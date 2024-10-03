@@ -1,0 +1,10 @@
+services:
+
+    jekyll:
+        image: bretfisher/jekyll-serve
+        # command: jekyll serve --force_polling
+        ports:
+            - 4000:4000
+        volumes:
+            - .:/site
+        platform: linux/amd64

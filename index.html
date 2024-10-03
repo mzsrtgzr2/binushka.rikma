@@ -1,0 +1,106 @@
+---
+layout: default
+image: '/images/01.jpg'
+
+accordion: 
+    - title: מה כולל השירות?
+      content: ריקמה על בסיס פריטי בגד ואביזרים, ריקמה על בדים וכריות, ריקמה על תמונות ועוד.
+    - title: זה יכול להתאים לי?
+      content: כן! כל אחת יכולה להצליח בריקמה, גם אם לא יצא לך עד כה.
+    
+---
+
+{% include section-hero.html %}
+
+<!-- <section class="container ">
+  <div class="row m-t-4" style="display: flex;">
+    <div class="col col-3" style="display: flex; align-items: center;">
+        <div style="flex: 1;">
+            <img class="lazy" data-src="/images/hero4.png" alt="{{site.data.settings.author.author__name}}" style="max-height: 100%; width: auto;">
+        </div>
+    </div>
+    <div class="col col-9" style="display: flex; align-items: center;">
+        <div style="flex: 1;">
+            <h3 class="footer__author-name" style="margin-top: 0;">בואי לפינוק המושלם בסדנת ריקמה</h3>
+                    סדנאות וחוגי הריקמה שלי הם המקום המושלם להירגע, ליצור ולהתחבר עם אנשים חדשים. בין אם את מתחילה או מתקדמת, תמצאי אצלי את כל הכלים וההדרכה שאת צריכה כדי ליצור יצירות מדהימות. 
+        </div>
+    </div>
+</div> -->
+
+
+<section class="container ">
+  <div class="row">
+    <div class="col col-12">
+  {% include section-projects.html %}
+</div>
+</div>
+</section>
+
+<section>
+  <!-- <div class="container">
+    <div class="row m-t-4" >
+      <div class="col-12">
+    
+          <img src="images/gallery-snapshot.png" alt="{{site.data.settings.author.author__name}}" style="width: 100%;">
+    
+    </div>
+  </div> -->
+  <div class="row">
+    <div class="col col-12">
+    <div class="gallery-box">
+      <div class="gallery">
+        <img src="/images/gallery/00F9DC82-88DA-4F90-9550-8346C2B34E3C_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/D3652FA1-1446-44BB-AAC6-B9EA7F2928AC_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/02F00B26-5222-414E-86CD-BC30DCA965F4_4_5005_c.jpeg" loading="lazy">
+        <img src="/images/gallery/06E1A3AF-8512-4EC2-B8C2-8B0926B17260_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/1B31F69D-507E-4114-817F-56622D998AFC_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/1CFED432-37E4-4CCE-A7C2-7F9A824226FC_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/7AD14191-5528-4E30-8815-A5006C849138_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/7FE28533-4B82-44B7-B639-497B5AA6BC5C_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/12B38330-88EB-4580-ACF5-D1A4991BF336_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/36B88C8C-E3B9-4197-8BE3-11D5F93957F8_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/743DFEDB-98E6-485C-A337-1D2C1EDF29BF_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/809C8B3C-14CD-4184-B978-0C80DE00783F_4_5005_c.jpeg" loading="lazy">
+        <img src="/images/gallery/877D85F9-47B5-4057-BE01-D4FD6DB14841_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/1263848F-ABC7-4D12-9794-38F1F2246A44_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/4815648B-5345-42D4-8792-8BBB88FF771D_4_5005_c.jpeg" loading="lazy">
+        <img src="/images/gallery/78115654-8623-47AD-95B5-C2AD4486595C_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/ACEF7CED-79DA-4C88-B6F6-BA0AE1C9D46E_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/B2BA6EEC-95B2-4E14-9117-226F648C5369_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/B3C6797A-8C7B-42F9-B6E1-67F9B9610BA6_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/B13AAC46-B6C3-4F95-901F-93D31C2DC963_1_105_c.jpeg" loading="lazy">
+        <img src="/images/gallery/B5366D5C-D3A1-4A50-9C2A-67D1B1144C34_1_105_c.jpeg" loading="lazy">
+      </div>
+    </div>
+  </div>
+  </div>
+  
+</div>
+
+
+</section>
+
+
+<section class="container">
+<div class="text-center animate">
+    <h3 class="hero__title">שאלות נפוצות</h3>
+</div>
+{% include section-accordion.html %}
+</section>
+
+<section class="container section text-center">
+
+    <div class="text-center animate">
+        <h3 class="hero__title">אז...</h3>
+        </div>
+
+    <div class="section__navigation">
+        <a href="https://wa.me/972544247753?text=הי בינושקה :) " class="button button--primary section-button">
+          באה לרקום? 
+        </a>
+    </div>
+    
+</section>
+
+
+<!-- {_% include section-blog.html %_} -->

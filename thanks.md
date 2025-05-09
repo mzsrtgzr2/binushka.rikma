@@ -25,7 +25,7 @@ description: אישור הרשמה ותשלום
       <h2>מה הלאה?</h2>
       <ul>
         <li>תקבל/י אימייל עם הקבלה בעבור התשלום בקרוב</li>
-        <li>מוזמנים לעקוב אחריי באינסטגרם<a>https://www.instagram.com/bina.lir.cakes.embroidery/</a> ביניים ולהתמלא בהשראה לקראת הסדנה:</li>
+        <li>מוזמנים לעקוב אחריי <a href="https://www.instagram.com/bina.lir.cakes.embroidery">באינסטגרם</a> ולהתמלא בהשראה לקראת הסדנה: </li>
         <li>במידה ויש לך שאלות, תכתבו לי ל 054-4247753</li>
       </ul>
     </section>

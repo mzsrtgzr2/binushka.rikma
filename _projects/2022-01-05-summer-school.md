@@ -2,7 +2,7 @@
 title:  קייטנת יצירה ואפייה ברחובות
 date: 2022-01-30 19:00:00 +0300
 subtitle: ב-20 ליולי
-image: '/images/summer-school.jpg'
+image: '/images/summer-school3.jpg'
 permalink: /projects/summer-school/
 form_url: https://meshulam.co.il/quick_payment?b=e701bb2b183a80c33a318a50d941cfbc
 ---

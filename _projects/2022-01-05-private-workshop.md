@@ -2,7 +2,7 @@
 title:  סדנת רקמה פרטית
 date: 2022-01-30 19:00:00 +0300
 subtitle: בזמן שמתאים לכם
-image: '/images/projects/ceramic-workshop.jpg'
+image: '/images/gallery/BF743E15-F934-494D-B258-BBABA4DFCD3D_1_105_c.jpeg'
 permalink: /projects/private-workshop
 form_url: https://meshulam.co.il/quick_payment?b=328dd361257d9f94065e585cdc66cfec
 ---

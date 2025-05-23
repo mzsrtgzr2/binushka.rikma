@@ -1,7 +1,7 @@
 ---
 title:  מפגש רקמה ברחובות
 date: 2022-01-30 19:00:00 +0300
-subtitle:  למנוסות בלבד - אחת לחודש
+subtitle:  27.5.25 למנוסות בלבד 
 image: '/images/projects/ceramic-workshop.jpg'
 permalink: /projects/monthly-meeting/
 form_url: https://meshulam.co.il/quick_payment?b=e25ebffba38a3904bbcf629b4840924c

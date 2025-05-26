@@ -6,6 +6,9 @@ layout: default
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
+    {% if page.registration_full %}
+      <div class="registration-full-text">אין מקומות פנויים</div>
+    {% endif %}
     {% if page.subtitle %}
       <p class="project-subtitle">{{ page.subtitle }}</p>
     {% endif %}
@@ -16,6 +19,7 @@ layout: default
     {{ content }}
   </div>
 
+  {% unless page.registration_full %}
   <div class="project-content animate">
   <div class="container">
     <div class="row">
@@ -29,6 +33,7 @@ layout: default
     </div>
   </div>
   </div>
+  {% endunless %}
 
 
   {% if page.image %}
@@ -37,7 +42,12 @@ layout: default
   <div class="row">
     <div class="col col-12 text-center">
       <div class="page-image animate">
-        <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
+        <div class="project-image-container">
+          <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
+          {% if page.registration_full %}
+            <div class="registration-full">אין מקומות פנויים</div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

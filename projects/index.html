@@ -21,6 +21,9 @@ layout: default
         <div class="project__content">
           <a href="{{project.url}}" class="project__image">
             <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
+            {% if project.registration_full %}
+                    <div class="registration-full">אין מקומות פנויים</div>
+            {% endif %}
           </a>
           <div class="project__info">
             <h3 class="project__title"><a href="{{project.url}}">{{ project.title }}</a></h3>

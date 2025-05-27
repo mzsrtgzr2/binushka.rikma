@@ -1,6 +1,6 @@
 ---
 title:  קייטנת יצירה ואפייה ברחובות
-date: 2025-01-30 19:00:00 +0300
+date: 2024-07-20 19:00:00 +0300
 subtitle: ב-20 ליולי
 image: '/images/summer-school3.jpg'
 permalink: /projects/summer-school/

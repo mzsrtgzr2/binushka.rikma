@@ -7,7 +7,7 @@ permalink: /projects/beithilel/
 form_url: https://meshulam.co.il/quick_payment?b=a7223114f33652184157b88cb22be901
 ---
 
-## פרטי סדנת רקמה ברחובות
+## פרטי סדנת רקמה בבית הלל
 
 **מיקום:** מושב בית הלל 
 **תאריך:** 12.9.25  

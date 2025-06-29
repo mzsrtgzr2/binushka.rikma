@@ -1,18 +1,18 @@
 ---
-title:  סדנת רקמה ברחובות
-date: 2024-07-25 19:00:00 +0300
-subtitle: 25.7 שישי בוקר
+title:  סדנת רקמה בבית הלל
+date: 2024-09-12 19:00:00 +0300
+subtitle: 12.9 שישי בוקר
 image: '/images/gallery/BF743E15-F934-494D-B258-BBABA4DFCD3D_1_105_c.jpeg'
-permalink: /projects/rehovot/
-form_url: https://meshulam.co.il/quick_payment?b=b47ee71e59edf5ad731bd8a16458421f
+permalink: /projects/beithilel/
+form_url: https://meshulam.co.il/quick_payment?b=a7223114f33652184157b88cb22be901
 ---
 
 ## פרטי סדנת רקמה ברחובות
 
-**מיקום:** רח׳ אייזנברג, רחובות  
-**תאריך:** 25.7.25  
+**מיקום:** מושב בית הלל 
+**תאריך:** 12.9.25  
 **שעה:** 09:00-12:00  
-**מחיר:** 280 ש"ח למשתתף   
+**מחיר:** 300 ש"ח למשתתף   
 
 ### מה נלמד בסדנה?
 

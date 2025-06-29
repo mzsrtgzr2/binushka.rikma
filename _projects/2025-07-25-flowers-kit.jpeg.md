@@ -2,7 +2,7 @@
 title:  ערכת רקמה קלילה
 date: 2024-06-01 19:00:00 +0300
 subtitle: במקום לצפות במהדורה המרכזית
-image: '/images/gallery/BF743E15-F934-494D-B258-BBABA4DFCD3D_1_105_c.jpeg'
+image: '/images/gallery/flowers-kit.jpeg'
 permalink: /projects/flowers-kit/
 form_url: https://meshulam.co.il/quick_payment?b=95a64506487f899b634a3b884fa4245e
 ---

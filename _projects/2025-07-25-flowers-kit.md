@@ -4,7 +4,7 @@ date: 2024-06-01 19:00:00 +0300
 subtitle: במקום לצפות במהדורה המרכזית
 image: '/images/gallery/flowers-kit.jpeg'
 permalink: /projects/flowers-kit/
-form_url: https://meshulam.co.il/quick_payment?b=95a64506487f899b634a3b884fa4245e
+form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
 ---
 
 ## ערכת רקמה להפחתת סטרס

@@ -1,6 +1,6 @@
 ---
 title:  מפגש רקמה ברחובות
-date: 2024-07-15 19:00:00 +0300
+date: 2024-09-15 19:00:00 +0300
 subtitle:  שלישי בבוקר 15.7
 image: '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
 permalink: /projects/monthly-meeting/

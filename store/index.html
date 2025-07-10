@@ -1,0 +1,41 @@
+---
+layout: default
+---
+<div class="container">
+  <div class="page-head">
+    <h1 class="page-title">חנות</h1>
+    <p class="page-description">מוצרי רקמה איכותיים לבית ולמתנה</p>
+  </div>
+</div>
+
+<div class="store-page container animate">
+  <div class="row">
+    
+    {% assign sorted = site.store | sort: 'date' %}
+    {% for item in sorted %}
+      {% unless item.hide %}
+        <article class="store-item col col-4 col-d-6 col-t-12">
+          <div class="store-item__content">
+            <a href="{{item.url}}" class="store-item__image">
+              <img class="lazy" data-src="{{ item.image }}" alt="{{ item.title }}">
+              {% if item.out_of_stock %}
+                <div class="out-of-stock">אזל מהמלאי</div>
+              {% elsif item.limited_stock %}
+                <div class="limited-stock">מלאי מוגבל</div>
+              {% endif %}
+            </a>
+            <div class="store-item__info">
+              <h3 class="store-item__title"><a href="{{item.url}}">{{ item.title }}</a></h3>
+              {% if item.subtitle %}
+              <div class="store-item__subtitle">{{ item.subtitle }}</div>
+              {% endif %}
+              {% if item.price %}
+              <div class="store-item__price">{{ item.price }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% endunless %}
+    {% endfor %}
+  </div>
+</div> 

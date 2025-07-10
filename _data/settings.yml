@@ -15,6 +15,8 @@ menu__settings:
       url: '/'
     - title: חוגים וסדנאות 
       url: '/projects/'
+    # - title: 'חנות'
+    #   url: '/store/'
     # - title: המלצות 
     #   url: '/recommendations/'
     # - url: '/about/'
@@ -141,6 +143,8 @@ footer_menu__settings:
       title: 'קצת עלי'
     - title: 'חוגים וסדנאות'
       url: '/projects/'
+    - title: 'חנות'
+      url: '/store/'
     - title: 'צרו קשר'
       url: '/contact/'
 

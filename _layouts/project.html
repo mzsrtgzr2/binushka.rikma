@@ -8,7 +8,10 @@ layout: default
     <h1 class="page-title">{{ page.title }}</h1>
     {% if page.registration_full %}
       <div class="registration-full-text">אין מקומות פנויים</div>
+    {% elsif page.last_places %}
+      <div class="registration-full-text">מקומות אחרונים</div>
     {% endif %}
+
     {% if page.subtitle %}
       <p class="project-subtitle">{{ page.subtitle }}</p>
     {% endif %}
@@ -46,6 +49,8 @@ layout: default
           <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
           {% if page.registration_full %}
             <div class="registration-full">אין מקומות פנויים</div>
+          {% elsif page.last_places %}
+            <div class="registration-full">מקומות אחרונים</div>
           {% endif %}
         </div>
       </div>

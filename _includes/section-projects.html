@@ -15,22 +15,26 @@
           <div class="row">
             {% assign sorted = site.projects | sort: 'date'  %}
             {% for project in sorted %}
-            <article class="project col col-4 col-d-6 col-t-12">
-              <div class="project__content">
-                <a href="{{project.url}}" class="project__image">
-                  <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
-                  {% if project.registration_full %}
-                    <div class="registration-full">אין מקומות פנויים</div>
-                  {% endif %}
-                </a>
-                <div class="project__info">
-                  <h3 class="project__title"><a href="{{project.url}}">{{ project.title }}</a></h3>
-                  {% if project.subtitle %}
-                    <div class="project__subtitle">{{ project.subtitle }}</div>
-                  {% endif %}
-                </div>
-              </div>
-            </article>
+              {% unless project.hide %}
+                <article class="project col col-4 col-d-6 col-t-12">
+                  <div class="project__content">
+                    <a href="{{project.url}}" class="project__image">
+                      <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
+                      {% if project.registration_full %}
+                        <div class="registration-full">אין מקומות פנויים</div>
+                      {% elsif page.last_places %}
+                        <div class="registration-full">מקומות אחרונים</div>
+                      {% endif %}
+                    </a>
+                    <div class="project__info">
+                      <h3 class="project__title"><a href="{{project.url}}">{{ project.title }}</a></h3>
+                      {% if project.subtitle %}
+                        <div class="project__subtitle">{{ project.subtitle }}</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </article>
+              {% endunless %}
             {% endfor %}
           </div>
 

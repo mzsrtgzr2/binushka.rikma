@@ -1,0 +1,65 @@
+---
+layout: default
+---
+
+<div class="container">
+
+  <div class="page-head">
+    <h1 class="page-title">{{ page.title }}</h1>
+    {% if page.out_of_stock %}
+      <div class="out-of-stock-text">אזל מהמלאי</div>
+    {% elsif page.limited_stock %}
+      <div class="limited-stock-text">מלאי מוגבל</div>
+    {% endif %}
+
+    {% if page.subtitle %}
+      <p class="store-item-subtitle">{{ page.subtitle }}</p>
+    {% endif %}
+
+    {% if page.price %}
+      <div class="store-item-price">{{ page.price }}</div>
+    {% endif %}
+  </div>
+
+  <div class="store-item-content animate">
+    {{ content }}
+  </div>
+
+  {% unless page.out_of_stock %}
+  <div class="store-item-content animate">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="section__navigation">
+            <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank">
+            הזמיני עכשיו
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  {% endunless %}
+
+  {% if page.image %}
+  <div class="store-item-content animate">
+  <div class="container">
+  <div class="row">
+    <div class="col col-12 text-center">
+      <div class="page-image animate">
+        <div class="store-item-image-container">
+          <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
+          {% if page.out_of_stock %}
+            <div class="out-of-stock">אזל מהמלאי</div>
+          {% elsif page.limited_stock %}
+            <div class="limited-stock">מלאי מוגבל</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  {% endif %}
+
+</div> 

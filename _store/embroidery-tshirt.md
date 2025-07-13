@@ -3,7 +3,7 @@ title: רקמה בהזמנה אישית
 date: 2024-01-20 10:00:00 +0300
 subtitle: על כל פריט לבוש שתרצו
 image: '/images/gallery/tshirt.jpg'
-price: ₪60
+price: ₪70
 out_of_stock: false
 limited_stock: false
 hide: false

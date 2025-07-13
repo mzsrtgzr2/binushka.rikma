@@ -6,7 +6,7 @@ image: '/images/gallery/flowers-kit.jpeg'
 price: ₪120
 out_of_stock: true
 limited_stock: false
-hide: false
+hide: true
 form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
 ---
 

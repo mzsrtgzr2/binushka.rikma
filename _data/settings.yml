@@ -15,8 +15,8 @@ menu__settings:
       url: '/'
     - title: חוגים וסדנאות 
       url: '/projects/'
-    # - title: 'חנות'
-    #   url: '/store/'
+    - title: 'חנות'
+      url: '/store/'
     # - title: המלצות 
     #   url: '/recommendations/'
     # - url: '/about/'

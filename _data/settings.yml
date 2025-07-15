@@ -11,8 +11,8 @@ color_scheme: light # You can choose three modes auto, light, and dark. By defau
 # Navigation Settings
 menu__settings:
   menu__items:
-    - title: 'דף הבית'
-      url: '/'
+    # - title: 'דף הבית'
+    #   url: '/'
     - title: חוגים וסדנאות 
       url: '/projects/'
     - title: 'חנות'

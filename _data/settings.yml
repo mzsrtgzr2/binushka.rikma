@@ -17,8 +17,8 @@ menu__settings:
       url: '/projects/'
     - title: 'חנות'
       url: '/store/'
-    # - title: המלצות 
-    #   url: '/recommendations/'
+    - title: המלצות מוצרים
+      url: '/recommendations/'
     # - url: '/about/'
     #   title: 'קצת עלי'
     - title: 'צרו קשר'
@@ -71,7 +71,7 @@ projects__settings:
   projects__description:  בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
 
 recommendations__settings:
-  recommendations__title: המלצות
+  recommendations__title: המלצות מוצרים
   recommendations__description: קישורים למוצרים שאני ממליצה
 
 #-------------------------------

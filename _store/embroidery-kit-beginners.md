@@ -1,7 +1,7 @@
 ---
 title: ערכת רקמה למתחילים
 date: 2024-01-15 10:00:00 +0300
-subtitle: ערכה מלאה לרקמה קלילה
+subtitle: במקום לצפות במהדורה המרכזית
 image: '/images/gallery/flowers-kit.jpeg'
 price: ₪60
 out_of_stock: false

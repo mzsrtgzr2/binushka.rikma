@@ -13,11 +13,11 @@ menu__settings:
   menu__items:
     # - title: 'דף הבית'
     #   url: '/'
-    - title: חוגים וסדנאות 
+    - title: סדנאות
       url: '/projects/'
     - title: 'חנות'
       url: '/store/'
-    - title: המלצות מוצרים
+    - title: מוצרים מומלצים
       url: '/recommendations/'
     # - url: '/about/'
     #   title: 'קצת עלי'

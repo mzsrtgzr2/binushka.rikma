@@ -5,7 +5,7 @@ subtitle: במקום לצפות במהדורה המרכזית
 image: '/images/gallery/flowers-kit.jpeg'
 permalink: /projects/flowers-kit/
 form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
-hide: false
+hide: true
 ---
 
 ## ערכת רקמה להפחתת סטרס

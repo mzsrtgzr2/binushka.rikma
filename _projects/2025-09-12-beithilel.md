@@ -5,6 +5,7 @@ subtitle: 12.9 שישי בוקר
 image: '/images/gallery/E103B918-B9B5-4D17-9A63-0F2FBB31C444_1_105_c.jpeg'
 permalink: /projects/beithilel/
 form_url: https://meshulam.co.il/quick_payment?b=a7223114f33652184157b88cb22be901
+hide: true
 ---
 
 ## פרטי סדנת רקמה בבית הלל

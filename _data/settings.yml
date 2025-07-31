@@ -150,6 +150,15 @@ footer_menu__settings:
 
 
 #-------------------------------
+# Instagram Settings
+instagram:
+  enabled: true
+  account: "bina.lir.cakes.embroidery"
+  posts_count: 6
+  title: "עקבו אחריי באינסטגרם"
+  description: "השראה, רקמות ועוד הרבה דברים יפים"
+
+#-------------------------------
 # Contact Settings
 contact:
   email: bina.rot@gmail.com # Add your form_id

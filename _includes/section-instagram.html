@@ -1,0 +1,177 @@
+{% if site.data.settings.instagram.enabled %}
+<section class="container section">
+  <div class="text-center animate">
+    <h3 class="hero__title">{{ site.data.settings.instagram.title }}</h3>
+    {% if site.data.settings.instagram.description %}
+      <p class="hero__description">{{ site.data.settings.instagram.description }}</p>
+    {% endif %}
+  </div>
+
+  <div class="instagram-embed-container animate">
+    <div class="instagram-embed-wrapper">
+      <!-- Instagram Embed using Instagram's embed feature -->
+      <iframe 
+        src="https://www.instagram.com/{{ site.data.settings.instagram.account }}/embed" 
+        width="100%" 
+        height="600" 
+        frameborder="0" 
+        scrolling="no" 
+        allowtransparency="true"
+        title="Instagram feed for {{ site.data.settings.instagram.account }}"
+        loading="lazy">
+      </iframe>
+      
+      <!-- Fallback content if iframe doesn't load -->
+      <div class="instagram-fallback">
+        <div class="instagram-fallback-content">
+          <div class="instagram-icon-large">📸</div>
+          <h4>עקבו אחריי באינסטגרם</h4>
+          <p>הציצו בתמונות האחרונות שלי</p>
+          <a href="https://www.instagram.com/{{ site.data.settings.instagram.account }}" 
+             target="_blank" 
+             class="button button--primary">
+            לראות תמונות
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="instagram-footer text-center">
+      <a href="https://www.instagram.com/{{ site.data.settings.instagram.account }}" target="_blank" class="button button--primary">
+        עקבו אחריי באינסטגרם
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+.instagram-embed-container {
+  margin-top: 2rem;
+}
+
+.instagram-embed-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  background: #fff;
+}
+
+.instagram-embed-wrapper iframe {
+  width: 100%;
+  height: 600px;
+  border: none;
+  display: block;
+}
+
+.instagram-footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+/* Fallback content */
+.instagram-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+.instagram-fallback-content {
+  text-align: center;
+  padding: 2rem;
+}
+
+.instagram-icon-large {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.instagram-fallback h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+}
+
+.instagram-fallback p {
+  margin: 0 0 1rem 0;
+  color: #666;
+}
+
+/* Hide fallback when iframe loads */
+.instagram-embed-wrapper.loaded .instagram-fallback {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .instagram-embed-wrapper iframe {
+    height: 500px;
+  }
+  
+  .instagram-embed-container {
+    margin-top: 1rem;
+  }
+  
+  .instagram-footer {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .instagram-embed-wrapper iframe {
+    height: 400px;
+  }
+  
+  .instagram-embed-wrapper {
+    border-radius: 8px;
+  }
+  
+  .hero__title {
+    font-size: 1.5rem;
+  }
+  
+  .hero__description {
+    font-size: 0.9rem;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const iframe = document.querySelector('.instagram-embed-wrapper iframe');
+  const wrapper = document.querySelector('.instagram-embed-wrapper');
+  
+  if (iframe && wrapper) {
+    // Check if iframe loads successfully
+    iframe.addEventListener('load', function() {
+      wrapper.classList.add('loaded');
+    });
+    
+    // Check if iframe fails to load
+    iframe.addEventListener('error', function() {
+      // Keep fallback visible
+      console.log('Instagram iframe failed to load, showing fallback');
+    });
+    
+    // Fallback: if iframe doesn't load within 3 seconds, show fallback
+    setTimeout(function() {
+      if (!wrapper.classList.contains('loaded')) {
+        console.log('Instagram iframe timeout, showing fallback');
+      }
+    }, 3000);
+  }
+});
+</script>
+
+{% endif %} 

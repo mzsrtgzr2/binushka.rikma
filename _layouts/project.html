@@ -61,6 +61,63 @@ layout: default
 
   {% endif %}
 
+  <!-- Project Navigation -->
+  <div class="project-navigation animate">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="project-navigation__inner">
+            {% assign sorted_projects = site.projects | sort: 'date' | reverse %}
+            {% assign visible_projects = '' | split: '' %}
+            {% assign current_index = -1 %}
+            
+            {% for project in sorted_projects %}
+              {% unless project.hide %}
+                {% assign visible_projects = visible_projects | push: project %}
+              {% endunless %}
+            {% endfor %}
+            
+            {% for project in visible_projects %}
+              {% if project.permalink == page.permalink %}
+                {% assign current_index = forloop.index0 %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            
+            {% assign total_projects = visible_projects.size %}
+            {% assign prev_index = current_index | minus: 1 %}
+            {% if prev_index < 0 %}
+              {% assign prev_index = total_projects | minus: 1 %}
+            {% endif %}
+            {% assign next_index = current_index | plus: 1 %}
+            {% if next_index >= total_projects %}
+              {% assign next_index = 0 %}
+            {% endif %}
+            
+            {% assign prev_project = visible_projects[prev_index] %}
+            {% assign next_project = visible_projects[next_index] %}
+            
+            <a href="{{ prev_project.permalink }}" class="project-navigation__button project-navigation__button--prev">
+              <div class="project-navigation__thumbnail">
+                <img src="{{ prev_project.image }}" alt="{{ prev_project.title }}">
+              </div>
+              <span class="project-navigation__arrow">→</span>
+              <span class="project-navigation__text">{{ prev_project.title }}</span>
+            </a>
+            
+            <a href="{{ next_project.permalink }}" class="project-navigation__button project-navigation__button--next">
+              <span class="project-navigation__text">{{ next_project.title }}</span>
+              <span class="project-navigation__arrow">←</span>
+              <div class="project-navigation__thumbnail">
+                <img src="{{ next_project.image }}" alt="{{ next_project.title }}">
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- {% if page.previous.url %}
   <div class="project__nav animate">
     <a class="project__prev" href="{{page.previous.url}}">

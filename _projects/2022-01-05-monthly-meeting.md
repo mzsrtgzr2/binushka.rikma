@@ -1,7 +1,7 @@
 ---
 title:  מפגש רקמה ברחובות
-date: 2024-09-15 19:00:00 +0300
-subtitle:  שלישי בבוקר 9.9
+date: 2024-10-21 19:00:00 +0300
+subtitle:  שלישי בבוקר 21.10
 image: '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
 permalink: /projects/monthly-meeting/
 form_url: https://pay.grow.link/fe07884faff28b2da7e1005b88d59a8a-MjQ3MjQxNQ
@@ -24,7 +24,6 @@ form_url: https://pay.grow.link/fe07884faff28b2da7e1005b88d59a8a-MjQ3MjQxNQ
 - - לא מתאים למי שאין לה שום נסיון ברקמה.
 
 ### מתי מתקיימים המפגשים הקרובים?
-- המפגש של חודש ספטמבר יתקיים ביום שלישי ה9.9.
 - המפגש של חודש אוקטובר יתקיים ביום שלישי ה21.10.
 - המפגש של חודש נובמבר יתקיים ביום שלישי ה11.11.
 

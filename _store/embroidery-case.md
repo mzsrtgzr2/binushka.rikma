@@ -16,7 +16,7 @@ form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 
 ### מצאתם את המתנה המושלמת!
 
-- קלמר בגודל עד 11.5*23 cm.
+- הקלמר בגודל 11.5*23 cm.
 - רקמה בעבודת יד, ייחודית🪴.
 - אין לאף אחד כזו💫.
 

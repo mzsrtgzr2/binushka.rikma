@@ -2,7 +2,7 @@
 title: מסגרת רקומה
 date: 2024-01-20 10:00:00 +0300
 subtitle: עם כל תמונה שתבחרו
-image: '/images/gallery/portrait.jpg'
+image: '/images/gallery/portrait.png'
 price: ₪250
 out_of_stock: false
 limited_stock: false

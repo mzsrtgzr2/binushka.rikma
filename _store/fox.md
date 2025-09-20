@@ -2,7 +2,7 @@
 title: רקמת שועל משמח
 date: 2024-01-20 10:00:00 +0300
 subtitle: בטכניקת פאנץ׳ נידל
-image: '/images/gallery/fox.png'
+image: '/images/gallery/fox.png' 
 price: ₪220
 out_of_stock: false
 limited_stock: true

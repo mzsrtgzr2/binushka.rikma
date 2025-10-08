@@ -3,7 +3,7 @@ title: תעודת לידה רקומה
 date: 2024-01-20 10:00:00 +0300
 subtitle: מתנת הלידה הכי יפה
 image: '/images/gallery/birthhoop.jpeg'
-price: ₪355
+price: ₪360
 out_of_stock: false
 limited_stock: false
 hide: false
@@ -12,7 +12,7 @@ form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 
 ## תעודת לידה רקומה בעבודת יד
 
-**מחיר:** ₪355
+**מחיר:** ₪360
 
 ### מצאתם את המתנה המושלמת!
 

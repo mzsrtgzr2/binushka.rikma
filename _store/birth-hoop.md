@@ -19,7 +19,6 @@ form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 - רקמה בעבודת יד, ייחודית🪴.
 - מותאמת אישית לכם🎩.
 - אין לאף אחד כזו💫.
-- ניתן להביא בעצמכם פריט לבוש או שארכוש עבורכם🔥.
 - חישוק בקוטר 19 cm.
 
 ### למי השירות מתאים?

@@ -1,6 +1,6 @@
 ---
 title: ערכת רקמה למתחילים
-date: 2024-01-15 10:00:00 +0300
+date: 2024-09-15 10:00:00 +0300
 subtitle: במקום לצפות במהדורה המרכזית
 image: '/images/gallery/flowers-kit.jpeg'
 price: ₪60

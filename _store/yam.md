@@ -1,6 +1,6 @@
 ---
 title: רקמת בטטה מושרשת
-date: 2024-01-20 10:00:00 +0300
+date: 2023-01-20 10:00:00 +0300
 subtitle: בעבודת יד עדינה
 image: '/images/gallery/yam.png'
 price: ₪300

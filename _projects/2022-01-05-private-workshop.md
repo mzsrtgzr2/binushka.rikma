@@ -4,7 +4,7 @@ date: 2025-12-30 19:00:00 +0300
 subtitle: בזמן שמתאים לכם
 image: '/images/gallery/6A0F9AB8-9045-4401-BF34-5DA77DA4C596_1_105_c.jpeg'
 permalink: /projects/private-workshop/
-form_url: https://meshulam.co.il/quick_payment?b=328dd361257d9f94065e585cdc66cfec
+form_url: https://pay.grow.link/5994080e6dac0eaf4b84f20b39568868-MjYyODg5NQ
 ---
 
 ## סדנא פרטית חד פעמית לחברים ומשפחה

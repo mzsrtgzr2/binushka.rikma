@@ -1,0 +1,69 @@
+<!-- begin pricing -->
+<section class="section pricing animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% if include.title or page.pricing.title or site.data.settings.pricing.title %}
+        <div class="section__info">
+          <h2 class="section__title">
+            {{ include.title | default: page.pricing.title | default: site.data.settings.pricing.title | default: "מחירים" }}
+          </h2>
+          {% if include.description or page.pricing.description or site.data.settings.pricing.description %}
+          <p class="section__description">
+            {{ include.description | default: page.pricing.description | default: site.data.settings.pricing.description }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="pricing__container">
+          {% assign pricing_plans = include.plans | default: page.pricing.plans | default: site.data.settings.pricing.plans %}
+          <div class="row">
+            {% for plan in pricing_plans %}
+            <div class="col col-4 col-d-6 col-t-12">
+              <div class="pricing__card {% if plan.featured %}pricing__card--featured{% endif %}">
+                {% if plan.badge %}
+                <div class="pricing__badge">{{ plan.badge }}</div>
+                {% endif %}
+                {% if plan.name %}
+                <h3 class="pricing__plan-name">{{ plan.name }}</h3>
+                {% endif %}
+                {% if plan.price %}
+                <div class="pricing__price">
+                  <span class="pricing__amount">{{ plan.price }}</span>
+                  {% if plan.period %}
+                  <span class="pricing__period">/ {{ plan.period }}</span>
+                  {% endif %}
+                </div>
+                {% endif %}
+                {% if plan.description %}
+                <p class="pricing__description">{{ plan.description }}</p>
+                {% endif %}
+                {% if plan.features %}
+                <ul class="pricing__features">
+                  {% for feature in plan.features %}
+                  <li class="pricing__feature">
+                    <i class="ion ion-md-checkmark"></i>
+                    <span>{{ feature }}</span>
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+                {% if plan.button_text and plan.button_url %}
+                <a href="{{ plan.button_url }}" class="button button--primary pricing__button {% if plan.featured %}button--big{% endif %}">
+                  {{ plan.button_text }}
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end pricing -->
+

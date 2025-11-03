@@ -1,0 +1,87 @@
+<!-- begin map -->
+<section class="section map animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% if include.title or page.map.title or site.data.settings.map.title %}
+        <div class="section__info">
+          <h2 class="section__title">
+            {{ include.title | default: page.map.title | default: site.data.settings.map.title | default: "איך להגיע" }}
+          </h2>
+          {% if include.description or page.map.description or site.data.settings.map.description %}
+          <p class="section__description">
+            {{ include.description | default: page.map.description | default: site.data.settings.map.description }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="map__container">
+          <div class="row">
+            {% if include.show_info != false %}
+            <div class="col col-12 {% if include.map_embed or page.map.embed_url or site.data.settings.map.embed_url %}col-d-6 col-t-12{% endif %}">
+              <div class="map__info">
+                {% assign map_data = include | default: page.map | default: site.data.settings.map %}
+                {% if map_data.location %}
+                <div class="map__address">
+                  <h3 class="map__address-title">כתובת</h3>
+                  <p class="map__address-text">{{ map_data.location.name }}</p>
+                  <p class="map__address-text">{{ map_data.location.address }}</p>
+                  {% if map_data.location.city %}
+                  <p class="map__address-text">{{ map_data.location.city }}</p>
+                  {% endif %}
+                </div>
+                {% endif %}
+                {% if map_data.directions %}
+                <div class="map__directions">
+                  <h3 class="map__directions-title">הוראות הגעה</h3>
+                  <p class="map__directions-text">{{ map_data.directions }}</p>
+                </div>
+                {% endif %}
+                {% if map_data.parking %}
+                <div class="map__parking">
+                  <h3 class="map__parking-title">חניה</h3>
+                  <p class="map__parking-text">{{ map_data.parking }}</p>
+                </div>
+                {% endif %}
+                {% if map_data.map_link %}
+                <div class="map__link">
+                  <a href="{{ map_data.map_link }}" target="_blank" rel="noopener" class="button button--primary">
+                    פתח במפות
+                  </a>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+            
+            {% if include.map_embed or page.map.embed_url or site.data.settings.map.embed_url %}
+            <div class="col col-12 {% if include.show_info != false %}col-d-6 col-t-12{% endif %}">
+              <div class="map__embed">
+                {% assign embed_url = include.map_embed | default: page.map.embed_url | default: site.data.settings.map.embed_url %}
+                {% if embed_url contains 'iframe' %}
+                  {{ embed_url }}
+                {% else %}
+                <iframe 
+                  src="{{ embed_url }}" 
+                  width="100%" 
+                  height="450" 
+                  style="border:0;" 
+                  allowfullscreen="" 
+                  loading="lazy" 
+                  referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end map -->
+

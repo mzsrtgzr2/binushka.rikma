@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" class="layout-retreat">
+
+{% include head.html %}
+
+<body>
+
+  {% if site.data.settings.google-analytics %}
+    {% include google-analytics.html %}
+  {% endif %}
+
+  {% include header.html %}
+
+  <!-- Hero Section - Below Header -->
+  {% if page.hero.video or page.hero.image %}
+    {% include section-hero-retreat.html %}
+  {% endif %}
+
+  <!-- begin content -->
+  <main class="content" aria-label="Content">
+    {{ content }}
+  </main>
+  <!-- end content -->
+
+  {% include footer.html %}
+  {% include floater.html %}
+
+  <script src="{{ site.baseurl }}/js/scripts.js"></script>
+  <script src="{{ site.baseurl }}/js/common.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,130 @@
+/* Pricing */
+.pricing {
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &__card {
+    position: relative;
+    padding: 40px 30px;
+    background: #fff;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-color: var(--brand-color);
+    }
+
+    &--featured {
+      border-color: var(--brand-color);
+      border-width: 3px;
+      transform: scale(1.05);
+
+      @media only screen and (max-width: $tablet) {
+        transform: scale(1);
+      }
+    }
+
+    @media only screen and (max-width: $mobile) {
+      padding: 30px 20px;
+      margin-bottom: 30px;
+    }
+  }
+
+  &__badge {
+    position: absolute;
+    top: -15px;
+    right: 50%;
+    transform: translateX(50%);
+    padding: 8px 20px;
+    background: var(--brand-color);
+    color: var(--dark);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 20px;
+  }
+
+  &__plan-name {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 24px;
+    }
+  }
+
+  &__price {
+    margin-bottom: 30px;
+  }
+
+  &__amount {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--brand-color);
+    display: block;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 36px;
+    }
+  }
+
+  &__period {
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  &__description {
+    margin-bottom: 30px;
+    color: rgba(0, 0, 0, 0.7);
+    line-height: 1.6;
+  }
+
+  &__features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px 0;
+    text-align: right;
+    flex: 1;
+
+    li {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  &__feature {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    direction: rtl;
+
+    i {
+      color: var(--brand-color);
+      margin-left: 10px;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    span {
+      flex: 1;
+    }
+  }
+
+  &__button {
+    margin-top: auto;
+  }
+}
+

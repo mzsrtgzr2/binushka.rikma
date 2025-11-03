@@ -1,0 +1,100 @@
+<!-- begin hero retreat -->
+<section class="hero-retreat">
+  {% assign hero_title = include.title | default: page.hero.title | default: page.hero.hero__title %}
+  {% assign hero_subtitle = include.subtitle | default: page.hero.subtitle %}
+  {% assign hero_video = include.video | default: page.hero.video %}
+  {% assign hero_video_poster = include.video_poster | default: page.hero.video_poster %}
+  {% assign hero_image = include.image | default: page.hero.image %}
+  {% assign hero_overlay = include.overlay | default: page.hero.overlay | default: true %}
+
+  <div class="hero-retreat__container">
+    {% if hero_video %}
+    <div class="hero-retreat__video-wrapper">
+      {% if hero_video contains 'youtube.com' or hero_video contains 'youtu.be' %}
+        {% assign video_id = hero_video | split: 'v=' | last | split: '&' | first %}
+        {% if hero_video contains 'youtu.be' %}
+          {% assign video_id = hero_video | split: '/' | last | split: '?' | first %}
+        {% endif %}
+        <div class="hero-retreat__video-bg" data-video-id="{{ video_id }}" data-platform="youtube"></div>
+        <iframe 
+          class="hero-retreat__video-iframe" 
+          src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0&showinfo=0&rel=0&iv_load_policy=3"
+          frameborder="0" 
+          allow="autoplay; encrypted-media" 
+          allowfullscreen>
+        </iframe>
+      {% elsif hero_video contains 'vimeo.com' %}
+        {% assign video_id = hero_video | split: '/' | last | split: '?' | first %}
+        <div class="hero-retreat__video-bg" data-video-id="{{ video_id }}" data-platform="vimeo"></div>
+        <iframe 
+          class="hero-retreat__video-iframe" 
+          src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1&muted=1&loop=1&background=1"
+          frameborder="0" 
+          allow="autoplay; fullscreen" 
+          allowfullscreen>
+        </iframe>
+      {% else %}
+        <video class="hero-retreat__video" autoplay muted loop playsinline>
+          <source src="{{ hero_video }}" type="video/mp4">
+          {% if hero_video_poster %}
+          <img src="{{ hero_video_poster }}" alt="Hero background">
+          {% endif %}
+        </video>
+      {% endif %}
+    </div>
+    {% elsif hero_image %}
+    <div class="hero-retreat__image-wrapper">
+      <img class="hero-retreat__image lazy" data-src="{{ hero_image }}" alt="Hero background">
+    </div>
+    {% endif %}
+
+    {% if hero_overlay %}
+    <div class="hero-retreat__overlay"></div>
+    {% endif %}
+
+    <div class="hero-retreat__content">
+      <div class="container">
+        <div class="row">
+          <div class="col col-12">
+            {% if hero_title %}
+            <h1 class="hero-retreat__title">{{ hero_title }}</h1>
+            {% endif %}
+            {% if hero_subtitle %}
+            <p class="hero-retreat__subtitle">{{ hero_subtitle }}</p>
+            {% endif %}
+            {% if include.button_text and include.button_url %}
+            <a href="{{ include.button_url }}" class="button button--primary hero-retreat__button">
+              {{ include.button_text }}
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end hero retreat -->
+
+<script>
+// Handle YouTube/Vimeo background video
+document.addEventListener('DOMContentLoaded', function() {
+  const videoBg = document.querySelector('.hero-retreat__video-bg');
+  if (videoBg) {
+    const videoId = videoBg.dataset.videoId;
+    const platform = videoBg.dataset.platform;
+    
+    // Create video element for better mobile support
+    const video = document.createElement('video');
+    video.className = 'hero-retreat__video';
+    video.setAttribute('autoplay', '');
+    video.setAttribute('muted', '');
+    video.setAttribute('loop', '');
+    video.setAttribute('playsinline', '');
+    video.style.display = 'none';
+    
+    // For now, we'll rely on the iframe approach for YouTube/Vimeo
+    // The iframe is already in the HTML with autoplay
+  }
+});
+</script>
+

@@ -1,0 +1,68 @@
+/* Map */
+.map {
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  &__info {
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    height: 100%;
+
+    @media only screen and (max-width: $tablet) {
+      margin-bottom: 30px;
+    }
+  }
+
+  &__address,
+  &__directions,
+  &__parking {
+    margin-bottom: 30px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__address-title,
+  &__directions-title,
+  &__parking-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--brand-color);
+  }
+
+  &__address-text,
+  &__directions-text,
+  &__parking-text {
+    margin: 8px 0;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  &__link {
+    margin-top: 20px;
+  }
+
+  &__embed {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 450px;
+      border: none;
+
+      @media only screen and (max-width: $mobile) {
+        height: 300px;
+      }
+    }
+  }
+}
+

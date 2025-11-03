@@ -1,0 +1,215 @@
+/* Hero Retreat - Full Screen Video Background */
+.hero-retreat {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+
+  @media only screen and (max-width: $mobile) {
+    height: 100vh;
+  }
+}
+
+.hero-retreat__container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+}
+
+.hero-retreat__video-wrapper,
+.hero-retreat__image-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 100vw;
+  min-height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-retreat__video,
+.hero-retreat__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.hero-retreat__video-iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  pointer-events: none;
+  border: none;
+  // Default: assume 16:9 aspect ratio video
+  // Make iframe large enough to cover viewport
+  width: 177.78vh; // 16:9 ratio based on viewport height
+  height: 100vh;
+  min-width: 100vw; // Ensure it covers width
+  min-height: 56.25vw; // 16:9 ratio based on viewport width
+  
+  // Center the iframe
+  transform: translate(-50%, -50%);
+  
+  // For wider screens (viewport wider than 16:9)
+  @media (min-aspect-ratio: 16/9) {
+    width: 100vw;
+    height: 56.25vw; // 9/16 of width
+    min-height: 100vh; // Ensure it covers height
+    min-width: 100vw;
+    transform: translate(-50%, -50%);
+  }
+  
+  // For taller screens (viewport taller than 16:9)
+  @media (max-aspect-ratio: 16/9) {
+    width: 177.78vh; // 16/9 of height
+    height: 100vh;
+    min-width: 100vw; // Ensure it covers width
+    min-height: 100vh;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.hero-retreat__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.hero-retreat__content {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #fff;
+  padding: 220px 0 80px; /* Top padding to account for fixed header */
+
+  @media only screen and (max-width: $desktop) {
+    padding: 200px 0 60px;
+  }
+
+  @media only screen and (max-width: $mobile) {
+    padding: 180px 0 40px;
+  }
+}
+
+.hero-retreat__title {
+  font-size: 72px;
+  font-weight: 300;
+  line-height: 1.2;
+  margin-bottom: 30px;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+
+  @media only screen and (max-width: $wide) {
+    font-size: 60px;
+  }
+
+  @media only screen and (max-width: $desktop) {
+    font-size: 48px;
+    margin-bottom: 20px;
+  }
+
+  @media only screen and (max-width: $mobile) {
+    font-size: 36px;
+    margin-bottom: 15px;
+  }
+}
+
+.hero-retreat__subtitle {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin-bottom: 40px;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+
+  @media only screen and (max-width: $desktop) {
+    font-size: 20px;
+    margin-bottom: 30px;
+  }
+
+  @media only screen and (max-width: $mobile) {
+    font-size: 18px;
+    margin-bottom: 25px;
+  }
+}
+
+.hero-retreat__button {
+  margin-top: 20px;
+}
+
+/* Layout adjustments for retreat page */
+.layout-retreat {
+  .content {
+    position: relative;
+    z-index: 10;
+    background: var(--background-color);
+    margin-top: 100vh; /* Push content below hero */
+  }
+
+  // Header fixed and transparent, overlaying hero
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    background: transparent;
+    
+    .header__inner {
+      background: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border-radius: 0;
+      padding: 15px $base-spacing-unit;
+      transition: all 0.3s ease;
+
+      @media only screen and (max-width: $desktop) {
+        padding: 12px $base-spacing-unit;
+      }
+
+      @media only screen and (max-width: $mobile) {
+        padding: 10px $base-spacing-unit;
+      }
+    }
+
+    // Remove white backgrounds from logo and containers
+    .container-big,
+    .row,
+    .logo,
+    .logo__link,
+    .logo__image {
+      background: transparent !important;
+    }
+  }
+}
+
+.gallery-section {
+  padding: 100px 0;
+
+  @media only screen and (max-width: $desktop) {
+    padding: 80px 0;
+  }
+}

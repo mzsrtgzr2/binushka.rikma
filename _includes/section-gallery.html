@@ -1,0 +1,38 @@
+<!-- begin gallery -->
+<section class="section gallery-section animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% if include.title or page.gallery.title or site.data.settings.gallery.title %}
+        <div class="section__info">
+          <h2 class="section__title">
+            {{ include.title | default: page.gallery.title | default: site.data.settings.gallery.title | default: "גלריה" }}
+          </h2>
+          {% if include.description or page.gallery.description or site.data.settings.gallery.description %}
+          <p class="section__description">
+            {{ include.description | default: page.gallery.description | default: site.data.settings.gallery.description }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="gallery-box">
+          <div class="gallery">
+            {% assign gallery_images = include.images | default: page.gallery.images | default: site.data.settings.gallery.gallery__images %}
+            {% for image in gallery_images %}
+              {% if image.url %}
+              <img src="{{ image.url }}" alt="{{ image.alt | default: 'Gallery image' }}" loading="lazy" class="gallery__image">
+              {% elsif image %}
+              <img src="{{ image }}" alt="Gallery image" loading="lazy" class="gallery__image">
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end gallery -->
+

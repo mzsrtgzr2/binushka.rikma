@@ -1,0 +1,100 @@
+<!-- begin video -->
+{% assign video_url = include.url | default: page.video.url | default: site.data.settings.video.url %}
+{% assign video_id = include.id | default: page.video.id | default: site.data.settings.video.id %}
+{% assign video_embed = include.embed | default: page.video.embed | default: site.data.settings.video.embed %}
+
+{% if video_url or video_id or video_embed %}
+<section class="section video animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% if include.title or page.video.title or site.data.settings.video.title %}
+        <div class="section__info">
+          <h2 class="section__title">
+            {{ include.title | default: page.video.title | default: site.data.settings.video.title }}
+          </h2>
+          {% if include.description or page.video.description or site.data.settings.video.description %}
+          <p class="section__description">
+            {{ include.description | default: page.video.description | default: site.data.settings.video.description }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="video__container">
+          
+          {% if video_embed %}
+          <div class="video__embed">
+            <div class="video__wrapper">
+              {{ video_embed }}
+            </div>
+          </div>
+          {% elsif video_url %}
+            {% if video_url contains 'youtube.com' or video_url contains 'youtu.be' %}
+              {% assign video_id = video_url | split: 'v=' | last | split: '&' | first %}
+              {% if video_url contains 'youtu.be' %}
+                {% assign video_id = video_url | split: '/' | last | split: '?' | first %}
+              {% endif %}
+              <div class="video__embed">
+                <div class="video__wrapper">
+                  <iframe 
+                    src="https://www.youtube.com/embed/{{ video_id }}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              </div>
+            {% elsif video_url contains 'vimeo.com' %}
+              {% assign video_id = video_url | split: '/' | last | split: '?' | first %}
+              <div class="video__embed">
+                <div class="video__wrapper">
+                  <iframe 
+                    src="https://player.vimeo.com/video/{{ video_id }}" 
+                    frameborder="0" 
+                    allow="autoplay; fullscreen; picture-in-picture" 
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              </div>
+            {% else %}
+            <div class="video__embed">
+              <div class="video__wrapper">
+                <video controls>
+                  <source src="{{ video_url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+            {% endif %}
+          {% elsif video_id %}
+          <div class="video__embed">
+            <div class="video__wrapper">
+              {% if include.platform == 'vimeo' or page.video.platform == 'vimeo' or site.data.settings.video.platform == 'vimeo' %}
+              <iframe 
+                src="https://player.vimeo.com/video/{{ video_id }}" 
+                frameborder="0" 
+                allow="autoplay; fullscreen; picture-in-picture" 
+                allowfullscreen>
+              </iframe>
+              {% else %}
+              <iframe 
+                src="https://www.youtube.com/embed/{{ video_id }}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+              </iframe>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+<!-- end video -->
+

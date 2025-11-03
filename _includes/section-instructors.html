@@ -1,0 +1,62 @@
+<!-- begin instructors -->
+<section class="section instructors animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% if include.title or page.instructors.title or site.data.settings.instructors.title %}
+        <div class="section__info">
+          <h2 class="section__title">
+            {{ include.title | default: page.instructors.title | default: site.data.settings.instructors.title | default: "הצוות" }}
+          </h2>
+          {% if include.description or page.instructors.description or site.data.settings.instructors.description %}
+          <p class="section__description">
+            {{ include.description | default: page.instructors.description | default: site.data.settings.instructors.description }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="instructors__container">
+          {% assign instructors_list = include.team | default: page.instructors.team | default: site.data.settings.instructors.team %}
+          <div class="row">
+            {% for instructor in instructors_list %}
+            <div class="col col-4 col-d-6 col-t-12">
+              <div class="instructors__card">
+                {% if instructor.image %}
+                <div class="instructors__image">
+                  <img class="lazy" data-src="{{ instructor.image }}" alt="{{ instructor.name }}">
+                </div>
+                {% endif %}
+                <div class="instructors__content">
+                  {% if instructor.name %}
+                  <h3 class="instructors__name">{{ instructor.name }}</h3>
+                  {% endif %}
+                  {% if instructor.title %}
+                  <p class="instructors__title">{{ instructor.title }}</p>
+                  {% endif %}
+                  {% if instructor.bio %}
+                  <p class="instructors__bio">{{ instructor.bio }}</p>
+                  {% endif %}
+                  {% if instructor.social %}
+                  <div class="instructors__social">
+                    {% for social in instructor.social %}
+                    <a href="{{ social.link }}" target="_blank" rel="noopener" class="instructors__social-link">
+                      <i class="{{ social.icon }}"></i>
+                    </a>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end instructors -->
+

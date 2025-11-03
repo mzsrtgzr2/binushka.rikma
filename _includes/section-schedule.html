@@ -1,0 +1,62 @@
+<!-- begin schedule -->
+<section class="section schedule animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% if include.title or page.schedule.title or site.data.settings.schedule.title %}
+        <div class="section__info">
+          <h2 class="section__title">
+            {{ include.title | default: page.schedule.title | default: site.data.settings.schedule.title | default: "לוח זמנים" }}
+          </h2>
+          {% if include.description or page.schedule.description or site.data.settings.schedule.description %}
+          <p class="section__description">
+            {{ include.description | default: page.schedule.description | default: site.data.settings.schedule.description }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="schedule__container">
+          {% assign schedule_items = include.items | default: page.schedule.items | default: site.data.settings.schedule.items %}
+          {% for item in schedule_items %}
+          <div class="schedule__item">
+            <div class="schedule__day">
+              {% if item.day %}
+              <h3 class="schedule__day-title">{{ item.day }}</h3>
+              {% endif %}
+              {% if item.date %}
+              <span class="schedule__day-date">{{ item.date }}</span>
+              {% endif %}
+            </div>
+            <div class="schedule__content">
+              {% if item.activities %}
+              <ul class="schedule__activities">
+                {% for activity in item.activities %}
+                <li class="schedule__activity">
+                  {% if activity.time %}
+                  <span class="schedule__time">{{ activity.time }}</span>
+                  {% endif %}
+                  <div class="schedule__activity-content">
+                    {% if activity.title %}
+                    <h4 class="schedule__activity-title">{{ activity.title }}</h4>
+                    {% endif %}
+                    {% if activity.description %}
+                    <p class="schedule__activity-description">{{ activity.description }}</p>
+                    {% endif %}
+                  </div>
+                </li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end schedule -->
+

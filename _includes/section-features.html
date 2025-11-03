@@ -1,0 +1,53 @@
+<!-- begin features -->
+<section class="section features animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% if include.title or page.features.title or site.data.settings.features.title %}
+        <div class="section__info">
+          <h2 class="section__title">
+            {{ include.title | default: page.features.title | default: site.data.settings.features.title | default: "מה כלול במחיר" }}
+          </h2>
+          {% if include.description or page.features.description or site.data.settings.features.description %}
+          <p class="section__description">
+            {{ include.description | default: page.features.description | default: site.data.settings.features.description }}
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="features__container">
+          {% assign features_list = include.items | default: page.features.items | default: site.data.settings.features.items %}
+          <div class="row">
+            {% for feature in features_list %}
+            <div class="col col-4 col-d-6 col-t-12">
+              <div class="features__item">
+                {% if feature.icon %}
+                <div class="features__icon">
+                  <i class="{{ feature.icon }}"></i>
+                </div>
+                {% endif %}
+                {% if feature.image %}
+                <div class="features__image">
+                  <img class="lazy" data-src="{{ feature.image }}" alt="{{ feature.title }}">
+                </div>
+                {% endif %}
+                {% if feature.title %}
+                <h3 class="features__title">{{ feature.title }}</h3>
+                {% endif %}
+                {% if feature.description %}
+                <p class="features__description">{{ feature.description }}</p>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end features -->
+

@@ -43,14 +43,14 @@ instructors:
   title: "הצוות"
   description: ""
   team:
-    - name: "רוני ענבר"
+    - name: "קוקו לוקו"
       title: "מורה בכירה ליוגה, בוגרת קורס TMS"
       bio: "בוגרת קורס מטפלים בגישת TMS. מתוך מסע ההחלמה שלי מכאב כרוני אני משלבת יוגה ו-TMS, מלווה נשים וגברים לשחרור, חוסן וחיים מלאי אפשרות."
       image: "/images/instructor-1.jpg"
       social:
         - icon: "ion-logo-instagram"
           link: "https://instagram.com"
-    - name: "עינת יניב אסטליין"
+    - name: "פוקי נוקי"
       title: "מטפלת ב-TMS ויוגה תרפיה"
       bio: "מורה ליוגה נשית ומפתחת את שפת התנועה 'מחולנפש'."
       image: "/images/instructor-2.jpg"

@@ -53,14 +53,14 @@ instructors:
   team:
     - name: "בינה ליר"
       title: "רוקמת ומנרמלת להנעתה"
-      bio: " מרפאה את הנפש בעזרת רקמה וחברותא. מארחת, אופה ויוצרת בשנים האחרונות. מועילה לעולם."
+      bio: " .מרפאה את הנפש בעזרת רקמה וחברותא. מארחת, אופה ויוצרת. מועילה לעולם."
       image: "/images/instructor-1.jpeg"
       social:
         - icon: "ion-logo-instagram"
           link: "https://instagram.com/bina.lir.cakes.embroidery/"
     - name: "משה רוט"
       title: "צייר עם גישה אקספרסיבית למרחב ולצבע"
-      bio: "מצייר בשמן, אקריליק וצבעי מים. מרגיש חיבור עמוק לציור הטבע ולגוף האדם, כמקורות השראה."
+      bio: ".מצייר בשמן, אקריליק וצבעי מים. מרגיש חיבור עמוק לציור הטבע ולגוף האדם, כמקורות השראה."
       image: "/images/instructor-2.jpeg"
       social:
         - icon: "ion-logo-instagram"

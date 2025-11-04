@@ -54,7 +54,7 @@ instructors:
     - name: "בינה ליר"
       title: "רוקמת ומנרמלת להנעתה"
       bio: "מרפאה את הנפש בעזרת רקמה וחברותא. אוהבת לארח, לאפות לכם ולרקום אתכם"
-      image: "/images/instructor-1.jpg"
+      image: "/images/instructor-1.jpeg"
       social:
         - icon: "ion-logo-instagram"
           link: "https://instagram.com/bina.lir.cakes.embroidery/"

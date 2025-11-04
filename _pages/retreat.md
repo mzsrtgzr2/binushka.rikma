@@ -39,7 +39,7 @@ schedule:
           title: "סדנה מרכזית"
           description: "כלים מעשיים להתמודדות עם כאב"
     - day: "יום ראשון"
-      date: "6.12.2025"
+      date: "25.1.2026"
       activities:
         - time: "09:00"
           title: "תרגול בוקר"
@@ -51,20 +51,20 @@ instructors:
   title: "הצוות"
   description: ""
   team:
-    - name: "קוקו לוקו"
-      title: "מורה בכירה ליוגה, בוגרת קורס TMS"
-      bio: "בוגרת קורס מטפלים בגישת TMS. מתוך מסע ההחלמה שלי מכאב כרוני אני משלבת יוגה ו-TMS, מלווה נשים וגברים לשחרור, חוסן וחיים מלאי אפשרות."
+    - name: "בינה ליר"
+      title: "רוקמת ומנרמלת להנעתה"
+      bio: "מרפאה את הנפש בעזרת רקמה וחברותא. אוהבת לארח, לאפות לכם ולרקום אתכם"
       image: "/images/instructor-1.jpg"
       social:
         - icon: "ion-logo-instagram"
-          link: "https://instagram.com"
-    - name: "פוקי נוקי"
-      title: "מטפלת ב-TMS ויוגה תרפיה"
-      bio: "מורה ליוגה נשית ומפתחת את שפת התנועה 'מחולנפש'."
+          link: "https://instagram.com/bina.lir.cakes.embroidery/"
+    - name: "משה רוט"
+      title: "צייר עם גישה אקספרסיבית למרחב ולצבע"
+      bio: "מצייר בשמן, אקריליק וצבעי מים. מרגיש חיבור עמוק לציור הטבע ולגוף האדם, כמקורות השראה."
       image: "/images/instructor-2.jpg"
       social:
         - icon: "ion-logo-instagram"
-          link: "https://instagram.com"
+          link: "https://instagram.com/mzsrtgzr2/"
 
 features:
   title: "מה כלול במחיר"

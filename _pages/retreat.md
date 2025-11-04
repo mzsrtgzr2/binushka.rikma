@@ -3,8 +3,8 @@ layout: retreat
 title: ריטריט Rewire
 permalink: /retreat/
 hero:
-  title: "כשהבנתי שהכאב הוא רק הסימפטום, הדרך לשחרור ממנו החלה"
-  subtitle: "ריטריט Rewire - לדבר עם הכאב"
+  title: "להאט, לנשום, לרקום – ולחזור הביתה אל עצמך"
+  subtitle: "ריטריט חורפי של יצירה וחיבור"
   video: "https://www.youtube.com/watch?v=Bt8iqHZkgTg" # YouTube/Vimeo URL or path to MP4 video file
   video_poster: "/images/hero4.png" # Poster image while video loads
   image: "" # Fallback image if no video
@@ -17,10 +17,10 @@ schedule:
   title: "לוח זמנים"
   description: ""
   items:
-    - day: "יום ראשון"
-      date: "5.12.2025"
+    - day: "יום שישי"
+      date: "23.1.2026"
       activities:
-        - time: "10:00"
+        - time: "14:00"
           title: "הגעה ורישום"
           description: "התכנסות, רישום והתמצאות"
         - time: "10:30"
@@ -29,7 +29,16 @@ schedule:
         - time: "12:00"
           title: "סדנה ראשונה"
           description: "הבנת הקשר בין הגוף והנפש"
-    - day: "יום שני"
+    - day: "יום שבת"
+      date: "24.1.2026"
+      activities:
+        - time: "09:00"
+          title: "תרגול בוקר"
+          description: "תרגול יוגה ותנועה"
+        - time: "11:00"
+          title: "סדנה מרכזית"
+          description: "כלים מעשיים להתמודדות עם כאב"
+    - day: "יום ראשון"
       date: "6.12.2025"
       activities:
         - time: "09:00"
@@ -38,7 +47,6 @@ schedule:
         - time: "11:00"
           title: "סדנה מרכזית"
           description: "כלים מעשיים להתמודדות עם כאב"
-
 instructors:
   title: "הצוות"
   description: ""

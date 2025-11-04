@@ -61,7 +61,7 @@ instructors:
     - name: "משה רוט"
       title: "צייר עם גישה אקספרסיבית למרחב ולצבע"
       bio: "מצייר בשמן, אקריליק וצבעי מים. מרגיש חיבור עמוק לציור הטבע ולגוף האדם, כמקורות השראה."
-      image: "/images/instructor-2.jpg"
+      image: "/images/instructor-1.jpeg"
       social:
         - icon: "ion-logo-instagram"
           link: "https://instagram.com/mzsrtgzr2/"

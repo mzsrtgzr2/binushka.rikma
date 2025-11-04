@@ -53,7 +53,7 @@ instructors:
   team:
     - name: "בינה ליר"
       title: "רוקמת ומנרמלת להנעתה"
-      bio: "מרפאה את הנפש בעזרת רקמה וחברותא. מארחת, אופה ויוצרת"
+      bio: " מרפאה את הנפש בעזרת רקמה וחברותא. מארחת, אופה ויוצרת בשנים האחרונות. מועילה לעולם."
       image: "/images/instructor-1.jpeg"
       social:
         - icon: "ion-logo-instagram"

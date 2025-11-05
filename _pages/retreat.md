@@ -86,7 +86,7 @@ features:
   description: ""
   items:
     - title: "לינה"
-      description: "2 לילות ו- שלושה ימים במתחם Slowness שבקיבוץ מורן"
+      description: "2 לילות ו3 ימים במתחם Slowness שבקיבוץ מורן"
       icon: "ion-md-bed"
     - title: "ארוחות"
       description: "ארוחות שף על בסיס פנסיון מלא - בוקר, צהריים וערב כולל מנות צמחוניות ודגים"

@@ -102,21 +102,21 @@ features:
 
 pricing:
   title: "מחירים"
-  description: ""
+  description: "מכירה מוקדמת עד ה18.12.25"
   plans:
-    - name: "מחיר רגיל"
-      price: "₪2,500"
+    - name: "חדר לשלישיה"
+      price: "₪2,520"
       period: "אדם"
-      description: "הרשמה עד 2 חודשים לפני"
+      description: "במקום 2,800"
       features:
         - "2 לילות לינה"
         - "כל הארוחות"
         - "כל הסדנאות"
         - "חומרים"
-    - name: "הרשמה מוקדמת"
-      price: "₪2,200"
+    - name: "חדר לזוג"
+      price: "₪2,700"
       period: "אדם"
-      description: "הרשמה עד 3 חודשים לפני"
+      description: "במקום 3,000"
       badge: "מומלץ"
       featured: true
       features:
@@ -125,10 +125,10 @@ pricing:
         - "כל הסדנאות"
         - "חומרים"
         - "הנחה של ₪300"
-    - name: "זוג"
-      price: "₪4,200"
-      period: "זוג"
-      description: "מחיר מיוחד לזוגות"
+    - name: "חדר ליחיד"
+      price: "₪3,500"
+      period: "אדם"
+      description: "במקום 3,890"
       features:
         - "2 לילות לינה לזוג"
         - "כל הארוחות"

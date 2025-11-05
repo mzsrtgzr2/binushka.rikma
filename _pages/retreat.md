@@ -286,8 +286,8 @@ gallery:
     <h3 class="hero__title">להרשמה</h3>
   </div>
   <div class="section__navigation">
-    <a href="#contact" class="button button--primary section-button">
-      להשארת פרטים
+    <a href="https://pay.grow.link/71d3c71f4082b4c673f9af15d20a6b9b-MjY4NzI3Mg" target="_blank" class="button button--primary section-button">
+      לחצי כאן
     </a>
   </div>
 </section>

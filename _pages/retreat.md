@@ -102,7 +102,7 @@ pricing:
   title: "מחירים"
   description: "מחירי הרשמה מוקדמת עד ה18.12.25"
   plans:
-    - name: "חדר לשלישיה"
+    - name: "חדר לשלושה"
       price: "₪2,520"
       period: "אדם"
       description: "במקום 2,800"

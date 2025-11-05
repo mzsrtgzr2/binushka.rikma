@@ -95,7 +95,7 @@ features:
       description: "4 סדנאות אומנות מגוונות, כולל חומרים"
       icon: "ion-md-book"
     - title: "בריסטה חופשי"
-      description: "קפה בריסטה לאורך כל היום. כולל מאצ׳ה, תה ועוד"
+      description: "קפה בריסטה לאורך כל היום. כולל משקאות קפה, מאצ׳ה, תה ועוד"
       icon: "ion-md-build"
 
 pricing:

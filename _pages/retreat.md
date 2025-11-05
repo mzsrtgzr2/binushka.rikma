@@ -5,7 +5,7 @@ permalink: /retreat/
 hero:
   title: "להאט, לנשום, לרקום – ולחזור הביתה אל עצמך"
   subtitle: "ריטריט חורפי של יצירה וחיבור"
-  video: "https://www.youtube.com/watch?v=Bt8iqHZkgTg" # YouTube/Vimeo URL or path to MP4 video file
+  video: "https://youtu.be/kIir6yd5_pQ" # YouTube/Vimeo URL or path to MP4 video file
   video_poster: "/images/hero4.png" # Poster image while video loads
   image: "" # Fallback image if no video
   overlay: true

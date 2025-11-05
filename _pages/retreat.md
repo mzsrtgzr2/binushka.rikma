@@ -10,7 +10,7 @@ hero:
   image: "" # Fallback image if no video
   overlay: true
   button_text: "להרשמה לחצו כאן" # Text for registration button
-  button_url: "#contact" # URL for registration button (can be anchor link like #contact or external URL)
+  button_url: "https://pay.grow.link/71d3c71f4082b4c673f9af15d20a6b9b-MjY4NzI3Mg" # URL for registration button (can be anchor link like #contact or external URL)
 video:
   title: "סרטון על הריטריט"
   description: ""

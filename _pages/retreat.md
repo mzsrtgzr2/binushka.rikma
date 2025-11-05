@@ -267,11 +267,6 @@ gallery:
 {% include section-gallery.html %}
 {% endif %}
 
-<!-- Map Section -->
-{% if page.map.location or page.map.embed_url %}
-{% include section-map.html %}
-{% endif %}
-
 <!-- FAQ Section -->
 {% if page.accordion %}
 <section class="container">
@@ -280,6 +275,11 @@ gallery:
   </div>
   {% include section-accordion.html %}
 </section>
+{% endif %}
+
+<!-- Map Section -->
+{% if page.map.location or page.map.embed_url %}
+{% include section-map.html %}
 {% endif %}
 
 <!-- Call to Action -->

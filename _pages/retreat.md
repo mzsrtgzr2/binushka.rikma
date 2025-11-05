@@ -161,7 +161,7 @@ terms:
   payment:
     title: "תנאי תשלום:"
     content:
-      - "יש אפשרות לשלם עד 4 תשלומים ללא ריבית."
+      - "יש אפשרות לשלם עד 4 תשלומים."
   cancellation:
     title: "תנאי ביטול:"
     content:

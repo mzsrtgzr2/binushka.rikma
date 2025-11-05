@@ -76,6 +76,8 @@ schedule:
         - time: "13:00"
           title: "פרידה וחיבוקים"
           description: "סיכום, חזרה הביתה עם כוחות מחודשים"
+        - time: "**"
+          title: "ניתן להישאר וליהנות ממתקני המלון עד הערב"
 instructors:
   title: "הצוות"
   description: ""

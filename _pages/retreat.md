@@ -88,16 +88,16 @@ features:
   description: ""
   items:
     - title: "לינה"
-      description: "2 לילות בחדרים מאובזרים"
+      description: "2 לילות ו- שלושה ימים במתחם Slowness שבקיבוץ מורן"
       icon: "ion-md-bed"
     - title: "ארוחות"
-      description: "5 ארוחות מזינות במסעדת סלונס"
+      description: "ארוחות שף על בסיס פנסיון מלא - בוקר, צהריים וערב כולל מנות צמחוניות ודגים"
       icon: "ion-md-restaurant"
     - title: "סדנאות"
-      description: "4 סדנאות אומנות"
+      description: "4 סדנאות אומנות מגוונות, כולל חומרים"
       icon: "ion-md-book"
-    - title: "חומרים"
-      description: "כל החומרים והעזרים הדרושים"
+    - title: "בריסטה חופשי"
+      description: "קפה בריסטה לאורך כל היום. כולל מאצ׳ה, תה ועוד"
       icon: "ion-md-build"
 
 pricing:

@@ -65,8 +65,7 @@ schedule:
       date: "25.1.2026"
       activities:
         - time: "08:00"
-          title: "מדיטציה"
-          description: "הליכה שקטה בקיבוץ"
+          title: "כתיבת בוקר עם אפרת"
         - time: "09:00"
           title: "ארוחת בוקר וצ׳ק אאוט"
           description: "ארוחה מזינה וטעימה במסעדת סלונס"

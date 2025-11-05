@@ -62,9 +62,11 @@
             {% if hero_subtitle %}
             <p class="hero-retreat__subtitle">{{ hero_subtitle }}</p>
             {% endif %}
-            {% if include.button_text and include.button_url %}
-            <a href="{{ include.button_url }}" class="button button--primary hero-retreat__button">
-              {{ include.button_text }}
+            {% assign hero_button_text = include.button_text | default: page.hero.button_text %}
+            {% assign hero_button_url = include.button_url | default: page.hero.button_url %}
+            {% if hero_button_text and hero_button_url %}
+            <a href="{{ hero_button_url }}" class="button button--primary hero-retreat__button">
+              {{ hero_button_text }}
             </a>
             {% endif %}
           </div>

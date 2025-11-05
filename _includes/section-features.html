@@ -21,7 +21,7 @@
           {% assign features_list = include.items | default: page.features.items | default: site.data.settings.features.items %}
           <div class="row">
             {% for feature in features_list %}
-            <div class="col col-4 col-d-6 col-t-12">
+            <div class="col col-3 col-d-6 col-t-12">
               <div class="features__item">
                 {% if feature.icon %}
                 <div class="features__icon">

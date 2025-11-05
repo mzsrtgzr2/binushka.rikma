@@ -1,130 +1,189 @@
 /* Pricing */
 .pricing {
   &__container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
   }
 
   &__card {
     position: relative;
-    padding: 40px 30px;
-    background: #fff;
-    border-radius: 12px;
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    text-align: center;
+    padding: 50px 40px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    border: none;
+    text-align: right;
     transition: all 0.3s ease;
     height: 100%;
     display: flex;
     flex-direction: column;
+    margin-bottom: 30px;
 
     &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      border-color: var(--brand-color);
+      background: rgba(255, 255, 255, 0.8);
     }
 
     &--featured {
-      border-color: var(--brand-color);
-      border-width: 3px;
-      transform: scale(1.05);
-
-      @media only screen and (max-width: $tablet) {
-        transform: scale(1);
-      }
+      background: rgba(255, 255, 255, 0.8);
     }
 
     @media only screen and (max-width: $mobile) {
-      padding: 30px 20px;
+      padding: 40px 30px;
       margin-bottom: 30px;
     }
   }
 
   &__badge {
-    position: absolute;
-    top: -15px;
-    right: 50%;
-    transform: translateX(50%);
-    padding: 8px 20px;
-    background: var(--brand-color);
-    color: var(--dark);
-    font-size: 14px;
-    font-weight: 700;
-    border-radius: 20px;
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    margin-bottom: 20px;
   }
 
   &__plan-name {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 20px;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: rgba(0, 0, 0, 0.9);
 
     @media only screen and (max-width: $mobile) {
-      font-size: 24px;
+      font-size: 22px;
     }
   }
 
   &__price {
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   &__amount {
-    font-size: 48px;
-    font-weight: 700;
-    color: var(--brand-color);
+    font-size: 42px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.9);
     display: block;
+    line-height: 1.2;
 
     @media only screen and (max-width: $mobile) {
-      font-size: 36px;
+      font-size: 32px;
     }
   }
 
   &__period {
-    font-size: 16px;
-    color: rgba(0, 0, 0, 0.6);
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.5);
+    font-weight: 400;
+    margin-top: 5px;
+    display: block;
   }
 
   &__description {
     margin-bottom: 30px;
-    color: rgba(0, 0, 0, 0.7);
-    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.6);
+    line-height: 1.7;
+    font-size: 15px;
   }
 
   &__features {
     list-style: none;
     padding: 0;
-    margin: 0 0 30px 0;
+    margin: 0 0 35px 0;
     text-align: right;
     flex: 1;
 
     li {
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-      &:last-child {
-        border-bottom: none;
-      }
+      padding: 10px 0;
+      border-bottom: none;
     }
   }
 
   &__feature {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-end;
     direction: rtl;
+    padding: 8px 0;
 
     i {
-      color: var(--brand-color);
-      margin-left: 10px;
-      font-size: 20px;
+      color: rgba(0, 0, 0, 0.4);
+      margin-left: 12px;
+      font-size: 18px;
       flex-shrink: 0;
+      margin-top: 2px;
     }
 
     span {
       flex: 1;
+      color: rgba(0, 0, 0, 0.7);
+      line-height: 1.6;
+      font-size: 15px;
     }
   }
 
   &__button {
     margin-top: auto;
+  }
+
+  // Simple pricing layout
+  &__simple {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: right;
+  }
+
+  &__simple-item {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+
+    &:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+
+  &__simple-name {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark);
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 20px;
+    }
+  }
+
+  &__simple-price {
+    margin-bottom: 10px;
+  }
+
+  &__simple-amount {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--dark);
+    display: inline-block;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 28px;
+    }
+  }
+
+  &__simple-period {
+    font-size: 16px;
+    color: var(--gray);
+    font-weight: 400;
+    margin-right: 5px;
+  }
+
+  &__simple-description {
+    color: var(--gray);
+    line-height: 1.6;
+    margin: 0;
+    font-size: 15px;
   }
 }
 

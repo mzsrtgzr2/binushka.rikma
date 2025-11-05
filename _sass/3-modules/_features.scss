@@ -6,7 +6,7 @@
   }
 
   &__item {
-    padding: 30px 20px;
+    padding: 20px 15px;
     text-align: center;
     transition: all 0.3s ease;
 
@@ -21,9 +21,9 @@
   }
 
   &__icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -32,15 +32,15 @@
     transition: all 0.3s ease;
 
     i {
-      font-size: 40px;
-      color: var(--brand-color);
+      font-size: 30px;
+      color: var(--gray);
     }
 
     .features__item:hover & {
-      background: var(--brand-color);
+      background: var(--dark);
       
       i {
-        color: var(--dark);
+        color: var(--white);
       }
     }
   }
@@ -61,19 +61,24 @@
   }
 
   &__title {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 
     @media only screen and (max-width: $mobile) {
-      font-size: 20px;
+      font-size: 16px;
     }
   }
 
   &__description {
     color: rgba(0, 0, 0, 0.7);
-    line-height: 1.6;
+    line-height: 1.5;
     margin: 0;
+    font-size: 14px;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 13px;
+    }
   }
 }
 

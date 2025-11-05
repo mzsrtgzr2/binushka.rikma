@@ -1,0 +1,51 @@
+<!-- begin terms -->
+<section class="section terms-section animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% assign terms_data = include | default: page.terms | default: site.data.settings.terms %}
+        <div class="terms__container">
+          <div class="row">
+            {% if terms_data.payment %}
+            <div class="col col-6 col-d-12 col-t-12">
+              <div class="terms__block">
+                {% if terms_data.payment.title %}
+                <h3 class="terms__title">{{ terms_data.payment.title }}</h3>
+                {% endif %}
+                {% if terms_data.payment.content %}
+                <div class="terms__content">
+                  {% for item in terms_data.payment.content %}
+                  <p>{{ item }}</p>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+            
+            {% if terms_data.cancellation %}
+            <div class="col col-6 col-d-12 col-t-12">
+              <div class="terms__block">
+                {% if terms_data.cancellation.title %}
+                <h3 class="terms__title">{{ terms_data.cancellation.title }}</h3>
+                {% endif %}
+                {% if terms_data.cancellation.content %}
+                <div class="terms__content">
+                  {% for item in terms_data.cancellation.content %}
+                  <p>{{ item }}</p>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end terms -->
+

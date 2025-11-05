@@ -1,0 +1,47 @@
+/* Terms Section */
+.terms-section {
+  &__container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  &__block {
+    padding: 30px 20px;
+    height: 100%;
+
+    @media only screen and (max-width: $mobile) {
+      padding: 20px 15px;
+      margin-bottom: 30px;
+    }
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--dark);
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+  }
+
+  &__content {
+    p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--gray);
+      margin-bottom: 15px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      @media only screen and (max-width: $mobile) {
+        font-size: 14px;
+      }
+    }
+  }
+}
+

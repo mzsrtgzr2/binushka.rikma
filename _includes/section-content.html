@@ -1,0 +1,45 @@
+<!-- begin content -->
+<section class="section content-section animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        
+        {% assign content_data = include | default: page.content_sections | default: site.data.settings.content %}
+        {% if content_data.title %}
+        <div class="section__info">
+          <h2 class="section__title">{{ content_data.title }}</h2>
+        </div>
+        {% endif %}
+
+        {% if content_data.items %}
+        <div class="content-section__items">
+          {% for item in content_data.items %}
+          {% assign index = forloop.index %}
+          {% assign is_even = index | modulo: 2 %}
+          <div class="content-section__item {% if is_even == 0 %}content-section__item--right{% else %}content-section__item--left{% endif %}">
+            {% if item.image %}
+            <div class="content-section__image-wrapper">
+              <img src="{{ item.image }}" alt="{{ item.title }}" class="content-section__image">
+            </div>
+            {% endif %}
+            <div class="content-section__text-wrapper">
+              {% if item.title %}
+              <h3 class="content-section__item-title">{{ item.title }}</h3>
+              {% endif %}
+              {% if item.text %}
+              <div class="content-section__item-text">
+                {{ item.text | newline_to_br }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end content -->
+

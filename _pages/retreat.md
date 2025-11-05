@@ -262,14 +262,14 @@ gallery:
 {% include section-terms.html %}
 {% endif %}
 
-<!-- Map Section -->
-{% if page.map.location or page.map.embed_url %}
-{% include section-map.html %}
-{% endif %}
-
 <!-- Gallery Section -->
 {% if page.gallery.images %}
 {% include section-gallery.html %}
+{% endif %}
+
+<!-- Map Section -->
+{% if page.map.location or page.map.embed_url %}
+{% include section-map.html %}
 {% endif %}
 
 <!-- FAQ Section -->

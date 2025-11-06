@@ -36,7 +36,7 @@ schedule:
       date: "24.1.2026"
       activities:
         - time: "08:00"
-          title: "טיול סובב מורן עם שרו"
+          title: "טיול סובב מורן עם שרון"
         - time: "09:00"
           title: "ארוחת בוקר"
         - time: "10:00"
@@ -227,7 +227,6 @@ gallery:
 עם אוכל טוב, נופים רכים וחיבור פשוט לעצמך.
 
 ריטריט אומנות הוא חוויה משחררת, שלווה, סוחפת. מטרתה לעזור לך להרפות לרגע מעומס היום יום.
-ריטריט אומנות הוא חוויה משחררת, שלווה, סוחפת.
           </p>
         </div>
       </div>
@@ -235,19 +234,14 @@ gallery:
   </div>
 </section>
 
-<!-- Content Section -->
-{% if page.content_sections.items %}
-{% include section-content.html %}
+<!-- Schedule Section -->
+{% if page.schedule.items %}
+{% include section-schedule.html %}
 {% endif %}
 
 <!-- Instructors Section -->
 {% if page.instructors.team %}
 {% include section-instructors.html %}
-{% endif %}
-
-<!-- Schedule Section -->
-{% if page.schedule.items %}
-{% include section-schedule.html %}
 {% endif %}
 
 <!-- Features Section -->
@@ -268,6 +262,11 @@ gallery:
 <!-- Gallery Section -->
 {% if page.gallery.images %}
 {% include section-gallery.html %}
+{% endif %}
+
+<!-- Content Section -->
+{% if page.content_sections.items %}
+{% include section-content.html %}
 {% endif %}
 
 <!-- FAQ Section -->

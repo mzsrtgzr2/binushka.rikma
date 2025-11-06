@@ -36,7 +36,7 @@ schedule:
       date: "24.1.2026"
       activities:
         - time: "08:00"
-          title: "טיול סובב מורן עם שרו"
+          title: "טיול סובב מורן עם שרון"
         - time: "09:00"
           title: "ארוחת בוקר"
         - time: "10:00"

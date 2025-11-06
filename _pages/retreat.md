@@ -1,10 +1,10 @@
 ---
 layout: retreat
-title: ריטריט אומנות
+title: ריטריט אומנות עם בינה ליר
 permalink: /retreat/
 hero:
   title: "להאט, לנשום, לרקום – ולחזור הביתה אל עַצמֵך"
-  subtitle: "ריטריט חורפי של יצירה וחיבור"
+  subtitle: "ריטריט חורפי של יצירה וחיבור במלון מפנק בקיבוץ מורן שבמשגב"
   video: "https://youtu.be/kIir6yd5_pQ" # YouTube/Vimeo URL or path to MP4 video file
   video_poster: "/images/hero4.png" # Poster image while video loads
   image: "" # Fallback image if no video

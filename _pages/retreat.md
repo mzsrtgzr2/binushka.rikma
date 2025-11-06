@@ -234,10 +234,6 @@ gallery:
   </div>
 </section>
 
-<!-- Content Section -->
-{% if page.content_sections.items %}
-{% include section-content.html %}
-{% endif %}
 
 <!-- Instructors Section -->
 {% if page.instructors.team %}
@@ -267,6 +263,11 @@ gallery:
 <!-- Gallery Section -->
 {% if page.gallery.images %}
 {% include section-gallery.html %}
+{% endif %}
+
+<!-- Content Section -->
+{% if page.content_sections.items %}
+{% include section-content.html %}
 {% endif %}
 
 <!-- FAQ Section -->

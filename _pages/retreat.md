@@ -233,15 +233,14 @@ gallery:
   </div>
 </section>
 
+<!-- Schedule Section -->
+{% if page.schedule.items %}
+{% include section-schedule.html %}
+{% endif %}
 
 <!-- Instructors Section -->
 {% if page.instructors.team %}
 {% include section-instructors.html %}
-{% endif %}
-
-<!-- Schedule Section -->
-{% if page.schedule.items %}
-{% include section-schedule.html %}
 {% endif %}
 
 <!-- Features Section -->

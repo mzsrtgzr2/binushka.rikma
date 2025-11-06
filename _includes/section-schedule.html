@@ -3,20 +3,16 @@
   <div class="container">
     <div class="row">
       <div class="col col-12">
-        
-        {% if include.title or page.schedule.title or site.data.settings.schedule.title %}
+        {% assign schedule_title = include.title | default: page.schedule.title | default: site.data.settings.schedule.title %}
+        {% if schedule_title and schedule_title != "" %}
         <div class="section__info">
-          <h2 class="section__title">
-            {{ include.title | default: page.schedule.title | default: site.data.settings.schedule.title | default: "לוח זמנים" }}
-          </h2>
-          {% if include.description or page.schedule.description or site.data.settings.schedule.description %}
-          <p class="section__description">
-            {{ include.description | default: page.schedule.description | default: site.data.settings.schedule.description }}
-          </p>
+          <h2 class="section__title">{{ schedule_title }}</h2>
+          {% assign schedule_description = include.description | default: page.schedule.description | default: site.data.settings.schedule.description %}
+          {% if schedule_description and schedule_description != "" %}
+          <p class="section__description">{{ schedule_description }}</p>
           {% endif %}
         </div>
         {% endif %}
-
         <div class="schedule__container">
           {% assign schedule_items = include.items | default: page.schedule.items | default: site.data.settings.schedule.items %}
           <div class="schedule__columns">
@@ -25,17 +21,17 @@
               {% if item.day %}
               <h3 class="schedule__day-title">{{ item.day }}</h3>
               {% endif %}
-              {% if item.date %}
-              <div class="schedule__day-date">{{ item.date }}</div>
-              {% endif %}
               {% if item.activities %}
               <div class="schedule__activities">
                 {% for activity in item.activities %}
                 <div class="schedule__activity">
-                  {% if activity.time %}
+                  {% if activity.time and activity.title %}
                   <span class="schedule__activity-time">{{ activity.time }}</span>
-                  {% endif %}
-                  {% if activity.title %}
+                  <span class="schedule__activity-separator"> - </span>
+                  <span class="schedule__activity-title">{{ activity.title }}</span>
+                  {% elsif activity.time %}
+                  <span class="schedule__activity-time">{{ activity.time }}</span>
+                  {% elsif activity.title %}
                   <span class="schedule__activity-title">{{ activity.title }}</span>
                   {% endif %}
                   {% if activity.description %}
@@ -47,6 +43,9 @@
               {% endif %}
             </div>
             {% endfor %}
+          </div>
+          <div class="schedule__note">
+            <p>** ייתכנו שינויים בלוח הזמנים</p>
           </div>
         </div>
 

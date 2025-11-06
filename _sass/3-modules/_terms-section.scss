@@ -1,11 +1,21 @@
 /* Terms Section */
 .terms-section {
-  &__container {
-    max-width: 1000px;
+  &__container,
+  .terms__container {
+    max-width: 900px;
     margin: 0 auto;
+
+    @media only screen and (max-width: 1024px) {
+      max-width: 800px;
+    }
+
+    @media only screen and (max-width: 576px) {
+      max-width: 100%;
+    }
   }
 
-  &__block {
+  &__block,
+  .terms__block {
     padding: 30px 20px;
     height: 100%;
 
@@ -15,7 +25,8 @@
     }
   }
 
-  &__title {
+  &__title,
+  .terms__title {
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 20px;
@@ -27,7 +38,8 @@
     }
   }
 
-  &__content {
+  &__content,
+  .terms__content {
     p {
       font-size: 15px;
       line-height: 1.7;
@@ -44,4 +56,5 @@
     }
   }
 }
+
 

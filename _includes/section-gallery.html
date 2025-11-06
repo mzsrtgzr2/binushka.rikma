@@ -4,14 +4,16 @@
     <div class="row">
       <div class="col col-12">
         
-        {% if include.title or page.gallery.title or site.data.settings.gallery.title %}
+        {% assign gallery_title = include.title | default: page.gallery.title | default: site.data.settings.gallery.title %}
+        {% if gallery_title and gallery_title != "" %}
         <div class="section__info">
           <h2 class="section__title">
-            {{ include.title | default: page.gallery.title | default: site.data.settings.gallery.title | default: "גלריה" }}
+            {{ gallery_title }}
           </h2>
-          {% if include.description or page.gallery.description or site.data.settings.gallery.description %}
+          {% assign gallery_description = include.description | default: page.gallery.description | default: site.data.settings.gallery.description %}
+          {% if gallery_description and gallery_description != "" %}
           <p class="section__description">
-            {{ include.description | default: page.gallery.description | default: site.data.settings.gallery.description }}
+            {{ gallery_description }}
           </p>
           {% endif %}
         </div>

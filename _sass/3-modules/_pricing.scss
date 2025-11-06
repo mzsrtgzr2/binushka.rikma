@@ -129,28 +129,41 @@
 
   // Simple pricing layout
   &__simple {
-    max-width: 600px;
+    max-width: 1200px;
     margin: 0 auto;
-    text-align: right;
+    display: flex;
+    gap: 60px;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: center;
+
+    @media only screen and (max-width: $desktop) {
+      gap: 40px;
+    }
+
+    @media only screen and (max-width: $mobile) {
+      flex-direction: column;
+      gap: 30px;
+    }
   }
 
   &__simple-item {
-    margin-bottom: 40px;
-    padding-bottom: 30px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    flex: 1;
+    max-width: 300px;
+    text-align: center;
+    transition: transform 0.2s ease;
 
-    &:last-child {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
+    @media only screen and (max-width: $mobile) {
+      max-width: 100%;
     }
   }
 
   &__simple-name {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     color: var(--dark);
+    line-height: 1.4;
 
     @media only screen and (max-width: $mobile) {
       font-size: 20px;
@@ -158,22 +171,23 @@
   }
 
   &__simple-price {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    line-height: 1.4;
   }
 
   &__simple-amount {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 600;
     color: var(--dark);
     display: inline-block;
 
     @media only screen and (max-width: $mobile) {
-      font-size: 28px;
+      font-size: 22px;
     }
   }
 
   &__simple-period {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--gray);
     font-weight: 400;
     margin-right: 5px;
@@ -181,9 +195,84 @@
 
   &__simple-description {
     color: var(--gray);
-    line-height: 1.6;
+    line-height: 1.4;
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
+  }
+
+  // Link wrapper for clickable pricing section
+  &__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.85;
+    }
+
+    &:hover .pricing__sticker-content {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
+
+    &:hover .pricing__simple-item {
+      transform: translateY(-2px);
+    }
+  }
+
+  // Sticker
+  &__sticker {
+    display: flex;
+    justify-content: center;
+    margin: 30px auto 40px;
+
+    @media only screen and (max-width: $mobile) {
+      margin: 25px auto 30px;
+    }
+  }
+
+  &__sticker-content {
+    background-color: #faf9f5;
+    border: 1px solid #000;
+    border-radius: 8px;
+    padding: 20px 40px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+    text-align: center;
+    direction: rtl;
+    max-width: 400px;
+    margin: 0 auto;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+    @media only screen and (max-width: $mobile) {
+      padding: 16px 30px;
+      max-width: 100%;
+    }
+  }
+
+  &__sticker-text {
+    font-size: 16px;
+    color: #000;
+    margin: 0 0 8px 0;
+    font-weight: 400;
+    line-height: 1.4;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 14px;
+    }
+  }
+
+  &__sticker-date {
+    font-size: 24px;
+    color: #000;
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.2;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 20px;
+    }
   }
 }
 

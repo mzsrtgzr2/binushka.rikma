@@ -4,40 +4,51 @@
     <div class="row">
       <div class="col col-12">
         
-        {% if include.title or page.pricing.title or site.data.settings.pricing.title %}
+        {% assign pricing_title = include.title | default: page.pricing.title | default: site.data.settings.pricing.title %}
+        {% if pricing_title and pricing_title != "" %}
         <div class="section__info">
-          <h2 class="section__title">
-            {{ include.title | default: page.pricing.title | default: site.data.settings.pricing.title | default: "מחירים" }}
-          </h2>
-          {% if include.description or page.pricing.description or site.data.settings.pricing.description %}
-          <p class="section__description">
-            {{ include.description | default: page.pricing.description | default: site.data.settings.pricing.description }}
-          </p>
+          <h2 class="section__title">{{ pricing_title }}</h2>
+          {% assign pricing_description = include.description | default: page.pricing.description | default: site.data.settings.pricing.description %}
+          {% if pricing_description and pricing_description != "" %}
+          <p class="section__description">{{ pricing_description }}</p>
           {% endif %}
         </div>
         {% endif %}
 
-        <div class="pricing__simple">
-          {% assign pricing_plans = include.plans | default: page.pricing.plans | default: site.data.settings.pricing.plans %}
-          {% for plan in pricing_plans %}
-          <div class="pricing__simple-item">
-            {% if plan.name %}
-            <h3 class="pricing__simple-name">{{ plan.name }}</h3>
-            {% endif %}
-            {% if plan.price %}
-            <div class="pricing__simple-price">
-              <span class="pricing__simple-amount">{{ plan.price }}</span>
-              {% if plan.period %}
-              <span class="pricing__simple-period">/ {{ plan.period }}</span>
+        {% assign registration_url = include.registration_url | default: page.hero.button_url | default: page.pricing.registration_url | default: "https://pay.grow.link/71d3c71f4082b4c673f9af15d20a6b9b-MjY4NzI3Mg" %}
+        <a href="{{ registration_url }}" target="_blank" class="pricing__link">
+          {% assign early_registration_date = page.pricing.early_registration_date | default: "31/8/25" %}
+          {% if early_registration_date %}
+          <div class="pricing__sticker">
+            <div class="pricing__sticker-content">
+              <p class="pricing__sticker-text">ההרשמה מוקדמת עד לתאריך:</p>
+              <p class="pricing__sticker-date">{{ early_registration_date }}</p>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="pricing__simple">
+            {% assign pricing_plans = include.plans | default: page.pricing.plans | default: site.data.settings.pricing.plans %}
+            {% for plan in pricing_plans %}
+            <div class="pricing__simple-item">
+              {% if plan.name %}
+              <h3 class="pricing__simple-name">{{ plan.name }}</h3>
+              {% endif %}
+              {% if plan.price %}
+              <div class="pricing__simple-price">
+                <span class="pricing__simple-amount">{{ plan.price }}</span>
+                {% if plan.period %}
+                <span class="pricing__simple-period">/ {{ plan.period }}</span>
+                {% endif %}
+              </div>
+              {% endif %}
+              {% if plan.description %}
+              <p class="pricing__simple-description">{{ plan.description }}</p>
               {% endif %}
             </div>
-            {% endif %}
-            {% if plan.description %}
-            <p class="pricing__simple-description">{{ plan.description }}</p>
-            {% endif %}
+            {% endfor %}
           </div>
-          {% endfor %}
-        </div>
+        </a>
 
       </div>
     </div>

@@ -1,18 +1,18 @@
 /* Sections */
 section {
-  padding: 50px 0 25px ;
+  padding: 40px 0 20px ;
 
   @media only screen and (max-width: $desktop) {
-    padding: 12px 0;
+    padding: 30px 0;
   }
 }
 
 .section {
   position: relative;
-  padding: 100px 0 25px ;
+  padding: 60px 0 20px ;
 
   @media only screen and (max-width: $desktop) {
-    padding: 80px 0;
+    padding: 50px 0;
   }
 }
 
@@ -23,11 +23,11 @@ section {
 
 .section__info {
   max-width: 530px;
-  margin: 0 auto 48px;
+  margin: 0 auto 30px;
   text-align: center;
 
   @media only screen and (max-width: $mobile) {
-     margin: 0 auto 40px;
+     margin: 0 auto 25px;
   }
 }
 
@@ -42,7 +42,14 @@ section {
 }
 
 .section__description {
+  margin-top: 20px;
   margin-bottom: 0;
+  line-height: 1.8;
+  
+  @media only screen and (max-width: $mobile) {
+    margin-top: 16px;
+    line-height: 1.7;
+  }
 }
 
 .section__navigation {

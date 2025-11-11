@@ -234,6 +234,26 @@ gallery:
   </div>
 </section>
 
+<!-- Date & Location Info Section -->
+<section class="section retreat-info animate">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        <div class="retreat-info__content">
+          <div class="retreat-info__item">
+            <span class="retreat-info__icon">📅</span>
+            <span class="retreat-info__text">23-25.1.26</span>
+          </div>
+          <div class="retreat-info__item">
+            <span class="retreat-info__icon">📍</span>
+            <span class="retreat-info__text">Slowness - קיבוץ מורן</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Schedule Section -->
 {% if page.schedule.items %}
 {% include section-schedule.html %}

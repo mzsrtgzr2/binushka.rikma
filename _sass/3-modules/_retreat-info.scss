@@ -1,0 +1,59 @@
+/* Retreat Info Section */
+.retreat-info {
+  padding: 35px 0;
+
+  @media only screen and (max-width: $mobile) {
+    padding: 29px 0;
+  }
+
+  &__content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 60px;
+    max-width: 600px;
+    margin: 0 auto;
+
+    @media only screen and (max-width: $desktop) {
+      gap: 40px;
+    }
+
+    @media only screen and (max-width: $mobile) {
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    direction: rtl;
+    text-align: right;
+
+    @media only screen and (max-width: $mobile) {
+      justify-content: center;
+    }
+  }
+
+  &__icon {
+    font-size: 24px;
+    line-height: 1;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 20px;
+    }
+  }
+
+  &__text {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--dark);
+    line-height: 1.4;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 16px;
+    }
+  }
+}
+

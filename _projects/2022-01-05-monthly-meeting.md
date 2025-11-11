@@ -1,7 +1,7 @@
 ---
 title:  מפגש רקמה ברחובות
 date: 2024-12-12 19:00:00 +0300
-subtitle:  שלישי בבוקר 11.11
+subtitle:  שלישי בבוקר 2.12
 image: '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
 permalink: /projects/monthly-meeting/
 form_url: https://pay.grow.link/fe07884faff28b2da7e1005b88d59a8a-MjQ3MjQxNQ
@@ -25,7 +25,6 @@ form_url: https://pay.grow.link/fe07884faff28b2da7e1005b88d59a8a-MjQ3MjQxNQ
 - - ללא תינוקות מגיל זחילה ומעלה.
 
 ### מתי מתקיימים המפגשים הקרובים?
-- המפגש של חודש נובמבר יתקיים ביום שלישי ה11.11.
 - המפגש של חודש דצמבר יתקיים ביום שלישי ה2.12.
 
 ### מה תקבלו במפגש?

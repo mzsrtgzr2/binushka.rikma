@@ -1,6 +1,6 @@
 ---
 title: ערכת רקמה בהזמנה אישית
-date: 2024-01-20 10:00:00 +0300
+date: 2023-01-20 10:00:00 +0300
 subtitle: מתנה שהייתי שמחה לקבל!
 image: '/images/gallery/kit.jpeg'
 price: ₪205

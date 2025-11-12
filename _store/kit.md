@@ -7,7 +7,7 @@ price: ₪205
 out_of_stock: false
 limited_stock: false
 hide: false
-form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+form_url: https://pay.grow.link/fd01f222f818c6613104d886733c4e24-MjcxNjcwOA
 ---
 
 ## ערכת רקמה בהזמנה אישית

@@ -104,18 +104,18 @@ pricing:
   early_registration_date: "25/11/25"
   plans:
     - name: "חדר לשלושה"
-      price: "₪2,700"
+      price: "₪3,000"
       period: "אדם"
-      description: "במקום 3,000"
+      description: ""
       features:
         - "2 לילות לינה"
         - "כל הארוחות"
         - "כל הסדנאות"
         - "חומרים"
     - name: "חדר לזוג"
-      price: "₪2,900"
+      price: "₪3,200"
       period: "אדם"
-      description: "במקום 3,200"
+      description: ""
       badge: "מומלץ"
       featured: true
       features:
@@ -125,9 +125,9 @@ pricing:
         - "חומרים"
         - "הנחה של ₪300"
     - name: "חדר ליחיד"
-      price: "₪3,650"
+      price: "₪3,950"
       period: "אדם"
-      description: "במקום 3,950"
+      description: ""
       features:
         - "2 לילות לינה לזוג"
         - "כל הארוחות"

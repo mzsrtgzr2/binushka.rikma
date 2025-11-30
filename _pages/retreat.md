@@ -101,7 +101,6 @@ features:
 pricing:
   title: "מחירים"
   description: ""
-  early_registration_date: "25/11/25"
   plans:
     - name: "חדר לשלושה"
       price: "₪3,000"

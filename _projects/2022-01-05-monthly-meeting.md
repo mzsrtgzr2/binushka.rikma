@@ -1,7 +1,7 @@
 ---
 title:  מפגש רקמה ברחובות
 date: 2025-02-03 19:00:00 +0300
-subtitle:  שלישי בבוקר 9.12
+subtitle:  שלישי בבוקר אחת לחודש
 image: '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
 permalink: /projects/monthly-meeting/
 form_url: https://pay.grow.link/fe07884faff28b2da7e1005b88d59a8a-MjQ3MjQxNQ
@@ -25,7 +25,6 @@ form_url: https://pay.grow.link/fe07884faff28b2da7e1005b88d59a8a-MjQ3MjQxNQ
 - - ללא תינוקות מגיל זחילה ומעלה.
 
 ### מתי מתקיימים המפגשים הקרובים?
-- המפגש של חודש דצמבר יתקיים ביום שלישי ה9.12.
 - בחודש ינואר לא יתקיים מפגש, אבל כן יתקיים ריטריט אומנות :)
 - המפגש של חודש פברואר יתקיים ביום שלישי ה3.2.
 

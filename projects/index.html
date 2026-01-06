@@ -14,12 +14,17 @@ layout: default
 
 <!-- Retreat Banner -->
 <div class="container">
-  <div class="retreat-banner animate">
+  {% assign retreat_page = site.pages | where: "permalink", "/retreat/" | first %}
+  {% assign is_fully_booked = retreat_page.fully_booked | default: false %}
+  <div class="retreat-banner animate {% if is_fully_booked %}retreat-banner--fully-booked{% endif %}">
     <a href="/retreat/" class="retreat-banner__link">
       <div class="retreat-banner__image-wrapper">
         <img src="/images/retreat-banner.png" alt="ריטריט אומנות" class="retreat-banner__image">
       </div>
       <div class="retreat-banner__overlay"></div>
+      {% if is_fully_booked %}
+      <div class="retreat-banner__badge">🎉 הריטריט מלא 🎉</div>
+      {% endif %}
       <div class="retreat-banner__content">
         <div class="retreat-banner__text">
           <h2 class="retreat-banner__title">ריטריט אומנות</h2>
@@ -28,7 +33,11 @@ layout: default
             <span class="retreat-banner__date">📅 23-25.1.26</span>
             <span class="retreat-banner__location">📍 Slowness - קיבוץ מורן</span>
           </div>
+          {% if is_fully_booked %}
+          <span class="retreat-banner__cta retreat-banner__cta--booked">🎉 הריטריט מלא 🎉</span>
+          {% else %}
           <span class="retreat-banner__cta">לפרטים נוספים ←</span>
+          {% endif %}
         </div>
       </div>
     </a>

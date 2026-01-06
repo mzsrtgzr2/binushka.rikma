@@ -2,6 +2,7 @@
 layout: retreat
 title: ריטריט אומנות עם בינה ליר
 permalink: /retreat/
+fully_booked: true # Set to true when retreat is fully booked
 hero:
   title: "להאט, לנשום, לרקום – ולחזור הביתה אל עַצמֵך"
   subtitle: "23-25.1.26 | Slowness - Moran"
@@ -304,6 +305,16 @@ gallery:
 {% endif %}
 
 <!-- Call to Action -->
+{% if page.fully_booked %}
+<section class="container section text-center">
+  <div class="text-center animate">
+    <h3 class="hero__title">🎉 הריטריט מלא 🎉</h3>
+    <p class="section__description" style="margin-top: 1rem; font-size: 1.1rem;">
+      תודה על העניין! הריטריט מלא כרגע. נשמח לראותכם בריטריט הבא.
+    </p>
+  </div>
+</section>
+{% else %}
 <section class="container section text-center">
   <div class="text-center animate">
     <h3 class="hero__title">להרשמה</h3>
@@ -314,3 +325,4 @@ gallery:
     </a>
   </div>
 </section>
+{% endif %}

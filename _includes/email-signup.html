@@ -1,0 +1,89 @@
+<!-- Email Signup Form -->
+<div class="email-signup">
+  <h3 class="email-signup__title">הירשמי לניוזלטר</h3>
+  <p class="email-signup__description">קבלי עדכונים על סדנאות חדשות, מוצרים ופרויקטים מיוחדים</p>
+  
+  <form class="email-signup__form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <input type="hidden" name="_subject" value="New email signup from website">
+    <input type="hidden" name="_language" value="he">
+    
+    <div class="form__group">
+      <input 
+        type="email" 
+        name="email" 
+        class="form__input email-signup__input" 
+        placeholder="הכנסי את כתובת האימייל שלך"
+        required
+        aria-label="כתובת אימייל"
+      >
+    </div>
+    
+    <button type="submit" class="button button--primary email-signup__button">
+      הירשמי
+    </button>
+    
+    <div class="email-signup__message" id="email-signup-message" style="display: none;"></div>
+  </form>
+</div>
+
+<script>
+  // Hide form if Formspree Form ID is not configured
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.email-signup__form');
+    const emailSignup = document.querySelector('.email-signup');
+    
+    // Hide the entire form if Form ID is still the placeholder
+    if (form && form.action.includes('YOUR_FORM_ID')) {
+      if (emailSignup) {
+        emailSignup.style.display = 'none';
+      }
+      return; // Exit early if form is not configured
+    }
+    
+    // Handle form submission with user feedback
+    const messageDiv = document.getElementById('email-signup-message');
+    
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const button = form.querySelector('.email-signup__button');
+        const originalButtonText = button.textContent;
+        
+        // Show loading state
+        button.textContent = 'שולח...';
+        button.disabled = true;
+        messageDiv.style.display = 'none';
+        
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            messageDiv.textContent = 'תודה! נרשמת בהצלחה 🎉';
+            messageDiv.className = 'email-signup__message email-signup__message--success';
+            messageDiv.style.display = 'block';
+            form.reset();
+          } else {
+            throw new Error('Network response was not ok');
+          }
+        })
+        .catch(error => {
+          messageDiv.textContent = 'אירעה שגיאה. נסי שוב מאוחר יותר.';
+          messageDiv.className = 'email-signup__message email-signup__message--error';
+          messageDiv.style.display = 'block';
+        })
+        .finally(() => {
+          button.textContent = originalButtonText;
+          button.disabled = false;
+        });
+      });
+    }
+  });
+</script>
+

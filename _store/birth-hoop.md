@@ -3,7 +3,7 @@ title: תעודת לידה רקומה
 date: 2024-01-20 10:00:00 +0300
 subtitle: מתנת הלידה הכי יפה
 image: '/images/gallery/birthhoop.jpeg'
-price: ₪360
+price: ₪450
 out_of_stock: false
 limited_stock: false
 hide: false

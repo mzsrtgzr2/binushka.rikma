@@ -12,9 +12,10 @@ layout: default
   </div>
 </div>
 
-<!-- Retreat Banner -->
+<!-- Retreat Banner (hidden when show_retreat is false) -->
+{% assign retreat_page = site.pages | where: "permalink", "/retreat/" | first %}
+{% if retreat_page.show_retreat %}
 <div class="container">
-  {% assign retreat_page = site.pages | where: "permalink", "/retreat/" | first %}
   {% assign is_fully_booked = retreat_page.fully_booked | default: false %}
   <div class="retreat-banner animate {% if is_fully_booked %}retreat-banner--fully-booked{% endif %}">
     <a href="/retreat/" class="retreat-banner__link">
@@ -43,6 +44,7 @@ layout: default
     </a>
   </div>
 </div>
+{% endif %}
 
 <div class="projects-page container animate">
   <div class="row">

@@ -2,6 +2,7 @@
 layout: retreat
 title: ריטריט אומנות עם בינה ליר
 permalink: /retreat/
+show_retreat: false # Set to true when there's an active retreat to show banner and links
 fully_booked: true # Set to true when retreat is fully booked
 hero:
   title: "להאט, לנשום, לרקום – ולחזור הביתה אל עַצמֵך"

@@ -1,6 +1,6 @@
 ---
 title: זר פרחים רקום
-date: 2024-01-20 10:00:00 +0300
+date: 2025-01-20 10:00:00 +0300
 subtitle:  פספרטו ועץ טבעי
 image: '/images/gallery/embroidery-flowers.jpeg'
 price: ₪300

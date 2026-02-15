@@ -2,7 +2,7 @@
 title: גיפט קארד
 date: 2024-01-20 10:00:00 +0300
 subtitle: מתנה שהיא זמן איכות ופינוק
-image: '/images/gallery/giftcard.jpeg'
+image: '/images/gallery/giftcard.jpg'
 price: כל סכום לבחירתך
 out_of_stock: false
 limited_stock: false

@@ -1,5 +1,5 @@
 ---
-title: ערכת רקמה בהזמנה אישית
+title: ערכת רקמה מפנקת
 date: 2023-01-20 10:00:00 +0300
 subtitle: מתנה שהייתי שמחה לקבל!
 image: '/images/gallery/kit.jpeg'
@@ -10,7 +10,7 @@ hide: false
 form_url: https://pay.grow.link/fd01f222f818c6613104d886733c4e24-MjcxNjcwOA
 ---
 
-## ערכת רקמה בהזמנה אישית
+## ערכת רקמה מפנקת בהתאמה אישית
 
 **מחיר:** ₪210
 

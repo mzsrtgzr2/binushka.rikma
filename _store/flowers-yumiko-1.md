@@ -3,7 +3,7 @@ title: פרחים בהשראת הטבע ויומיקו
 date: 2025-01-20 10:00:00 +0300
 subtitle:  קוטר 12 ס״מ
 image: '/images/gallery/flowers-yumiko-1.jpeg'
-price: ₪240
+price: ₪300
 out_of_stock: false
 limited_stock: false
 hide: false
@@ -16,7 +16,7 @@ form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 הימים הזויים במדינה ואני כמהה לשקט, אז רקמתי בהשראת אמנית הרקמה yumiko את האביב לתחושתי.
 על בד דריל בגוון טבעי, ויצרתי לי פספרטו מחישוק עץ אשוח בקוטר 12 ס״מ.
 
-**מחיר**: ₪240
+**מחיר**: ₪300
 
 ### מצאתם את התוספת המושלמת לבית!
 

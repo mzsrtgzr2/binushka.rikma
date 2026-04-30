@@ -12,13 +12,7 @@
   transition: transform .2s ease-in-out;
 
   &:hover {
-    transform: translateY(-4px);
-
-    .project__title {
-      a {
-        background-size: 100% 28%;
-      }
-    }
+    transform: translateY(-5px);
   }
 }
 
@@ -27,17 +21,27 @@
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 280px;
+  min-height: 136px;
   border-radius: 8px;
   user-select: none;
   transform: translate(0);
   overflow: hidden;
   background-color: var(--background-alt-color);
 
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: transparent;
+    transition: background .2s ease-in-out;
+  }
+
   &::after {
     content: "";
     display: table;
-    padding-top: 85%;
+    padding-top: 38.4%;
   }
 
   img {
@@ -49,34 +53,74 @@
     object-fit: cover;
     border-radius: 8px;
     pointer-events: none;
+    filter: none;
+    transition: filter .2s ease-in-out;
+  }
+}
+
+.project--full {
+  .project__image {
+    &::before {
+      background: rgba(241, 232, 221, 0.5);
+    }
+
+    img {
+      filter: saturate(0.45) contrast(0.8) brightness(1.1);
+    }
   }
 }
 
 .project__info {
-  margin-top: 24px;
+  margin-top: 0;
+  margin-bottom: 12px;
   text-align: center;
+  min-height: 132px;
+
+  .project__status-slot {
+    min-height: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .project__status {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 999px;
+    color: #8a3d2d;
+    background: #f6e6dd;
+  }
 
   .project__title {
-    margin-bottom: 16px;
-    font-size: 32px;
-    line-height: 1;
+    margin-bottom: 10px;
+    font-size: 28px;
+    line-height: 1.15;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     a {
-      background: linear-gradient(var(--brand-color),var(--brand-color)) no-repeat bottom /100% 0%;
-      transition: background .2s ease-in-out;
+      transition: color .2s ease-in-out;
     }
 
     @media only screen and (max-width: $desktop) {
-      font-size: 30px;
+      font-size: 26px;
     }
   }
 
   .project__subtitle {
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 500;
     line-height: 18px;
-    letter-spacing: 1.6px;
-    text-transform: uppercase;
+    letter-spacing: .2px;
+    text-transform: none;
+    color: var(--text-alt-color);
+    min-height: 18px;
   }
 }
 

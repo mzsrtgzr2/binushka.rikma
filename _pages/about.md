@@ -32,7 +32,7 @@ permalink: /about/
       </p>
 
       <p>
-      <a class="button button--primary" href="https://www.instagram.com/bina.lir.cakes.embroidery/" target="_blank">דברו איתי באינסטגרם</a>
+      <a class="button button--primary" href="https://www.instagram.com/bina.lir.cakes.embroidery/" target="_blank">דברי איתי באינסטגרם</a>
       </p>
 
     </div>

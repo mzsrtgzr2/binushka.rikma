@@ -1,9 +1,9 @@
 #-------------------------------
 # Site Settings
 title: בינה ליר אמנות הרקמה
-logo: /images/logo-bin.png
-logo_full: /images/logo-bin.png
-description: בואו לרקום איתי בקבוצות אינטימיות בפינוק מושלם
+logo:
+logo_full:
+description: בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
 color_scheme: light # You can choose three modes auto, light, and dark. By default, the auto mode is set, which means the user can choose the light or dark mode themself.
 
 
@@ -15,15 +15,15 @@ menu__settings:
     #   url: '/'
     - title: סדנאות
       url: '/projects/'
+    - title: ביקורות
+      url: '/reviews/'
     - title: 'חנות'
       url: '/store/'
     - title: מוצרים מומלצים
       url: '/recommendations/'
-    - title: ביקורות
-      url: '/reviews/'
     # - url: '/about/'
     #   title: 'קצת עלי'
-    - title: 'צרו קשר'
+    - title: 'צרי קשר'
       url: '/contact/'
     # - title: 'Pages'
     #   submenu:
@@ -53,8 +53,8 @@ social:
 #-------------------------------
 # Hero Settings
 hero:
-  hero__title: תני לעצמך שעתיים של שקט ויצירה
-  hero__description: בואו לרקום איתי בקבוצות אינטימיות בפינוק מושלם
+  hero__title: שעתיים קסומות של שלווה וריקמה
+  hero__description: בואי לרקום איתי בקבוצה אינטימית
   hero__image: '/images/table-hero.png'
 
 
@@ -70,7 +70,7 @@ mailchimp__button__text: Get updates
 # Projects Settings
 projects__settings:
   projects__title: חוגים וסדנאות
-  projects__description:  בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
+  projects__description:
 
 recommendations__settings:
   recommendations__title: המלצות מוצרים
@@ -137,7 +137,7 @@ footer_menu__settings:
       url: '/projects/'
     - title: 'חנות'
       url: '/store/'
-    - title: 'צרו קשר'
+    - title: 'צרי קשר'
       url: '/contact/'
 
 
@@ -147,7 +147,7 @@ instagram:
   enabled: true
   account: "bina.lir.cakes.embroidery"
   posts_count: 6
-  title: "עקבו אחריי באינסטגרם"
+  title: "עקבי אחריי באינסטגרם"
   description: "השראה, רקמות ועוד הרבה דברים יפים"
 
 #-------------------------------

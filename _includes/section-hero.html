@@ -3,21 +3,25 @@
   <div class="container">
     <div class="row">
       <div class="col col-12">
-    
-    <h3 class="hero__title">{{ site.data.settings.hero.hero__title }}</h3>
-
-    </div>
-    </div>  
-
-    <div class="row">
-      <div class="col col-12 only-non-mobile">
-        <img class="lazy hero__image" data-src="/images/hero2.png" alt="{{site.data.settings.author.author__name}}'s Picture">
-      </div>
-      <div class="col col-12 only-mobile">
-        <img class="lazy hero__image" data-src="/images/hero3.png" alt="{{site.data.settings.author.author__name}}'s Picture">
+        <h1 class="hero__title">{{ site.data.settings.hero.hero__title }}</h1>
+        <p class="hero__description text-center">{{ site.data.settings.hero.hero__description }}</p>
+        <div class="hero__cta text-center">
+          <a href="/projects/" class="button button--primary">למפגש הקרוב</a>
+          <a href="/reviews/" class="button button--secondary">לביקורות</a>
+        </div>
+        <div class="hero__figure">
+          <img class="lazy hero__image hero__image--main" data-src="/images/gallery/4.jpeg" alt="{{site.data.settings.author.author__name}}">
+        </div>
+        <div class="hero__thumbs">
+          <img class="lazy hero__thumb" data-src="/images/gallery/5.jpeg" alt="{{site.data.settings.author.author__name}}">
+          <img class="lazy hero__thumb" data-src="/images/gallery/3.jpeg" alt="{{site.data.settings.author.author__name}}">
+          <img class="lazy hero__thumb" data-src="/images/gallery/2.jpeg" alt="{{site.data.settings.author.author__name}}">
+          <img class="lazy hero__thumb" data-src="/images/gallery/1.jpeg" alt="{{site.data.settings.author.author__name}}">
+          <img class="lazy hero__thumb" data-src="/images/gallery/877D85F9-47B5-4057-BE01-D4FD6DB14841_1_105_c.jpeg" alt="{{site.data.settings.author.author__name}}">
+          <img class="lazy hero__thumb" data-src="/images/gallery/7FE28533-4B82-44B7-B639-497B5AA6BC5C_1_105_c.jpeg" alt="{{site.data.settings.author.author__name}}">
+        </div>
       </div>
     </div>
   </div>
-
 </section>
 <!-- end hero -->

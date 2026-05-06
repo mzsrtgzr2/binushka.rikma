@@ -1,0 +1,18 @@
+.top-shipping-banner {
+  background: var(--button-background-color);
+  color: var(--dark);
+  text-align: center;
+  direction: rtl;
+  padding: 10px 0;
+  width: 100%;
+  margin: 0;
+  box-shadow: 0 0 0 100vmax var(--button-background-color);
+  clip-path: inset(0 -100vmax);
+}
+
+.top-shipping-banner__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 600;
+}

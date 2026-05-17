@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Serve Jekyll site",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bundle exec jekyll serve --livereload",
+      "cwd": "${workspaceFolder}",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Server address: (https?://[^\\s]+)",
+        "uriFormat": "%s"
+      }
+    },
+    {
+      "name": "Serve Jekyll site (Docker)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "docker compose up",
+      "cwd": "${workspaceFolder}",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "uriFormat": "http://127.0.0.1:4001"
+      }
+    }
+  ]
+}

@@ -2,11 +2,7 @@
 .footer {
   .footer__inner {
     margin-top: 24px;
-    padding: 72px 0 56px;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    background: var(--surface-color);
-    border-top: 1px solid var(--background-alt-color);
+    padding: 24px 0 20px;
   
     .row .col {
       flex-grow: 1;
@@ -51,12 +47,12 @@
   display: flex;
 
   @media only screen and (max-width: $desktop) {
-    margin-bottom: 100px;
+    margin-bottom: 24px;
     flex-direction: column;
   }
 
   @media only screen and (max-width: $mobile) {
-    margin-bottom: 80px;
+    margin-bottom: 20px;
   }
 }
 
@@ -203,7 +199,6 @@
 /* Footer Info */
 .footer__info {
   padding: 28px 0;
-  border-top: 1px solid var(--border-color);
 
   .footer__info-box {
     display: flex;

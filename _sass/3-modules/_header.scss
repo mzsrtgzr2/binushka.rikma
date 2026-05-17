@@ -6,6 +6,7 @@
   backdrop-filter: saturate(140%) blur(8px);
   background: rgba(252, 250, 247, 0.86);
   border-bottom: 1px solid var(--border-color);
+  overflow: hidden;
 
   .container-big {
     padding-left: 0;
@@ -41,6 +42,28 @@
       padding: 14px $base-spacing-unit;
     }
   }
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  top: -26px;
+  left: -8px;
+  width: 148px;
+  height: 148px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .58;
+  transform: rotate(-6deg);
+  background-image: url('/images/branding/svg/girl2.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.header .header__inner {
+  position: relative;
+  z-index: 1;
 }
 
 /* Logo */
@@ -81,17 +104,21 @@
 }
 
 .logo__title {
+  font-family: 'Secular One', $heading-font-family;
   font-size: 22px;
   font-weight: 600;
   line-height: .9;
   margin-bottom: -7px;
+  color: #5f4b69;
 }
 
 .logo__subtitle {
+  font-family: 'Secular One', $heading-font-family;
   font-size: 16px;
   font-weight: 400;
   line-height: .9;
   opacity: .85;
+  color: #7a6593;
 }
 
 .logo__image {
@@ -137,6 +164,14 @@
 }
 
 @media only screen and (max-width: $mobile) {
+  .header::before {
+    top: -14px;
+    left: -10px;
+    width: 112px;
+    height: 112px;
+    opacity: .48;
+  }
+
   .logo {
     max-width: calc(100vw - 170px);
   }

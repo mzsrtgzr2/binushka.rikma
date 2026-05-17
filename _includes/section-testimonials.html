@@ -18,7 +18,7 @@
             <div class="testimonial-item">
               <div class="testimonial-content">
                 <div class="client-meta">
-                  {% if testimonial__item.image %}
+                  {% if testimonial__item.image and page.url != '/reviews/' %}
                     <div class="image-container">
                       <img class="client-avatar" src="{{ testimonial__item.image | relative_url }}" alt="{{ testimonial__item.name }}" loading="lazy">
                     </div>

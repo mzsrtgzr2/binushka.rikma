@@ -1,6 +1,6 @@
 #-------------------------------
 # Site Settings
-title: בינה ליר אמנות הרקמה
+title: בינה ליר רוקמת להנעתה
 logo:
 logo_full:
 description: בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
@@ -54,7 +54,7 @@ social:
 # Hero Settings
 hero:
   hero__title: שעתיים קסומות של שלווה וריקמה
-  hero__description: בואי לרקום איתי בקבוצה אינטימית
+  hero__description: בואי לרקום איתי בקבוצה קטנה
   hero__image: '/images/table-hero.png'
 
 

@@ -51,22 +51,24 @@ layout: default
     {% assign sorted = site.projects | sort: 'date'  %}
     {% for project in sorted %}
       {% unless project.hide %}
-        <article class="project col col-4 col-d-6 col-t-12">
+        <article class="project col col-4 col-d-6 col-t-12{% if project.registration_full %} project--full{% endif %}">
           <div class="project__content">
-            <a href="{{project.url}}" class="project__image">
-              <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
-              {% if project.registration_full %}
-                      <div class="registration-full">אין מקומות פנויים</div>
-              {% elsif project.last_places %}
-                      <div class="registration-full">מקומות אחרונים</div>
-              {% endif %}
-            </a>
             <div class="project__info">
+              <div class="project__status-slot">
+                {% if project.registration_full %}
+                  <div class="project__status">אין מקומות פנויים</div>
+                {% elsif project.last_places %}
+                  <div class="project__status">מקומות אחרונים</div>
+                {% endif %}
+              </div>
               <h3 class="project__title"><a href="{{project.url}}">{{ project.title }}</a></h3>
               {% if project.subtitle %}
               <div class="project__subtitle">{{ project.subtitle }}</div>
               {% endif %}
             </div>
+            <a href="{{project.url}}" class="project__image">
+              <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
+            </a>
           </div>
         </article>
       {% endunless %}

@@ -1,0 +1,152 @@
+<section class="home-redesign">
+  <section class="home-redesign__trust container">
+    <div class="home-redesign__trust-item">
+      <strong>500+</strong>
+      <span>בוגרות סדנאות</span>
+    </div>
+    <div class="home-redesign__trust-item">
+      <strong>עד 8</strong>
+      <span>משתתפות בכל קבוצה</span>
+    </div>
+    <div class="home-redesign__trust-item">
+      <strong>ללא ניסיון</strong>
+      <span>מתחילות לגמרי מוזמנות</span>
+    </div>
+  </section>
+
+  <section class="home-redesign__services container">
+    <div class="home-redesign__section-head">
+      <span class="home-redesign__eyebrow">מה אני מציעה</span>
+      <h2>בואי לרקום איתי</h2>
+    </div>
+    <div class="home-redesign__service-grid">
+      <a href="/projects/" class="home-redesign__service-card">
+        <h3>חוגים וסדנאות</h3>
+        <p>קבוצות קטנות, אינטימיות ומודרכות אישית</p>
+        <span>לכל הסדנאות</span>
+      </a>
+      <a href="/projects/private-workshop/" class="home-redesign__service-card">
+        <h3>סדנה פרטית</h3>
+        <p>מפגש אישי או זוגי בזמן שמתאים לך</p>
+        <span>לפרטים ותיאום</span>
+      </a>
+      <a href="/store/" class="home-redesign__service-card">
+        <h3>חנות ומוצרים</h3>
+        <p>ערכות, מתנות וחומרים להמשך יצירה בבית</p>
+        <span>לחנות</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="home-redesign__about container">
+    <div class="home-redesign__about-heading">
+      <span class="home-redesign__eyebrow">קצת עלי</span>
+      <h2>אני בינה, וכאן זה מקום להרגיש בבית</h2>
+    </div>
+    <div class="home-redesign__about-main">
+      <div class="home-redesign__about-photo">
+        <img src="/images/branding/svg/girl7.svg" alt="איור של בינה רוקמת">
+      </div>
+      <div class="home-redesign__about-text">
+        <p>מאז שלמדתי לרקום הבנתי שזה לא רק תחביב, אלא מרחב. שעתיים שבהן את יכולה לעצור, לנשום, וליצור בקצב שלך.</p>
+        <p>הסדנאות שלי קטנות בכוונה - עד 8 משתתפות סביב שולחן אחד, עם כיבוד ביתי וליווי אישי לכל תפר. לא צריך ניסיון, רק רצון להגיע.</p>
+        <div class="home-redesign__about-cta">
+          <a href="https://wa.me/972544247753?text=הי בינושקה :) " class="button button--primary">דברי איתי ב-WhatsApp</a>
+          <a href="/about/">קראי עוד עלי</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-redesign__workshops container">
+    <div class="home-redesign__section-head">
+      <span class="home-redesign__eyebrow">הרשמה פתוחה</span>
+      <h2>הסדנאות הקרובות</h2>
+    </div>
+    <div class="home-redesign__workshops-list">
+      {% assign upcoming_projects = site.projects | where_exp: "item", "item.hide != true" | sort: "date" | reverse %}
+      {% for project in upcoming_projects limit: 5 %}
+      <a href="{{ project.url }}" class="home-redesign__workshop-row">
+        <div class="home-redesign__date-box">
+          <span class="day">{{ project.date | date: "%d" }}</span>
+          <span class="month">{{ project.date | date: "%m.%Y" }}</span>
+        </div>
+        <div class="home-redesign__workshop-info">
+          <h3>{{ project.title }}</h3>
+          <p>{{ project.subtitle }}</p>
+        </div>
+        {% if project.registration_full %}
+        <span class="status status--full">אין מקומות</span>
+        {% elsif project.last_places %}
+        <span class="status status--last">מקומות אחרונים</span>
+        {% else %}
+        <span class="status status--open">מקומות פנויים</span>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    <div class="home-redesign__workshops-cta">
+      <a href="/projects/" class="button button--primary">לכל לוח הסדנאות</a>
+    </div>
+  </section>
+
+  <section class="home-redesign__testimonials">
+    <div class="container">
+      <div class="home-redesign__section-head">
+        <span class="home-redesign__eyebrow">אומרות עלינו</span>
+        <h2>הן כבר רקמו</h2>
+      </div>
+      <div class="home-redesign__testimonial-grid">
+        <article>
+          <p>הגעתי בלי ניסיון ויצאתי עם רקמה מהממת וביטחון להמשיך ליצור בבית. בינה סבלנית ומלאת לב.</p>
+          <span>מיכל, תל אביב</span>
+        </article>
+        <article>
+          <p>שעתיים של שקט אמיתי. הקבוצה הקטנה והיחס האישי הופכים כל מפגש לחוויה שאני מחכה לה.</p>
+          <span>שרה, רחובות</span>
+        </article>
+        <article>
+          <p>הזמנתי סדנה פרטית כמתנה, וזאת היתה הבחירה הכי מוצלחת. הכל היה מוקפד ונעים.</p>
+          <span>דנה, נס ציונה</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-redesign__faq container">
+    <div class="home-redesign__section-head">
+      <span class="home-redesign__eyebrow">שאלות נפוצות</span>
+      <h2>כל מה שרצית לדעת</h2>
+    </div>
+    <div class="home-redesign__faq-grid">
+      {% assign half = page.accordion.size | divided_by: 2 %}
+      <div>
+        {% for item in page.accordion limit: half %}
+        <details {% if forloop.first %}open{% endif %}>
+          <summary>{{ item.title }}</summary>
+          <p>{{ item.content }}</p>
+        </details>
+        {% endfor %}
+      </div>
+      <div>
+        {% for item in page.accordion offset: half %}
+        <details>
+          <summary>{{ item.title }}</summary>
+          <p>{{ item.content }}</p>
+        </details>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="home-redesign__final-cta">
+    <div class="container">
+      <h2>באה לרקום איתי?</h2>
+      <p>שלחי הודעה ב-WhatsApp ונמצא יחד את הסדנה שהכי מתאימה לך.</p>
+      <div class="home-redesign__final-cta-row">
+        <a href="https://wa.me/972544247753?text=הי בינושקה :) " class="button button--primary">שלחי הודעה</a>
+        <a href="/projects/" class="button button--secondary">לכל הסדנאות</a>
+      </div>
+    </div>
+  </section>
+</section>

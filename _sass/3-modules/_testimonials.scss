@@ -18,6 +18,16 @@
   }
 }
 
+.testimonials__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+
+  @media only screen and (max-width: $desktop) {
+    grid-template-columns: 1fr;
+  }
+}
+
 .client-meta {
   text-align: center;
 }

@@ -21,32 +21,16 @@
           <div class="container">
             <div class="row">
       
-              <div class="col col-10 col-d-12">
+              <div class="col col-12">
                 <div class="footer__author">
                   
                   <div class="footer__author-info">
-                    <h3 class="footer__author-name">בינושקה אומנות הרקמה </h3>
                     <p class="footer__author-bio">
 
                                               
                     </p>
-                    <p>
-                    {% include social-nav.html %}
-                    </p>
                     {% include email-signup.html %}
                   </div>
-                </div>
-              </div>
-      
-              <div class="col col-2 col-d-12">
-                <div class="footer__nav">
-                  <ul class="footer__nav-list list-reset">
-                    {% for item in site.data.settings.footer_menu__settings.menu__items %}
-                    <li class="footer__nav-item">
-                      <a href="{{ item.url | relative_url }}" class="footer__nav-link">{{ item.title }}</a>
-                    </li>
-                    {% endfor %}
-                  </ul>
                 </div>
               </div>
       

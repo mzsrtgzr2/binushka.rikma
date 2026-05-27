@@ -12,20 +12,34 @@ document.addEventListener("DOMContentLoaded", function() {
   /* =======================================================
   // Menu + Theme Switcher
   ======================================================= */
-  menuOpenIcon.addEventListener("click", () => {
-    menuOpen();
-  });
+  if (menuOpenIcon && menuList) {
+    menuOpenIcon.addEventListener("click", () => {
+      menuOpen();
+    });
+  }
 
-  menuCloseIcon.addEventListener("click", () => {
-    menuClose();
-  });
+  if (menuCloseIcon && menuList) {
+    menuCloseIcon.addEventListener("click", () => {
+      menuClose();
+    });
+  }
+
+  if (menuList) {
+    menuList.querySelectorAll(".nav__link").forEach((link) => {
+      link.addEventListener("click", () => menuClose());
+    });
+  }
 
   function menuOpen() {
+    if (!menuList) return;
     menuList.classList.add("is-open");
+    document.body.style.overflow = "hidden";
   }
 
   function menuClose() {
+    if (!menuList) return;
     menuList.classList.remove("is-open");
+    document.body.style.overflow = "";
   }
 
   if (toggleTheme) {

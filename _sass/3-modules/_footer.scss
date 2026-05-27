@@ -1,15 +1,15 @@
 /* Footer */
 .footer {
   .footer__inner {
-    padding: 100px 0;
-    border-top: 1px solid var(--background-alt-color);
+    margin-top: 24px;
+    padding: 24px 0 20px;
   
     .row .col {
       flex-grow: 1;
     }
 
     @media only screen and (max-width: $desktop) {
-      padding: 100px 0 32px;
+      padding: 56px 0 28px;
       text-align: center;
     }
   }
@@ -47,12 +47,12 @@
   display: flex;
 
   @media only screen and (max-width: $desktop) {
-    margin-bottom: 100px;
+    margin-bottom: 24px;
     flex-direction: column;
   }
 
   @media only screen and (max-width: $mobile) {
-    margin-bottom: 80px;
+    margin-bottom: 20px;
   }
 }
 
@@ -84,9 +84,9 @@
 }
 
 .footer__author-name {
-  margin-bottom: 20px;
-  font-size: 48px;
-  font-weight: 200;
+  margin-bottom: 12px;
+  font-size: 42px;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -172,7 +172,8 @@
   .footer__nav-link {
     font-family: $heading-font-family;
     margin-bottom: 20px;
-    font-size: 20px;
+    font-size: 18px;
+    color: var(--text-alt-color);
   }
 
   @media only screen and (max-width: $desktop) {
@@ -197,8 +198,7 @@
 
 /* Footer Info */
 .footer__info {
-  padding: 40px 0;
-  border-top: 1px solid var(--background-alt-color);
+  padding: 28px 0;
 
   .footer__info-box {
     display: flex;

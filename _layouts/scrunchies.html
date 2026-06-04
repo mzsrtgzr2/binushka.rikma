@@ -1,0 +1,59 @@
+---
+layout: default
+---
+
+<div class="scrunchies-hero">
+  {% if page.hero_image %}
+  <img class="scrunchies-hero__bg lazy" data-src="{{ page.hero_image | relative_url }}" alt="{{ page.title }}">
+  {% endif %}
+  <div class="scrunchies-hero__content container">
+    <h1 class="scrunchies-hero__title">{{ page.title }}</h1>
+    {% if page.subtitle %}
+    <p class="scrunchies-hero__subtitle">{{ page.subtitle }}</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if page.model_image %}
+<div class="container animate">
+  <div class="scrunchies-models">
+    <div class="scrunchies-models__text">
+      <h2>טבעי. אותנטי. בית.</h2>
+      <p>כל סקראנצ'י נולדת מבד שבחרתי בקפידה — ללא תפירה תעשייתית, ללא שכפול. משהו שמרגיש כמו בית על הגוף.</p>
+    </div>
+    <div class="scrunchies-models__photo">
+      <img class="lazy" data-src="{{ page.model_image | relative_url }}" alt="">
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="container">
+  <div class="scrunchies-story animate">
+    {% if page.lifestyle_image %}
+    <div class="scrunchies-story__img">
+      <img class="lazy" data-src="{{ page.lifestyle_image | relative_url }}" alt="">
+    </div>
+    {% endif %}
+    <div class="scrunchies-story__text">
+      {{ content }}
+    </div>
+  </div>
+</div>
+
+{% if page.gallery %}
+<div class="scrunchies-gallery animate">
+  {% for img in page.gallery %}
+  <div class="scrunchies-gallery__item">
+    <img class="lazy" data-src="{{ img | relative_url }}" alt="סקראנצ'י">
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="container scrunchies-cta animate">
+  <p class="scrunchies-cta__text">כל סקראנצ'י תפורה בעבודת יד — בצבע ובדגם שתבחרי</p>
+  <a href="{{ page.form_url }}" class="button button--primary scrunchies-cta__btn" target="_blank" rel="noopener">להזמנה ותשלום</a>
+</div>
+
+{% include store-shipping.html %}

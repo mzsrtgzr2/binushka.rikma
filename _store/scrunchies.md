@@ -3,7 +3,7 @@ title: סקראנצ'יז בעבודת יד
 subtitle: מבד ייחודי, כל אחת מיוחדת
 date: 2026-06-04 10:00:00 +0300
 layout: scrunchies
-image: /images/scrunchies/lifestyle-01.jpeg
+image: /images/scrunchies/11.jpeg
 hero_image: /images/scrunchies/06.jpeg
 lifestyle_image: /images/scrunchies/sewing-machine.jpeg
 model_image: /images/scrunchies/lifestyle-01.jpeg

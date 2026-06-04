@@ -71,7 +71,7 @@
 
 .scrunchies-story {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 340px;
   gap: 56px;
   align-items: center;
   margin-bottom: 80px;
@@ -95,7 +95,7 @@
 
     img {
       width: 100%;
-      height: 440px;
+      height: 520px;
       object-fit: cover;
       object-position: center center;
       display: block;
@@ -126,7 +126,7 @@
 
 .scrunchies-models {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr 340px;
   gap: 56px;
   align-items: center;
   margin-bottom: 80px;

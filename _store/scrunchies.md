@@ -1,14 +1,14 @@
 ---
 title: סקראנצ'יז בעבודת יד
-subtitle: מבד ייחודי, כל אחת מיוחדת
-date: 2026-06-04 10:00:00 +0300
+subtitle: מבדים מיוחדים
+date: 2024-06-04 10:00:00 +0300
 layout: scrunchies
 image: /images/scrunchies/11.jpeg
 hero_image: /images/scrunchies/06.jpeg
 lifestyle_image: /images/scrunchies/sewing-machine.jpeg
 model_image: /images/scrunchies/lifestyle-01.jpeg
 form_url: https://pay.grow.link/cfbcac8807a8d68eaaf19f4ec11024d7-MzMyNDczNQ
-price: "₪25 – ₪85"
+price: "₪30 – ₪85"
 hide: false
 gallery:
   - /images/scrunchies/01.jpeg

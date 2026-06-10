@@ -3,7 +3,7 @@
 title: בינה ליר אמנות הרקמה
 logo: /images/logo-bin.png
 logo_full: /images/logo-bin.png
-description: בואו לרקום איתי בקבוצות אינטימיות בפינוק מושלם
+description: בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
 color_scheme: light # You can choose three modes auto, light, and dark. By default, the auto mode is set, which means the user can choose the light or dark mode themself.
 
 
@@ -52,7 +52,7 @@ social:
 # Hero Settings
 hero:
   hero__title: תני לעצמך שעתיים של שקט ויצירה
-  hero__description: בואו לרקום איתי בקבוצות אינטימיות בפינוק מושלם
+  hero__description: בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
   hero__image: '/images/table-hero.png'
 
 

@@ -22,6 +22,10 @@ gallery:
   - /images/scrunchies/09.jpeg
   - /images/scrunchies/10.jpeg
   - /images/scrunchies/11.jpeg
+  - /images/scrunchies/12.jpeg
+  - /images/scrunchies/13.jpeg
+  - /images/scrunchies/14.jpeg
+  - /images/scrunchies/15.jpeg
 ---
 
 ב-2026 הוצאתי את מכונת התפירה הוינטג׳ של אמא שלי מהמחסן, ומאז אני תופרת כל סקראנצ׳י בעצמי — כל אחת בבד אחר, כל אחת ייחודית.

@@ -51,7 +51,7 @@ social:
 #-------------------------------
 # Hero Settings
 hero:
-  hero__title: תני לעצמך שעתיים של שקט ויצירה
+  hero__title: תני לעצמך רגע של שקט ויצירה
   hero__description: בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
   hero__image: '/images/table-hero.png'
 

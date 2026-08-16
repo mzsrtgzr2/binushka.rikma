@@ -32,6 +32,13 @@ layout: default
               {% if item.price %}
               <div class="store-item__price">{{ item.price }}</div>
               {% endif %}
+              {% assign slug = item.slug | default: item.basename %}
+              {% assign cart_meta = site.data.morning-cart.products[slug] %}
+              {% if site.data.morning-cart.enabled and cart_meta and cart_meta.enabled != false and item.out_of_stock != true %}
+              <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}">
+                הוסיפי לסל
+              </button>
+              {% endif %}
             </div>
           </div>
         </article>

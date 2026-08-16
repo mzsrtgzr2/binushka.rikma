@@ -7,7 +7,6 @@ price: כל סכום לבחירתך
 out_of_stock: false
 limited_stock: false
 hide: false
-form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
 ---
 
 ## גיפט קארד למי שצריכה פינוק

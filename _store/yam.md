@@ -7,7 +7,6 @@ price: ₪300
 out_of_stock: true
 limited_stock: true
 hide: false
-form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 ---
 
 ## רקמת בטטה מושרשת בעבודת יד עדינה

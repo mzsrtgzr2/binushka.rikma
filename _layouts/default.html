@@ -21,8 +21,14 @@
   {% include footer.html %}
   {% include floater.html %}
 
+  {% include morning-cart-catalog.html %}
+  {% include morning-cart-widget.html %}
+
   <script src="{{ site.baseurl }}/js/scripts.js"></script>
   <script src="{{ site.baseurl }}/js/common.js"></script>
+  {% if site.data.morning-cart.enabled %}
+  <script src="{{ site.baseurl }}/js/morning-cart.js" defer></script>
+  {% endif %}
 </body>
 
 </html>

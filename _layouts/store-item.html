@@ -30,10 +30,14 @@ layout: default
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <div class="section__navigation">
-            <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank">
-            הזמיני עכשיו
-          </a>
+        <div class="section__navigation store-item__cart-actions">
+          {% assign slug = page.slug | default: page.basename %}
+          {% assign cart_meta = site.data.morning-cart.products[slug] %}
+          {% if site.data.morning-cart.enabled and cart_meta and cart_meta.enabled != false %}
+          <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}">
+            הוסיפי לסל
+          </button>
+          {% endif %}
         </div>
       </div>
     </div>

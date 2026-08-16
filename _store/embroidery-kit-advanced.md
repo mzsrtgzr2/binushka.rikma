@@ -7,7 +7,6 @@ price: ₪180
 out_of_stock: false
 limited_stock: true
 hide: true
-form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
 ---
 
 ## ערכת רקמה מתקדמת

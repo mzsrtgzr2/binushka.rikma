@@ -7,7 +7,6 @@ price: ₪210
 out_of_stock: false
 limited_stock: false
 hide: false
-form_url: https://pay.grow.link/fd01f222f818c6613104d886733c4e24-MjcxNjcwOA
 ---
 
 ## ערכת רקמה מפנקת בהתאמה אישית

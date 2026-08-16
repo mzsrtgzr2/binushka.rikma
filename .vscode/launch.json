@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Jekyll site",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bundle exec jekyll serve --livereload",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Local checkout API",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "node scripts/local-checkout-api.js",
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Site + checkout (local)",
+      "configurations": ["Jekyll site", "Local checkout API"]
+    }
+  ]
+}

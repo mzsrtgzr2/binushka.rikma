@@ -1,0 +1,25 @@
+{% if site.data.morning-cart.enabled %}
+<div class="morning-cart" id="morning-cart">
+  <button type="button" class="morning-cart__toggle" id="morning-cart-toggle" aria-expanded="false" aria-controls="morning-cart-panel">
+    <span class="morning-cart__toggle-label">סל</span>
+    <span class="morning-cart__count" id="morning-cart-count" aria-hidden="true">0</span>
+  </button>
+
+  <div class="morning-cart__panel" id="morning-cart-panel" hidden>
+    <div class="morning-cart__header">
+      <h2 class="morning-cart__title">סל הקניות</h2>
+      <button type="button" class="morning-cart__close" id="morning-cart-close" aria-label="סגירת סל">&times;</button>
+    </div>
+    <ul class="morning-cart__lines" id="morning-cart-lines"></ul>
+    <p class="morning-cart__empty" id="morning-cart-empty">הסל ריק</p>
+    <div class="morning-cart__footer">
+      <p class="morning-cart__total"><span>סה״כ:</span> <strong id="morning-cart-total">₪0</strong></p>
+      <button type="button" class="button button--primary morning-cart__checkout" id="morning-cart-checkout" disabled>
+        לתשלום
+      </button>
+      <p class="morning-cart__error" id="morning-cart-error" role="alert" hidden></p>
+    </div>
+  </div>
+  <div class="morning-cart__backdrop" id="morning-cart-backdrop" hidden></div>
+</div>
+{% endif %}

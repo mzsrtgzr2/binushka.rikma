@@ -1,0 +1,27 @@
+{% if site.data.morning-cart.enabled %}
+<script type="application/json" id="morning-cart-catalog">
+[
+{%- assign first = true -%}
+{%- assign gc = site.data.morning-cart -%}
+{%- for item in site.store -%}
+  {%- unless item.hide -%}
+    {%- assign slug = item.slug | default: item.basename -%}
+    {%- assign meta = gc.products[slug] -%}
+    {%- if meta and meta.enabled != false -%}
+      {%- unless first -%},{%- endunless -%}
+      {
+        "id": {{ slug | jsonify }},
+        "name": {{ item.title | jsonify }},
+        "price": {{ meta.price }},
+        "itemId": {% if meta.morning_item_id %}{{ meta.morning_item_id | jsonify }}{% else %}null{% endif %},
+        "image": {{ item.image | absolute_url | jsonify }},
+        "url": {{ item.url | relative_url | jsonify }},
+        "outOfStock": {% if item.out_of_stock %}true{% else %}false{% endif %}
+      }
+      {%- assign first = false -%}
+    {%- endif -%}
+  {%- endunless -%}
+{%- endfor -%}
+]
+</script>
+{% endif %}

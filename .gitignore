@@ -4,3 +4,7 @@ _site
 .jekyll-metadata
 .DS_Store
 Gemfile.lock
+.env
+.env.*
+!.env.example
+.vercel

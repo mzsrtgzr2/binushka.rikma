@@ -1,0 +1,9 @@
+{
+  "buildCommand": "bundle install && bundle exec jekyll build",
+  "outputDirectory": "_site",
+  "installCommand": "gem install bundler && bundle install",
+  "framework": null,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
+}

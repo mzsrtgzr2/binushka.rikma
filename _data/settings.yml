@@ -148,6 +148,16 @@ footer_menu__settings:
     - title: 'צרו קשר'
       url: '/contact/'
 
+footer_legal__settings:
+  title: 'מידע נוסף'
+  menu__items:
+    - title: 'משלוחים והחזרות'
+      url: '/shipping/'
+    - title: 'הצהרת נגישות'
+      url: '/accessibility/'
+    - title: 'תקנון האתר'
+      url: '/regulations/'
+
 
 #-------------------------------
 # Instagram Settings

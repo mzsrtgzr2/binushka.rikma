@@ -144,6 +144,21 @@
     }
   }
 
+  ul, ol {
+    list-style: disc;
+    padding-right: 24px;
+    margin-left: 0;
+  }
+
+  h2 {
+    margin-top: 8px;
+  }
+
+  h3 {
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
   img, .js-reframe {
     border-radius: 8px;
     overflow: hidden;

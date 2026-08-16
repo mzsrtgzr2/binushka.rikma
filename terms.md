@@ -2,6 +2,7 @@
 layout: default
 title: תקנון ותנאי ביטול סדנאות
 description: תנאי השימוש ומדיניות הביטולים של סדנאות הרקמה - בינה ליר
+permalink: /terms/
 ---
 
 <div class="container">
@@ -66,6 +67,15 @@ description: תנאי השימוש ומדיניות הביטולים של סדנ
        <li>אם התקיים אירוע שלא יצא לפועל מיוזמת העסק — תינתן אפשרות לקבוע תאריך חלופי ללא עלות.</li>
 
      </ul>
+    </section>
+
+    <section class="terms-section">
+      <p>
+        לתנאי השימוש באתר, לרכישות בחנות ולמדיניות המשלוחים ראו גם את
+        <a href="{{ '/regulations/' | relative_url }}">תקנון האתר</a>
+        ואת
+        <a href="{{ '/shipping/' | relative_url }}">מדיניות המשלוחים וההחזרות</a>.
+      </p>
     </section>
   </div>
 </div> 

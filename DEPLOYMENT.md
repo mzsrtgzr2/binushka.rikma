@@ -40,23 +40,20 @@ The site used to be served by GitHub Pages at `rikma.binushka.com`. These are th
 serving to Vercel. Do them in this order — the domain keeps working the whole way through, and
 the only user-visible moment is the DNS switch in step 4, which is a few seconds of cutover.
 
-### 1. Connect the Vercel project to this repository
+### 1. Check the Vercel project
 
-A Vercel project for this site already exists, but it was serving an old build, so its Git
-connection is either missing or paused.
+A Vercel project for this site already exists and is connected to this repository: pushes build,
+and pull requests get preview deployments.
 
-1. Open the project in the Vercel dashboard → **Settings → Git**.
-2. Connect it to this repository and set the production branch to `master`.
-   If reconnecting is awkward, delete the project and re-import the repo instead
-   (**Add New → Project → Import Git Repository**). Vercel reads `vercel.json`, so accept the
-   detected settings as-is.
-3. Confirm **Settings → Build & Deployment** shows Jekyll and `_site` (both come from
-   `vercel.json`).
+1. Open the project in the Vercel dashboard → **Settings → Git** and confirm the production
+   branch is `master`.
+2. Confirm **Settings → Build & Deployment** shows Jekyll and `_site` (both come from
+   `vercel.json`, so there is nothing to type in).
 
 ### 2. Verify the preview build
 
-Merge this branch, or push it and open the preview deployment Vercel creates for it. Check the
-deployment URL before touching DNS:
+Open the preview deployment Vercel creates for this branch. Preview deployments sit behind Vercel
+Authentication, so open them while signed in to Vercel. Check before touching DNS:
 
 - `/` renders with styling and images
 - `/store/`, `/terms/`, `/thanks/`, `/about/`, `/blog/` all return 200

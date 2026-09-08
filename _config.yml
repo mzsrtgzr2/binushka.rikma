@@ -84,4 +84,5 @@ exclude:
   - README.md
   - DEPLOYMENT.md
   - EMAIL_SIGNUP_SETUP.md
+  - GROW_PAYMENTS_SETUP.md
   - INSTAGRAM_SETUP.md

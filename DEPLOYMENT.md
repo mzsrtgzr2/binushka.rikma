@@ -20,6 +20,11 @@ Ruby. `Gemfile.lock` is intentionally not committed: Vercel's bundler resolves t
 at build time, which avoids lockfile/bundler version mismatches between local machines and the
 build image.
 
+Note for the planned Grow payments endpoint (see `GROW_PAYMENTS_SETUP.md`): a serverless function
+placed in `/api` is served alongside the Jekyll output, but `trailingSlash: true` applies to it
+too, so `/api/create-payment-link` answers with a 308 to `/api/create-payment-link/`. Call it with
+the trailing slash, or add a rewrite in `vercel.json` to exempt `/api`.
+
 ## Local development
 
 ```bash

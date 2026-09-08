@@ -1,0 +1,173 @@
+---
+layout: default
+title: עמוד תשלום
+description: השלימי את הפרטים שלך לפני המעבר לתשלום מאובטח
+permalink: /checkout/
+---
+
+<div class="container">
+  <div class="page-head">
+    <h1 class="page-title">{{ page.title }}</h1>
+    <p class="page-description">{{ page.description }}</p>
+  </div>
+</div>
+
+<div class="checkout-page container animate">
+  <div class="checkout-content">
+
+    <section class="checkout-summary">
+      <h2>סיכום ההזמנה</h2>
+      <p class="checkout-summary__note">
+        עגלת הקניות באתר נמצאת בבנייה. לאחר השלמתה, פרטי המוצרים שבחרת יופיעו כאן לפני המעבר לתשלום.
+      </p>
+    </section>
+
+    <section class="checkout-form-section">
+      <h2>פרטים אישיים לתשלום</h2>
+      <p class="checkout-form-section__note">
+        יש למלא את הפרטים הבאים לפני המעבר לדף התשלום המאובטח.
+      </p>
+
+      <form class="checkout-form" id="checkout-form" novalidate>
+
+        <div class="row">
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-first-name">שם פרטי *</label>
+              <input
+                type="text"
+                id="checkout-first-name"
+                name="firstName"
+                class="form__input"
+                placeholder="שם פרטי"
+                autocomplete="given-name"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-last-name">שם משפחה *</label>
+              <input
+                type="text"
+                id="checkout-last-name"
+                name="lastName"
+                class="form__input"
+                placeholder="שם משפחה"
+                autocomplete="family-name"
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-phone">טלפון (ללא קידומת בינלאומית) *</label>
+              <input
+                type="tel"
+                id="checkout-phone"
+                name="phone"
+                class="form__input"
+                placeholder="לדוגמה: 0501234567"
+                autocomplete="tel-national"
+                pattern="0[0-9]{8,9}"
+                title="יש להזין מספר טלפון ישראלי, ללא קידומת בינלאומית, לדוגמה 0501234567"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-email">כתובת אימייל *</label>
+              <input
+                type="email"
+                id="checkout-email"
+                name="email"
+                class="form__input"
+                placeholder="name@example.com"
+                autocomplete="email"
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="form__group">
+          <label class="form__label" for="checkout-address">כתובת (רחוב, מספר בית ועיר) *</label>
+          <input
+            type="text"
+            id="checkout-address"
+            name="address"
+            class="form__input"
+            placeholder="לדוגמה: אייזנברג 39, רחובות"
+            autocomplete="street-address"
+            required
+          >
+        </div>
+
+        <div class="row">
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-city">עיר *</label>
+              <input
+                type="text"
+                id="checkout-city"
+                name="city"
+                class="form__input"
+                placeholder="עיר"
+                autocomplete="address-level2"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-zip">מיקוד</label>
+              <input
+                type="text"
+                id="checkout-zip"
+                name="zip"
+                class="form__input"
+                placeholder="מיקוד"
+                autocomplete="postal-code"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="form__group">
+          <label class="form__label" for="checkout-country">מדינה *</label>
+          <select id="checkout-country" name="country" class="form__input" autocomplete="country-name" required>
+            <option value="ישראל" selected>ישראל</option>
+            <option value="אחר">אחר</option>
+          </select>
+        </div>
+
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label" for="checkout-terms">
+            <input type="checkbox" id="checkout-terms" name="acceptTerms" required>
+            <span>
+              קראתי ואני מאשר/ת את
+              <a href="{{ '/regulations/' | relative_url }}" target="_blank" rel="noopener">תקנון האתר ותנאי השימוש</a>
+            </span>
+          </label>
+        </div>
+
+        <button type="submit" class="button button--primary button--big checkout-form__submit">
+          המשך לתשלום מאובטח
+        </button>
+
+        <div class="checkout-form__message" id="checkout-form-message" style="display: none;"></div>
+
+      </form>
+    </section>
+
+  </div>
+</div>
+
+<script src="{{ site.baseurl }}/js/checkout.js"></script>

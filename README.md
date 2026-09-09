@@ -1,2 +1,2 @@
-Jekyll site for rikma.binushka.com, hosted on GitHub Pages. See [DEPLOYMENT.md](DEPLOYMENT.md)
-for local development. Vercel still builds the repo as a secondary `*.vercel.app` URL.
+Jekyll site for rikma.binushka.com, hosted on Vercel. See [DEPLOYMENT.md](DEPLOYMENT.md) for
+build settings, local development, and the DNS cutover.

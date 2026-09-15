@@ -1,0 +1,22 @@
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+<section class="container section newsletter-section">
+  <div class="text-center animate">
+    <h3 class="hero__title">{{ newsletter.section.title }}</h3>
+    {% if newsletter.section.description %}
+      <p class="hero__description">{{ newsletter.section.description }}</p>
+    {% endif %}
+  </div>
+
+  <div class="newsletter-section__inner animate">
+    <div class="newsletter-teaser" data-newsletter-latest data-newsletter-limit="1" hidden>
+      <p class="newsletter-teaser__eyebrow">{{ newsletter.section.teaser_label }}</p>
+      <div class="newsletter-teaser__grid" data-newsletter-latest-target></div>
+    </div>
+
+    <div class="newsletter-section__signup">
+      {% include newsletter-signup.html source="home" hide_heading=true %}
+    </div>
+  </div>
+</section>
+{% endif %}

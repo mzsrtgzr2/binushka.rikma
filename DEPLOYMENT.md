@@ -24,14 +24,16 @@ Grow approved the site for clearing and pointed us at the Green Invoice payment-
 (not WooCommerce / Wix / Shopify). The cart collects Grow-required customer details on
 `/checkout/`, then the server builds the payment form.
 
-Set these in Vercel → Project → Settings → Environment Variables (Production):
+Set these in Vercel → Project → Settings → Environment Variables. For the
+preview/sandbox cart, set **Preview** (and leave Production for later):
 
 | Variable | What it is |
 | --- | --- |
-| `MORNING_ENV` | `production` once live, `sandbox` while testing |
-| `MORNING_API_KEY_ID` | Morning → developer tools → API keys |
+| `MORNING_ENV` | `sandbox` while testing. `production` only when charging real cards |
+| `MORNING_API_KEY_ID` | Morning sandbox keys while `MORNING_ENV=sandbox` |
 | `MORNING_API_KEY_SECRET` | same |
-| `MORNING_PLUGIN_ID` | already in the checkout function; override in Vercel only if Grow issues a new one |
+| `MORNING_PLUGIN_ID` | Grow production plugin. **Not sent in sandbox** — it 404s there |
+| `MORNING_SANDBOX_PLUGIN_ID` | optional sandbox plugin; if empty, Morning uses the account default |
 
 Gift cards and scrunchies stay on their existing Grow payment links because the price is not fixed.
 

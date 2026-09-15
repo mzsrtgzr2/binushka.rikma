@@ -1,6 +1,9 @@
 /**
  * Server-side price list. Checkout never trusts prices from the browser.
  * Keep in sync with _data/store-cart.yml
+ *
+ * itemId values are Morning production catalog UUIDs. Do not send them on
+ * sandbox payment forms — missing items return Morning error 404.
  */
 
 const PRODUCTS = {

@@ -21,7 +21,14 @@ test('sandbox omits the production Grow plugin id', () => {
   assert.equal(pluginId, '');
 });
 
-test('sandbox uses MORNING_SANDBOX_PLUGIN_ID when set', () => {
+test('sandbox ignores the production Grow plugin even in MORNING_SANDBOX_PLUGIN_ID', () => {
+  const pluginId = checkout.resolvePluginId('sandbox', {
+    MORNING_SANDBOX_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
+  });
+  assert.equal(pluginId, '');
+});
+
+test('sandbox uses a distinct MORNING_SANDBOX_PLUGIN_ID', () => {
   const pluginId = checkout.resolvePluginId('sandbox', {
     MORNING_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
     MORNING_SANDBOX_PLUGIN_ID: 'sandbox-plugin',
@@ -100,7 +107,10 @@ test('public env status never includes secrets', () => {
     hasKeyId: true,
     hasSecret: true,
     keyIdPrefix: '9d80ace4',
+    hasPluginId: true,
+    hasSandboxPluginId: false,
     sendsPluginId: false,
+    blockedProductionPlugin: true,
   });
   assert.equal(JSON.stringify(status).includes('super-secret'), false);
 });

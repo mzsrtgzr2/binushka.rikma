@@ -2,9 +2,10 @@
  * Checkout page: render the cart, collect Grow-required customer fields,
  * then POST to /api/checkout/ which creates a Green Invoice payment form.
  */
-document.addEventListener('DOMContentLoaded', function () {
-  var form = document.getElementById('checkout-form');
-  if (!form) return;
+(function () {
+  function init() {
+    var form = document.getElementById('checkout-form');
+    if (!form) return;
 
   var messageEl = document.getElementById('checkout-form-message');
   var linesEl = document.getElementById('checkout-lines');
@@ -29,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!messageEl) return;
     messageEl.textContent = text;
     messageEl.className = 'checkout-form__message checkout-form__message--' + type;
-    messageEl.style.display = 'block';
+    messageEl.style.display = text ? 'block' : 'none';
+    if (text) messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function shippingCost(method, subtotal, coupon) {
@@ -171,5 +173,12 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
 
-  renderSummary();
-});
+    renderSummary();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

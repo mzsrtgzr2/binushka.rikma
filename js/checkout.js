@@ -143,17 +143,24 @@ document.addEventListener('DOMContentLoaded', function () {
       body: JSON.stringify(payload),
     })
       .then(function (res) {
-        return res.json().then(function (body) {
-          return { ok: res.ok, body: body };
+        return res.text().then(function (text) {
+          var body = {};
+          if (text) {
+            try {
+              body = JSON.parse(text);
+            } catch (e) {
+              body = {};
+            }
+          }
+          if (!res.ok || !body.url) {
+            throw new Error(body.error || 'לא הצלחנו לפתוח תשלום. נסי שוב.');
+          }
+          return body;
         });
       })
-      .then(function (result) {
-        if (result.ok && result.body.url) {
-          if (window.StoreCart) StoreCart.clear();
-          window.location.href = result.body.url;
-          return;
-        }
-        throw new Error(result.body.error || 'שגיאה בתשלום');
+      .then(function (body) {
+        if (window.StoreCart) StoreCart.clear();
+        window.location.href = body.url;
       })
       .catch(function (err) {
         showMessage(err.message || 'לא הצלחנו לפתוח תשלום. נסי שוב.', 'error');

@@ -143,6 +143,19 @@ function isNotFound(status, json) {
   return status === 404 || Number(json && json.errorCode) === 404;
 }
 
+function publicEnvStatus(envVars) {
+  const vars = envVars || {};
+  const env = resolveMorningEnv(vars.MORNING_ENV);
+  const keyId = String(vars.MORNING_API_KEY_ID || '').trim();
+  return {
+    env,
+    hasKeyId: Boolean(keyId),
+    hasSecret: Boolean(String(vars.MORNING_API_KEY_SECRET || '').trim()),
+    keyIdPrefix: keyId ? keyId.slice(0, 8) : null,
+    sendsPluginId: Boolean(resolvePluginId(env, vars)),
+  };
+}
+
 function readCustomer(body) {
   const firstName = String(body.firstName || '').trim();
   const lastName = String(body.lastName || '').trim();
@@ -237,7 +250,7 @@ async function postPaymentForm(rest, token, payload) {
 }
 
 async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.headers.origin) {
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
@@ -245,6 +258,10 @@ async function handler(req, res) {
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
+  }
+
+  if (req.method === 'GET') {
+    return res.status(200).json(publicEnvStatus(process.env));
   }
 
   if (req.method !== 'POST') {
@@ -355,6 +372,7 @@ handler.buildPaymentFormPayload = buildPaymentFormPayload;
 handler.readCustomer = readCustomer;
 handler.buildIncomeRows = buildIncomeRows;
 handler.morningErrorMessage = morningErrorMessage;
+handler.publicEnvStatus = publicEnvStatus;
 handler.GROW_PRODUCTION_PLUGIN_ID = GROW_PRODUCTION_PLUGIN_ID;
 
 module.exports = handler;

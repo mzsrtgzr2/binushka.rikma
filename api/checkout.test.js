@@ -87,3 +87,20 @@ test('Morning 2600 tells the user to connect sandbox clearing', () => {
   assert.match(message, /מסוף סליקה/);
   assert.match(message, /sandbox/);
 });
+
+test('public env status never includes secrets', () => {
+  const status = checkout.publicEnvStatus({
+    MORNING_ENV: 'sandbox',
+    MORNING_API_KEY_ID: '9d80ace4-c82c-4b00-9836-0f9399469b2d',
+    MORNING_API_KEY_SECRET: 'super-secret',
+    MORNING_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
+  });
+  assert.deepEqual(status, {
+    env: 'sandbox',
+    hasKeyId: true,
+    hasSecret: true,
+    keyIdPrefix: '9d80ace4',
+    sendsPluginId: false,
+  });
+  assert.equal(JSON.stringify(status).includes('super-secret'), false);
+});

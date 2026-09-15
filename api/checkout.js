@@ -57,16 +57,16 @@ function morningHosts(env) {
 
 /**
  * Production Grow plugin IDs do not exist in sandbox and Morning returns 404.
- * Sandbox uses MORNING_SANDBOX_PLUGIN_ID, or omits pluginId so Morning picks the
- * sandbox business default.
+ * Sandbox uses MORNING_SANDBOX_PLUGIN_ID / MORNING_PLUGIN_ID only when it is a
+ * different UUID. Otherwise pluginId is omitted and Morning uses the default.
  */
 function resolvePluginId(env, envVars) {
   const vars = envVars || {};
   if (env === 'sandbox') {
-    const sandboxId = String(vars.MORNING_SANDBOX_PLUGIN_ID || '').trim();
-    if (sandboxId) return sandboxId;
-    const plugin = String(vars.MORNING_PLUGIN_ID || '').trim();
-    if (plugin && plugin !== GROW_PRODUCTION_PLUGIN_ID) return plugin;
+    const candidate = String(
+      vars.MORNING_SANDBOX_PLUGIN_ID || vars.MORNING_PLUGIN_ID || ''
+    ).trim();
+    if (candidate && candidate !== GROW_PRODUCTION_PLUGIN_ID) return candidate;
     return '';
   }
   return String(vars.MORNING_PLUGIN_ID || GROW_PRODUCTION_PLUGIN_ID).trim();
@@ -147,12 +147,20 @@ function publicEnvStatus(envVars) {
   const vars = envVars || {};
   const env = resolveMorningEnv(vars.MORNING_ENV);
   const keyId = String(vars.MORNING_API_KEY_ID || '').trim();
+  const plugin = String(vars.MORNING_PLUGIN_ID || '').trim();
+  const sandboxPlugin = String(vars.MORNING_SANDBOX_PLUGIN_ID || '').trim();
+  const blockedProductionPlugin =
+    env === 'sandbox' &&
+    (plugin === GROW_PRODUCTION_PLUGIN_ID || sandboxPlugin === GROW_PRODUCTION_PLUGIN_ID);
   return {
     env,
     hasKeyId: Boolean(keyId),
     hasSecret: Boolean(String(vars.MORNING_API_KEY_SECRET || '').trim()),
     keyIdPrefix: keyId ? keyId.slice(0, 8) : null,
+    hasPluginId: Boolean(plugin),
+    hasSandboxPluginId: Boolean(sandboxPlugin),
     sendsPluginId: Boolean(resolvePluginId(env, vars)),
+    blockedProductionPlugin,
   };
 }
 

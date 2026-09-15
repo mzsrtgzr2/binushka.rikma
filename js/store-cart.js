@@ -199,4 +199,28 @@
   }
 
   renderWidget();
+
+  fetch('/api/prices/')
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      var products = data && data.products;
+      if (!products) return;
+      Object.keys(products).forEach(function (id) {
+        var live = products[id];
+        if (!byId[id] || !live || !(Number(live.price) > 0)) return;
+        byId[id].price = Number(live.price);
+        if (live.name) byId[id].name = live.name;
+      });
+      document.querySelectorAll('[data-product-price]').forEach(function (el) {
+        var id = el.getAttribute('data-product-price');
+        if (byId[id]) el.textContent = '₪' + byId[id].price;
+      });
+      renderWidget();
+      window.dispatchEvent(new Event('binushka:prices'));
+    })
+    .catch(function () {
+      /* keep the prices baked into the page */
+    });
 })();

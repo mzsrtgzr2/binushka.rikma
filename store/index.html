@@ -29,10 +29,10 @@ layout: default
               {% if item.subtitle %}
               <div class="store-item__subtitle">{{ item.subtitle }}</div>
               {% endif %}
-              {% if item.price %}
-              <div class="store-item__price">{{ item.price }}</div>
-              {% endif %}
               {% assign slug = item.slug | default: item.basename %}
+              {% if item.price %}
+              <div class="store-item__price" data-product-price="{{ slug }}">{{ item.price }}</div>
+              {% endif %}
               {% assign cart_meta = site.data.store-cart.products[slug] %}
               {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false and item.out_of_stock != true %}
               <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}">

@@ -93,6 +93,7 @@
   }
 
   form.addEventListener('change', renderSummary);
+  window.addEventListener('binushka:prices', renderSummary);
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();

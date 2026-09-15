@@ -1,6 +1,9 @@
 /**
- * Server-side price list. Checkout never trusts prices from the browser.
- * Keep in sync with _data/store-cart.yml
+ * Server-side catalog. Checkout never trusts prices from the browser.
+ *
+ * Slugs and Morning item UUIDs live here. Live prices come from Morning's
+ * item list (פריטים) when the API is reachable; otherwise these fallbacks.
+ * Keep slugs in sync with _data/store-cart.yml and _store/*.md
  *
  * itemId values are Morning production catalog UUIDs. Do not send them on
  * sandbox payment forms — missing items return Morning error 404.
@@ -28,6 +31,45 @@ const SHIPPING = {
 const FREE_SHIPPING_MIN = 250;
 const MAX_QTY = 20;
 
+function applyLiveProduct(product, liveBySlug, slug) {
+  const live = liveBySlug && liveBySlug[slug];
+  if (!live) return product;
+  const price = Number(live.price);
+  if (!Number.isFinite(price) || price <= 0) return product;
+  return {
+    ...product,
+    price,
+    name: live.name || product.name,
+  };
+}
+
+function fallbackPriceBook() {
+  const out = {};
+  for (const [slug, product] of Object.entries(PRODUCTS)) {
+    out[slug] = { price: product.price, name: product.name };
+  }
+  return out;
+}
+
+function priceBookFromMorningItems(items) {
+  const byMorningId = {};
+  for (const item of items || []) {
+    if (item && item.id) byMorningId[item.id] = item;
+  }
+  const out = {};
+  for (const [slug, product] of Object.entries(PRODUCTS)) {
+    const live = product.itemId && byMorningId[product.itemId];
+    if (!live) continue;
+    const price = Number(live.price);
+    if (!Number.isFinite(price) || price <= 0) continue;
+    out[slug] = {
+      price,
+      name: live.name || product.name,
+    };
+  }
+  return out;
+}
+
 function shippingPrice(method, subtotal) {
   const ship = SHIPPING[method];
   if (!ship) return null;
@@ -37,7 +79,7 @@ function shippingPrice(method, subtotal) {
   return ship.price;
 }
 
-function buildOrder(rawItems, shippingMethod) {
+function buildOrder(rawItems, shippingMethod, liveBySlug) {
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
     return { error: 'הסל ריק' };
   }
@@ -47,7 +89,7 @@ function buildOrder(rawItems, shippingMethod) {
 
   for (const raw of rawItems) {
     const id = raw && raw.id;
-    const product = PRODUCTS[id];
+    const product = applyLiveProduct(PRODUCTS[id], liveBySlug, id);
     if (!product) {
       return { error: 'מוצר לא מוכר בסל' };
     }
@@ -90,4 +132,6 @@ module.exports = {
   FREE_SHIPPING_MIN,
   shippingPrice,
   buildOrder,
+  fallbackPriceBook,
+  priceBookFromMorningItems,
 };

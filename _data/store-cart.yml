@@ -1,7 +1,8 @@
 # Fixed-price store items that can go in the cart.
 # Variable-price products (gift card, scrunchies) keep their Grow payment links.
-# morning_item_id is the Green Invoice / Morning catalog UUID (optional).
-# price is shekels, VAT included.
+# morning_item_id is the Green Invoice / Morning catalog UUID.
+# price is a fallback if the Morning item list cannot be loaded.
+# Live prices come from Morning → פריטים.
 
 enabled: true
 success_path: "/thanks/"

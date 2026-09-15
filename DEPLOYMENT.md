@@ -43,6 +43,21 @@ you can confirm Preview picked up the sandbox pair without printing secrets.
 
 Gift cards and scrunchies stay on their existing Grow payment links because the price is not fixed.
 
+## Who edits products
+
+**Prices:** Morning (Green Invoice) → **פריטים** (Items). Checkout and the store
+page read that price list over the API. The numbers in `_store/*.md` and
+`_data/store-cart.yml` are fallbacks if Morning is unreachable.
+
+**Stock / hide a product:** still in GitHub, `_store/<product>.md`
+(`out_of_stock`, `limited_stock`, `hide`). Morning’s item API has no inventory
+field. Grow is payments only — it is not a catalog.
+
+**Photos and product text:** still `_store/<product>.md`.
+
+To add a new cart product: create the item in Morning, put its UUID in
+`_data/store-cart.yml` and `api/catalog.js`, and add the markdown page.
+
 ## Local development
 
 ```bash

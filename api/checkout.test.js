@@ -81,3 +81,9 @@ test('empty Morning 404 maps to a Hebrew sandbox hint', () => {
   const message = checkout.morningErrorMessage({ errorCode: 404, errorMessage: '' });
   assert.match(message, /sandbox/);
 });
+
+test('Morning 2600 tells the user to connect sandbox clearing', () => {
+  const message = checkout.morningErrorMessage({ errorCode: 2600, errorMessage: '' });
+  assert.match(message, /מסוף סליקה/);
+  assert.match(message, /sandbox/);
+});

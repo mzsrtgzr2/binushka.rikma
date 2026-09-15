@@ -22,7 +22,7 @@ const MORNING_ERROR_HE = {
   404: 'פריט לא נמצא בחשבון Morning. ב-sandbox זה בדרך כלל מזהה תוסף סליקה או מוצר של פרודקשן.',
   1100: 'מזהה לא תקין.',
   1110: 'מחיר לא תקין.',
-  2600: 'לא נמצא מסוף סליקה פעיל בחשבון Morning.',
+  2600: 'לא נמצא מסוף סליקה פעיל בחשבון Morning. ב-sandbox צריך לחבר סליקה ב-app.sandbox.d.greeninvoice.co.il תחת תשלומים → סליקה.',
   2804: 'שגיאת תוסף סליקה.',
   2805: 'תוסף הסליקה לא פעיל.',
 };
@@ -93,37 +93,38 @@ function extractToken(json) {
 }
 
 async function getMorningToken({ id, secret, idp, rest }) {
-  const oauthRes = await fetch(`${idp}/idp/v1/oauth/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'client_credentials',
-      id,
-      secret,
-    }),
-  });
+  const attempts = [
+    {
+      url: `${idp}/idp/v1/oauth/token`,
+      body: { grant_type: 'client_credentials', client_id: id, client_secret: secret },
+    },
+    {
+      url: `${idp}/idp/v1/oauth/token`,
+      body: { grant_type: 'client_credentials', id, secret },
+    },
+    {
+      url: `${rest}/account/token`,
+      body: { grant_type: 'client_credentials', id, secret },
+    },
+  ];
 
-  if (oauthRes.ok) {
-    const json = await oauthRes.json();
+  let lastErr = '';
+  for (const attempt of attempts) {
+    const res = await fetch(attempt.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(attempt.body),
+    });
+    if (!res.ok) {
+      lastErr = `${res.status} ${await res.text()}`;
+      continue;
+    }
+    const json = await res.json();
     const token = extractToken(json);
     if (token) return token;
   }
 
-  const legacyRes = await fetch(`${rest}/account/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, secret }),
-  });
-
-  if (!legacyRes.ok) {
-    const errText = await legacyRes.text();
-    throw new Error(`Morning auth failed (${legacyRes.status}): ${errText.slice(0, 300)}`);
-  }
-
-  const legacyJson = await legacyRes.json();
-  const token = extractToken(legacyJson);
-  if (!token) throw new Error('Morning auth returned no token');
-  return token;
+  throw new Error(`Morning auth failed: ${lastErr.slice(0, 300)}`);
 }
 
 function morningErrorMessage(json) {

@@ -20,14 +20,18 @@
 }
 
 .store-cart__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 22px;
   height: 22px;
   padding: 0 6px;
   border-radius: 999px;
   background: var(--white);
-  color: var(--brand-color-strong);
+  color: var(--dark);
   font-size: 12px;
-  line-height: 22px;
+  font-weight: 800;
+  line-height: 1;
   text-align: center;
 }
 

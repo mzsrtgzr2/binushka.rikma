@@ -17,7 +17,8 @@ layout: default
     {% endif %}
 
     {% if page.price %}
-      <div class="store-item-price">{{ page.price }}</div>
+      {% assign price_slug = page.slug | default: page.basename %}
+      <div class="store-item-price" data-product-price="{{ price_slug }}">{{ page.price }}</div>
     {% endif %}
   </div>
 

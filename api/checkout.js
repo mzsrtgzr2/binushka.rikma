@@ -6,7 +6,13 @@
  * POST /api/v1/payments/form  (get payment form)
  */
 
-const { buildOrder } = require('./catalog');
+const { buildOrder, priceBookFromMorningItems } = require('./catalog');
+const {
+  resolveMorningEnv,
+  morningHosts,
+  getMorningToken,
+  searchItems,
+} = require('./morning');
 
 const VAT_RATE = 0.18;
 const GROW_PRODUCTION_PLUGIN_ID = '453df580-760d-439d-a848-4fe7dc1fb9b3';
@@ -36,30 +42,6 @@ function siteOrigin(req) {
   return process.env.SITE_URL || 'https://rikma.binushka.com';
 }
 
-function resolveMorningEnv(raw) {
-  const value = String(raw || '').trim().toLowerCase();
-  if (value === 'production' || value === 'prod' || value === 'live') return 'production';
-  return 'sandbox';
-}
-
-function morningHosts(env) {
-  if (env === 'production') {
-    return {
-      idp: 'https://api.morning.co',
-      rest: 'https://api.greeninvoice.co.il/api/v1',
-    };
-  }
-  return {
-    idp: 'https://api.sandbox.morning.dev',
-    rest: 'https://sandbox.d.greeninvoice.co.il/api/v1',
-  };
-}
-
-/**
- * Production Grow plugin IDs do not exist in sandbox and Morning returns 404.
- * Sandbox uses MORNING_SANDBOX_PLUGIN_ID / MORNING_PLUGIN_ID only when it is a
- * different UUID. Otherwise pluginId is omitted and Morning uses the default.
- */
 function resolvePluginId(env, envVars) {
   const vars = envVars || {};
   if (env === 'sandbox') {
@@ -86,45 +68,6 @@ function computeAmount(income, vatType) {
     return Math.round(sum * (1 + VAT_RATE) * 100) / 100;
   }
   return Math.round(sum * 100) / 100;
-}
-
-function extractToken(json) {
-  return json?.accessToken || json?.access_token || json?.token || json?.jwt || null;
-}
-
-async function getMorningToken({ id, secret, idp, rest }) {
-  const attempts = [
-    {
-      url: `${idp}/idp/v1/oauth/token`,
-      body: { grant_type: 'client_credentials', client_id: id, client_secret: secret },
-    },
-    {
-      url: `${idp}/idp/v1/oauth/token`,
-      body: { grant_type: 'client_credentials', id, secret },
-    },
-    {
-      url: `${rest}/account/token`,
-      body: { grant_type: 'client_credentials', id, secret },
-    },
-  ];
-
-  let lastErr = '';
-  for (const attempt of attempts) {
-    const res = await fetch(attempt.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(attempt.body),
-    });
-    if (!res.ok) {
-      lastErr = `${res.status} ${await res.text()}`;
-      continue;
-    }
-    const json = await res.json();
-    const token = extractToken(json);
-    if (token) return token;
-  }
-
-  throw new Error(`Morning auth failed: ${lastErr.slice(0, 300)}`);
 }
 
 function morningErrorMessage(json) {
@@ -296,15 +239,6 @@ async function handler(req, res) {
   const successUrl = `${origin}${successPath.startsWith('/') ? successPath : `/${successPath}`}`;
   const failureUrl = `${origin}/checkout/`;
 
-  const payload = buildPaymentFormPayload({
-    order,
-    customer: customerResult.customer,
-    env,
-    envVars: process.env,
-    successUrl,
-    failureUrl,
-  });
-
   if (!keyId || !keySecret) {
     return res.status(503).json({
       error: 'סליקה עדיין לא הוגדרה. צריך MORNING_API_KEY_ID ו-MORNING_API_KEY_SECRET ב-Vercel.',
@@ -312,7 +246,15 @@ async function handler(req, res) {
   }
 
   if (process.env.MORNING_DEV_SKIP_PAYMENT === 'true') {
-    return res.status(200).json({ url: successUrl, skipped: true, amount: payload.amount });
+    const skipPayload = buildPaymentFormPayload({
+      order,
+      customer: customerResult.customer,
+      env,
+      envVars: process.env,
+      successUrl,
+      failureUrl,
+    });
+    return res.status(200).json({ url: successUrl, skipped: true, amount: skipPayload.amount });
   }
 
   const { idp, rest } = morningHosts(env);
@@ -324,6 +266,26 @@ async function handler(req, res) {
     console.error('Morning auth failed', err);
     return res.status(502).json({ error: 'לא הצלחנו להתחבר לסליקה. נסי שוב בעוד רגע.' });
   }
+
+  let pricedOrder = order;
+  try {
+    const items = await searchItems(rest, token);
+    const live = priceBookFromMorningItems(items);
+    if (Object.keys(live).length) {
+      pricedOrder = buildOrder(body.items, body.shipping, live);
+    }
+  } catch (err) {
+    console.warn('Morning item prices unavailable, using catalog fallback', err);
+  }
+
+  const payload = buildPaymentFormPayload({
+    order: pricedOrder,
+    customer: customerResult.customer,
+    env,
+    envVars: process.env,
+    successUrl,
+    failureUrl,
+  });
 
   let result;
   try {

@@ -6,7 +6,6 @@
 enabled: true
 success_path: "/thanks/"
 free_shipping_min: 250
-free_shipping_coupon: "free"
 
 shipping:
   pickup:

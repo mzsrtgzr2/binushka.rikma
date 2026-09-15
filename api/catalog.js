@@ -23,20 +23,18 @@ const SHIPPING = {
 };
 
 const FREE_SHIPPING_MIN = 250;
-const FREE_COUPON = 'free';
 const MAX_QTY = 20;
 
-function shippingPrice(method, subtotal, coupon) {
+function shippingPrice(method, subtotal) {
   const ship = SHIPPING[method];
   if (!ship) return null;
-  const code = String(coupon || '').trim().toLowerCase();
-  if (method === 'courier' && subtotal >= FREE_SHIPPING_MIN && code === FREE_COUPON) {
+  if (method === 'courier' && subtotal >= FREE_SHIPPING_MIN) {
     return 0;
   }
   return ship.price;
 }
 
-function buildOrder(rawItems, shippingMethod, coupon) {
+function buildOrder(rawItems, shippingMethod) {
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
     return { error: 'הסל ריק' };
   }
@@ -64,7 +62,7 @@ function buildOrder(rawItems, shippingMethod, coupon) {
     });
   }
 
-  const shipCost = shippingPrice(shippingMethod, subtotal, coupon);
+  const shipCost = shippingPrice(shippingMethod, subtotal);
   if (shipCost == null) {
     return { error: 'שיטת משלוח לא תקינה' };
   }
@@ -87,7 +85,6 @@ module.exports = {
   PRODUCTS,
   SHIPPING,
   FREE_SHIPPING_MIN,
-  FREE_COUPON,
   shippingPrice,
   buildOrder,
 };

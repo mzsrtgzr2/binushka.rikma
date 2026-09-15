@@ -31,9 +31,15 @@ preview/sandbox cart, set **Preview** (and leave Production for later):
 | --- | --- |
 | `MORNING_ENV` | `sandbox` while testing. `production` only when charging real cards |
 | `MORNING_API_KEY_ID` | Morning sandbox keys while `MORNING_ENV=sandbox` |
-| `MORNING_API_KEY_SECRET` | same |
+| `MORNING_API_KEY_SECRET` | same. Paste the raw secret — no wrapping quotes in the Vercel UI |
 | `MORNING_PLUGIN_ID` | Grow production plugin. **Not sent in sandbox** — it 404s there |
 | `MORNING_SANDBOX_PLUGIN_ID` | optional sandbox plugin; if empty, Morning uses the account default |
+
+Changing env vars does not update an already-built Preview. Redeploy the
+git branch (or use Vercel → Deployments → Redeploy) after saving them.
+
+`GET /api/checkout/` returns `{ env, hasKeyId, hasSecret, keyIdPrefix }` so
+you can confirm Preview picked up the sandbox pair without printing secrets.
 
 Gift cards and scrunchies stay on their existing Grow payment links because the price is not fixed.
 

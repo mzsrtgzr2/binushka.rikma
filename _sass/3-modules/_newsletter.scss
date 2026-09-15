@@ -47,6 +47,11 @@
 .newsletter-signup__input {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/* Inside the tinted signup box the default grey field disappears, so flip it
+   to the page background. Standalone forms keep the theme's default. */
+.newsletter-signup .newsletter-signup__input {
   background-color: var(--background-color);
 }
 
@@ -60,12 +65,17 @@
   }
 }
 
+/* Leaving the list should be easy to find but should not compete with the
+   brand-coloured signup button. */
+/* An inset shadow rather than a border: the page layout resets borders on
+   .button, and this keeps the control exactly as tall as the email field. */
 .newsletter-signup__button--quiet {
   color: var(--heading-font-color);
   background-color: transparent;
-  border: 2px solid var(--border-color);
+  box-shadow: inset 0 0 0 2px var(--blue-gray);
 
   &:hover {
+    color: var(--heading-font-color);
     background-color: var(--background-alt-color);
   }
 }
@@ -112,15 +122,30 @@
   }
 }
 
-/* Home page section */
+/* Home page section. The theme's .section class zeroes out .container's
+   horizontal padding, which would push the cards against the screen edge on
+   mobile, so the vertical rhythm is matched by hand instead. */
+.newsletter-section {
+  padding-top: 90px;
+  padding-bottom: 90px;
+
+  @media only screen and (max-width: $desktop) {
+    padding-top: 75px;
+    padding-bottom: 75px;
+  }
+}
+
 .newsletter-section__inner {
   display: flex;
   gap: 32px;
-  align-items: stretch;
+  /* The signup box is much shorter than the issue card; centring it reads
+     better than stretching it into a tall empty panel. */
+  align-items: center;
   margin-top: 40px;
 
   @media only screen and (max-width: $desktop) {
     flex-direction: column;
+    align-items: stretch;
   }
 }
 
@@ -128,13 +153,6 @@
 .newsletter-teaser {
   flex: 1 1 0;
   min-width: 0;
-}
-
-.newsletter-section__signup .newsletter-signup {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
 .newsletter-section__signup .newsletter-signup__form {
@@ -243,6 +261,46 @@
   color: var(--text-alt-color);
 }
 
-.newsletter-page__section--archive .newsletter-teaser__grid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+/* The page layout caps content at a 780px reading column, too narrow for a
+   row of cards, so the archive stacks as wide rows instead. */
+.newsletter-page__section--archive {
+  .newsletter-teaser__grid {
+    gap: 16px;
+  }
+
+  .newsletter-teaser__card {
+    display: flex;
+    align-items: stretch;
+  }
+
+  /* Absolute so a portrait thumbnail cannot stretch the row: the text decides
+     how tall each card is. */
+  .newsletter-teaser__media {
+    position: relative;
+    flex: 0 0 200px;
+    aspect-ratio: auto;
+    min-height: 150px;
+
+    img {
+      position: absolute;
+      inset: 0;
+    }
+  }
+
+  .newsletter-teaser__body {
+    flex: 1 1 auto;
+    padding: 20px 24px;
+  }
+
+  @media only screen and (max-width: $tablet) {
+    .newsletter-teaser__card {
+      flex-direction: column;
+    }
+
+    .newsletter-teaser__media {
+      flex: 0 0 auto;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
+    }
+  }
 }

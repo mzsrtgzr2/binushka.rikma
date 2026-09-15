@@ -30,10 +30,18 @@ layout: default
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <div class="section__navigation">
-            <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank">
+        <div class="section__navigation store-item__cart-actions">
+          {% assign slug = page.slug | default: page.basename %}
+          {% assign cart_meta = site.data.store-cart.products[slug] %}
+          {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false %}
+          <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}">
+            הוסיפי לסל
+          </button>
+          {% elsif page.form_url %}
+          <a href="{{ page.form_url }}" class="button button--primary section-button" target="_blank" rel="noopener">
             הזמיני עכשיו
           </a>
+          {% endif %}
         </div>
       </div>
     </div>

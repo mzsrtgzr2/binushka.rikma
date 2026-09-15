@@ -20,9 +20,17 @@
 
   {% include footer.html %}
   {% include floater.html %}
+  {% include store-cart-catalog.html %}
+  {% include store-cart-widget.html %}
 
   <script src="{{ site.baseurl }}/js/scripts.js"></script>
   <script src="{{ site.baseurl }}/js/common.js"></script>
+  {% if site.data.store-cart.enabled %}
+  <script src="{{ site.baseurl }}/js/store-cart.js" defer></script>
+  {% endif %}
+  {% if page.url == '/checkout/' or page.url == '/checkout' %}
+  <script src="{{ site.baseurl }}/js/checkout.js" defer></script>
+  {% endif %}
 </body>
 
 </html>

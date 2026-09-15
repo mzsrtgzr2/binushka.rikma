@@ -1,0 +1,24 @@
+{% if site.data.store-cart.enabled %}
+<div class="store-cart" id="store-cart">
+  <button type="button" class="store-cart__toggle" id="store-cart-toggle" aria-expanded="false" aria-controls="store-cart-panel">
+    <span class="store-cart__toggle-label">סל</span>
+    <span class="store-cart__count" id="store-cart-count" hidden>0</span>
+  </button>
+
+  <div class="store-cart__panel" id="store-cart-panel" hidden>
+    <div class="store-cart__header">
+      <h2 class="store-cart__title">סל הקניות</h2>
+      <button type="button" class="store-cart__close" id="store-cart-close" aria-label="סגירת סל">&times;</button>
+    </div>
+    <ul class="store-cart__lines" id="store-cart-lines"></ul>
+    <p class="store-cart__empty" id="store-cart-empty">הסל ריק</p>
+    <div class="store-cart__footer">
+      <p class="store-cart__total"><span>סה״כ:</span> <strong id="store-cart-total">₪0</strong></p>
+      <a class="button button--primary store-cart__checkout" id="store-cart-checkout" href="{{ '/checkout/' | relative_url }}">
+        לתשלום
+      </a>
+    </div>
+  </div>
+  <div class="store-cart__backdrop" id="store-cart-backdrop" hidden></div>
+</div>
+{% endif %}

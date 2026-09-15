@@ -7,3 +7,6 @@ Gemfile.lock
 .bundle/
 vendor/
 .vercel
+.env
+.env.*
+!.env.example

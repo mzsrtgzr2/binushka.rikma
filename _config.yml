@@ -86,3 +86,5 @@ exclude:
   - EMAIL_SIGNUP_SETUP.md
   - GROW_PAYMENTS_SETUP.md
   - INSTAGRAM_SETUP.md
+  - api/
+  - .env.example

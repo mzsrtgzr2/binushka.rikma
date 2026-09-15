@@ -139,7 +139,7 @@ module.exports = async (req, res) => {
   const env = process.env.MORNING_ENV === 'production' ? 'production' : 'sandbox';
 
   const body = req.body || {};
-  const order = buildOrder(body.items, body.shipping, body.coupon);
+  const order = buildOrder(body.items, body.shipping);
   if (order.error) {
     return res.status(400).json({ error: order.error });
   }

@@ -14,9 +14,8 @@
   var subtotalEl = document.getElementById('checkout-subtotal');
   var grandEl = document.getElementById('checkout-grand-total');
   var formSection = document.getElementById('checkout-form-section');
-  var couponEl = document.getElementById('checkout-coupon');
 
-  var shippingConfig = { freeShippingMin: 250, freeShippingCoupon: 'free', methods: {} };
+  var shippingConfig = { freeShippingMin: 250, methods: {} };
   var shippingEl = document.getElementById('store-cart-shipping');
   if (shippingEl) {
     try {
@@ -34,7 +33,7 @@
     if (text) messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  function shippingCost(method, subtotal, coupon) {
+  function shippingCost(method, subtotal) {
     var methods = shippingConfig.methods || {};
     var row = methods[method];
     if (!row) {
@@ -43,12 +42,7 @@
       if (method === 'courier') return 40;
       return 0;
     }
-    var code = String(coupon || '').trim().toLowerCase();
-    if (
-      method === 'courier' &&
-      subtotal >= (shippingConfig.freeShippingMin || 250) &&
-      code === String(shippingConfig.freeShippingCoupon || 'free').toLowerCase()
-    ) {
+    if (method === 'courier' && subtotal >= (shippingConfig.freeShippingMin || 250)) {
       return 0;
     }
     return Number(row.price) || 0;
@@ -93,13 +87,12 @@
         .join('');
     }
 
-    var ship = shippingCost(selectedShipping(), subtotal, couponEl && couponEl.value);
+    var ship = shippingCost(selectedShipping(), subtotal);
     if (grandEl) grandEl.textContent = '₪' + (subtotal + ship);
     return items;
   }
 
   form.addEventListener('change', renderSummary);
-  if (couponEl) couponEl.addEventListener('input', renderSummary);
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -119,7 +112,6 @@
         return { id: item.id, quantity: item.quantity };
       }),
       shipping: data.shipping,
-      coupon: data.coupon || '',
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,

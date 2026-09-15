@@ -1,0 +1,40 @@
+{% if site.data.store-cart.enabled %}
+<script type="application/json" id="store-cart-catalog">
+[
+{%- assign first = true -%}
+{%- assign gc = site.data.store-cart -%}
+{%- for item in site.store -%}
+  {%- unless item.hide -%}
+    {%- assign slug = item.slug | default: item.basename -%}
+    {%- assign meta = gc.products[slug] -%}
+    {%- if meta and meta.enabled != false -%}
+      {%- unless first -%},{%- endunless -%}
+      {
+        "id": {{ slug | jsonify }},
+        "name": {{ item.title | jsonify }},
+        "price": {{ meta.price }},
+        "image": {{ item.image | relative_url | jsonify }},
+        "url": {{ item.url | relative_url | jsonify }},
+        "outOfStock": {% if item.out_of_stock %}true{% else %}false{% endif %}
+      }
+      {%- assign first = false -%}
+    {%- endif -%}
+  {%- endunless -%}
+{%- endfor -%}
+]
+</script>
+<script type="application/json" id="store-cart-shipping">
+{
+  "freeShippingMin": {{ site.data.store-cart.free_shipping_min | default: 250 }},
+  "freeShippingCoupon": {{ site.data.store-cart.free_shipping_coupon | default: "free" | jsonify }},
+  "methods": {
+    {%- assign sfirst = true -%}
+    {%- for method in site.data.store-cart.shipping -%}
+      {%- unless sfirst -%},{%- endunless -%}
+      {{ method[0] | jsonify }}: { "label": {{ method[1].label | jsonify }}, "price": {{ method[1].price }} }
+      {%- assign sfirst = false -%}
+    {%- endfor -%}
+  }
+}
+</script>
+{% endif %}

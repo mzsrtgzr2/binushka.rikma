@@ -1,63 +1,168 @@
 /**
- * Checkout page ("/checkout/") form handling.
- *
- * This currently validates and collects the customer's personal details
- * required by our payment processor (Grow) before purchase, as required by
- * their site-approval checklist: first name, last name, phone (no country
- * prefix), address, and email.
- *
- * TODO (future work, once the shopping cart is built):
- * 1. Replace the placeholder `handleCheckoutSubmit` behavior below with a
- *    call to our own serverless endpoint, e.g. a Vercel function such as
- *    `/api/create-payment-link`.
- * 2. That serverless function (NOT this client-side code) should hold the
- *    Grow `x-api-key` / `userId` / `pageCode` credentials and call Grow's
- *    `createPaymentLink` API server-to-server, sending it the cart total,
- *    products, and this customer's details.
- * 3. Grow requests must never be sent directly from the browser - they are
- *    blocked server-side by Grow and would also leak API credentials.
- * 4. On success, redirect the browser to the `paymentLinkUrl` returned by
- *    Grow (their hosted, PCI-compliant payment page).
- * 5. After the customer pays, Grow calls our webhook/server-update URL;
- *    our server must respond 200 and then call Grow's `approveTransaction`
- *    endpoint to finalize the charge before showing a "thank you" page.
- *
- * See GROW_PAYMENTS_SETUP.md at the repo root for the full integration plan.
+ * Checkout page: render the cart, collect Grow-required customer fields,
+ * then POST to /api/checkout/ which creates a Green Invoice payment form.
  */
 document.addEventListener('DOMContentLoaded', function () {
   var form = document.getElementById('checkout-form');
-  if (!form) {
-    return;
-  }
+  if (!form) return;
 
   var messageEl = document.getElementById('checkout-form-message');
+  var linesEl = document.getElementById('checkout-lines');
+  var emptyEl = document.getElementById('checkout-empty');
+  var subtotalRow = document.getElementById('checkout-subtotal-row');
+  var subtotalEl = document.getElementById('checkout-subtotal');
+  var grandEl = document.getElementById('checkout-grand-total');
+  var formSection = document.getElementById('checkout-form-section');
+  var couponEl = document.getElementById('checkout-coupon');
+
+  var shippingConfig = { freeShippingMin: 250, freeShippingCoupon: 'free', methods: {} };
+  var shippingEl = document.getElementById('store-cart-shipping');
+  if (shippingEl) {
+    try {
+      shippingConfig = JSON.parse(shippingEl.textContent);
+    } catch (e) {
+      /* keep defaults */
+    }
+  }
 
   function showMessage(text, type) {
-    if (!messageEl) {
-      return;
-    }
+    if (!messageEl) return;
     messageEl.textContent = text;
     messageEl.className = 'checkout-form__message checkout-form__message--' + type;
     messageEl.style.display = 'block';
   }
 
+  function shippingCost(method, subtotal, coupon) {
+    var methods = shippingConfig.methods || {};
+    var row = methods[method];
+    if (!row) {
+      if (method === 'pickup') return 0;
+      if (method === 'registered') return 25;
+      if (method === 'courier') return 40;
+      return 0;
+    }
+    var code = String(coupon || '').trim().toLowerCase();
+    if (
+      method === 'courier' &&
+      subtotal >= (shippingConfig.freeShippingMin || 250) &&
+      code === String(shippingConfig.freeShippingCoupon || 'free').toLowerCase()
+    ) {
+      return 0;
+    }
+    return Number(row.price) || 0;
+  }
+
+  function selectedShipping() {
+    var checked = form.querySelector('input[name="shipping"]:checked');
+    return checked ? checked.value : 'courier';
+  }
+
+  function renderSummary() {
+    if (!window.StoreCart) return [];
+    var items = StoreCart.items();
+    var subtotal = StoreCart.subtotal();
+
+    if (!items.length) {
+      if (emptyEl) emptyEl.hidden = false;
+      if (subtotalRow) subtotalRow.hidden = true;
+      if (formSection) formSection.hidden = true;
+      if (linesEl) linesEl.innerHTML = '';
+      return [];
+    }
+
+    if (emptyEl) emptyEl.hidden = true;
+    if (subtotalRow) subtotalRow.hidden = false;
+    if (formSection) formSection.hidden = false;
+    if (subtotalEl) subtotalEl.textContent = '₪' + subtotal;
+
+    if (linesEl) {
+      linesEl.innerHTML = items
+        .map(function (item) {
+          return (
+            '<li class="checkout-lines__item"><span>' +
+            item.name +
+            ' × ' +
+            item.quantity +
+            '</span><span>₪' +
+            item.price * item.quantity +
+            '</span></li>'
+          );
+        })
+        .join('');
+    }
+
+    var ship = shippingCost(selectedShipping(), subtotal, couponEl && couponEl.value);
+    if (grandEl) grandEl.textContent = '₪' + (subtotal + ship);
+    return items;
+  }
+
+  form.addEventListener('change', renderSummary);
+  if (couponEl) couponEl.addEventListener('input', renderSummary);
+
   form.addEventListener('submit', function (event) {
     event.preventDefault();
-
+    var items = renderSummary();
+    if (!items.length) {
+      showMessage('הסל ריק', 'error');
+      return;
+    }
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
     var data = Object.fromEntries(new FormData(form).entries());
+    var payload = {
+      items: items.map(function (item) {
+        return { id: item.id, quantity: item.quantity };
+      }),
+      shipping: data.shipping,
+      coupon: data.coupon || '',
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      email: data.email,
+      address: data.address,
+      city: data.city,
+      zip: data.zip || '',
+      country: data.country,
+      successPath: '/thanks/',
+    };
 
-    // Placeholder until the shopping cart + Vercel/Grow integration exists.
-    // See TODO block above for the intended production flow.
-    console.log('Checkout details captured (payment integration pending):', data);
-    showMessage(
-      'תודה! עגלת הקניות והתשלום המקוון נמצאים בהשלמה, ניצור איתך קשר להשלמת ההזמנה בהקדם.',
-      'info'
-    );
-    form.reset();
+    var submitBtn = form.querySelector('[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'מעבירה לתשלום…';
+    }
+    showMessage('', 'info');
+    if (messageEl) messageEl.style.display = 'none';
+
+    fetch('/api/checkout/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          return { ok: res.ok, body: body };
+        });
+      })
+      .then(function (result) {
+        if (result.ok && result.body.url) {
+          if (window.StoreCart) StoreCart.clear();
+          window.location.href = result.body.url;
+          return;
+        }
+        throw new Error(result.body.error || 'שגיאה בתשלום');
+      })
+      .catch(function (err) {
+        showMessage(err.message || 'לא הצלחנו לפתוח תשלום. נסי שוב.', 'error');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'המשך לתשלום מאובטח';
+        }
+      });
   });
+
+  renderSummary();
 });

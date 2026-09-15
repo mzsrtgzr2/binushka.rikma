@@ -135,7 +135,7 @@ module.exports = async (req, res) => {
 
   const keyId = process.env.MORNING_API_KEY_ID;
   const keySecret = process.env.MORNING_API_KEY_SECRET;
-  const pluginId = process.env.MORNING_PLUGIN_ID;
+  const pluginId = process.env.MORNING_PLUGIN_ID || '453df580-760d-439d-a848-4fe7dc1fb9b3';
   const env = process.env.MORNING_ENV === 'production' ? 'production' : 'sandbox';
 
   const body = req.body || {};

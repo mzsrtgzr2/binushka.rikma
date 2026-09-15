@@ -31,7 +31,7 @@ Set these in Vercel → Project → Settings → Environment Variables (Producti
 | `MORNING_ENV` | `production` once live, `sandbox` while testing |
 | `MORNING_API_KEY_ID` | Morning → developer tools → API keys |
 | `MORNING_API_KEY_SECRET` | same |
-| `MORNING_PLUGIN_ID` | payment plugin UUID. Grow offered to send this by email |
+| `MORNING_PLUGIN_ID` | already in the checkout function; override in Vercel only if Grow issues a new one |
 
 Gift cards and scrunchies stay on their existing Grow payment links because the price is not fixed.
 

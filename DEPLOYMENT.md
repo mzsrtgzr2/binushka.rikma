@@ -14,10 +14,26 @@ settings; there is nothing to type in the Vercel dashboard.
 `cleanUrls` and `trailingSlash` keep URL shapes matching what GitHub Pages used (`/terms/`,
 `/store/`, `/thanks/`).
 
-A serverless function in `/api` (see `GROW_PAYMENTS_SETUP.md`) is served alongside the Jekyll
-output, but `trailingSlash: true` applies to it too, so `/api/create-payment-link` answers with
-a 308 to `/api/create-payment-link/`. Call it with the trailing slash, or add a rewrite in
-`vercel.json` to exempt `/api`.
+A serverless function at `/api/checkout` creates the Green Invoice / Morning payment form.
+`vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308 the
+function. The browser posts to `/api/checkout/`.
+
+## Store cart
+
+Grow approved the site for clearing and pointed us at the Green Invoice payment-form API
+(not WooCommerce / Wix / Shopify). The cart collects Grow-required customer details on
+`/checkout/`, then the server builds the payment form.
+
+Set these in Vercel → Project → Settings → Environment Variables (Production):
+
+| Variable | What it is |
+| --- | --- |
+| `MORNING_ENV` | `production` once live, `sandbox` while testing |
+| `MORNING_API_KEY_ID` | Morning → developer tools → API keys |
+| `MORNING_API_KEY_SECRET` | same |
+| `MORNING_PLUGIN_ID` | payment plugin UUID. Grow offered to send this by email |
+
+Gift cards and scrunchies stay on their existing Grow payment links because the price is not fixed.
 
 ## Local development
 

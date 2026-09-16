@@ -30,6 +30,7 @@ layout: default
               <div class="store-item__subtitle">{{ item.subtitle }}</div>
               {% endif %}
               {% assign slug = item.slug | default: item.basename %}
+              <div class="store-item__footer">
               {% if item.price %}
               <div class="store-item__price" data-product-price="{{ slug }}">{{ item.price }}</div>
               {% endif %}
@@ -38,7 +39,12 @@ layout: default
               <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}">
                 הוסיפי לסל
               </button>
+              {% elsif item.form_url and item.out_of_stock != true %}
+              <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener">
+                הזמיני עכשיו
+              </a>
               {% endif %}
+              </div>
             </div>
           </div>
         </article>

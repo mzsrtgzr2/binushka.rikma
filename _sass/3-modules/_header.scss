@@ -1,5 +1,8 @@
 /* Header */
 .header {
+  position: relative;
+  z-index: 1202;
+
   .header__inner {
     position: relative;
     display: flex;
@@ -366,6 +369,7 @@
 .nav-button {
   display: flex;
   align-items: center;
+  gap: 12px;
   font-size: 21px;
   color: var(--link-color);
   border-radius: 50%;

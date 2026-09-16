@@ -33,7 +33,7 @@ preview/sandbox cart, set **Preview** (and leave Production for later):
 | `MORNING_API_KEY_ID` | Morning sandbox keys while `MORNING_ENV=sandbox` |
 | `MORNING_API_KEY_SECRET` | same. Paste the raw secret — no wrapping quotes in the Vercel UI |
 | `MORNING_PLUGIN_ID` | Grow production plugin. **Not sent in sandbox** — it 404s there |
-| `MORNING_SANDBOX_PLUGIN_ID` | optional sandbox plugin; if empty, Morning uses the account default |
+| `MORNING_SANDBOX_PLUGIN_ID` | sandbox Grow plugin `facd67fd-5082-496c-917f-830f0d7449e3` (already the checkout default) |
 
 Changing env vars does not update an already-built Preview. Redeploy the
 git branch (or use Vercel → Deployments → Redeploy) after saving them.

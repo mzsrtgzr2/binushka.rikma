@@ -93,6 +93,9 @@
     els.backdrop.hidden = false;
     els.toggle.setAttribute('aria-expanded', 'true');
     document.body.classList.add('store-cart-open');
+    if (els.toggle && els.toggle.scrollIntoView) {
+      els.toggle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
   function closePanel() {

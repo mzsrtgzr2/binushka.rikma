@@ -1,42 +1,51 @@
 .store-cart {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 1200;
+  position: relative;
 }
 
 .store-cart__toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--brand-color);
-  color: var(--button-color);
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
-}
-
-.store-cart__count {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--link-color);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--brand-color);
+  }
+}
+
+.store-cart__count {
+  position: absolute;
+  top: 2px;
+  inset-inline-start: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
   border-radius: 999px;
-  background: var(--white);
-  color: var(--dark);
-  font-size: 12px;
+  background: var(--brand-color);
+  color: var(--white);
+  font-size: 11px;
   font-weight: 800;
   line-height: 1;
   text-align: center;
 }
 
-.store-cart__count[hidden] {
-  display: none;
+.store-cart__count[hidden],
+.store-cart__panel[hidden],
+.store-cart__backdrop[hidden] {
+  display: none !important;
 }
 
 .store-cart__backdrop {
@@ -47,10 +56,11 @@
 }
 
 .store-cart__panel {
-  position: fixed;
-  right: 20px;
-  bottom: 76px;
-  width: min(380px, calc(100vw - 40px));
+  position: absolute;
+  top: calc(100% + 12px);
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  width: min(380px, calc(100vw - 32px));
   max-height: min(70vh, 520px);
   display: flex;
   flex-direction: column;
@@ -58,7 +68,7 @@
   background: var(--surface-color, var(--white));
   border: 1px solid var(--border-color);
   box-shadow: 0 16px 40px rgba(0, 0, 0, .18);
-  z-index: 1199;
+  z-index: 1203;
   overflow: hidden;
 }
 
@@ -178,15 +188,11 @@ body.store-cart-open {
 }
 
 @media only screen and (max-width: $mobile) {
-  .store-cart {
-    right: 12px;
-    bottom: 12px;
-  }
-
   .store-cart__panel {
-    right: 12px;
-    left: 12px;
+    position: fixed;
+    top: 88px;
+    inset-inline-start: 12px;
+    inset-inline-end: 12px;
     width: auto;
-    bottom: 68px;
   }
 }

@@ -1,7 +1,14 @@
 {% if site.data.store-cart.enabled %}
 <div class="store-cart" id="store-cart">
-  <button type="button" class="store-cart__toggle" id="store-cart-toggle" aria-expanded="false" aria-controls="store-cart-panel">
-    <span class="store-cart__toggle-label">סל</span>
+  <button
+    type="button"
+    class="store-cart__toggle"
+    id="store-cart-toggle"
+    aria-expanded="false"
+    aria-controls="store-cart-panel"
+    aria-label="סל הקניות"
+  >
+    <i class="ion ion-md-cart" aria-hidden="true"></i>
     <span class="store-cart__count" id="store-cart-count" hidden aria-live="polite">0</span>
   </button>
 

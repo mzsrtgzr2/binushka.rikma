@@ -108,6 +108,8 @@
     }
 
     var data = Object.fromEntries(new FormData(form).entries());
+    var subtotal = window.StoreCart ? StoreCart.subtotal() : 0;
+    var ship = shippingCost(data.shipping, subtotal);
     var payload = {
       items: items.map(function (item) {
         return { id: item.id, quantity: item.quantity };
@@ -154,7 +156,21 @@
         });
       })
       .then(function (body) {
-        if (window.StoreCart) StoreCart.clear();
+        try {
+          sessionStorage.setItem(
+            'binushka-last-order-v1',
+            JSON.stringify({
+              items: items,
+              shipping: data.shipping,
+              shippingCost: ship,
+              subtotal: subtotal,
+              total: subtotal + ship,
+              email: data.email,
+            })
+          );
+        } catch (e) {
+          /* private mode / quota */
+        }
         window.location.href = body.url;
       })
       .catch(function (err) {

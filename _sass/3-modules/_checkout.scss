@@ -118,6 +118,17 @@
   cursor: pointer;
 }
 
+.thanks-page {
+  .status-list {
+    margin: 0;
+    padding-inline-start: 1.2em;
+  }
+
+  .thanks-section + .thanks-section {
+    margin-top: 24px;
+  }
+}
+
 .checkout-form__message {
   margin-top: 16px;
   padding: 12px 16px;

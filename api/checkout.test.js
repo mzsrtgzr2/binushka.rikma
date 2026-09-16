@@ -68,6 +68,21 @@ test('payment form payload for sandbox uses the sandbox plugin and no catalog it
   assert.ok(payload.income.every((row) => row.price > 0));
   assert.equal(payload.income.length, 1);
   assert.equal(payload.amount, 220);
+  assert.equal(payload.maxPayments, 1);
+});
+
+test('payment form uses 12 installments only when MORNING_MAX_PAYMENTS is set', () => {
+  const order = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: { MORNING_MAX_PAYMENTS: '12' },
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(payload.maxPayments, 12);
 });
 
 test('zero-price shipping is omitted from income rows', () => {

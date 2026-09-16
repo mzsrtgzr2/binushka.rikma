@@ -120,6 +120,7 @@
     'zip',
     'country',
     'shipping',
+    'variantNote',
   ];
 
   function loadCustomer() {
@@ -143,6 +144,7 @@
   function setFieldValue(name, value) {
     if (value == null || value === '') return;
     if (name === 'shipping' && ['pickup', 'registered', 'courier'].indexOf(String(value)) === -1) return;
+    if (name === 'variantNote') value = String(value).slice(0, 200);
     var el = form.elements[name];
     if (!el) return;
     if (el.length && el[0] && el[0].type === 'radio') {

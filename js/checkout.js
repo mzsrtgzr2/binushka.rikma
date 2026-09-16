@@ -109,7 +109,78 @@
     return items;
   }
 
-  form.addEventListener('change', renderSummary);
+  var CUSTOMER_KEY = 'binushka-checkout-customer-v1';
+  var CUSTOMER_FIELDS = [
+    'firstName',
+    'lastName',
+    'phone',
+    'email',
+    'address',
+    'city',
+    'zip',
+    'country',
+    'shipping',
+  ];
+
+  function loadCustomer() {
+    try {
+      var raw = localStorage.getItem(CUSTOMER_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      return data && typeof data === 'object' ? data : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function fieldValue(name) {
+    var el = form.elements[name];
+    if (!el) return '';
+    if (el.length && el[0] && el[0].type === 'radio') return el.value || '';
+    return el.value || '';
+  }
+
+  function setFieldValue(name, value) {
+    if (value == null || value === '') return;
+    if (name === 'shipping' && ['pickup', 'registered', 'courier'].indexOf(String(value)) === -1) return;
+    var el = form.elements[name];
+    if (!el) return;
+    if (el.length && el[0] && el[0].type === 'radio') {
+      var radios = form.querySelectorAll('input[name="' + name + '"]');
+      for (var i = 0; i < radios.length; i++) {
+        if (radios[i].value === value) radios[i].checked = true;
+      }
+      return;
+    }
+    el.value = String(value);
+  }
+
+  function saveCustomer() {
+    var data = {};
+    CUSTOMER_FIELDS.forEach(function (name) {
+      data[name] = fieldValue(name);
+    });
+    try {
+      localStorage.setItem(CUSTOMER_KEY, JSON.stringify(data));
+    } catch (e) {
+      /* private mode / quota */
+    }
+  }
+
+  function restoreCustomer() {
+    var data = loadCustomer();
+    if (!data) return;
+    CUSTOMER_FIELDS.forEach(function (name) {
+      setFieldValue(name, data[name]);
+    });
+  }
+
+  restoreCustomer();
+  form.addEventListener('input', saveCustomer);
+  form.addEventListener('change', function () {
+    saveCustomer();
+    renderSummary();
+  });
   window.addEventListener('binushka:prices', renderSummary);
 
   form.addEventListener('submit', function (event) {
@@ -146,6 +217,7 @@
       successPath: '/thanks/',
     };
     if (data.variantNote) payload.variantNote = String(data.variantNote).trim();
+    saveCustomer();
 
     var submitBtn = form.querySelector('[type="submit"]');
     if (submitBtn) {

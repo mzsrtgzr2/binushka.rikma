@@ -18,7 +18,8 @@ layout: default
 
     {% if page.price %}
       {% assign price_slug = page.slug | default: page.basename %}
-      <div class="store-item-price" data-product-price="{{ price_slug }}">{{ page.price }}</div>
+      {% assign price_meta = site.data.store-cart.products[price_slug] %}
+      <div class="store-item-price"{% unless price_meta.variable %} data-product-price="{{ price_slug }}"{% endunless %}>{{ page.price }}</div>
     {% endif %}
   </div>
 
@@ -35,9 +36,39 @@ layout: default
           {% assign slug = page.slug | default: page.basename %}
           {% assign cart_meta = site.data.store-cart.products[slug] %}
           {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false %}
+            {% if cart_meta.variable %}
+            <div class="gift-amount">
+              <p class="gift-amount__label">בחרי סכום לגיפט קארד</p>
+              {% if cart_meta.presets %}
+              <div class="gift-amount__chips" role="group" aria-label="סכומים מומלצים">
+                {% for n in cart_meta.presets %}
+                <button type="button" class="gift-amount__chip" data-gift-amount="{{ n }}">₪{{ n }}</button>
+                {% endfor %}
+              </div>
+              {% endif %}
+              <label class="gift-amount__custom" for="gift-card-amount">
+                <span>או סכום אחר (₪{{ cart_meta.min_price }}–₪{{ cart_meta.max_price }})</span>
+                <input
+                  type="number"
+                  class="form__input gift-amount__input"
+                  id="gift-card-amount"
+                  name="giftAmount"
+                  min="{{ cart_meta.min_price }}"
+                  max="{{ cart_meta.max_price }}"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder="₪"
+                >
+              </label>
+              <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}" disabled>
+                הוסיפי לסל
+              </button>
+            </div>
+            {% else %}
           <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}">
             הוסיפי לסל
           </button>
+            {% endif %}
           {% elsif page.form_url %}
           <a href="{{ page.form_url }}" class="button button--primary section-button" target="_blank" rel="noopener">
             הזמיני עכשיו

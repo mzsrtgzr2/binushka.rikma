@@ -187,4 +187,61 @@
 
 .store-item-image-container {
   display: inline-block;
+}
+
+.gift-amount {
+  width: min(480px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.gift-amount__label {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.gift-amount__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 0 16px;
+}
+
+.gift-amount__chip {
+  border: 1px solid var(--border-color);
+  background: var(--background-alt-color);
+  color: var(--heading-font-color);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover,
+  &.is-selected {
+    background: var(--brand-color);
+    border-color: var(--brand-color);
+    color: var(--dark);
+  }
+}
+
+.gift-amount__custom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.gift-amount__input {
+  width: 160px;
+  text-align: center;
+}
+
+.gift-amount .section-button[disabled] {
+  opacity: .45;
+  cursor: not-allowed;
 } 

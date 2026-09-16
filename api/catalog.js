@@ -20,6 +20,13 @@ const PRODUCTS = {
   'flowers-yumiko-1': { name: 'פרחים בהשראת הטבע ויומיקו', price: 300, itemId: 'cfd588dc-506a-4f75-a024-aba5f893c9fc' },
   yam: { name: 'רקמת בטטה מושרשת', price: 300, itemId: 'b1f904cb-c304-487b-b323-4ea4e3510e29' },
   'voucher-gift': { name: 'שובר מתנה - בוקר פינוק לאמהות', price: 330, itemId: 'bf19a018-ef43-42bf-8182-9ca96d43aee1' },
+  'gift-card': {
+    name: 'גיפט קארד',
+    price: 0,
+    variable: true,
+    minPrice: 50,
+    maxPrice: 2000,
+  },
 };
 
 const SHIPPING = {
@@ -32,6 +39,7 @@ const FREE_SHIPPING_MIN = 250;
 const MAX_QTY = 20;
 
 function applyLiveProduct(product, liveBySlug, slug) {
+  if (!product || product.variable) return product;
   const live = liveBySlug && liveBySlug[slug];
   if (!live) return product;
   const price = Number(live.price);
@@ -58,7 +66,8 @@ function priceBookFromMorningItems(items) {
   }
   const out = {};
   for (const [slug, product] of Object.entries(PRODUCTS)) {
-    const live = product.itemId && byMorningId[product.itemId];
+    if (product.variable || !product.itemId) continue;
+    const live = byMorningId[product.itemId];
     if (!live) continue;
     const price = Number(live.price);
     if (!Number.isFinite(price) || price <= 0) continue;
@@ -97,11 +106,23 @@ function buildOrder(rawItems, shippingMethod, liveBySlug) {
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY) {
       return { error: 'כמות לא תקינה' };
     }
-    subtotal += product.price * quantity;
+
+    let price = product.price;
+    let description = product.name;
+    if (product.variable) {
+      const amount = Number(raw.amount);
+      if (!Number.isInteger(amount) || amount < product.minPrice || amount > product.maxPrice) {
+        return { error: 'סכום הגיפט קארד לא תקין' };
+      }
+      price = amount;
+      description = `${product.name} — ₪${amount}`;
+    }
+
+    subtotal += price * quantity;
     lines.push({
-      description: product.name,
+      description,
       quantity,
-      price: product.price,
+      price,
       currency: 'ILS',
       itemId: product.itemId,
     });

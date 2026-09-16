@@ -173,12 +173,14 @@ function buildPaymentFormPayload({ order, customer, env, envVars, successUrl, fa
     lang: 'he',
     vatType: documentVatType,
     group: Number(vars.MORNING_PAYMENT_GROUP || 100),
-    maxPayments: Number(vars.MORNING_MAX_PAYMENTS || 12),
     client: customer,
     income,
     successUrl,
     failureUrl,
   };
+
+  const maxPayments = Number(vars.MORNING_MAX_PAYMENTS);
+  payload.maxPayments = Number.isInteger(maxPayments) && maxPayments >= 1 ? maxPayments : 1;
 
   if (pluginId) payload.pluginId = pluginId;
   if (vars.MORNING_NOTIFY_URL) payload.notifyUrl = vars.MORNING_NOTIFY_URL;

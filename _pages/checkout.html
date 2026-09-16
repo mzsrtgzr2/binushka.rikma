@@ -149,6 +149,19 @@ permalink: /checkout/
           </select>
         </div>
 
+        <div class="form__group" id="checkout-variant-note-group" hidden>
+          <label class="form__label" for="checkout-variant-note">איזו דוגמא אהבת לסקראנצ'י?</label>
+          <textarea
+            id="checkout-variant-note"
+            name="variantNote"
+            class="form__input checkout-variant-note"
+            maxlength="200"
+            rows="2"
+            placeholder="למשל: פרחים ורודים, או תחרה זהובה (אופציונלי)"
+          ></textarea>
+          <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם הזמנת כמה, אפשר לרשום כאן איזו דוגמא לכל אחת.</p>
+        </div>
+
         <fieldset class="checkout-shipping">
           <legend>משלוח *</legend>
           <label class="checkout-shipping__option">

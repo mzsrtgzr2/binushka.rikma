@@ -27,6 +27,15 @@ const PRODUCTS = {
     minPrice: 50,
     maxPrice: 2000,
   },
+  scrunchies: {
+    name: "סקראנצ'יז בעבודת יד",
+    price: 0,
+    variants: {
+      regular: { name: "סקראנצ'י גודל רגיל", price: 30 },
+      large: { name: "סקראנצ'י לארג'", price: 45 },
+      fancy: { name: "Fancy סקראנצ'י", price: 85 },
+    },
+  },
 };
 
 const SHIPPING = {
@@ -39,7 +48,7 @@ const FREE_SHIPPING_MIN = 250;
 const MAX_QTY = 20;
 
 function applyLiveProduct(product, liveBySlug, slug) {
-  if (!product || product.variable) return product;
+  if (!product || product.variable || product.variants) return product;
   const live = liveBySlug && liveBySlug[slug];
   if (!live) return product;
   const price = Number(live.price);
@@ -66,7 +75,7 @@ function priceBookFromMorningItems(items) {
   }
   const out = {};
   for (const [slug, product] of Object.entries(PRODUCTS)) {
-    if (product.variable || !product.itemId) continue;
+    if (product.variable || product.variants || !product.itemId) continue;
     const live = byMorningId[product.itemId];
     if (!live) continue;
     const price = Number(live.price);
@@ -109,6 +118,7 @@ function buildOrder(rawItems, shippingMethod, liveBySlug) {
 
     let price = product.price;
     let description = product.name;
+    let kind;
     if (product.variable) {
       const amount = Number(raw.amount);
       if (!Number.isInteger(amount) || amount < product.minPrice || amount > product.maxPrice) {
@@ -116,16 +126,26 @@ function buildOrder(rawItems, shippingMethod, liveBySlug) {
       }
       price = amount;
       description = `${product.name} — ₪${amount}`;
+    } else if (product.variants) {
+      const variant = product.variants[raw.variant];
+      if (!variant || !(Number(variant.price) > 0)) {
+        return { error: 'סוג סקראנצ\'י לא תקין' };
+      }
+      price = Number(variant.price);
+      description = variant.name;
+      kind = 'variant';
     }
 
     subtotal += price * quantity;
-    lines.push({
+    const line = {
       description,
       quantity,
       price,
       currency: 'ILS',
       itemId: product.itemId,
-    });
+    };
+    if (kind) line.kind = kind;
+    lines.push(line);
   }
 
   const shipCost = shippingPrice(shippingMethod, subtotal);
@@ -147,6 +167,22 @@ function buildOrder(rawItems, shippingMethod, liveBySlug) {
   return { lines, subtotal, shipping: shipCost, total };
 }
 
+function applyVariantNote(order, note) {
+  const clean = String(note || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 200);
+  if (!order || order.error || !clean) return order;
+  return {
+    ...order,
+    lines: (order.lines || []).map((line) =>
+      line.kind === 'variant'
+        ? { ...line, description: `${line.description} — דוגמא: ${clean}` }
+        : line
+    ),
+  };
+}
+
 module.exports = {
   PRODUCTS,
   SHIPPING,
@@ -155,4 +191,5 @@ module.exports = {
   buildOrder,
   fallbackPriceBook,
   priceBookFromMorningItems,
+  applyVariantNote,
 };

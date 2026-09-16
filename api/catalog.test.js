@@ -4,6 +4,7 @@ const {
   buildOrder,
   fallbackPriceBook,
   priceBookFromMorningItems,
+  applyVariantNote,
   PRODUCTS,
 } = require('./catalog');
 
@@ -66,4 +67,68 @@ test('Morning overlay never replaces a variable gift-card amount', () => {
   const order = buildOrder([{ id: 'gift-card', quantity: 1, amount: 200 }], 'pickup', live);
   assert.equal(order.lines[0].price, 200);
   assert.equal(order.lines[0].description, 'גיפט קארד — ₪200');
+});
+
+test('scrunchie variant charges the catalog price, not a client price', () => {
+  const order = buildOrder([{ id: 'scrunchies', quantity: 2, variant: 'large', price: 1 }], 'pickup');
+  assert.equal(order.lines[0].price, 45);
+  assert.equal(order.lines[0].description, "סקראנצ'י לארג'");
+  assert.equal(order.lines[0].kind, 'variant');
+  assert.equal(order.subtotal, 90);
+});
+
+test('regular, large and fancy scrunchies are separate lines', () => {
+  const order = buildOrder(
+    [
+      { id: 'scrunchies', quantity: 1, variant: 'regular' },
+      { id: 'scrunchies', quantity: 1, variant: 'large' },
+      { id: 'scrunchies', quantity: 1, variant: 'fancy' },
+    ],
+    'pickup'
+  );
+  assert.equal(order.subtotal, 30 + 45 + 85);
+  assert.deepEqual(
+    order.lines.filter((line) => line.kind === 'variant').map((line) => line.price),
+    [30, 45, 85]
+  );
+});
+
+test('unknown or missing scrunchie variant is rejected', () => {
+  assert.equal(
+    buildOrder([{ id: 'scrunchies', quantity: 1, variant: 'tiny' }], 'pickup').error,
+    "סוג סקראנצ'י לא תקין"
+  );
+  assert.equal(
+    buildOrder([{ id: 'scrunchies', quantity: 1 }], 'pickup').error,
+    "סוג סקראנצ'י לא תקין"
+  );
+});
+
+test('Morning overlay never replaces a scrunchie variant price', () => {
+  const live = { scrunchies: { price: 1, name: 'hack' } };
+  const order = buildOrder([{ id: 'scrunchies', quantity: 1, variant: 'fancy' }], 'pickup', live);
+  assert.equal(order.lines[0].price, 85);
+  assert.equal(order.lines[0].description, 'Fancy סקראנצ\'י');
+});
+
+test('variant fabric note is appended only to scrunchie lines', () => {
+  const order = applyVariantNote(
+    buildOrder(
+      [
+        { id: 'fox', quantity: 1 },
+        { id: 'scrunchies', quantity: 1, variant: 'regular' },
+      ],
+      'pickup'
+    ),
+    '  פרחים ורודים  '
+  );
+  assert.equal(order.lines[0].description, 'רקמת שועל משמח');
+  assert.equal(order.lines[1].description, "סקראנצ'י גודל רגיל — דוגמא: פרחים ורודים");
+});
+
+test('empty variant note is ignored and long notes are trimmed', () => {
+  const base = buildOrder([{ id: 'scrunchies', quantity: 1, variant: 'regular' }], 'pickup');
+  assert.equal(applyVariantNote(base, '   ').lines[0].description, "סקראנצ'י גודל רגיל");
+  const long = applyVariantNote(base, 'א'.repeat(250));
+  assert.match(long.lines[0].description, /דוגמא: א{200}$/);
 });

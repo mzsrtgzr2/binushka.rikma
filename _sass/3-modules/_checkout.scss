@@ -40,6 +40,16 @@
   margin-bottom: 24px;
 }
 
+.checkout-variant-note {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.checkout-variant-note__hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
 .form__label {
   display: block;
   margin-bottom: 8px;

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildOrder } = require('./catalog');
+const { buildOrder, applyVariantNote } = require('./catalog');
 const checkout = require('./checkout');
 
 const customerBody = {
@@ -128,4 +128,25 @@ test('public env status never includes secrets', () => {
     blockedProductionPlugin: true,
   });
   assert.equal(JSON.stringify(status).includes('super-secret'), false);
+});
+
+test('scrunchie variant income uses catalog price and optional fabric note', () => {
+  const order = applyVariantNote(
+    buildOrder([{ id: 'scrunchies', quantity: 1, variant: 'fancy' }], 'pickup'),
+    'תחרה זהובה'
+  );
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: {},
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(payload.income[0].price, 85);
+  assert.equal(payload.income[0].description, 'Fancy סקראנצ\'י — דוגמא: תחרה זהובה');
+  assert.equal(payload.amount, 85);
+  assert.ok(payload.income.every((row) => !row.itemId));
+  assert.ok(payload.income.every((row) => !row.kind));
 });

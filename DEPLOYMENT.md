@@ -43,8 +43,11 @@ you can confirm Preview picked up the sandbox pair without printing secrets.
 
 Gift cards: the customer picks an amount (₪50–₪2,000) and it goes through the
 same Morning cart as other products. Checkout sends that custom sum as an
-income line (no Morning catalog UUID). Scrunchies stay on their Grow payment
-link because the range is per-item, not a single open amount.
+income line (no Morning catalog UUID).
+
+Scrunchies: three fixed variants (regular ₪30, large ₪45, fancy ₪85). Checkout
+sends a server-validated variant id, never a client price. An optional fabric
+note from the checkout form is appended to the Morning income description.
 
 ## Who edits products
 

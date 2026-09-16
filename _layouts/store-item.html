@@ -18,7 +18,7 @@ layout: default
 
     {% if page.price %}
       {% assign price_slug = page.slug | default: page.basename %}
-      {% assign price_meta = site.data.store-cart.products[price_slug] %}
+      {% assign price_meta = site.data.catalog[price_slug] %}
       <div class="store-item-price"{% unless price_meta.variable or price_meta.variants %} data-product-price="{{ price_slug }}"{% endunless %}>{{ page.price }}</div>
     {% endif %}
   </div>
@@ -34,7 +34,7 @@ layout: default
       <div class="col-12">
         <div class="section__navigation store-item__cart-actions">
           {% assign slug = page.slug | default: page.basename %}
-          {% assign cart_meta = site.data.store-cart.products[slug] %}
+          {% assign cart_meta = site.data.catalog[slug] %}
           {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false %}
             {% if cart_meta.variable %}
             <div class="gift-amount">
@@ -63,6 +63,28 @@ layout: default
               <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}" disabled>
                 הוסיפי לסל
               </button>
+            </div>
+            {% elsif cart_meta.variants %}
+            <div class="store-variants">
+              {% for variant in cart_meta.variants %}
+              {% assign vid = variant[0] %}
+              {% assign v = variant[1] %}
+              <article class="store-variant">
+                {% if v.image %}
+                <img class="store-variant__photo lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+                {% endif %}
+                <div class="store-variant__info">
+                  <h3 class="store-variant__name">{{ v.name }}</h3>
+                  {% if v.description %}
+                  <p class="store-variant__desc">{{ v.description }}</p>
+                  {% endif %}
+                  <div class="store-variant__price">₪{{ v.price }}</div>
+                </div>
+                <button type="button" class="button button--primary" data-cart-add="{{ slug }}" data-cart-variant="{{ vid }}">
+                  הוסיפי לסל
+                </button>
+              </article>
+              {% endfor %}
             </div>
             {% else %}
           <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}">

@@ -51,9 +51,11 @@ note from the checkout form is appended to the Morning income description.
 
 ## Store admin (`/admin/`)
 
-A password-protected Hebrew backoffice for stock and visibility. It is not
-linked from the public menu. After save it commits `_store/*.md` to GitHub so
-Vercel rebuilds.
+A password-protected Hebrew backoffice for **every** store product: create,
+update, delete, prices charged at checkout, gift-card amounts, scrunchie
+variants, page text, and stock/visibility. It is not linked from the public
+menu. After save it commits `_store/<slug>.md`, `api/catalog-data.json`, and
+`_data/catalog.json` to GitHub so Vercel rebuilds.
 
 Set these on **Production** (and Preview if you want to try it there):
 
@@ -64,23 +66,28 @@ Set these on **Production** (and Preview if you want to try it there):
 | `GITHUB_BRANCH` | Usually `master`. Admin always writes this branch |
 | `GITHUB_REPO` | Optional `owner/repo`. Vercel already sets the git owner/slug |
 
-Prices charged at checkout for fixed products still come from Morning → פריטים.
-Gift-card amounts and scrunchie variant prices stay in GitHub YAML / `api/catalog.js`.
+For local `vercel dev`, set `ADMIN_LOCAL_ROOT` to the repo root so saves write
+the markdown/JSON files on disk instead of GitHub.
+
+The number saved in the admin is the number charged at checkout. Morning →
+פריטים is no longer the live price overlay. `morning_item_id` is optional
+leftover if you still want a Morning item linked; new products do not need one.
 
 ## Who edits products
 
-**Prices:** Morning (Green Invoice) → **פריטים** (Items). Checkout and the store
-page read that price list over the API. The numbers in `_store/*.md` and
-`_data/store-cart.yml` are fallbacks if Morning is unreachable.
+**Everything in the catalog:** `/admin/` (password). That includes normal
+fixed-price products, gift cards, scrunchies variants, titles, photos paths,
+page text, stock, and hide.
 
-**Stock / hide a product:** `/admin/` (password). That writes `out_of_stock`,
-`limited_stock`, and `hide` in `_store/<product>.md`. Morning’s item API has no
-inventory field. Grow is payments only — it is not a catalog.
+**Photos files:** put the file under `/images/` in the repo (or paste an
+existing path in admin). The backoffice stores the path, it does not upload
+binaries.
 
-**Photos and product text:** still `_store/<product>.md`.
+**Stock / hide:** same `/admin/` screen. Morning’s item API has no inventory
+field. Grow is payments only — it is not a catalog.
 
-To add a new cart product: create the item in Morning, put its UUID in
-`_data/store-cart.yml` and `api/catalog.js`, and add the markdown page.
+To add a new cart product: `/admin/` → מוצר חדש. No Morning פריטים step is
+required to charge.
 
 ## Local development
 

@@ -41,7 +41,10 @@ git branch (or use Vercel → Deployments → Redeploy) after saving them.
 `GET /api/checkout/` returns `{ env, hasKeyId, hasSecret, keyIdPrefix }` so
 you can confirm Preview picked up the sandbox pair without printing secrets.
 
-Gift cards and scrunchies stay on their existing Grow payment links because the price is not fixed.
+Gift cards: the customer picks an amount (₪50–₪2,000) and it goes through the
+same Morning cart as other products. Checkout sends that custom sum as an
+income line (no Morning catalog UUID). Scrunchies stay on their Grow payment
+link because the range is per-item, not a single open amount.
 
 ## Who edits products
 

@@ -119,7 +119,9 @@
     var ship = shippingCost(data.shipping, subtotal);
     var payload = {
       items: items.map(function (item) {
-        return { id: item.id, quantity: item.quantity };
+        var row = { id: item.id, quantity: item.quantity };
+        if (item.amount) row.amount = item.amount;
+        return row;
       }),
       shipping: data.shipping,
       firstName: data.firstName,

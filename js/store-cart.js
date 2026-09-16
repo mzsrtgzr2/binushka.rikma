@@ -32,30 +32,62 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
   }
 
+  function parseCartKey(key) {
+    if (byId[key]) return { id: key, amount: null };
+    var parts = String(key).split(':');
+    if (parts.length < 2) return { id: key, amount: null };
+    var amount = Number(parts[parts.length - 1]);
+    var id = parts.slice(0, -1).join(':');
+    return { id: id, amount: Number.isFinite(amount) ? amount : null };
+  }
+
+  function lineKey(id, amount) {
+    var p = byId[id];
+    if (p && p.variable) return id + ':' + amount;
+    return id;
+  }
+
+  function validGiftAmount(p, amount) {
+    var n = Number(amount);
+    if (!p || !p.variable || !Number.isInteger(n)) return false;
+    return n >= Number(p.minPrice) && n <= Number(p.maxPrice);
+  }
+
+  function linePrice(p, amount) {
+    if (p.variable) return Number(amount);
+    return p.price;
+  }
+
   function cartCount(cart) {
-    return Object.keys(cart).reduce(function (sum, id) {
-      return sum + (cart[id] || 0);
+    return Object.keys(cart).reduce(function (sum, key) {
+      return sum + (cart[key] || 0);
     }, 0);
   }
 
   function cartTotal(cart) {
-    return Object.keys(cart).reduce(function (sum, id) {
-      var p = byId[id];
-      if (!p) return sum;
-      return sum + p.price * cart[id];
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      var p = byId[parsed.id];
+      if (!p || cart[key] < 1) return sum;
+      return sum + linePrice(p, parsed.amount) * cart[key];
     }, 0);
   }
 
   function cartItems(cart) {
     return Object.keys(cart)
-      .map(function (id) {
-        var p = byId[id];
-        if (!p || cart[id] < 1) return null;
+      .map(function (key) {
+        var parsed = parseCartKey(key);
+        var p = byId[parsed.id];
+        if (!p || cart[key] < 1) return null;
+        if (p.variable && !validGiftAmount(p, parsed.amount)) return null;
+        var price = linePrice(p, parsed.amount);
         return {
-          id: id,
-          quantity: cart[id],
-          name: p.name,
-          price: p.price,
+          id: parsed.id,
+          key: key,
+          quantity: cart[key],
+          name: p.variable ? p.name + ' — ₪' + parsed.amount : p.name,
+          price: price,
+          amount: p.variable ? parsed.amount : undefined,
           url: p.url,
           image: p.image || '',
         };
@@ -69,13 +101,15 @@
     return d.innerHTML;
   }
 
-  function addToCart(id, delta) {
+  function addToCart(id, delta, amount) {
     var p = byId[id];
     if (!p || p.outOfStock) return false;
+    if (p.variable && !validGiftAmount(p, amount)) return false;
+    var key = lineKey(id, amount);
     var cart = loadCart();
-    var next = (cart[id] || 0) + delta;
-    if (next < 1) delete cart[id];
-    else cart[id] = next;
+    var next = (cart[key] || 0) + delta;
+    if (next < 1) delete cart[key];
+    else cart[key] = next;
     saveCart(cart);
     renderWidget();
     return true;
@@ -277,10 +311,10 @@
         '<span class="store-cart__line-price">₪' + item.price * item.quantity + '</span>' +
         '</div>' +
         '<div class="store-cart__line-actions">' +
-        '<button type="button" class="store-cart__qty" data-action="dec" data-id="' + item.id + '" aria-label="הפחתה">−</button>' +
+        '<button type="button" class="store-cart__qty" data-action="dec" data-id="' + escapeHtml(item.key) + '" aria-label="הפחתה">−</button>' +
         '<span class="store-cart__qty-val">' + item.quantity + '</span>' +
-        '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + item.id + '" aria-label="הוספה">+</button>' +
-        '<button type="button" class="store-cart__remove" data-action="remove" data-id="' + item.id + '" aria-label="הסרה">×</button>' +
+        '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + escapeHtml(item.key) + '" aria-label="הוספה">+</button>' +
+        '<button type="button" class="store-cart__remove" data-action="remove" data-id="' + escapeHtml(item.key) + '" aria-label="הסרה">×</button>' +
         '</div>';
       els.lines.appendChild(li);
     });
@@ -290,8 +324,13 @@
     STORAGE_KEY: STORAGE_KEY,
     load: loadCart,
     save: saveCart,
-    add: function (id, triggerEl) {
-      if (!addToCart(id, 1)) return;
+    add: function (id, triggerEl, amount) {
+      var p = byId[id];
+      if (p && p.variable && (amount == null || amount === '')) {
+        var input = document.getElementById('gift-card-amount');
+        amount = input ? Number(input.value) : NaN;
+      }
+      if (!addToCart(id, 1, amount)) return;
       if (triggerEl && triggerEl.classList) {
         triggerEl.classList.add('is-added');
         window.setTimeout(function () {
@@ -325,13 +364,14 @@
     els.lines.addEventListener('click', function (e) {
       var t = e.target.closest('[data-action]');
       if (!t) return;
-      var id = t.getAttribute('data-id');
+      var key = t.getAttribute('data-id');
+      var parsed = parseCartKey(key);
       var action = t.getAttribute('data-action');
-      if (action === 'inc') addToCart(id, 1);
-      if (action === 'dec') addToCart(id, -1);
+      if (action === 'inc') addToCart(parsed.id, 1, parsed.amount);
+      if (action === 'dec') addToCart(parsed.id, -1, parsed.amount);
       if (action === 'remove') {
         var cart = loadCart();
-        delete cart[id];
+        delete cart[key];
         saveCart(cart);
         renderWidget();
       }
@@ -352,6 +392,35 @@
     });
   }
 
+  function syncGiftAmountUi() {
+    var input = document.getElementById('gift-card-amount');
+    var addBtn = document.querySelector('[data-cart-add="gift-card"]');
+    if (!input) return;
+    var amount = Number(input.value);
+    var ok = validGiftAmount(byId['gift-card'], amount);
+    if (addBtn) addBtn.disabled = !ok;
+    document.querySelectorAll('[data-gift-amount]').forEach(function (chip) {
+      chip.classList.toggle('is-selected', Number(chip.getAttribute('data-gift-amount')) === amount);
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var chip = e.target.closest('[data-gift-amount]');
+    if (!chip) return;
+    e.preventDefault();
+    var input = document.getElementById('gift-card-amount');
+    if (!input) return;
+    input.value = chip.getAttribute('data-gift-amount');
+    syncGiftAmountUi();
+  });
+
+  var giftInput = document.getElementById('gift-card-amount');
+  if (giftInput) {
+    giftInput.addEventListener('input', syncGiftAmountUi);
+    giftInput.addEventListener('change', syncGiftAmountUi);
+    syncGiftAmountUi();
+  }
+
   renderWidget();
 
   fetch('/api/prices/')
@@ -363,13 +432,13 @@
       if (!products) return;
       Object.keys(products).forEach(function (id) {
         var live = products[id];
-        if (!byId[id] || !live || !(Number(live.price) > 0)) return;
+        if (!byId[id] || byId[id].variable || !live || !(Number(live.price) > 0)) return;
         byId[id].price = Number(live.price);
         if (live.name) byId[id].name = live.name;
       });
       document.querySelectorAll('[data-product-price]').forEach(function (el) {
         var id = el.getAttribute('data-product-price');
-        if (byId[id]) el.textContent = '₪' + byId[id].price;
+        if (byId[id] && !byId[id].variable) el.textContent = '₪' + byId[id].price;
       });
       renderWidget();
       window.dispatchEvent(new Event('binushka:prices'));

@@ -85,7 +85,7 @@
           id: parsed.id,
           key: key,
           quantity: cart[key],
-          name: p.variable ? p.name + ' — ₪' + parsed.amount : p.name,
+          name: p.name,
           price: price,
           amount: p.variable ? parsed.amount : undefined,
           url: p.url,

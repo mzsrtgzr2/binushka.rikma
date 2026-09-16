@@ -19,6 +19,8 @@
     d.textContent = s == null ? '' : String(s);
     return d.innerHTML;
   }
+
+  function show(el, text, type) {
     if (!el) return;
     if (!text) {
       el.hidden = true;

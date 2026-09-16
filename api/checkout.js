@@ -16,6 +16,7 @@ const {
 
 const VAT_RATE = 0.18;
 const GROW_PRODUCTION_PLUGIN_ID = '453df580-760d-439d-a848-4fe7dc1fb9b3';
+const GROW_SANDBOX_PLUGIN_ID = 'facd67fd-5082-496c-917f-830f0d7449e3';
 
 const COUNTRY_ISO = {
   IL: 'IL',
@@ -45,11 +46,15 @@ function siteOrigin(req) {
 function resolvePluginId(env, envVars) {
   const vars = envVars || {};
   if (env === 'sandbox') {
-    const candidate = String(
-      vars.MORNING_SANDBOX_PLUGIN_ID || vars.MORNING_PLUGIN_ID || ''
-    ).trim();
-    if (candidate && candidate !== GROW_PRODUCTION_PLUGIN_ID) return candidate;
-    return '';
+    const sandboxExplicit = String(vars.MORNING_SANDBOX_PLUGIN_ID || '').trim();
+    const plugin = String(vars.MORNING_PLUGIN_ID || '').trim();
+    let candidate = sandboxExplicit;
+    if (!candidate && plugin && plugin !== GROW_PRODUCTION_PLUGIN_ID) {
+      candidate = plugin;
+    }
+    if (!candidate) candidate = GROW_SANDBOX_PLUGIN_ID;
+    if (candidate === GROW_PRODUCTION_PLUGIN_ID) return GROW_SANDBOX_PLUGIN_ID;
+    return candidate;
   }
   return String(vars.MORNING_PLUGIN_ID || GROW_PRODUCTION_PLUGIN_ID).trim();
 }
@@ -344,5 +349,6 @@ handler.buildIncomeRows = buildIncomeRows;
 handler.morningErrorMessage = morningErrorMessage;
 handler.publicEnvStatus = publicEnvStatus;
 handler.GROW_PRODUCTION_PLUGIN_ID = GROW_PRODUCTION_PLUGIN_ID;
+handler.GROW_SANDBOX_PLUGIN_ID = GROW_SANDBOX_PLUGIN_ID;
 
 module.exports = handler;

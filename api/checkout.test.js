@@ -14,18 +14,18 @@ const customerBody = {
   country: 'ישראל',
 };
 
-test('sandbox omits the production Grow plugin id', () => {
+test('sandbox uses the sandbox plugin when the production Grow id is set', () => {
   const pluginId = checkout.resolvePluginId('sandbox', {
     MORNING_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
   });
-  assert.equal(pluginId, '');
+  assert.equal(pluginId, checkout.GROW_SANDBOX_PLUGIN_ID);
 });
 
 test('sandbox ignores the production Grow plugin even in MORNING_SANDBOX_PLUGIN_ID', () => {
   const pluginId = checkout.resolvePluginId('sandbox', {
     MORNING_SANDBOX_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
   });
-  assert.equal(pluginId, '');
+  assert.equal(pluginId, checkout.GROW_SANDBOX_PLUGIN_ID);
 });
 
 test('sandbox uses a distinct MORNING_SANDBOX_PLUGIN_ID', () => {
@@ -47,7 +47,7 @@ test('unspecified MORNING_ENV is sandbox', () => {
   assert.equal(checkout.resolveMorningEnv('production'), 'production');
 });
 
-test('payment form payload for sandbox has no pluginId or catalog itemIds', () => {
+test('payment form payload for sandbox uses the sandbox plugin and no catalog itemIds', () => {
   const order = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
   const { customer } = checkout.readCustomer(customerBody);
   const payload = checkout.buildPaymentFormPayload({
@@ -59,7 +59,7 @@ test('payment form payload for sandbox has no pluginId or catalog itemIds', () =
     failureUrl: 'https://example.com/checkout/',
   });
 
-  assert.equal(payload.pluginId, undefined);
+  assert.equal(payload.pluginId, checkout.GROW_SANDBOX_PLUGIN_ID);
   assert.equal(payload.client.add, true);
   assert.equal(payload.client.address, 'אייזנברג 39');
   assert.equal(payload.client.country, 'IL');
@@ -109,7 +109,7 @@ test('public env status never includes secrets', () => {
     keyIdPrefix: '9d80ace4',
     hasPluginId: true,
     hasSandboxPluginId: false,
-    sendsPluginId: false,
+    sendsPluginId: true,
     blockedProductionPlugin: true,
   });
   assert.equal(JSON.stringify(status).includes('super-secret'), false);

@@ -1,0 +1,150 @@
+.admin-body {
+  background: var(--background-alt-color);
+  min-height: 100vh;
+}
+
+.admin {
+  direction: rtl;
+}
+
+.admin-shell {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.admin-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-top__brand {
+  font-weight: 700;
+  color: var(--heading-font-color);
+}
+
+.admin-top__title {
+  flex: 1;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 300;
+}
+
+.admin-top__logout {
+  border: 0;
+  background: none;
+  color: var(--text-alt-color);
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.admin-lead {
+  color: var(--text-alt-color);
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+
+.admin-login {
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-card {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 16px;
+  background: var(--background-color);
+  border-radius: 16px;
+  padding: 16px;
+  align-items: start;
+}
+
+.admin-card__thumb {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--background-alt-color);
+}
+
+.admin-card__thumb--empty {
+  display: block;
+}
+
+.admin-card__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.admin-card__badge {
+  font-size: 13px;
+  color: var(--text-alt-color);
+  white-space: nowrap;
+}
+
+.admin-card__price {
+  margin: 0 0 10px;
+  color: var(--text-alt-color);
+  font-size: 14px;
+}
+
+.admin-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 15px;
+  margin: 4px 0;
+  cursor: pointer;
+}
+
+.admin-message {
+  margin: 0;
+  font-size: 14px;
+}
+
+.admin-message--error {
+  color: #b42318;
+}
+
+.admin-message--ok {
+  color: #067647;
+}
+
+@media only screen and (max-width: $mobile) {
+  .admin-card {
+    grid-template-columns: 64px 1fr;
+  }
+
+  .admin-card__thumb {
+    width: 64px;
+    height: 64px;
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

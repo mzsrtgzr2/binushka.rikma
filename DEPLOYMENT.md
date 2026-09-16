@@ -49,15 +49,33 @@ Scrunchies: three fixed variants (regular ₪30, large ₪45, fancy ₪85). Chec
 sends a server-validated variant id, never a client price. An optional fabric
 note from the checkout form is appended to the Morning income description.
 
+## Store admin (`/admin/`)
+
+A password-protected Hebrew backoffice for stock and visibility. It is not
+linked from the public menu. After save it commits `_store/*.md` to GitHub so
+Vercel rebuilds.
+
+Set these on **Production** (and Preview if you want to try it there):
+
+| Variable | What it is |
+| --- | --- |
+| `ADMIN_PASSWORD` | Shared password for `/admin/` |
+| `GITHUB_TOKEN` | Fine-grained PAT with **Contents: Read and write** on this repo |
+| `GITHUB_BRANCH` | Usually `master`. Admin always writes this branch |
+| `GITHUB_REPO` | Optional `owner/repo`. Vercel already sets the git owner/slug |
+
+Prices charged at checkout for fixed products still come from Morning → פריטים.
+Gift-card amounts and scrunchie variant prices stay in GitHub YAML / `api/catalog.js`.
+
 ## Who edits products
 
 **Prices:** Morning (Green Invoice) → **פריטים** (Items). Checkout and the store
 page read that price list over the API. The numbers in `_store/*.md` and
 `_data/store-cart.yml` are fallbacks if Morning is unreachable.
 
-**Stock / hide a product:** still in GitHub, `_store/<product>.md`
-(`out_of_stock`, `limited_stock`, `hide`). Morning’s item API has no inventory
-field. Grow is payments only — it is not a catalog.
+**Stock / hide a product:** `/admin/` (password). That writes `out_of_stock`,
+`limited_stock`, and `hide` in `_store/<product>.md`. Morning’s item API has no
+inventory field. Grow is payments only — it is not a catalog.
 
 **Photos and product text:** still `_store/<product>.md`.
 

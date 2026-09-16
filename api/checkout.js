@@ -6,7 +6,7 @@
  * POST /api/v1/payments/form  (get payment form)
  */
 
-const { buildOrder, priceBookFromMorningItems } = require('./catalog');
+const { buildOrder, priceBookFromMorningItems, applyVariantNote } = require('./catalog');
 const {
   resolveMorningEnv,
   morningHosts,
@@ -231,7 +231,7 @@ async function handler(req, res) {
   const env = resolveMorningEnv(process.env.MORNING_ENV);
 
   const body = req.body || {};
-  const order = buildOrder(body.items, body.shipping);
+  const order = applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote);
   if (order.error) {
     return res.status(400).json({ error: order.error });
   }
@@ -279,7 +279,7 @@ async function handler(req, res) {
     const items = await searchItems(rest, token);
     const live = priceBookFromMorningItems(items);
     if (Object.keys(live).length) {
-      pricedOrder = buildOrder(body.items, body.shipping, live);
+      pricedOrder = applyVariantNote(buildOrder(body.items, body.shipping, live), body.variantNote);
     }
   } catch (err) {
     console.warn('Morning item prices unavailable, using catalog fallback', err);

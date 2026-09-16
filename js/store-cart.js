@@ -33,17 +33,24 @@
   }
 
   function parseCartKey(key) {
-    if (byId[key]) return { id: key, amount: null };
+    if (byId[key]) return { id: key, amount: null, variant: null };
     var parts = String(key).split(':');
-    if (parts.length < 2) return { id: key, amount: null };
-    var amount = Number(parts[parts.length - 1]);
+    if (parts.length < 2) return { id: key, amount: null, variant: null };
+    var extra = parts[parts.length - 1];
     var id = parts.slice(0, -1).join(':');
-    return { id: id, amount: Number.isFinite(amount) ? amount : null };
+    var p = byId[id];
+    if (p && p.variants) return { id: id, amount: null, variant: extra };
+    var amount = Number(extra);
+    return { id: id, amount: Number.isFinite(amount) ? amount : null, variant: null };
   }
 
-  function lineKey(id, amount) {
+  function cartExtra(parsed) {
+    return parsed.variant || parsed.amount;
+  }
+
+  function lineKey(id, extra) {
     var p = byId[id];
-    if (p && p.variable) return id + ':' + amount;
+    if (p && (p.variable || p.variants)) return id + ':' + extra;
     return id;
   }
 
@@ -53,8 +60,13 @@
     return n >= Number(p.minPrice) && n <= Number(p.maxPrice);
   }
 
-  function linePrice(p, amount) {
-    if (p.variable) return Number(amount);
+  function validVariant(p, variant) {
+    return !!(p && p.variants && variant && p.variants[variant] && Number(p.variants[variant].price) > 0);
+  }
+
+  function linePrice(p, extra) {
+    if (p.variable) return Number(extra);
+    if (p.variants && extra && p.variants[extra]) return Number(p.variants[extra].price);
     return p.price;
   }
 
@@ -69,7 +81,7 @@
       var parsed = parseCartKey(key);
       var p = byId[parsed.id];
       if (!p || cart[key] < 1) return sum;
-      return sum + linePrice(p, parsed.amount) * cart[key];
+      return sum + linePrice(p, cartExtra(parsed)) * cart[key];
     }, 0);
   }
 
@@ -80,16 +92,20 @@
         var p = byId[parsed.id];
         if (!p || cart[key] < 1) return null;
         if (p.variable && !validGiftAmount(p, parsed.amount)) return null;
-        var price = linePrice(p, parsed.amount);
+        if (p.variants && !validVariant(p, parsed.variant)) return null;
+        var extra = cartExtra(parsed);
+        var price = linePrice(p, extra);
+        var variant = p.variants && parsed.variant ? p.variants[parsed.variant] : null;
         return {
           id: parsed.id,
           key: key,
           quantity: cart[key],
-          name: p.name,
+          name: variant ? variant.name : p.name,
           price: price,
           amount: p.variable ? parsed.amount : undefined,
+          variant: parsed.variant || undefined,
           url: p.url,
-          image: p.image || '',
+          image: (variant && variant.image) || p.image || '',
         };
       })
       .filter(Boolean);
@@ -101,11 +117,12 @@
     return d.innerHTML;
   }
 
-  function addToCart(id, delta, amount) {
+  function addToCart(id, delta, extra) {
     var p = byId[id];
     if (!p || p.outOfStock) return false;
-    if (p.variable && !validGiftAmount(p, amount)) return false;
-    var key = lineKey(id, amount);
+    if (p.variable && !validGiftAmount(p, extra)) return false;
+    if (p.variants && !validVariant(p, extra)) return false;
+    var key = lineKey(id, extra);
     var cart = loadCart();
     var next = (cart[key] || 0) + delta;
     if (next < 1) delete cart[key];
@@ -134,6 +151,10 @@
     var img = null;
     var card = triggerEl && triggerEl.closest ? triggerEl.closest('.store-item') : null;
     if (card) img = card.querySelector('.store-item__image img');
+    if (!img && triggerEl && triggerEl.closest) {
+      var variantCard = triggerEl.closest('.scrunchies-variant');
+      if (variantCard) img = variantCard.querySelector('img');
+    }
     if (!img) img = document.querySelector('.store-item-image-container img');
     var url = imageUrlFromEl(img) || (byId[id] && byId[id].image) || '';
     var originEl = triggerEl;
@@ -324,13 +345,16 @@
     STORAGE_KEY: STORAGE_KEY,
     load: loadCart,
     save: saveCart,
-    add: function (id, triggerEl, amount) {
+    add: function (id, triggerEl, extra) {
       var p = byId[id];
-      if (p && p.variable && (amount == null || amount === '')) {
+      if (p && p.variable && (extra == null || extra === '')) {
         var input = document.getElementById('gift-card-amount');
-        amount = input ? Number(input.value) : NaN;
+        extra = input ? Number(input.value) : NaN;
       }
-      if (!addToCart(id, 1, amount)) return;
+      if (p && p.variants && (extra == null || extra === '')) {
+        extra = triggerEl && triggerEl.getAttribute ? triggerEl.getAttribute('data-cart-variant') : '';
+      }
+      if (!addToCart(id, 1, extra)) return;
       if (triggerEl && triggerEl.classList) {
         triggerEl.classList.add('is-added');
         window.setTimeout(function () {
@@ -367,8 +391,8 @@
       var key = t.getAttribute('data-id');
       var parsed = parseCartKey(key);
       var action = t.getAttribute('data-action');
-      if (action === 'inc') addToCart(parsed.id, 1, parsed.amount);
-      if (action === 'dec') addToCart(parsed.id, -1, parsed.amount);
+      if (action === 'inc') addToCart(parsed.id, 1, cartExtra(parsed));
+      if (action === 'dec') addToCart(parsed.id, -1, cartExtra(parsed));
       if (action === 'remove') {
         var cart = loadCart();
         delete cart[key];
@@ -432,13 +456,13 @@
       if (!products) return;
       Object.keys(products).forEach(function (id) {
         var live = products[id];
-        if (!byId[id] || byId[id].variable || !live || !(Number(live.price) > 0)) return;
+        if (!byId[id] || byId[id].variable || byId[id].variants || !live || !(Number(live.price) > 0)) return;
         byId[id].price = Number(live.price);
         if (live.name) byId[id].name = live.name;
       });
       document.querySelectorAll('[data-product-price]').forEach(function (el) {
         var id = el.getAttribute('data-product-price');
-        if (byId[id] && !byId[id].variable) el.textContent = '₪' + byId[id].price;
+        if (byId[id] && !byId[id].variable && !byId[id].variants) el.textContent = '₪' + byId[id].price;
       });
       renderWidget();
       window.dispatchEvent(new Event('binushka:prices'));

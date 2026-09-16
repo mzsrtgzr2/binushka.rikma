@@ -63,6 +63,8 @@
       if (subtotalRow) subtotalRow.hidden = true;
       if (formSection) formSection.hidden = true;
       if (linesEl) linesEl.innerHTML = '';
+      var emptyNote = document.getElementById('checkout-variant-note-group');
+      if (emptyNote) emptyNote.hidden = true;
       return [];
     }
 
@@ -94,6 +96,14 @@
         .join('');
     }
 
+    var noteGroup = document.getElementById('checkout-variant-note-group');
+    if (noteGroup) {
+      var hasVariant = items.some(function (item) {
+        return item.variant;
+      });
+      noteGroup.hidden = !hasVariant;
+    }
+
     var ship = shippingCost(selectedShipping(), subtotal);
     if (grandEl) grandEl.textContent = '₪' + (subtotal + ship);
     return items;
@@ -121,6 +131,7 @@
       items: items.map(function (item) {
         var row = { id: item.id, quantity: item.quantity };
         if (item.amount) row.amount = item.amount;
+        if (item.variant) row.variant = item.variant;
         return row;
       }),
       shipping: data.shipping,
@@ -134,6 +145,7 @@
       country: data.country,
       successPath: '/thanks/',
     };
+    if (data.variantNote) payload.variantNote = String(data.variantNote).trim();
 
     var submitBtn = form.querySelector('[type="submit"]');
     if (submitBtn) {

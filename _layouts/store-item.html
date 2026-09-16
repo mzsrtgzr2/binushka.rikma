@@ -19,7 +19,7 @@ layout: default
     {% if page.price %}
       {% assign price_slug = page.slug | default: page.basename %}
       {% assign price_meta = site.data.store-cart.products[price_slug] %}
-      <div class="store-item-price"{% unless price_meta.variable %} data-product-price="{{ price_slug }}"{% endunless %}>{{ page.price }}</div>
+      <div class="store-item-price"{% unless price_meta.variable or price_meta.variants %} data-product-price="{{ price_slug }}"{% endunless %}>{{ page.price }}</div>
     {% endif %}
   </div>
 

@@ -51,9 +51,38 @@ layout: default
 </div>
 {% endif %}
 
+{% assign cart_meta = site.data.store-cart.products.scrunchies %}
+{% if site.data.store-cart.enabled and cart_meta.variants %}
+<div class="container scrunchies-variants-section animate">
+  <h2 class="scrunchies-variants-section__title">בחרי סוג</h2>
+  <p class="scrunchies-variants-section__subtitle">כל סקראנצ'י תפורה בעבודת יד — בצבע ובדגם שתבחרי. בקופה אפשר לרשום איזו דוגמא אהבת.</p>
+  <div class="scrunchies-variants">
+    {% for variant in cart_meta.variants %}
+    {% assign vid = variant[0] %}
+    {% assign v = variant[1] %}
+    <article class="scrunchies-variant">
+      {% if v.image %}
+      <div class="scrunchies-variant__photo">
+        <img class="lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+      </div>
+      {% endif %}
+      <h3 class="scrunchies-variant__name">{{ v.name }}</h3>
+      {% if v.description %}
+      <p class="scrunchies-variant__desc">{{ v.description }}</p>
+      {% endif %}
+      <div class="scrunchies-variant__price">₪{{ v.price }}</div>
+      <button type="button" class="button button--primary" data-cart-add="scrunchies" data-cart-variant="{{ vid }}">
+        הוסיפי לסל
+      </button>
+    </article>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
 <div class="container scrunchies-cta animate">
   <p class="scrunchies-cta__text">כל סקראנצ'י תפורה בעבודת יד — בצבע ובדגם שתבחרי</p>
   <a href="{{ page.form_url }}" class="button button--primary scrunchies-cta__btn" target="_blank" rel="noopener">להזמנה ותשלום</a>
 </div>
+{% endif %}
 
 {% include store-shipping.html %}

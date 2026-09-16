@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('fs');
+const path = require('path');
 const {
   buildOrder,
   fallbackPriceBook,
@@ -12,6 +14,15 @@ test('fallback price book includes every cart product', () => {
   const book = fallbackPriceBook();
   assert.equal(book.fox.price, 220);
   assert.equal(Object.keys(book).length, Object.keys(PRODUCTS).length);
+});
+
+test('Jekyll catalog matches the checkout catalog file', () => {
+  const apiCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-data.json'), 'utf8'));
+  const dataCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '_data', 'catalog.json'), 'utf8'));
+  assert.deepEqual(apiCatalog, dataCatalog);
+  assert.equal(PRODUCTS.fox.price, 220);
+  assert.equal(PRODUCTS['gift-card'].variable, true);
+  assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
 });
 
 test('Morning item list overlays the charged price', () => {
@@ -96,11 +107,11 @@ test('regular, large and fancy scrunchies are separate lines', () => {
 test('unknown or missing scrunchie variant is rejected', () => {
   assert.equal(
     buildOrder([{ id: 'scrunchies', quantity: 1, variant: 'tiny' }], 'pickup').error,
-    "סוג סקראנצ'י לא תקין"
+    'סוג לא תקין'
   );
   assert.equal(
     buildOrder([{ id: 'scrunchies', quantity: 1 }], 'pickup').error,
-    "סוג סקראנצ'י לא תקין"
+    'סוג לא תקין'
   );
 });
 

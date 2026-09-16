@@ -1,16 +1,17 @@
 /**
  * Password-protected store backoffice.
- * Lists _store/*.md products and updates stock/visibility flags.
+ * Create / update / delete products and stock flags.
  * Production writes go to GitHub so Vercel rebuilds the site.
  */
 
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const store = require('./admin-store');
 
 const COOKIE = 'binushka-admin-v1';
 const SESSION_PAYLOAD = 'binushka-admin-session-v1';
-const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
+const CATALOG_FILES = ['api/catalog-data.json', '_data/catalog.json'];
 
 function json(res, status, body, extraHeaders) {
   res.statusCode = status;
@@ -73,70 +74,6 @@ function isAuthed(req, env) {
   return safeEqual(readCookie(req, COOKIE), expected);
 }
 
-function splitFrontMatter(raw) {
-  const text = String(raw || '').replace(/^\uFEFF/, '');
-  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!match) return null;
-  return { yaml: match[1], body: match[2], newline: text.includes('\r\n') ? '\r\n' : '\n' };
-}
-
-function yamlValue(yaml, key) {
-  const match = String(yaml).match(new RegExp(`^${key}:\\s*(.*)$`, 'm'));
-  if (!match) return undefined;
-  let value = match[1].trim();
-  if (
-    (value.startsWith("'") && value.endsWith("'")) ||
-    (value.startsWith('"') && value.endsWith('"'))
-  ) {
-    value = value.slice(1, -1);
-  }
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  return value;
-}
-
-function setYamlBool(yaml, key, value) {
-  const line = `${key}: ${value ? 'true' : 'false'}`;
-  const re = new RegExp(`^${key}:\\s*.*$`, 'm');
-  if (re.test(yaml)) return yaml.replace(re, line);
-  const trimmed = yaml.replace(/\s+$/, '');
-  return `${trimmed}\n${line}\n`;
-}
-
-function parseProduct(slug, raw) {
-  const parts = splitFrontMatter(raw);
-  if (!parts) return null;
-  const image = yamlValue(parts.yaml, 'image') || '';
-  return {
-    slug,
-    title: yamlValue(parts.yaml, 'title') || slug,
-    image: String(image).replace(/^['"]|['"]$/g, '').trim(),
-    price: yamlValue(parts.yaml, 'price') || '',
-    out_of_stock: yamlValue(parts.yaml, 'out_of_stock') === true,
-    limited_stock: yamlValue(parts.yaml, 'limited_stock') === true,
-    hide: yamlValue(parts.yaml, 'hide') === true,
-  };
-}
-
-function applyFlags(raw, flags) {
-  const parts = splitFrontMatter(raw);
-  if (!parts) throw new Error('invalid-front-matter');
-  let yaml = parts.yaml;
-  yaml = setYamlBool(yaml, 'out_of_stock', Boolean(flags.out_of_stock));
-  yaml = setYamlBool(yaml, 'limited_stock', Boolean(flags.limited_stock));
-  yaml = setYamlBool(yaml, 'hide', Boolean(flags.hide));
-  const nl = parts.newline;
-  return `---${nl}${yaml.replace(/\r?\n/g, nl)}${nl}---${nl}${parts.body}`;
-}
-
-function flagsChanged(product, flags) {
-  return (
-    Boolean(product.out_of_stock) !== Boolean(flags.out_of_stock) ||
-    Boolean(product.limited_stock) !== Boolean(flags.limited_stock) ||
-    Boolean(product.hide) !== Boolean(flags.hide)
-  );
-}
-
 function repoParts(env) {
   const explicit = String(env.GITHUB_REPO || '').trim();
   if (explicit.includes('/')) {
@@ -153,38 +90,22 @@ function gitBranch(env) {
   return String(env.GITHUB_BRANCH || 'master').trim() || 'master';
 }
 
-function localStoreDir(env) {
-  const root = String(env.ADMIN_LOCAL_ROOT || '').trim();
-  if (!root) return null;
-  return path.join(root, '_store');
+function localRoot(env) {
+  return String(env.ADMIN_LOCAL_ROOT || '').trim() || null;
 }
 
-function listLocal(env) {
-  const dir = localStoreDir(env);
-  const names = fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
-  return names
-    .map((name) => {
-      const slug = name.replace(/\.md$/, '');
-      const raw = fs.readFileSync(path.join(dir, name), 'utf8');
-      return parseProduct(slug, raw);
-    })
-    .filter(Boolean)
-    .sort((a, b) => String(a.title).localeCompare(String(b.title), 'he'));
+function writeTarget(env) {
+  if (localRoot(env)) return 'local';
+  if (env.GITHUB_TOKEN && repoParts(env)) return 'github';
+  return null;
 }
 
-function saveLocal(env, updates) {
-  const dir = localStoreDir(env);
-  const changed = [];
-  for (const flags of updates) {
-    const file = path.join(dir, `${flags.slug}.md`);
-    const raw = fs.readFileSync(file, 'utf8');
-    const current = parseProduct(flags.slug, raw);
-    if (!current) throw new Error('invalid-front-matter');
-    if (!flagsChanged(current, flags)) continue;
-    fs.writeFileSync(file, applyFlags(raw, flags));
-    changed.push(flags.slug);
+function emptyCatalog() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-data.json'), 'utf8'));
+  } catch {
+    return {};
   }
-  return changed;
 }
 
 async function githubJson(env, pathname, opts = {}) {
@@ -224,92 +145,190 @@ async function githubJson(env, pathname, opts = {}) {
   return body;
 }
 
-async function listGithub(env) {
-  const branch = gitBranch(env);
-  const entries = await githubJson(env, `/contents/_store?ref=${encodeURIComponent(branch)}`);
-  const files = (Array.isArray(entries) ? entries : []).filter((entry) => entry.name && entry.name.endsWith('.md'));
-  const products = [];
-  for (const entry of files) {
-    const file = await githubJson(
-      env,
-      `/contents/_store/${encodeURIComponent(entry.name)}?ref=${encodeURIComponent(branch)}`
-    );
-    const raw = Buffer.from(file.content.replace(/\n/g, ''), 'base64').toString('utf8');
-    const slug = entry.name.replace(/\.md$/, '');
-    const product = parseProduct(slug, raw);
-    if (product) products.push(product);
-  }
-  products.sort((a, b) => String(a.title).localeCompare(String(b.title), 'he'));
-  return products;
+function decodeGithubFile(file) {
+  return Buffer.from(String(file.content || '').replace(/\n/g, ''), 'base64').toString('utf8');
 }
 
-async function saveGithub(env, updates) {
+async function githubRead(env, filePath) {
   const branch = gitBranch(env);
-  const changed = [];
-  const blobs = [];
+  const file = await githubJson(
+    env,
+    `/contents/${filePath.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(branch)}`
+  );
+  return decodeGithubFile(file);
+}
 
-  for (const flags of updates) {
-    const file = await githubJson(
-      env,
-      `/contents/_store/${encodeURIComponent(flags.slug)}.md?ref=${encodeURIComponent(branch)}`
-    );
-    const raw = Buffer.from(file.content.replace(/\n/g, ''), 'base64').toString('utf8');
-    const current = parseProduct(flags.slug, raw);
-    if (!current) throw new Error('invalid-front-matter');
-    if (!flagsChanged(current, flags)) continue;
-    const next = applyFlags(raw, flags);
+async function commitFiles(env, files, message) {
+  const blobs = [];
+  for (const file of files) {
     const blob = await githubJson(env, '/git/blobs', {
       method: 'POST',
-      body: JSON.stringify({ content: next, encoding: 'utf-8' }),
+      body: JSON.stringify({ content: file.content, encoding: 'utf-8' }),
     });
-    blobs.push({
-      path: `_store/${flags.slug}.md`,
-      mode: '100644',
-      type: 'blob',
-      sha: blob.sha,
-    });
-    changed.push(flags.slug);
+    blobs.push({ path: file.path, mode: '100644', type: 'blob', sha: blob.sha });
   }
-
-  if (!blobs.length) return changed;
-
+  if (!blobs.length) return;
+  const branch = gitBranch(env);
   const ref = await githubJson(env, `/git/ref/heads/${encodeURIComponent(branch)}`);
   const parentSha = ref.object && ref.object.sha;
   const parent = await githubJson(env, `/git/commits/${parentSha}`);
   const tree = await githubJson(env, '/git/trees', {
     method: 'POST',
-    body: JSON.stringify({
-      base_tree: parent.tree.sha,
-      tree: blobs,
-    }),
+    body: JSON.stringify({ base_tree: parent.tree.sha, tree: blobs }),
   });
   const commit = await githubJson(env, '/git/commits', {
     method: 'POST',
-    body: JSON.stringify({
-      message: 'Update store stock from admin',
-      tree: tree.sha,
-      parents: [parentSha],
-    }),
+    body: JSON.stringify({ message, tree: tree.sha, parents: [parentSha] }),
   });
   await githubJson(env, `/git/refs/heads/${encodeURIComponent(branch)}`, {
     method: 'PATCH',
     body: JSON.stringify({ sha: commit.sha }),
   });
-  return changed;
 }
 
-function writeTarget(env) {
-  if (localStoreDir(env)) return 'local';
-  if (env.GITHUB_TOKEN && repoParts(env)) return 'github';
-  return null;
+async function githubDelete(env, filePath, message) {
+  const branch = gitBranch(env);
+  const file = await githubJson(
+    env,
+    `/contents/${filePath.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(branch)}`
+  );
+  await githubJson(env, `/contents/${filePath.split('/').map(encodeURIComponent).join('/')}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ message, sha: file.sha, branch }),
+  });
 }
 
-function normalizeUpdates(rawProducts, allowedSlugs) {
+function readLocalCatalog(env) {
+  const root = localRoot(env);
+  for (const rel of CATALOG_FILES) {
+    const full = path.join(root, rel);
+    if (fs.existsSync(full)) return JSON.parse(fs.readFileSync(full, 'utf8'));
+  }
+  return emptyCatalog();
+}
+
+function writeLocalCatalog(env, catalog) {
+  const root = localRoot(env);
+  const json = store.prettyCatalog(catalog);
+  for (const rel of CATALOG_FILES) {
+    const full = path.join(root, rel);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, json);
+  }
+}
+
+async function readCatalog(env) {
+  if (writeTarget(env) === 'local') return readLocalCatalog(env);
+  try {
+    const raw = await githubRead(env, 'api/catalog-data.json');
+    return JSON.parse(raw);
+  } catch (err) {
+    if (Number(err.status) === 404) return emptyCatalog();
+    throw err;
+  }
+}
+
+function listStoreFilesLocal(env) {
+  const dir = path.join(localRoot(env), '_store');
+  return fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
+}
+
+function readStoreLocal(env, name) {
+  return fs.readFileSync(path.join(localRoot(env), '_store', name), 'utf8');
+}
+
+async function listProducts(env) {
+  const target = writeTarget(env);
+  if (!target) return { error: 'חסר GITHUB_TOKEN. צריך להגדיר אותו ב-Vercel כדי לנהל את החנות.' };
+  const catalog = await readCatalog(env);
+  let names;
+  const rawBySlug = {};
+  if (target === 'local') {
+    names = listStoreFilesLocal(env);
+    names.forEach((name) => {
+      rawBySlug[name.replace(/\.md$/, '')] = readStoreLocal(env, name);
+    });
+  } else {
+    const branch = gitBranch(env);
+    const entries = await githubJson(env, `/contents/_store?ref=${encodeURIComponent(branch)}`);
+    names = (Array.isArray(entries) ? entries : [])
+      .filter((entry) => entry.name && entry.name.endsWith('.md'))
+      .map((entry) => entry.name);
+    for (const name of names) {
+      rawBySlug[name.replace(/\.md$/, '')] = await githubRead(env, `_store/${name}`);
+    }
+  }
+  const products = names
+    .map((name) => {
+      const slug = name.replace(/\.md$/, '');
+      return store.parsePage(slug, rawBySlug[slug], catalog[slug]);
+    })
+    .filter(Boolean)
+    .sort((a, b) => String(a.title).localeCompare(String(b.title), 'he'));
+  return { target, products, catalog };
+}
+
+function catalogFilesFrom(catalog) {
+  const json = store.prettyCatalog(catalog);
+  return CATALOG_FILES.map((pathName) => ({ path: pathName, content: json }));
+}
+
+async function upsertProduct(env, input, { isNew }) {
+  const target = writeTarget(env);
+  const catalog = await readCatalog(env);
+  const mdPath = `_store/${input.slug}.md`;
+  let previous = '';
+  if (!isNew) {
+    if (target === 'local') previous = readStoreLocal(env, `${input.slug}.md`);
+    else previous = await githubRead(env, mdPath);
+  }
+  const markdown = isNew ? store.newPage(input) : store.applyPage(previous, input);
+  const row = store.catalogRowFromInput(input);
+  if (row) catalog[input.slug] = row;
+  else delete catalog[input.slug];
+
+  if (target === 'local') {
+    const full = path.join(localRoot(env), mdPath);
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, markdown);
+    writeLocalCatalog(env, catalog);
+    return { target, slug: input.slug };
+  }
+
+  await commitFiles(
+    env,
+    [{ path: mdPath, content: markdown }, ...catalogFilesFrom(catalog)],
+    isNew ? `Add store product ${input.slug}` : `Update store product ${input.slug}`
+  );
+  return { target, slug: input.slug };
+}
+
+async function deleteProduct(env, slug) {
+  const target = writeTarget(env);
+  const catalog = await readCatalog(env);
+  delete catalog[slug];
+  const mdPath = `_store/${slug}.md`;
+  if (target === 'local') {
+    const full = path.join(localRoot(env), mdPath);
+    if (fs.existsSync(full)) fs.unlinkSync(full);
+    writeLocalCatalog(env, catalog);
+    return { target, slug };
+  }
+  await commitFiles(env, catalogFilesFrom(catalog), `Remove ${slug} from catalog`);
+  try {
+    await githubDelete(env, mdPath, `Delete store product ${slug}`);
+  } catch (err) {
+    if (Number(err.status) !== 404) throw err;
+  }
+  return { target, slug };
+}
+
+function normalizeFlags(rawProducts, allowedSlugs) {
   if (!Array.isArray(rawProducts)) return { error: 'אין רשימת מוצרים' };
   const updates = [];
   for (const row of rawProducts) {
     const slug = row && row.slug;
-    if (!SLUG_RE.test(String(slug || '')) || !allowedSlugs.has(slug)) {
+    if (!store.SLUG_RE.test(String(slug || '')) || !allowedSlugs.has(slug)) {
       return { error: 'מוצר לא מוכר' };
     }
     updates.push({
@@ -322,18 +341,36 @@ function normalizeUpdates(rawProducts, allowedSlugs) {
   return { updates };
 }
 
-async function listProducts(env) {
-  const target = writeTarget(env);
-  if (target === 'local') return { target, products: listLocal(env) };
-  if (target === 'github') return { target, products: await listGithub(env) };
-  return { error: 'חסר GITHUB_TOKEN. צריך להגדיר אותו ב-Vercel כדי לנהל מלאי.' };
-}
-
-async function saveProducts(env, updates) {
-  const target = writeTarget(env);
-  if (target === 'local') return { target, changed: saveLocal(env, updates) };
-  if (target === 'github') return { target, changed: await saveGithub(env, updates) };
-  return { error: 'חסר GITHUB_TOKEN. צריך להגדיר אותו ב-Vercel כדי לנהל מלאי.' };
+async function saveFlags(env, updates) {
+  const listed = await listProducts(env);
+  if (listed.error) return listed;
+  const files = [];
+  const changed = [];
+  for (const flags of updates) {
+    const current = listed.products.find((p) => p.slug === flags.slug);
+    if (!current) continue;
+    if (
+      Boolean(current.out_of_stock) === flags.out_of_stock &&
+      Boolean(current.limited_stock) === flags.limited_stock &&
+      Boolean(current.hide) === flags.hide
+    ) {
+      continue;
+    }
+    let raw;
+    if (listed.target === 'local') raw = readStoreLocal(env, `${flags.slug}.md`);
+    else raw = await githubRead(env, `_store/${flags.slug}.md`);
+    const next = store.applyPage(raw, { ...current, ...flags });
+    if (listed.target === 'local') {
+      fs.writeFileSync(path.join(localRoot(env), '_store', `${flags.slug}.md`), next);
+    } else {
+      files.push({ path: `_store/${flags.slug}.md`, content: next });
+    }
+    changed.push(flags.slug);
+  }
+  if (listed.target === 'github' && files.length) {
+    await commitFiles(env, files, 'Update store stock from admin');
+  }
+  return { target: listed.target, changed };
 }
 
 async function handler(req, res) {
@@ -351,23 +388,18 @@ async function handler(req, res) {
 
   const env = process.env;
   if (!String(env.ADMIN_PASSWORD || '').trim()) {
-    return json(res, 503, { error: 'ניהול המלאי עדיין לא הוגדר (ADMIN_PASSWORD).' });
+    return json(res, 503, { error: 'ניהול החנות עדיין לא הוגדר (ADMIN_PASSWORD).' });
   }
 
   const secure = isSecureReq(req);
+  const body = req.body || {};
 
   if (req.method === 'POST') {
-    const body = req.body || {};
     if (body.action === 'login') {
       if (!safeEqual(body.password, env.ADMIN_PASSWORD)) {
         return json(res, 401, { error: 'סיסמה שגויה' });
       }
-      return json(
-        res,
-        200,
-        { ok: true },
-        { 'Set-Cookie': cookieHeader(sessionToken(env), { secure }) }
-      );
+      return json(res, 200, { ok: true }, { 'Set-Cookie': cookieHeader(sessionToken(env), { secure }) });
     }
     if (body.action === 'logout') {
       return json(res, 200, { ok: true }, { 'Set-Cookie': cookieHeader('', { clear: true, secure }) });
@@ -393,46 +425,60 @@ async function handler(req, res) {
     return json(res, 405, { error: 'Method not allowed' });
   }
 
-  const body = req.body || {};
-  if (body.action !== 'save') {
+  try {
+    if (body.action === 'save') {
+      const listed = await listProducts(env);
+      if (listed.error) return json(res, 503, { error: listed.error });
+      const allowed = new Set(listed.products.map((product) => product.slug));
+      const normalized = normalizeFlags(body.products, allowed);
+      if (normalized.error) return json(res, 400, { error: normalized.error });
+      const saved = await saveFlags(env, normalized.updates);
+      if (saved.error) return json(res, 503, { error: saved.error });
+      return json(res, 200, { ok: true, changed: saved.changed, target: saved.target });
+    }
+
+    if (body.action === 'upsert') {
+      const listed = await listProducts(env);
+      if (listed.error) return json(res, 503, { error: listed.error });
+      const existing = new Set(listed.products.map((p) => p.slug));
+      const isNew = Boolean(body.isNew);
+      const normalized = store.normalizeProductInput(body.product, {
+        isNew,
+        existingSlugs: existing,
+        catalog: listed.catalog,
+      });
+      if (normalized.error) return json(res, 400, { error: normalized.error });
+      const saved = await upsertProduct(env, normalized.input, { isNew });
+      return json(res, 200, { ok: true, slug: saved.slug, target: saved.target });
+    }
+
+    if (body.action === 'delete') {
+      const slug = String(body.slug || '').trim();
+      if (!store.SLUG_RE.test(slug)) return json(res, 400, { error: 'מוצר לא מוכר' });
+      const listed = await listProducts(env);
+      if (listed.error) return json(res, 503, { error: listed.error });
+      if (!listed.products.some((p) => p.slug === slug)) {
+        return json(res, 404, { error: 'מוצר לא נמצא' });
+      }
+      const deleted = await deleteProduct(env, slug);
+      return json(res, 200, { ok: true, slug: deleted.slug, target: deleted.target });
+    }
+
     return json(res, 400, { error: 'פעולה לא תקינה' });
-  }
-
-  let listed;
-  try {
-    listed = await listProducts(env);
   } catch (err) {
-    console.error('admin list before save failed', err);
-    return json(res, 502, { error: 'לא הצלחנו לקרוא את המוצרים מ-GitHub' });
-  }
-  if (listed.error) return json(res, 503, { error: listed.error });
-
-  const allowed = new Set(listed.products.map((product) => product.slug));
-  const normalized = normalizeUpdates(body.products, allowed);
-  if (normalized.error) return json(res, 400, { error: normalized.error });
-
-  try {
-    const saved = await saveProducts(env, normalized.updates);
-    if (saved.error) return json(res, 503, { error: saved.error });
-    return json(res, 200, {
-      ok: true,
-      changed: saved.changed,
-      target: saved.target,
-    });
-  } catch (err) {
-    console.error('admin save failed', err);
+    console.error('admin write failed', err);
     return json(res, 502, { error: 'לא הצלחנו לשמור ב-GitHub' });
   }
 }
 
-handler.splitFrontMatter = splitFrontMatter;
-handler.yamlValue = yamlValue;
-handler.setYamlBool = setYamlBool;
-handler.parseProduct = parseProduct;
-handler.applyFlags = applyFlags;
 handler.sessionToken = sessionToken;
 handler.isAuthed = isAuthed;
 handler.COOKIE = COOKIE;
-handler.normalizeUpdates = normalizeUpdates;
+handler.splitFrontMatter = store.splitFrontMatter;
+handler.yamlValue = store.yamlValue;
+handler.setYamlBool = store.setYamlBool;
+handler.parseProduct = (slug, raw) => store.parsePage(slug, raw, null);
+handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('x', raw, null), ...flags });
+handler.normalizeUpdates = normalizeFlags;
 
 module.exports = handler;

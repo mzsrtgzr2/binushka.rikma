@@ -6,13 +6,8 @@
  * POST /api/v1/payments/form  (get payment form)
  */
 
-const { buildOrder, priceBookFromMorningItems, applyVariantNote } = require('./catalog');
-const {
-  resolveMorningEnv,
-  morningHosts,
-  getMorningToken,
-  searchItems,
-} = require('./morning');
+const { buildOrder, applyVariantNote } = require('./catalog');
+const { resolveMorningEnv, morningHosts, getMorningToken } = require('./morning');
 
 const VAT_RATE = 0.18;
 const GROW_PRODUCTION_PLUGIN_ID = '453df580-760d-439d-a848-4fe7dc1fb9b3';
@@ -275,15 +270,6 @@ async function handler(req, res) {
   }
 
   let pricedOrder = order;
-  try {
-    const items = await searchItems(rest, token);
-    const live = priceBookFromMorningItems(items);
-    if (Object.keys(live).length) {
-      pricedOrder = applyVariantNote(buildOrder(body.items, body.shipping, live), body.variantNote);
-    }
-  } catch (err) {
-    console.warn('Morning item prices unavailable, using catalog fallback', err);
-  }
 
   const payload = buildPaymentFormPayload({
     order: pricedOrder,

@@ -30,7 +30,7 @@ layout: default
               <div class="store-item__subtitle">{{ item.subtitle }}</div>
               {% endif %}
               {% assign slug = item.slug | default: item.basename %}
-              {% assign cart_meta = site.data.store-cart.products[slug] %}
+              {% assign cart_meta = site.data.catalog[slug] %}
               <div class="store-item__footer">
               {% if item.price %}
               <div class="store-item__price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ item.price }}</div>

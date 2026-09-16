@@ -152,7 +152,7 @@
     var card = triggerEl && triggerEl.closest ? triggerEl.closest('.store-item') : null;
     if (card) img = card.querySelector('.store-item__image img');
     if (!img && triggerEl && triggerEl.closest) {
-      var variantCard = triggerEl.closest('.scrunchies-variant');
+      var variantCard = triggerEl.closest('.scrunchies-variant, .store-variant');
       if (variantCard) img = variantCard.querySelector('img');
     }
     if (!img) img = document.querySelector('.store-item-image-container img');

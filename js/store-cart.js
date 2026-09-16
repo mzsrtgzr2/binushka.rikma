@@ -143,7 +143,7 @@
     var startY = start.top + start.height / 2;
     var endX = end.left + end.width / 2;
     var endY = end.top + end.height / 2;
-    var size = Math.max(48, Math.min(88, Math.min(start.width, start.height) * 0.45));
+    var size = Math.max(64, Math.min(104, Math.min(start.width, start.height) * 0.55));
 
     var flyer = document.createElement('div');
     flyer.className = 'store-cart-flyer';
@@ -152,49 +152,66 @@
     flyer.style.height = size + 'px';
     flyer.style.left = startX + 'px';
     flyer.style.top = startY + 'px';
+    flyer.style.transform = 'translate(-50%, -50%) scale(1)';
     if (source.url) flyer.style.backgroundImage = 'url("' + source.url.replace(/"/g, '\\"') + '")';
     document.body.appendChild(flyer);
 
     var dx = endX - startX;
     var dy = endY - startY;
-    var anim = flyer.animate(
-      [
-        { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
-        {
-          transform:
-            'translate(-50%, -50%) translate(' +
-            dx * 0.42 +
-            'px, ' +
-            (dy * 0.28 - 72) +
-            'px) scale(0.82) rotate(-12deg)',
-          opacity: 1,
-          offset: 0.48,
-        },
-        {
-          transform:
-            'translate(-50%, -50%) translate(' + dx + 'px, ' + dy + 'px) scale(0.18) rotate(18deg)',
-          opacity: 0.25,
-          offset: 1,
-        },
-      ],
-      { duration: 720, easing: 'cubic-bezier(0.45, 0.05, 0.2, 1)', fill: 'forwards' }
-    );
+    var arc = (dx < 0 ? -1 : 1) * Math.min(90, Math.abs(dx) * 0.18);
 
-    var finished = false;
-    function finish() {
-      if (finished) return;
-      finished = true;
-      if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
-      bumpCart();
-      done();
+    function startAnim() {
+      var anim;
+      try {
+        anim = flyer.animate(
+          [
+            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
+            {
+              transform:
+                'translate(-50%, -50%) translate(' +
+                (dx * 0.45 + arc) +
+                'px, ' +
+                (dy * 0.35 - 48) +
+                'px) scale(0.78) rotate(-14deg)',
+              opacity: 1,
+              offset: 0.52,
+            },
+            {
+              transform:
+                'translate(-50%, -50%) translate(' + dx + 'px, ' + dy + 'px) scale(0.2) rotate(16deg)',
+              opacity: 0.35,
+              offset: 1,
+            },
+          ],
+          { duration: 900, easing: 'cubic-bezier(0.45, 0.05, 0.22, 1)', fill: 'forwards' }
+        );
+      } catch (e) {
+        if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+        bumpCart();
+        done();
+        return;
+      }
+
+      var finished = false;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+        bumpCart();
+        window.setTimeout(done, 180);
+      }
+
+      if (anim && anim.finished) {
+        anim.finished.then(finish).catch(finish);
+      } else if (anim) {
+        anim.onfinish = finish;
+      }
+      window.setTimeout(finish, 980);
     }
 
-    if (anim && anim.finished) {
-      anim.finished.then(finish).catch(finish);
-    } else if (anim) {
-      anim.onfinish = finish;
-    }
-    window.setTimeout(finish, 800);
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(startAnim);
+    });
   }
 
   var els = {

@@ -6,7 +6,18 @@ permalink: /thanks/
 ---
 
 <div class="container">
-  <div class="page-head">
+  <div class="page-head thanks-head">
+    <div class="thanks-confirm" role="img" aria-label="ההזמנה אושרה, הכל בסדר">
+      <span class="thanks-confirm__ring" aria-hidden="true"></span>
+      <span class="thanks-confirm__ring thanks-confirm__ring--delay" aria-hidden="true"></span>
+      <span class="thanks-confirm__sparkles" aria-hidden="true"></span>
+      <span class="thanks-confirm__badge">
+        <svg class="thanks-confirm__svg" viewBox="0 0 72 72" aria-hidden="true" focusable="false">
+          <circle class="thanks-confirm__circle" cx="36" cy="36" r="34"></circle>
+          <path class="thanks-confirm__check" d="M22 37.5l9 9 19-20"></path>
+        </svg>
+      </span>
+    </div>
     <h1 class="page-title">{{ page.title }}</h1>
     <p class="page-description">{{ page.description }}</p>
   </div>

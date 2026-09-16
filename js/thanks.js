@@ -26,6 +26,38 @@
     }
   }
 
+  function itemImage(item) {
+    if (item && item.image) return item.image;
+    var cat = window.StoreCart && StoreCart.catalog && item && StoreCart.catalog[item.id];
+    return (cat && cat.image) || '';
+  }
+
+  function lineHtml(item) {
+    var img = itemImage(item);
+    var thumb = img
+      ? '<img class="checkout-lines__thumb" src="' +
+        escapeHtml(img) +
+        '" alt="' +
+        escapeHtml(item.name) +
+        '">'
+      : '<span class="checkout-lines__thumb checkout-lines__thumb--empty" aria-hidden="true"></span>';
+    return (
+      '<li class="checkout-lines__item checkout-lines__item--product">' +
+      thumb +
+      '<span class="checkout-lines__info">' +
+      '<span class="checkout-lines__name">' +
+      escapeHtml(item.name) +
+      '</span>' +
+      '<span class="checkout-lines__qty">× ' +
+      escapeHtml(item.quantity) +
+      '</span>' +
+      '</span>' +
+      '<span class="checkout-lines__price">₪' +
+      escapeHtml(item.price * item.quantity) +
+      '</span></li>'
+    );
+  }
+
   function init() {
     var orderEl = document.getElementById('thanks-order');
     var linesEl = document.getElementById('thanks-lines');
@@ -37,19 +69,7 @@
     if (!order || !order.items.length) return;
 
     orderEl.hidden = false;
-    linesEl.innerHTML = order.items
-      .map(function (item) {
-        return (
-          '<li class="checkout-lines__item"><span>' +
-          escapeHtml(item.name) +
-          ' × ' +
-          escapeHtml(item.quantity) +
-          '</span><span>₪' +
-          escapeHtml(item.price * item.quantity) +
-          '</span></li>'
-        );
-      })
-      .join('');
+    linesEl.innerHTML = order.items.map(lineHtml).join('');
 
     if (shippingEl) {
       var label = SHIPPING_LABELS[order.shipping] || order.shipping || 'משלוח';

@@ -74,12 +74,19 @@
     if (linesEl) {
       linesEl.innerHTML = items
         .map(function (item) {
+          var img = item.image
+            ? '<img class="checkout-lines__thumb" src="' +
+              item.image +
+              '" alt="">'
+            : '<span class="checkout-lines__thumb checkout-lines__thumb--empty" aria-hidden="true"></span>';
           return (
-            '<li class="checkout-lines__item"><span>' +
+            '<li class="checkout-lines__item checkout-lines__item--product">' +
+            img +
+            '<span class="checkout-lines__info"><span class="checkout-lines__name">' +
             item.name +
-            ' × ' +
+            '</span><span class="checkout-lines__qty">× ' +
             item.quantity +
-            '</span><span>₪' +
+            '</span></span><span class="checkout-lines__price">₪' +
             item.price * item.quantity +
             '</span></li>'
           );

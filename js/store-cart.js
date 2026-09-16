@@ -51,7 +51,14 @@
       .map(function (id) {
         var p = byId[id];
         if (!p || cart[id] < 1) return null;
-        return { id: id, quantity: cart[id], name: p.name, price: p.price, url: p.url };
+        return {
+          id: id,
+          quantity: cart[id],
+          name: p.name,
+          price: p.price,
+          url: p.url,
+          image: p.image || '',
+        };
       })
       .filter(Boolean);
   }
@@ -72,6 +79,122 @@
     saveCart(cart);
     renderWidget();
     return true;
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function imageUrlFromEl(img) {
+    if (!img) return '';
+    return img.getAttribute('data-src') || img.currentSrc || img.src || '';
+  }
+
+  function isInViewport(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var r = el.getBoundingClientRect();
+    return r.width > 8 && r.height > 8 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+  }
+
+  function findAddSource(id, triggerEl) {
+    var img = null;
+    var card = triggerEl && triggerEl.closest ? triggerEl.closest('.store-item') : null;
+    if (card) img = card.querySelector('.store-item__image img');
+    if (!img) img = document.querySelector('.store-item-image-container img');
+    var url = imageUrlFromEl(img) || (byId[id] && byId[id].image) || '';
+    var originEl = triggerEl;
+    if (img && isInViewport(img)) originEl = img;
+    return { url: url, originEl: originEl || (els.toggle) };
+  }
+
+  function bumpCart() {
+    if (!els.toggle) return;
+    els.toggle.classList.remove('is-bump');
+    if (els.count) els.count.classList.remove('is-pop');
+    void els.toggle.offsetWidth;
+    els.toggle.classList.add('is-bump');
+    if (els.count && !els.count.hidden) els.count.classList.add('is-pop');
+    window.setTimeout(function () {
+      els.toggle.classList.remove('is-bump');
+      if (els.count) els.count.classList.remove('is-pop');
+    }, 600);
+  }
+
+  function flyToCart(id, triggerEl, onDone) {
+    var done = typeof onDone === 'function' ? onDone : function () {};
+    var cartBtn = els.toggle;
+    if (!cartBtn || prefersReducedMotion() || !window.Element || !Element.prototype.animate) {
+      bumpCart();
+      done();
+      return;
+    }
+
+    var source = findAddSource(id, triggerEl);
+    var origin = source.originEl || triggerEl || cartBtn;
+    var start = origin.getBoundingClientRect();
+    var end = cartBtn.getBoundingClientRect();
+    if (!start.width || !end.width) {
+      bumpCart();
+      done();
+      return;
+    }
+
+    var startX = start.left + start.width / 2;
+    var startY = start.top + start.height / 2;
+    var endX = end.left + end.width / 2;
+    var endY = end.top + end.height / 2;
+    var size = Math.max(48, Math.min(88, Math.min(start.width, start.height) * 0.45));
+
+    var flyer = document.createElement('div');
+    flyer.className = 'store-cart-flyer';
+    flyer.setAttribute('aria-hidden', 'true');
+    flyer.style.width = size + 'px';
+    flyer.style.height = size + 'px';
+    flyer.style.left = startX + 'px';
+    flyer.style.top = startY + 'px';
+    if (source.url) flyer.style.backgroundImage = 'url("' + source.url.replace(/"/g, '\\"') + '")';
+    document.body.appendChild(flyer);
+
+    var dx = endX - startX;
+    var dy = endY - startY;
+    var anim = flyer.animate(
+      [
+        { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
+        {
+          transform:
+            'translate(-50%, -50%) translate(' +
+            dx * 0.42 +
+            'px, ' +
+            (dy * 0.28 - 72) +
+            'px) scale(0.82) rotate(-12deg)',
+          opacity: 1,
+          offset: 0.48,
+        },
+        {
+          transform:
+            'translate(-50%, -50%) translate(' + dx + 'px, ' + dy + 'px) scale(0.18) rotate(18deg)',
+          opacity: 0.25,
+          offset: 1,
+        },
+      ],
+      { duration: 720, easing: 'cubic-bezier(0.45, 0.05, 0.2, 1)', fill: 'forwards' }
+    );
+
+    var finished = false;
+    function finish() {
+      if (finished) return;
+      finished = true;
+      if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+      bumpCart();
+      done();
+    }
+
+    if (anim && anim.finished) {
+      anim.finished.then(finish).catch(finish);
+    } else if (anim) {
+      anim.onfinish = finish;
+    }
+    window.setTimeout(finish, 800);
   }
 
   var els = {
@@ -127,7 +250,11 @@
     cartItems(cart).forEach(function (item) {
       var li = document.createElement('li');
       li.className = 'store-cart__line';
+      var thumb = item.image
+        ? '<img class="store-cart__thumb" src="' + escapeHtml(item.image) + '" alt="">'
+        : '<span class="store-cart__thumb store-cart__thumb--empty" aria-hidden="true"></span>';
       li.innerHTML =
+        thumb +
         '<div class="store-cart__line-info">' +
         '<a href="' + item.url + '">' + escapeHtml(item.name) + '</a>' +
         '<span class="store-cart__line-price">₪' + item.price * item.quantity + '</span>' +
@@ -146,8 +273,15 @@
     STORAGE_KEY: STORAGE_KEY,
     load: loadCart,
     save: saveCart,
-    add: function (id) {
-      if (addToCart(id, 1)) openPanel();
+    add: function (id, triggerEl) {
+      if (!addToCart(id, 1)) return;
+      if (triggerEl && triggerEl.classList) {
+        triggerEl.classList.add('is-added');
+        window.setTimeout(function () {
+          triggerEl.classList.remove('is-added');
+        }, 900);
+      }
+      flyToCart(id, triggerEl, openPanel);
     },
     items: function () {
       return cartItems(loadCart());
@@ -166,7 +300,7 @@
     var btn = e.target.closest('[data-cart-add]');
     if (btn) {
       e.preventDefault();
-      StoreCart.add(btn.getAttribute('data-cart-add'));
+      StoreCart.add(btn.getAttribute('data-cart-add'), btn);
     }
   });
 

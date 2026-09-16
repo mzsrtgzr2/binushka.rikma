@@ -87,9 +87,51 @@
 .checkout-lines__item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  padding: 8px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--border-color);
+}
+
+.checkout-lines__item--product {
+  align-items: center;
+}
+
+.checkout-lines__thumb {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 14px;
+  background: var(--white, #fff);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+}
+
+.checkout-lines__thumb--empty {
+  display: block;
+}
+
+.checkout-lines__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: start;
+}
+
+.checkout-lines__name {
+  font-weight: 700;
+}
+
+.checkout-lines__qty {
+  font-size: 14px;
+  opacity: .75;
+}
+
+.checkout-lines__price {
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .checkout-subtotal,
@@ -118,14 +160,146 @@
   cursor: pointer;
 }
 
+.thanks-head {
+  .thanks-confirm {
+    position: relative;
+    width: 112px;
+    height: 112px;
+    margin: 8px auto 24px;
+  }
+
+  .thanks-confirm__badge {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    background: var(--brand-color);
+    box-shadow: 0 14px 34px rgba(254, 200, 36, .42);
+    animation: thanks-pop .7s cubic-bezier(.34, 1.56, .64, 1);
+  }
+
+  .thanks-confirm__svg {
+    width: 64px;
+    height: 64px;
+    overflow: visible;
+  }
+
+  .thanks-confirm__circle {
+    fill: none;
+  }
+
+  .thanks-confirm__check {
+    fill: none;
+    stroke: var(--heading-font-color);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: thanks-draw .45s .28s ease forwards;
+  }
+
+  .thanks-confirm__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--brand-color);
+    opacity: 0;
+    animation: thanks-ring 1.15s ease-out forwards;
+  }
+
+  .thanks-confirm__ring--delay {
+    animation-delay: .18s;
+  }
+
+  .thanks-confirm__sparkles {
+    position: absolute;
+    inset: 50%;
+    width: 8px;
+    height: 8px;
+    margin: -4px;
+    background: transparent;
+    pointer-events: none;
+    box-shadow:
+      -62px -30px 0 0 var(--brand-color),
+      56px -38px 0 1px var(--brand-color),
+      -50px 44px 0 0 var(--brand-color),
+      64px 28px 0 0 var(--brand-color),
+      0 -68px 0 -1px var(--brand-color);
+    animation: thanks-sparkle .95s .32s ease both;
+  }
+}
+
 .thanks-page {
   .status-list {
+    list-style: none;
     margin: 0;
-    padding-inline-start: 1.2em;
+    padding: 0;
+
+    li {
+      position: relative;
+      margin: 8px 0;
+      padding-inline-start: 28px;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: .45em;
+        inset-inline-start: 0;
+        width: 8px;
+        height: 14px;
+        border-inline-end: 2.5px solid var(--brand-color);
+        border-bottom: 2.5px solid var(--brand-color);
+        transform: rotate(45deg);
+      }
+    }
   }
 
   .thanks-section + .thanks-section {
     margin-top: 24px;
+  }
+}
+
+@keyframes thanks-pop {
+  0% { transform: scale(.42); opacity: 0; }
+  72% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes thanks-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes thanks-ring {
+  0% { transform: scale(.72); opacity: .65; }
+  100% { transform: scale(1.58); opacity: 0; }
+}
+
+@keyframes thanks-sparkle {
+  0% { opacity: 0; transform: scale(.35); }
+  40% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thanks-head .thanks-confirm__badge,
+  .thanks-head .thanks-confirm__check,
+  .thanks-head .thanks-confirm__ring,
+  .thanks-head .thanks-confirm__sparkles {
+    animation: none;
+  }
+
+  .thanks-head .thanks-confirm__check {
+    stroke-dashoffset: 0;
+  }
+
+  .thanks-head .thanks-confirm__ring,
+  .thanks-head .thanks-confirm__sparkles {
+    display: none;
   }
 }
 

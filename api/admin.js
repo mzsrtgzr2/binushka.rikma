@@ -28,8 +28,29 @@ function safeEqual(a, b) {
   return crypto.timingSafeEqual(left, right);
 }
 
+function pickEnv(bag, name) {
+  if (!bag) return '';
+  return String(bag[String(name)] || '').trim();
+}
+
+function adminPassword(env) {
+  const bag = env || process.env;
+  return pickEnv(bag, 'ADMIN_PASSWORD') || pickEnv(bag, 'BINUSHKA_ADMIN_PASSWORD');
+}
+
+function adminConfigHint(env) {
+  const bag = env || process.env;
+  const vercelEnv = pickEnv(bag, 'VERCEL_ENV') || 'unknown';
+  const gitRef = pickEnv(bag, 'VERCEL_GIT_COMMIT_REF');
+  const adminKeys = Object.keys(bag).filter((key) => /admin/i.test(key));
+  const parts = [`סביבה: ${vercelEnv}`];
+  if (gitRef) parts.push(`ענף: ${gitRef}`);
+  if (adminKeys.length) parts.push(`מפתחות: ${adminKeys.join(', ')}`);
+  return parts.join(', ');
+}
+
 function sessionToken(env) {
-  const secret = String((env || process.env).ADMIN_PASSWORD || '');
+  const secret = adminPassword(env);
   if (!secret) return '';
   return crypto.createHmac('sha256', secret).update(SESSION_PAYLOAD).digest('hex');
 }
@@ -387,8 +408,10 @@ async function handler(req, res) {
   }
 
   const env = process.env;
-  if (!String(env.ADMIN_PASSWORD || '').trim()) {
-    return json(res, 503, { error: 'ניהול החנות עדיין לא הוגדר (ADMIN_PASSWORD).' });
+  if (!adminPassword(env)) {
+    return json(res, 503, {
+      error: `ניהול החנות עדיין לא הוגדר (ADMIN_PASSWORD). ${adminConfigHint(env)}. צריך משתנה Preview בשם ADMIN_PASSWORD ואז Redeploy.`,
+    });
   }
 
   const secure = isSecureReq(req);
@@ -396,7 +419,7 @@ async function handler(req, res) {
 
   if (req.method === 'POST') {
     if (body.action === 'login') {
-      if (!safeEqual(body.password, env.ADMIN_PASSWORD)) {
+      if (!safeEqual(body.password, adminPassword(env))) {
         return json(res, 401, { error: 'סיסמה שגויה' });
       }
       return json(res, 200, { ok: true }, { 'Set-Cookie': cookieHeader(sessionToken(env), { secure }) });

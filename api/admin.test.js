@@ -80,6 +80,19 @@ function request(handler, { method, headers, body, env }) {
   });
 }
 
+test('missing ADMIN_PASSWORD is reported as not configured', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: {},
+    body: { action: 'login', password: 'secret-pass' },
+    env: { ADMIN_PASSWORD: '', VERCEL_ENV: 'preview', VERCEL_GIT_COMMIT_REF: 'cursor/store-cart-34b6' },
+  });
+  assert.equal(result.status, 503);
+  assert.match(result.json.error, /ADMIN_PASSWORD/);
+  assert.match(result.json.error, /preview/);
+  assert.match(result.json.error, /cursor\/store-cart-34b6/);
+});
+
 test('login with the right password sets a session cookie', async () => {
   const result = await request(admin, {
     method: 'POST',

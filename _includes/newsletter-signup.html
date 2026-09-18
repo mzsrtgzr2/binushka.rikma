@@ -1,0 +1,41 @@
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+<div class="newsletter-signup {{ include.class }}">
+  {% unless include.hide_heading %}
+  <h3 class="newsletter-signup__title">{{ include.title | default: newsletter.title }}</h3>
+  <p class="newsletter-signup__description">{{ include.description | default: newsletter.description }}</p>
+  {% endunless %}
+
+  <form class="newsletter-signup__form"
+        data-newsletter-form
+        data-newsletter-source="{{ include.source | default: 'website' }}"
+        novalidate>
+    <div class="newsletter-signup__field">
+      <input type="email"
+             name="email"
+             class="form__input newsletter-signup__input"
+             placeholder="{{ newsletter.placeholder }}"
+             aria-label="{{ newsletter.placeholder }}"
+             autocomplete="email"
+             required>
+      <button type="submit" class="button button--primary newsletter-signup__button">
+        {{ newsletter.button }}
+      </button>
+    </div>
+
+    <div class="newsletter-signup__honeypot" aria-hidden="true">
+      <label>
+        Website
+        <input type="text" name="website" tabindex="-1" autocomplete="off" data-newsletter-honeypot>
+      </label>
+    </div>
+
+    <p class="newsletter-status" data-newsletter-status role="status" aria-live="polite" hidden></p>
+
+    <p class="newsletter-signup__consent">
+      {{ newsletter.consent }}
+      <a href="{{ '/newsletter/' | relative_url }}">{{ newsletter.consent_link_text }}</a>
+    </p>
+  </form>
+</div>
+{% endif %}

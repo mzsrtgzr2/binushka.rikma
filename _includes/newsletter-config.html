@@ -1,0 +1,27 @@
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+{% assign messages = newsletter.messages %}
+<script type="application/json" id="newsletter-config">
+{
+  "locale": {{ newsletter.locale | default: 'he-IL' | jsonify }},
+  "endpoints": {
+    "subscribe": "/api/newsletter/subscribe",
+    "unsubscribe": "/api/newsletter/unsubscribe",
+    "latest": "/api/newsletter/latest"
+  },
+  "text": {
+    "sending": {{ messages.sending | jsonify }},
+    "success": {{ messages.success | jsonify }},
+    "confirmPending": {{ messages.confirm_pending | jsonify }},
+    "unsubscribed": {{ messages.unsubscribed | jsonify }},
+    "invalidEmail": {{ messages.invalid_email | jsonify }},
+    "rateLimited": {{ messages.rate_limited | jsonify }},
+    "unavailable": {{ messages.unavailable | jsonify }},
+    "error": {{ messages.error | jsonify }},
+    "readIssue": {{ messages.read_issue | jsonify }},
+    "untitledIssue": {{ messages.untitled_issue | jsonify }}
+  }
+}
+</script>
+<script src="{{ site.baseurl }}/js/newsletter.js" defer></script>
+{% endif %}

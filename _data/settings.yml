@@ -57,11 +57,33 @@ hero:
 
 
 #-------------------------------
-# Newsletter
-mailchimp: enable # To enable the mailchimp form, use the value 'enable'. To disable the form, leave the field blank.
-mailchimp__identifier: frnla.us6.list-manage.com/subscribe/post?u=6314d69a3f315af7ce3fb00a0&amp;id=3038727cc3 # Add your MailChimp form identifier. For example - frnla.us6.list-manage.com/subscribe/post?u=6314d69a3f315af7ce3fb00a0&amp;id=3038727cc3
-mailchimp__input__text: Your email address...
-mailchimp__button__text: Get updates
+# Newsletter (powered by beehiiv - see NEWSLETTER_SETUP.md)
+newsletter:
+  enabled: true
+  locale: he-IL
+  title: הירשמי לניוזלטר
+  description: קבלי עדכונים על סדנאות חדשות, מוצרים ופרויקטים מיוחדים
+  placeholder: הכנסי את כתובת האימייל שלך
+  button: הירשמי
+  consent: לא שולחת ספאם, ואפשר להסיר את עצמך בכל רגע בלחיצה אחת בתחתית כל מייל.
+  consent_link_text: לפרטים ולביטול הרשמה
+
+  section:
+    title: הניוזלטר שלי
+    description: פעם בכמה שבועות, מייל אחד עם סדנאות חדשות, השראה ורעיונות לרקמה
+    teaser_label: הגיליון האחרון
+
+  messages:
+    sending: שולחת...
+    success: תודה! נרשמת בהצלחה 🎉
+    confirm_pending: כמעט! שלחתי לך מייל לאישור ההרשמה - צריך רק ללחוץ על הקישור שבו.
+    unsubscribed: הסרנו את הכתובת שלך מרשימת התפוצה. תמיד אפשר לחזור.
+    invalid_email: כתובת האימייל לא נראית תקינה.
+    rate_limited: יותר מדי ניסיונות. אפשר לנסות שוב עוד דקה.
+    unavailable: ההרשמה לניוזלטר לא זמינה כרגע. נסי שוב מאוחר יותר.
+    error: אירעה שגיאה. נסי שוב מאוחר יותר.
+    read_issue: לקריאת הגיליון
+    untitled_issue: גיליון חדש
 
 
 #-------------------------------
@@ -151,6 +173,8 @@ footer_menu__settings:
 footer_legal__settings:
   title: 'מידע נוסף'
   menu__items:
+    - title: 'הניוזלטר'
+      url: '/newsletter/'
     - title: 'משלוחים והחזרות'
       url: '/shipping/'
     - title: 'הצהרת נגישות'

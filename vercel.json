@@ -6,6 +6,12 @@
   "outputDirectory": "_site",
   "cleanUrls": true,
   "trailingSlash": true,
+  "rewrites": [
+    {
+      "source": "/api/newsletter/:endpoint/",
+      "destination": "/api/newsletter/:endpoint"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

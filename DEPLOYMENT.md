@@ -14,10 +14,80 @@ settings; there is nothing to type in the Vercel dashboard.
 `cleanUrls` and `trailingSlash` keep URL shapes matching what GitHub Pages used (`/terms/`,
 `/store/`, `/thanks/`).
 
-A serverless function in `/api` (see `GROW_PAYMENTS_SETUP.md`) is served alongside the Jekyll
-output, but `trailingSlash: true` applies to it too, so `/api/create-payment-link` answers with
-a 308 to `/api/create-payment-link/`. Call it with the trailing slash, or add a rewrite in
-`vercel.json` to exempt `/api`.
+A serverless function at `/api/checkout` creates the Green Invoice / Morning payment form.
+`vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308 the
+function. The browser posts to `/api/checkout/`.
+
+## Store cart
+
+Grow approved the site for clearing and pointed us at the Green Invoice payment-form API
+(not WooCommerce / Wix / Shopify). The cart collects Grow-required customer details on
+`/checkout/`, then the server builds the payment form.
+
+Set these in Vercel → Project → Settings → Environment Variables. For the
+preview/sandbox cart, set **Preview** (and leave Production for later):
+
+| Variable | What it is |
+| --- | --- |
+| `MORNING_ENV` | `sandbox` while testing. `production` only when charging real cards |
+| `MORNING_API_KEY_ID` | Morning sandbox keys while `MORNING_ENV=sandbox` |
+| `MORNING_API_KEY_SECRET` | same. Paste the raw secret — no wrapping quotes in the Vercel UI |
+| `MORNING_PLUGIN_ID` | Grow production plugin. **Not sent in sandbox** — it 404s there |
+| `MORNING_SANDBOX_PLUGIN_ID` | sandbox Grow plugin `facd67fd-5082-496c-917f-830f0d7449e3` (already the checkout default) |
+
+Changing env vars does not update an already-built Preview. Redeploy the
+git branch (or use Vercel → Deployments → Redeploy) after saving them.
+
+`GET /api/checkout/` returns `{ env, hasKeyId, hasSecret, keyIdPrefix }` so
+you can confirm Preview picked up the sandbox pair without printing secrets.
+
+Gift cards: the customer picks an amount (₪50–₪2,000) and it goes through the
+same Morning cart as other products. Checkout sends that custom sum as an
+income line (no Morning catalog UUID).
+
+Scrunchies: three fixed variants (regular ₪30, large ₪45, fancy ₪85). Checkout
+sends a server-validated variant id, never a client price. An optional fabric
+note from the checkout form is appended to the Morning income description.
+
+## Store admin (`/admin/`)
+
+A password-protected Hebrew backoffice for **every** store product: create,
+update, delete, prices charged at checkout, gift-card amounts, scrunchie
+variants, page text, and stock/visibility. It is not linked from the public
+menu. After save it commits `_store/<slug>.md`, `api/catalog-data.json`, and
+`_data/catalog.json` to GitHub so Vercel rebuilds.
+
+Set these on **Production** (and Preview if you want to try it there):
+
+| Variable | What it is |
+| --- | --- |
+| `ADMIN_PASSWORD` | Shared password for `/admin/` |
+| `GITHUB_TOKEN` | Fine-grained PAT with **Contents: Read and write** on this repo |
+| `GITHUB_BRANCH` | Usually `master`. Admin always writes this branch |
+| `GITHUB_REPO` | Optional `owner/repo`. Vercel already sets the git owner/slug |
+
+For local `vercel dev`, set `ADMIN_LOCAL_ROOT` to the repo root so saves write
+the markdown/JSON files on disk instead of GitHub.
+
+The number saved in the admin is the number charged at checkout. Morning →
+פריטים is no longer the live price overlay. `morning_item_id` is optional
+leftover if you still want a Morning item linked; new products do not need one.
+
+## Who edits products
+
+**Everything in the catalog:** `/admin/` (password). That includes normal
+fixed-price products, gift cards, scrunchies variants, titles, photos paths,
+page text, stock, and hide.
+
+**Photos files:** put the file under `/images/` in the repo (or paste an
+existing path in admin). The backoffice stores the path, it does not upload
+binaries.
+
+**Stock / hide:** same `/admin/` screen. Morning’s item API has no inventory
+field. Grow is payments only — it is not a catalog.
+
+To add a new cart product: `/admin/` → מוצר חדש. No Morning פריטים step is
+required to charge.
 
 ## Local development
 

@@ -1,0 +1,18 @@
+# Cart products live in _data/catalog.json (and api/catalog-data.json).
+# The admin backoffice edits those files. Checkout charges those prices.
+# This YAML is only the cart toggle and shipping methods.
+
+enabled: true
+success_path: "/thanks/"
+free_shipping_min: 250
+
+shipping:
+  pickup:
+    label: איסוף עצמי מרחובות
+    price: 0
+  registered:
+    label: דואר רשום
+    price: 25
+  courier:
+    label: שליח עד הבית
+    price: 40

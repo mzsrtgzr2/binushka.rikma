@@ -29,9 +29,32 @@ layout: default
               {% if item.subtitle %}
               <div class="store-item__subtitle">{{ item.subtitle }}</div>
               {% endif %}
+              {% assign slug = item.slug | default: item.basename %}
+              {% assign cart_meta = site.data.catalog[slug] %}
+              <div class="store-item__footer">
               {% if item.price %}
-              <div class="store-item__price">{{ item.price }}</div>
+              <div class="store-item__price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ item.price }}</div>
               {% endif %}
+              {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false and item.out_of_stock != true %}
+                {% if cart_meta.variable %}
+              <a href="{{ item.url }}" class="button button--primary store-item__add">
+                בחרי סכום
+              </a>
+                {% elsif cart_meta.variants %}
+              <a href="{{ item.url }}" class="button button--primary store-item__add">
+                בחרי סוג
+              </a>
+                {% else %}
+              <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}">
+                הוסיפי לסל
+              </button>
+                {% endif %}
+              {% elsif item.form_url and item.out_of_stock != true %}
+              <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener">
+                הזמיני עכשיו
+              </a>
+              {% endif %}
+              </div>
             </div>
           </div>
         </article>

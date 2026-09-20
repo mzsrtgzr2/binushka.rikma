@@ -515,11 +515,11 @@
 
   function fakeButton(label, extraClass) {
     return (
-      '<span class="button button--primary' +
+      '<button type="button" class="button button--primary' +
       (extraClass ? ' ' + extraClass : '') +
-      '" aria-hidden="true">' +
+      '" tabindex="-1" aria-hidden="true">' +
       escapeHtml(label) +
-      '</span>'
+      '</button>'
     );
   }
 

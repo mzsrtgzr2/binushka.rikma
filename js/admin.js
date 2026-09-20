@@ -231,15 +231,7 @@
     var imgSrc = variantImageSrc(row.image) || imagePath;
     return (
       '<div class="admin-variant">' +
-      '<input class="form__input" data-v="id" dir="ltr" placeholder="id" value="' +
-      escapeHtml(row.id || '') +
-      '">' +
-      '<input class="form__input" data-v="name" placeholder="שם" value="' +
-      escapeHtml(row.name || '') +
-      '">' +
-      '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
-      escapeHtml(row.price || '') +
-      '">' +
+      '<div class="admin-variant__head">' +
       '<div class="admin-variant__image">' +
       (imgSrc
         ? '<img class="admin-variant__thumb" src="' + escapeHtml(imgSrc) + '" alt="">'
@@ -253,14 +245,37 @@
       '<input type="file" data-v-image-file accept="image/jpeg,image/png,image/webp,image/gif">' +
       '</label>' +
       (imgSrc
-        ? '<button type="button" class="admin-variant__clear-image" data-clear-variant-image>הסרה</button>'
+        ? '<button type="button" class="admin-variant__clear-image" data-clear-variant-image>הסרת תמונה</button>'
         : '') +
       '</div></div>' +
-      '<input class="form__input" data-v="description" placeholder="תיאור" value="' +
-      escapeHtml(row.description || '') +
+      '<button type="button" class="admin-variant__remove" data-remove-variant>הסרת סוג</button>' +
+      '</div>' +
+      '<div class="admin-variant__fields">' +
+      '<div class="admin-variant__ids">' +
+      '<div class="form__group">' +
+      '<label class="form__label">מזהה</label>' +
+      '<input class="form__input" data-v="id" dir="ltr" placeholder="id" value="' +
+      escapeHtml(row.id || '') +
       '">' +
-      '<button type="button" class="admin-variant__remove" data-remove-variant>הסרה</button>' +
-      '</div>'
+      '</div>' +
+      '<div class="form__group">' +
+      '<label class="form__label">שם</label>' +
+      '<input class="form__input" data-v="name" placeholder="שם הסוג" value="' +
+      escapeHtml(row.name || '') +
+      '">' +
+      '</div>' +
+      '<div class="form__group">' +
+      '<label class="form__label">מחיר (₪)</label>' +
+      '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
+      escapeHtml(row.price || '') +
+      '">' +
+      '</div></div>' +
+      '<div class="form__group admin-variant__description-group">' +
+      '<label class="form__label">תיאור</label>' +
+      '<textarea class="form__input admin-variant__description" data-v="description" rows="4" placeholder="תיאור לסוג">' +
+      escapeHtml(row.description || '') +
+      '</textarea>' +
+      '</div></div></div>'
     );
   }
 
@@ -324,7 +339,7 @@
         clearBtn.type = 'button';
         clearBtn.className = 'admin-variant__clear-image';
         clearBtn.setAttribute('data-clear-variant-image', '');
-        clearBtn.textContent = 'הסרה';
+        clearBtn.textContent = 'הסרת תמונה';
         actions.appendChild(clearBtn);
       } else if (!src && clearBtn) {
         clearBtn.remove();

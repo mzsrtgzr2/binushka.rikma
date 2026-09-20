@@ -584,37 +584,81 @@
   font-size: 13px;
 }
 
-.admin-variant {
+.admin-variants {
   display: grid;
-  grid-template-columns: 110px 1fr 90px minmax(160px, 1.2fr) 1fr auto;
-  gap: 8px;
-  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-variant {
+  background: var(--background-alt-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+
+  .form__input {
+    background: var(--background-color);
+  }
+}
+
+.admin-variant__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-variant__fields {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-variant__ids {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 110px;
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-variant__ids .form__group,
+.admin-variant__description-group {
+  margin: 0;
+}
+
+.admin-variant__description {
+  min-height: 96px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
 }
 
 .admin-variant__image {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
 }
 
 .admin-variant__thumb {
   display: block;
-  width: 100%;
-  height: 72px;
+  width: 120px;
+  height: 90px;
   object-fit: cover;
   border-radius: 10px;
-  background: var(--background-alt-color);
+  background: var(--background-color);
 }
 
 .admin-variant__thumb--empty {
-  height: 72px;
+  width: 120px;
+  height: 90px;
 }
 
 .admin-variant__image-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -633,6 +677,9 @@
   color: var(--text-alt-color);
   cursor: pointer;
   font-size: 14px;
+  padding: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .admin-toolbar .button,
@@ -655,11 +702,18 @@
   .admin-toolbar,
   .admin-editor__top,
   .admin-grid,
-  .admin-variant,
+  .admin-variant__ids,
+  .admin-variant__image,
   .admin-editor__split {
     flex-direction: column;
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .admin-variant__thumb,
+  .admin-variant__thumb--empty {
+    width: 100%;
+    height: 120px;
   }
 
   .admin-preview {

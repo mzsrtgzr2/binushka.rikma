@@ -90,4 +90,5 @@ exclude:
   # Imported by the newsletter functions in api/, so it must not be published
   # either.
   - lib/
+  - test/
   - .env.example

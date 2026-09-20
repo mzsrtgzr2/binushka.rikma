@@ -1,0 +1,152 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { buildOrder, applyVariantNote } = require('./catalog');
+const checkout = require('./checkout');
+
+const customerBody = {
+  firstName: 'נועה',
+  lastName: 'כהן',
+  email: 'noa@example.com',
+  phone: '0501234567',
+  address: 'אייזנברג 39',
+  city: 'רחובות',
+  zip: '7620000',
+  country: 'ישראל',
+};
+
+test('sandbox uses the sandbox plugin when the production Grow id is set', () => {
+  const pluginId = checkout.resolvePluginId('sandbox', {
+    MORNING_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
+  });
+  assert.equal(pluginId, checkout.GROW_SANDBOX_PLUGIN_ID);
+});
+
+test('sandbox ignores the production Grow plugin even in MORNING_SANDBOX_PLUGIN_ID', () => {
+  const pluginId = checkout.resolvePluginId('sandbox', {
+    MORNING_SANDBOX_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
+  });
+  assert.equal(pluginId, checkout.GROW_SANDBOX_PLUGIN_ID);
+});
+
+test('sandbox uses a distinct MORNING_SANDBOX_PLUGIN_ID', () => {
+  const pluginId = checkout.resolvePluginId('sandbox', {
+    MORNING_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
+    MORNING_SANDBOX_PLUGIN_ID: 'sandbox-plugin',
+  });
+  assert.equal(pluginId, 'sandbox-plugin');
+});
+
+test('production keeps the Grow plugin id by default', () => {
+  const pluginId = checkout.resolvePluginId('production', {});
+  assert.equal(pluginId, checkout.GROW_PRODUCTION_PLUGIN_ID);
+});
+
+test('unspecified MORNING_ENV is sandbox', () => {
+  assert.equal(checkout.resolveMorningEnv(undefined), 'sandbox');
+  assert.equal(checkout.resolveMorningEnv('sandbox'), 'sandbox');
+  assert.equal(checkout.resolveMorningEnv('production'), 'production');
+});
+
+test('payment form payload for sandbox uses the sandbox plugin and no catalog itemIds', () => {
+  const order = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: { MORNING_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID },
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+
+  assert.equal(payload.pluginId, checkout.GROW_SANDBOX_PLUGIN_ID);
+  assert.equal(payload.client.add, true);
+  assert.equal(payload.client.address, 'אייזנברג 39');
+  assert.equal(payload.client.country, 'IL');
+  assert.equal(payload.vatType, 0);
+  assert.ok(payload.income.every((row) => !row.itemId));
+  assert.ok(payload.income.every((row) => row.price > 0));
+  assert.equal(payload.income.length, 1);
+  assert.equal(payload.amount, 220);
+  assert.equal(payload.maxPayments, 1);
+});
+
+test('payment form uses 12 installments only when MORNING_MAX_PAYMENTS is set', () => {
+  const order = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: { MORNING_MAX_PAYMENTS: '12' },
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(payload.maxPayments, 12);
+});
+
+test('zero-price shipping is omitted from income rows', () => {
+  const rows = checkout.buildIncomeRows(
+    [
+      { description: 'fox', quantity: 1, price: 220 },
+      { description: 'pickup', quantity: 1, price: 0 },
+    ],
+    1
+  );
+  assert.deepEqual(
+    rows.map((row) => row.description),
+    ['fox']
+  );
+});
+
+test('empty Morning 404 maps to a Hebrew sandbox hint', () => {
+  const message = checkout.morningErrorMessage({ errorCode: 404, errorMessage: '' });
+  assert.match(message, /sandbox/);
+});
+
+test('Morning 2600 tells the user to connect sandbox clearing', () => {
+  const message = checkout.morningErrorMessage({ errorCode: 2600, errorMessage: '' });
+  assert.match(message, /מסוף סליקה/);
+  assert.match(message, /sandbox/);
+});
+
+test('public env status never includes secrets', () => {
+  const status = checkout.publicEnvStatus({
+    MORNING_ENV: 'sandbox',
+    MORNING_API_KEY_ID: '9d80ace4-c82c-4b00-9836-0f9399469b2d',
+    MORNING_API_KEY_SECRET: 'super-secret',
+    MORNING_PLUGIN_ID: checkout.GROW_PRODUCTION_PLUGIN_ID,
+  });
+  assert.deepEqual(status, {
+    env: 'sandbox',
+    hasKeyId: true,
+    hasSecret: true,
+    keyIdPrefix: '9d80ace4',
+    hasPluginId: true,
+    hasSandboxPluginId: false,
+    sendsPluginId: true,
+    blockedProductionPlugin: true,
+  });
+  assert.equal(JSON.stringify(status).includes('super-secret'), false);
+});
+
+test('scrunchie variant income uses catalog price and optional fabric note', () => {
+  const order = applyVariantNote(
+    buildOrder([{ id: 'scrunchies', quantity: 1, variant: 'fancy' }], 'pickup'),
+    'תחרה זהובה'
+  );
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: {},
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(payload.income[0].price, 85);
+  assert.equal(payload.income[0].description, 'Fancy סקראנצ\'י — דוגמא: תחרה זהובה');
+  assert.equal(payload.amount, 85);
+  assert.ok(payload.income.every((row) => !row.itemId));
+  assert.ok(payload.income.every((row) => !row.kind));
+});

@@ -1,0 +1,149 @@
+---
+layout: admin
+title: ניהול חנות
+description: יצירה, עריכה ומחיקה של כל מוצרי החנות
+permalink: /admin/
+sitemap: false
+noindex: true
+---
+
+<div class="admin-shell">
+  <header class="admin-top">
+    <a class="admin-top__brand" href="{{ '/' | relative_url }}">בינושקה</a>
+    <h1 class="admin-top__title">ניהול חנות</h1>
+    <button type="button" class="admin-top__logout" id="admin-logout" hidden>יציאה</button>
+  </header>
+
+  <p class="admin-lead">
+    כאן מנהלים את כל המוצרים: יצירה, עריכה, מחיקה, מחיר בקופה ומלאי.
+    המחיר שנשמר כאן הוא המחיר שנגבה בקופה — גם למוצרים הרגילים.
+    אחרי שמירה האתר מתעדכן לבד (בילד ב-Vercel).
+  </p>
+
+  <form class="admin-login" id="admin-login">
+    <label class="form__label" for="admin-password">סיסמה</label>
+    <input class="form__input" type="password" id="admin-password" name="password" autocomplete="current-password" required>
+    <button type="submit" class="button button--primary">כניסה</button>
+    <p class="admin-message" id="admin-login-message" hidden></p>
+  </form>
+
+  <div class="admin-board" id="admin-board" hidden>
+    <div id="admin-list-view">
+      <div class="admin-toolbar">
+        <p class="admin-message" id="admin-board-message" hidden></p>
+        <div class="admin-toolbar__actions">
+          <button type="button" class="button" id="admin-new">מוצר חדש</button>
+          <button type="button" class="button button--primary" id="admin-save" disabled>שמירת מלאי</button>
+        </div>
+      </div>
+      <ul class="admin-list" id="admin-list"></ul>
+    </div>
+
+    <form class="admin-editor" id="admin-editor" hidden>
+      <div class="admin-editor__top">
+        <h2 class="admin-editor__title" id="admin-editor-title">מוצר חדש</h2>
+        <p class="admin-message" id="admin-editor-message" hidden></p>
+      </div>
+
+      <div class="admin-editor__split">
+      <div class="admin-editor__fields">
+
+      <div class="admin-grid">
+        <div class="form__group">
+          <label class="form__label" for="admin-slug">מזהה (כתובת)</label>
+          <input class="form__input" id="admin-slug" name="slug" dir="ltr" autocomplete="off" required>
+          <p class="admin-hint">באנגלית, אותיות קטנות ומקפים. הכתובת תהיה /store/המזהה/</p>
+        </div>
+        <div class="form__group">
+          <label class="form__label" for="admin-title">שם המוצר</label>
+          <input class="form__input" id="admin-title" name="title" required>
+        </div>
+        <div class="form__group">
+          <label class="form__label" for="admin-subtitle">תת־כותרת</label>
+          <input class="form__input" id="admin-subtitle" name="subtitle">
+        </div>
+      </div>
+
+      <fieldset class="admin-fieldset">
+        <legend>תמונות</legend>
+        <p class="admin-hint">הראשונה היא התמונה המרכזית בחנות ובדף המוצר. אפשר להעלות כמה, לשנות סדר ולהסיר.</p>
+        <div class="admin-photos" id="admin-photos"></div>
+        <label class="button admin-upload-btn">
+          הוסיפי תמונות
+          <input type="file" id="admin-photo-files" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+        </label>
+      </fieldset>
+
+      <div class="form__group">
+        <label class="form__label" for="admin-kind">איך המוצר נמכר</label>
+        <select class="form__input" id="admin-kind" name="kind">
+          <option value="fixed">מוצר רגיל — מחיר קבוע בסל</option>
+          <option value="variable">גיפט קארד — הלקוחה בוחרת סכום</option>
+          <option value="variants">כמה סוגים — כמו סקראנצ'י</option>
+          <option value="content">דף בלי סל (רק תצוגה באתר)</option>
+        </select>
+      </div>
+
+      <fieldset class="admin-fieldset" data-kind-fields="fixed">
+        <legend>מחיר בקופה</legend>
+        <div class="form__group">
+          <label class="form__label" for="admin-cart-price">מחיר (₪)</label>
+          <input class="form__input" id="admin-cart-price" name="cart_price" type="number" min="1" step="1" dir="ltr">
+        </div>
+      </fieldset>
+
+      <fieldset class="admin-fieldset" data-kind-fields="variable" hidden>
+        <legend>סכום לבחירת הלקוחה</legend>
+        <div class="admin-grid">
+          <div class="form__group">
+            <label class="form__label" for="admin-min-price">סכום מינימום (₪)</label>
+            <input class="form__input" id="admin-min-price" name="min_price" type="number" min="1" step="1" dir="ltr">
+          </div>
+          <div class="form__group">
+            <label class="form__label" for="admin-max-price">סכום מקסימום (₪)</label>
+            <input class="form__input" id="admin-max-price" name="max_price" type="number" min="1" step="1" dir="ltr">
+          </div>
+        </div>
+        <div class="form__group">
+          <label class="form__label" for="admin-presets">סכומים מומלצים</label>
+          <input class="form__input" id="admin-presets" name="presets" dir="ltr" placeholder="100, 150, 200, 250">
+          <p class="admin-hint">מופרדים בפסיקים. מופיעים ככפתורים בדף המוצר.</p>
+        </div>
+      </fieldset>
+
+      <fieldset class="admin-fieldset" data-kind-fields="variants" hidden>
+        <legend>סוגים ומחירים</legend>
+        <div class="admin-variants" id="admin-variants"></div>
+        <button type="button" class="button" id="admin-add-variant">הוסיפי סוג</button>
+      </fieldset>
+
+      <div class="form__group">
+        <label class="form__label" for="admin-body">טקסט בדף המוצר</label>
+        <textarea class="form__input admin-body-input" id="admin-body" name="body" rows="12"></textarea>
+        <p class="admin-hint">Markdown, כמו בקבצי המוצר הקיימים.</p>
+      </div>
+
+      <div class="admin-flags">
+        <label class="admin-check"><input type="checkbox" id="admin-out-of-stock"> אזל מהמלאי</label>
+        <label class="admin-check"><input type="checkbox" id="admin-limited-stock"> מלאי מוגבל</label>
+        <label class="admin-check"><input type="checkbox" id="admin-hide"> הסתר מהחנות</label>
+      </div>
+      <p class="admin-hint">הסתרה מורידה את המוצר מרשימת החנות ומגוגל. הדף נשאר בכתובת /store/המזהה/ ואפשר לקנות משם — מתאים לבדיקת תשלום.</p>
+
+      <div class="admin-editor__actions">
+        <button type="submit" class="button button--primary" id="admin-editor-save">שמירת מוצר</button>
+        <button type="button" class="button" id="admin-editor-cancel">ביטול</button>
+        <button type="button" class="admin-delete" id="admin-editor-delete" hidden>מחיקת מוצר</button>
+      </div>
+      </div>
+
+      <aside class="admin-preview" aria-label="תצוגה מקדימה כמו באתר">
+        <p class="admin-preview__kicker">תצוגה מקדימה</p>
+        <p class="admin-preview__lead">כך המוצר יופיע בחנות ובדף המוצר, לפי השדות כאן.</p>
+        <div id="admin-preview-card"></div>
+        <div id="admin-preview-page"></div>
+      </aside>
+      </div>
+    </form>
+  </div>
+</div>

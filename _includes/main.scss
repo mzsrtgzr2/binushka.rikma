@@ -71,8 +71,6 @@
 ======================= */
 /* >>>>>>>>>>>>>> :: 3.1-Header <<<<<<<<<<<<<<< */
 @import '3-modules/header';
-/* >>>>>>>>>>>>>> :: 3.1.1-Top Shipping Banner <<<<<<<<<<<<<<< */
-@import '3-modules/top-shipping-banner';
 /* >>>>>>>>>>>>>> :: 3.2-Pagination <<<<<<<<<<<<<<< */
 @import '3-modules/pagination';
 /* >>>>>>>>>>>>>> :: 3.3-Buttons <<<<<<<<<<<<<<< */
@@ -120,6 +118,7 @@
 @import '3-modules/retreat-banner';
 /* >>>>>>>>>>>>>> :: 3.23-Checkout <<<<<<<<<<<<<<< */
 @import '3-modules/checkout';
+@import '3-modules/store-cart';
 /* >>>>>>>>>>>>>> :: 3.11-Footer <<<<<<<<<<<<<<< */
 @import '3-modules/footer';
 
@@ -137,3 +136,4 @@
 @import '4-layouts/tags-page';
 /* >>>>>>>>>>>>>> :: 4.5-Scrunchies <<<<<<<<<<<<<<< */
 @import '4-layouts/scrunchies';
+@import '4-layouts/admin';

@@ -15,17 +15,20 @@ permalink: /checkout/
 <div class="checkout-page container animate">
   <div class="checkout-content">
 
-    <section class="checkout-summary">
+    <section class="checkout-summary" id="checkout-summary">
       <h2>סיכום ההזמנה</h2>
-      <p class="checkout-summary__note">
-        עגלת הקניות באתר נמצאת בבנייה. לאחר השלמתה, פרטי המוצרים שבחרת יופיעו כאן לפני המעבר לתשלום.
+      <p class="checkout-summary__note" id="checkout-empty" hidden>
+        הסל ריק. <a href="{{ '/store/' | relative_url }}">חזרה לחנות</a>
       </p>
+      <ul class="checkout-lines" id="checkout-lines"></ul>
+      <p class="checkout-subtotal" id="checkout-subtotal-row" hidden>סה״כ מוצרים: <strong id="checkout-subtotal">₪0</strong></p>
     </section>
 
-    <section class="checkout-form-section">
+    <section class="checkout-form-section" id="checkout-form-section">
       <h2>פרטים אישיים לתשלום</h2>
       <p class="checkout-form-section__note">
         יש למלא את הפרטים הבאים לפני המעבר לדף התשלום המאובטח.
+        הם נשמרים במכשיר הזה בלבד, לרכישה הבאה.
       </p>
 
       <form class="checkout-form" id="checkout-form" novalidate>
@@ -142,11 +145,41 @@ permalink: /checkout/
 
         <div class="form__group">
           <label class="form__label" for="checkout-country">מדינה *</label>
-          <select id="checkout-country" name="country" class="form__input" autocomplete="country-name" required>
-            <option value="ישראל" selected>ישראל</option>
-            <option value="אחר">אחר</option>
+          <select id="checkout-country" name="country" class="form__input" autocomplete="country" required>
+            <option value="IL" selected>ישראל</option>
           </select>
         </div>
+
+        <div class="form__group" id="checkout-variant-note-group" hidden>
+          <label class="form__label" for="checkout-variant-note">איזו דוגמא אהבת לסקראנצ'י?</label>
+          <textarea
+            id="checkout-variant-note"
+            name="variantNote"
+            class="form__input checkout-variant-note"
+            maxlength="200"
+            rows="2"
+            placeholder="למשל: פרחים ורודים, או תחרה זהובה (אופציונלי)"
+          ></textarea>
+          <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם הזמנת כמה, אפשר לרשום כאן איזו דוגמא לכל אחת.</p>
+        </div>
+
+        <fieldset class="checkout-shipping">
+          <legend>משלוח *</legend>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="pickup" required>
+            <span>איסוף עצמי מרחובות — חינם</span>
+          </label>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="registered" required>
+            <span>דואר רשום — ₪25</span>
+          </label>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="courier" required checked>
+            <span>שליח עד הבית — ₪40</span>
+          </label>
+        </fieldset>
+
+        <p class="checkout-grand-total">לתשלום: <strong id="checkout-grand-total">₪0</strong></p>
 
         <div class="form__group form__group--checkbox">
           <label class="checkbox-label" for="checkout-terms">
@@ -169,5 +202,3 @@ permalink: /checkout/
 
   </div>
 </div>
-
-<script src="{{ site.baseurl }}/js/checkout.js"></script>

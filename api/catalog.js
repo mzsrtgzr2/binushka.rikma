@@ -1,0 +1,144 @@
+/**
+ * Server-side catalog. Checkout never trusts prices from the browser.
+ *
+ * Cart products live in catalog-data.json (and _data/catalog.json).
+ * The admin backoffice edits those files. Checkout charges those prices.
+ * Keep slugs in sync with _store/*.md
+ */
+
+const RAW_CATALOG = require('./catalog-data.json');
+
+function fromCatalogFile(raw) {
+  const out = {};
+  for (const [slug, row] of Object.entries(raw || {})) {
+    const product = {
+      name: row.name || slug,
+      price: Number(row.price) || 0,
+    };
+    if (row.variable) {
+      product.variable = true;
+      product.minPrice = Number(row.min_price) || 0;
+      product.maxPrice = Number(row.max_price) || 0;
+    }
+    if (row.variants) product.variants = row.variants;
+    out[slug] = product;
+  }
+  return out;
+}
+
+const PRODUCTS = fromCatalogFile(RAW_CATALOG);
+
+const SHIPPING = {
+  pickup: { name: 'משלוח - איסוף עצמי מרחובות', price: 0 },
+  registered: { name: 'משלוח - דואר רשום', price: 25 },
+  courier: { name: 'משלוח - שליח עד הבית', price: 40 },
+};
+
+const MAX_QTY = 20;
+
+function fallbackPriceBook() {
+  const out = {};
+  for (const [slug, product] of Object.entries(PRODUCTS)) {
+    out[slug] = { price: product.price, name: product.name };
+  }
+  return out;
+}
+
+function shippingPrice(method) {
+  const ship = SHIPPING[method];
+  if (!ship) return null;
+  return ship.price;
+}
+
+function buildOrder(rawItems, shippingMethod) {
+  if (!Array.isArray(rawItems) || rawItems.length === 0) {
+    return { error: 'הסל ריק' };
+  }
+
+  const lines = [];
+  let subtotal = 0;
+
+  for (const raw of rawItems) {
+    const id = raw && raw.id;
+    const product = PRODUCTS[id];
+    if (!product) {
+      return { error: 'מוצר לא מוכר בסל' };
+    }
+    const quantity = Number(raw.quantity);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY) {
+      return { error: 'כמות לא תקינה' };
+    }
+
+    let price = product.price;
+    let description = product.name;
+    let kind;
+    if (product.variable) {
+      const amount = Number(raw.amount);
+      if (!Number.isInteger(amount) || amount < product.minPrice || amount > product.maxPrice) {
+        return { error: 'סכום הגיפט קארד לא תקין' };
+      }
+      price = amount;
+      description = `${product.name} — ₪${amount}`;
+    } else if (product.variants) {
+      const variant = product.variants[raw.variant];
+      if (!variant || !(Number(variant.price) > 0)) {
+        return { error: 'סוג לא תקין' };
+      }
+      price = Number(variant.price);
+      description = variant.name;
+      kind = 'variant';
+    }
+
+    subtotal += price * quantity;
+    const line = {
+      description,
+      quantity,
+      price,
+      currency: 'ILS',
+    };
+    if (kind) line.kind = kind;
+    lines.push(line);
+  }
+
+  const shipCost = shippingPrice(shippingMethod);
+  if (shipCost == null) {
+    return { error: 'שיטת משלוח לא תקינה' };
+  }
+
+  const ship = SHIPPING[shippingMethod];
+  lines.push({
+    description: ship.name,
+    quantity: 1,
+    price: shipCost,
+    currency: 'ILS',
+  });
+
+  const total = subtotal + shipCost;
+  return { lines, subtotal, shipping: shipCost, total };
+}
+
+function applyVariantNote(order, note) {
+  const clean = String(note || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 200);
+  if (!order || order.error || !clean) return order;
+  return {
+    ...order,
+    lines: (order.lines || []).map((line) =>
+      line.kind === 'variant'
+        ? { ...line, description: `${line.description} — דוגמא: ${clean}` }
+        : line
+    ),
+  };
+}
+
+module.exports = {
+  PRODUCTS,
+  SHIPPING,
+  shippingPrice,
+  buildOrder,
+  fallbackPriceBook,
+  applyVariantNote,
+  fromCatalogFile,
+};

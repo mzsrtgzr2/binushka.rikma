@@ -9,7 +9,6 @@
     {% include google-analytics.html %}
   {% endif %}
 
-  {% include top-shipping-banner.html %}
   {% include header.html %}
 
   <!-- begin content -->
@@ -20,9 +19,19 @@
 
   {% include footer.html %}
   {% include floater.html %}
+  {% include store-cart-catalog.html %}
 
   <script src="{{ site.baseurl }}/js/scripts.js"></script>
   <script src="{{ site.baseurl }}/js/common.js"></script>
+  {% if site.data.store-cart.enabled %}
+  <script src="{{ site.baseurl }}/js/store-cart.js" defer></script>
+  {% endif %}
+  {% if page.url == '/checkout/' or page.url == '/checkout' %}
+  <script src="{{ site.baseurl }}/js/checkout.js" defer></script>
+  {% endif %}
+  {% if page.url == '/thanks/' or page.url == '/thanks' %}
+  <script src="{{ site.baseurl }}/js/thanks.js" defer></script>
+  {% endif %}
 </body>
 
 </html>

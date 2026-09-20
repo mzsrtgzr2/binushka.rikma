@@ -11,7 +11,8 @@ Add these repository secrets in GitHub Actions:
 
 Optional repository variable:
 
-- `CURSOR_MODEL` - Cursor model name to use in the workflows. Defaults to `gpt-5`.
+- `CURSOR_MODEL` - Cursor model name to use in the workflows. Defaults to `auto`. Do not
+  set this to `gpt-5`; this Cursor CLI account does not expose that model id.
 - `CURSOR_AGENT_ALLOWED_USERS` - comma- or whitespace-separated GitHub usernames allowed to
   create Cursor tasks, request PR changes, or approve merges. If this is not set, only the
   repository owner is allowed.

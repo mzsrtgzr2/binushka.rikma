@@ -188,11 +188,17 @@ jobs:
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'gpt-5' }}
+          CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'auto' }}
         run: |
           set -euo pipefail
+          model="$CURSOR_MODEL"
+          if [ "$model" = "gpt-5" ]; then
+            echo "::warning::Cursor CLI does not offer model 'gpt-5' for this account; falling back to 'auto'."
+            model="auto"
+          fi
+
           agent -p "$(cat "${{ steps.prompt.outputs.file }}")" \
-            --model "$CURSOR_MODEL" \
+            --model "$model" \
             --force \
             --trust \
             --output-format text

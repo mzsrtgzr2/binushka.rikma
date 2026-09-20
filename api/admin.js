@@ -481,7 +481,7 @@ async function handler(req, res) {
       if (listed.error) return json(res, 503, { error: listed.error });
       const existing = new Set(listed.products.map((p) => p.slug));
       const isNew = Boolean(body.isNew);
-      const prepared = store.preparePhotos(body.product || {});
+      const prepared = store.prepareProductMedia(body.product || {});
       if (prepared.error) return json(res, 400, { error: prepared.error });
       const normalized = store.normalizeProductInput(
         { ...(body.product || {}), ...prepared.fields },

@@ -172,6 +172,29 @@ function asPhotoItems(raw) {
   });
 }
 
+function materializeUpload(slug, upload, nameHint) {
+  if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
+  const decoded = decodeDataUrl(upload && (upload.data || upload.content));
+  if (!decoded) return { error: 'קובץ תמונה לא תקין' };
+  const mime = String((upload && upload.mime) || decoded.mime || '').toLowerCase();
+  const ext = IMAGE_EXT[mime];
+  if (!ext) return { error: 'רק jpg, png, webp או gif' };
+  let buffer;
+  try {
+    buffer = Buffer.from(decoded.base64, 'base64');
+  } catch {
+    return { error: 'קובץ תמונה לא תקין' };
+  }
+  if (!buffer.length) return { error: 'קובץ תמונה ריק' };
+  if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)' };
+  const filename = safePhotoName((upload && (upload.filename || upload.name)) || nameHint || 'photo', ext);
+  const repoPath = `images/store/${slug}/${filename}`;
+  return {
+    file: { path: repoPath, content: decoded.base64, encoding: 'base64' },
+    pathName: `/${repoPath}`,
+  };
+}
+
 function preparePhotos(raw) {
   if (!Array.isArray(raw && raw.photos)) return { fields: {}, files: [] };
   const slug = String((raw && raw.slug) || '')
@@ -183,24 +206,10 @@ function preparePhotos(raw) {
   const paths = [];
   for (const item of items) {
     if (item && item.upload) {
-      if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
-      const decoded = decodeDataUrl(item.upload.data || item.upload.content);
-      if (!decoded) return { error: 'קובץ תמונה לא תקין' };
-      const mime = String(item.upload.mime || decoded.mime || '').toLowerCase();
-      const ext = IMAGE_EXT[mime];
-      if (!ext) return { error: 'רק jpg, png, webp או gif' };
-      let buffer;
-      try {
-        buffer = Buffer.from(decoded.base64, 'base64');
-      } catch {
-        return { error: 'קובץ תמונה לא תקין' };
-      }
-      if (!buffer.length) return { error: 'קובץ תמונה ריק' };
-      if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)' };
-      const filename = safePhotoName(item.upload.filename || item.upload.name, ext);
-      const repoPath = `images/store/${slug}/${filename}`;
-      files.push({ path: repoPath, content: decoded.base64, encoding: 'base64' });
-      paths.push(`/${repoPath}`);
+      const saved = materializeUpload(slug, item.upload);
+      if (saved.error) return saved;
+      files.push(saved.file);
+      paths.push(saved.pathName);
       continue;
     }
     const pathName = publicImagePath(item && (item.path || item));
@@ -214,6 +223,56 @@ function preparePhotos(raw) {
       photos,
     },
     files,
+  };
+}
+
+function resolveVariantImage(slug, image, nameHint) {
+  if (image && typeof image === 'object' && image.upload) {
+    return materializeUpload(slug, image.upload, nameHint || 'variant');
+  }
+  if (image && typeof image === 'object') {
+    const pathName = publicImagePath(image.path || image.preview || '');
+    return { pathName };
+  }
+  const pathName = publicImagePath(image);
+  return { pathName };
+}
+
+function prepareVariants(raw) {
+  if (!Array.isArray(raw && raw.variants)) return { fields: {}, files: [] };
+  const slug = String((raw && raw.slug) || '')
+    .trim()
+    .toLowerCase();
+  const files = [];
+  const variants = [];
+  for (const row of raw.variants) {
+    if (!row || typeof row !== 'object') {
+      variants.push(row);
+      continue;
+    }
+    const idHint = String(row.id || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '') || 'variant';
+    const resolved = resolveVariantImage(slug, row.image, idHint);
+    if (resolved.error) return resolved;
+    if (resolved.file) files.push(resolved.file);
+    variants.push({
+      ...row,
+      image: resolved.pathName || '',
+    });
+  }
+  return { fields: { variants }, files };
+}
+
+function prepareProductMedia(raw) {
+  const photos = preparePhotos(raw);
+  if (photos.error) return photos;
+  const variants = prepareVariants(raw);
+  if (variants.error) return variants;
+  return {
+    fields: { ...photos.fields, ...variants.fields },
+    files: [...photos.files, ...variants.files],
   };
 }
 
@@ -248,10 +307,14 @@ function variantsFromArray(rows) {
     if (!id) return;
     const price = Number(row.price);
     if (!(price > 0)) return;
+    const image =
+      row.image && typeof row.image === 'object'
+        ? publicImagePath(row.image.path || '')
+        : publicImagePath(row.image) || String(row.image || '').trim();
     out[id] = {
       name: String(row.name || id).trim() || id,
       price,
-      image: String(row.image || '').trim(),
+      image,
       description: String(row.description || '').trim(),
     };
   });
@@ -475,6 +538,8 @@ module.exports = {
   prettyCatalog,
   displayPriceFor,
   preparePhotos,
+  prepareVariants,
+  prepareProductMedia,
   uniquePhotos,
   photosFromParsed,
   MAX_PHOTOS,

@@ -32,6 +32,7 @@
   var editingNew = false;
   var saveHint = '';
   var photoItems = [];
+  var variantUploads = new WeakMap();
   var previewTimer;
 
   function escapeHtml(s) {
@@ -215,8 +216,19 @@
     editorDelete.hidden = true;
   }
 
+  function variantImageSrc(image) {
+    if (!image) return '';
+    if (typeof image === 'string') return image;
+    if (image.preview) return image.preview;
+    if (image.upload && image.upload.data) return image.upload.data;
+    if (image.path) return image.path;
+    return '';
+  }
+
   function variantRowHtml(row) {
     row = row || {};
+    var imagePath = typeof row.image === 'string' ? row.image : row.image && row.image.path ? row.image.path : '';
+    var imgSrc = variantImageSrc(row.image) || imagePath;
     return (
       '<div class="admin-variant">' +
       '<input class="form__input" data-v="id" dir="ltr" placeholder="id" value="' +
@@ -228,9 +240,22 @@
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
       escapeHtml(row.price || '') +
       '">' +
-      '<input class="form__input" data-v="image" dir="ltr" placeholder="/images/..." value="' +
-      escapeHtml(row.image || '') +
+      '<div class="admin-variant__image">' +
+      (imgSrc
+        ? '<img class="admin-variant__thumb" src="' + escapeHtml(imgSrc) + '" alt="">'
+        : '<span class="admin-variant__thumb admin-variant__thumb--empty" aria-hidden="true"></span>') +
+      '<input type="hidden" data-v="image" value="' +
+      escapeHtml(imagePath) +
       '">' +
+      '<div class="admin-variant__image-actions">' +
+      '<label class="button admin-upload-btn admin-upload-btn--compact">' +
+      (imgSrc ? 'החלפת תמונה' : 'העלאת תמונה') +
+      '<input type="file" data-v-image-file accept="image/jpeg,image/png,image/webp,image/gif">' +
+      '</label>' +
+      (imgSrc
+        ? '<button type="button" class="admin-variant__clear-image" data-clear-variant-image>הסרה</button>'
+        : '') +
+      '</div></div>' +
       '<input class="form__input" data-v="description" placeholder="תיאור" value="' +
       escapeHtml(row.description || '') +
       '">' +
@@ -244,16 +269,67 @@
     variantsEl.innerHTML = list.map(variantRowHtml).join('');
   }
 
+  function readVariantImage(row) {
+    var upload = variantUploads.get(row);
+    if (upload) return { upload: upload };
+    var pathValue = ((row.querySelector('[data-v="image"]') || {}).value || '').trim();
+    return pathValue;
+  }
+
   function readVariants() {
     return Array.prototype.map.call(variantsEl.querySelectorAll('.admin-variant'), function (row) {
       return {
         id: (row.querySelector('[data-v="id"]') || {}).value,
         name: (row.querySelector('[data-v="name"]') || {}).value,
         price: (row.querySelector('[data-v="price"]') || {}).value,
-        image: (row.querySelector('[data-v="image"]') || {}).value,
+        image: readVariantImage(row),
         description: (row.querySelector('[data-v="description"]') || {}).value,
       };
     });
+  }
+
+  function setVariantImagePreview(row, src, pathValue) {
+    var box = row.querySelector('.admin-variant__image');
+    if (!box) return;
+    var thumb = box.querySelector('.admin-variant__thumb');
+    if (src) {
+      if (!thumb || thumb.tagName !== 'IMG') {
+        var img = document.createElement('img');
+        img.className = 'admin-variant__thumb';
+        img.alt = '';
+        if (thumb) box.replaceChild(img, thumb);
+        else box.insertBefore(img, box.firstChild);
+        thumb = img;
+      }
+      thumb.src = src;
+    } else if (thumb) {
+      var empty = document.createElement('span');
+      empty.className = 'admin-variant__thumb admin-variant__thumb--empty';
+      empty.setAttribute('aria-hidden', 'true');
+      box.replaceChild(empty, thumb);
+    }
+    var pathInput = box.querySelector('[data-v="image"]');
+    if (pathInput) pathInput.value = pathValue || '';
+    var actions = box.querySelector('.admin-variant__image-actions');
+    if (actions) {
+      var label = actions.querySelector('.admin-upload-btn');
+      if (label) {
+        var fileInput = label.querySelector('input[type="file"]');
+        label.textContent = src ? 'החלפת תמונה' : 'העלאת תמונה';
+        if (fileInput) label.appendChild(fileInput);
+      }
+      var clearBtn = actions.querySelector('[data-clear-variant-image]');
+      if (src && !clearBtn) {
+        clearBtn = document.createElement('button');
+        clearBtn.type = 'button';
+        clearBtn.className = 'admin-variant__clear-image';
+        clearBtn.setAttribute('data-clear-variant-image', '');
+        clearBtn.textContent = 'הסרה';
+        actions.appendChild(clearBtn);
+      } else if (!src && clearBtn) {
+        clearBtn.remove();
+      }
+    }
   }
 
   function parsePresets(raw) {
@@ -535,12 +611,13 @@
       })
       .map(function (v) {
         var name = v.name || v.id || '';
-        var img = v.image
+        var imgSrc = variantImageSrc(v.image);
+        var img = imgSrc
           ? scrunchie
             ? '<div class="scrunchies-variant__photo"><img src="' +
-              escapeHtml(v.image) +
+              escapeHtml(imgSrc) +
               '" alt=""></div>'
-            : '<img class="store-variant__photo" src="' + escapeHtml(v.image) + '" alt="">'
+            : '<img class="store-variant__photo" src="' + escapeHtml(imgSrc) + '" alt="">'
           : '';
         if (scrunchie) {
           return (
@@ -870,12 +947,42 @@
   });
 
   variantsEl.addEventListener('click', function (event) {
+    var clearBtn = event.target.closest('[data-clear-variant-image]');
+    if (clearBtn) {
+      var clearRow = clearBtn.closest('.admin-variant');
+      if (clearRow) {
+        variantUploads.delete(clearRow);
+        setVariantImagePreview(clearRow, '', '');
+        schedulePreview();
+      }
+      return;
+    }
     var btn = event.target.closest('[data-remove-variant]');
     if (!btn) return;
     var row = btn.closest('.admin-variant');
     if (row) row.remove();
     if (!variantsEl.querySelector('.admin-variant')) renderVariants([{}]);
     schedulePreview();
+  });
+
+  variantsEl.addEventListener('change', function (event) {
+    var fileInput = event.target.closest('[data-v-image-file]');
+    if (!fileInput) return;
+    var row = fileInput.closest('.admin-variant');
+    var file = (fileInput.files || [])[0];
+    fileInput.value = '';
+    if (!row || !file) return;
+    show(editorMessage, 'טוענת תמונה…', 'info');
+    readFileAsPhoto(file)
+      .then(function (item) {
+        variantUploads.set(row, item.upload);
+        setVariantImagePreview(row, item.preview, '');
+        show(editorMessage, '', '');
+        schedulePreview();
+      })
+      .catch(function (err) {
+        show(editorMessage, err.message || 'לא הצלחנו להוסיף תמונה', 'error');
+      });
   });
 
   photosEl.addEventListener('click', function (event) {

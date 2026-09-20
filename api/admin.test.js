@@ -444,3 +444,49 @@ test('reordering photos changes which image is main', async () => {
   assert.deepEqual(product.gallery, ['/images/gallery/fox.png']);
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+test('upsert writes uploaded variant images into the catalog', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'bands',
+        title: 'גומיות',
+        kind: 'variants',
+        variants: [
+          {
+            id: 'small',
+            name: 'קטן',
+            price: 30,
+            image: {
+              upload: {
+                filename: 'small.png',
+                mime: 'image/png',
+                data: `data:image/png;base64,${TINY_PNG}`,
+              },
+            },
+          },
+          {
+            id: 'large',
+            name: 'גדול',
+            price: 45,
+            image: '/images/scrunchies/04.jpeg',
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.match(catalog.bands.variants.small.image, /^\/images\/store\/bands\/small-/);
+  assert.equal(catalog.bands.variants.large.image, '/images/scrunchies/04.jpeg');
+  const smallFile = path.join(root, catalog.bands.variants.small.image.replace(/^\//, ''));
+  assert.equal(fs.existsSync(smallFile), true);
+  fs.rmSync(root, { recursive: true, force: true });
+});

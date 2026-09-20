@@ -199,14 +199,46 @@ test('subscribe answers 503 while the credentials are missing', async () => {
   assert.equal(res.body.code, 'not_configured');
 });
 
-test('subscribe rejects a GET', async () => {
-  configure();
+test('a GET reports whether the deploy has credentials, without leaking them', async () => {
+  configure({ BEEHIIV_DOUBLE_OPT_IN: 'on' });
 
   const res = makeResponse();
   await subscribe(makeRequest({ method: 'GET' }), res);
 
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, {
+    configured: true,
+    hasApiKey: true,
+    hasPublicationId: true,
+    doubleOptIn: 'on',
+  });
+  assert.equal(
+    JSON.stringify(res.body).includes('key_test'),
+    false,
+    'the env check must never echo the API key',
+  );
+});
+
+test('a GET reports an unconfigured deploy', async () => {
+  clearCredentials();
+
+  const res = makeResponse();
+  await subscribe(makeRequest({ method: 'GET' }), res);
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.configured, false);
+  assert.equal(res.body.hasApiKey, false);
+  assert.equal(res.body.hasPublicationId, false);
+});
+
+test('subscribe rejects other methods', async () => {
+  configure();
+
+  const res = makeResponse();
+  await subscribe(makeRequest({ method: 'DELETE' }), res);
+
   assert.equal(res.statusCode, 405);
-  assert.equal(res.headers.allow, 'POST');
+  assert.equal(res.headers.allow, 'GET, POST');
 });
 
 test('unsubscribe looks the address up and unsubscribes it', async () => {

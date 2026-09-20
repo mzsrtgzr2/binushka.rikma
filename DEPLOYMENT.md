@@ -49,6 +49,39 @@ Scrunchies: three fixed variants (regular ₪30, large ₪45, fancy ₪85). Chec
 sends a server-validated variant id, never a client price. An optional fabric
 note from the checkout form is appended to the Morning income description.
 
+## Newsletter
+
+Signups go to beehiiv through `/api/newsletter/subscribe`, `/api/newsletter/unsubscribe`
+and `/api/newsletter/latest`. `NEWSLETTER_SETUP.md` covers creating the publication;
+these are the deployment-side details.
+
+Set these per environment. Preview needs its own copy — Vercel does not share
+environment variables between Preview and Production:
+
+| Variable | What it is |
+| --- | --- |
+| `BEEHIIV_API_KEY` | beehiiv → Settings → Integrations → API |
+| `BEEHIIV_PUBLICATION_ID` | the `pub_...` id on the same page |
+| `BEEHIIV_DOUBLE_OPT_IN` | optional `on` / `off` / `not_set` override of the publication setting |
+
+Until both required variables are set, the forms answer "ההרשמה לניוזלטר לא זמינה
+כרגע" and the home page teaser stays hidden. The page still builds and renders, so
+a preview without the variables shows the layout but cannot collect an address.
+
+As with the cart, changing env vars does not update an already-built Preview —
+redeploy the branch afterwards.
+
+`GET /api/newsletter/subscribe/` returns `{ configured, hasApiKey, hasPublicationId,
+doubleOptIn }` so you can confirm an environment picked up the pair without printing
+the key.
+
+Pointing Preview at the same publication as Production puts test signups on the real
+list. Either use a throwaway address and remove it afterwards, or create a second
+beehiiv publication for Preview.
+
+`/api/newsletter/latest` is cached at the edge for 30 minutes, so a freshly published
+issue does not appear in the teaser immediately.
+
 ## Store admin (`/admin/`)
 
 A password-protected Hebrew backoffice for **every** store product: create,

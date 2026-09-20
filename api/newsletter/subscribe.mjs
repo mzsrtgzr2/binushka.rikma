@@ -9,8 +9,19 @@ import { createRateLimiter, readClientIp, readJsonBody, sendJson } from '../../l
 const isRateLimited = createRateLimiter({ windowMs: 60_000, max: 5 });
 
 export default async function handler(req, res) {
+  // Same idea as GET /api/checkout/: let a deploy confirm it picked up its
+  // environment variables without printing any of them.
+  if (req.method === 'GET') {
+    return sendJson(res, 200, {
+      configured: Boolean(getConfig()),
+      hasApiKey: Boolean((process.env.BEEHIIV_API_KEY || '').trim()),
+      hasPublicationId: Boolean((process.env.BEEHIIV_PUBLICATION_ID || '').trim()),
+      doubleOptIn: (process.env.BEEHIIV_DOUBLE_OPT_IN || 'not_set').trim(),
+    });
+  }
+
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+    res.setHeader('Allow', 'GET, POST');
     return sendJson(res, 405, { ok: false, code: 'method_not_allowed' });
   }
 

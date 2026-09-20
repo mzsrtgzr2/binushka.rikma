@@ -292,7 +292,6 @@ function parsePage(slug, raw, catalogRow) {
     in_cart: Boolean(catalogRow),
     kind,
     cart_price: Number(catalog.price) || 0,
-    morning_item_id: catalog.morning_item_id || '',
     min_price: Number(catalog.min_price) || 0,
     max_price: Number(catalog.max_price) || 0,
     presets: Array.isArray(catalog.presets) ? catalog.presets : [],
@@ -389,13 +388,10 @@ function catalogRowFromInput(input) {
   }
   const price = Number(input.cart_price);
   if (!(price > 0)) throw new Error('מחיר לא תקין');
-  const row = {
+  return {
     name: String(input.title || '').trim(),
     price,
   };
-  const itemId = String(input.morning_item_id || '').trim();
-  if (itemId) row.morning_item_id = itemId;
-  return row;
 }
 
 function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
@@ -434,7 +430,6 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     kind,
     in_cart: kind !== 'content',
     cart_price: Number(raw && raw.cart_price),
-    morning_item_id: String((raw && raw.morning_item_id) || '').trim(),
     min_price: Number(raw && raw.min_price),
     max_price: Number(raw && raw.max_price),
     presets: parsePresets(raw && raw.presets),

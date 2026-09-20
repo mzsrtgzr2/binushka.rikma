@@ -69,9 +69,8 @@ Set these on **Production** (and Preview if you want to try it there):
 For local `vercel dev`, set `ADMIN_LOCAL_ROOT` to the repo root so saves write
 the markdown/JSON files on disk instead of GitHub.
 
-The number saved in the admin is the number charged at checkout. Morning →
-פריטים is no longer the live price overlay. `morning_item_id` is optional
-leftover if you still want a Morning item linked; new products do not need one.
+The number saved in the admin is the number charged at checkout. Morning is
+payments and invoices only. It is not the store catalog.
 
 ## Who edits products
 
@@ -86,8 +85,8 @@ committed under `images/store/<slug>/`.
 **Stock / hide:** same `/admin/` screen. Morning’s item API has no inventory
 field. Grow is payments only — it is not a catalog.
 
-To add a new cart product: `/admin/` → מוצר חדש. No Morning פריטים step is
-required to charge.
+To add a new cart product: `/admin/` → מוצר חדש. Create it on the site only.
+Morning does not need a matching item to charge.
 
 ## Local development
 

@@ -5,7 +5,6 @@ const path = require('path');
 const {
   buildOrder,
   fallbackPriceBook,
-  priceBookFromMorningItems,
   applyVariantNote,
   PRODUCTS,
 } = require('./catalog');
@@ -25,20 +24,11 @@ test('Jekyll catalog matches the checkout catalog file', () => {
   assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
 });
 
-test('Morning item list overlays the charged price', () => {
-  const live = priceBookFromMorningItems([
-    { id: PRODUCTS.fox.itemId, name: 'שועל', price: 199 },
-  ]);
-  const order = buildOrder([{ id: 'fox', quantity: 2 }], 'pickup', live);
-  assert.equal(order.lines[0].price, 199);
-  assert.equal(order.lines[0].description, 'שועל');
-  assert.equal(order.subtotal, 398);
-});
-
-test('unknown Morning items leave the fallback price', () => {
-  const live = priceBookFromMorningItems([{ id: 'not-a-product', price: 1 }]);
-  const order = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup', live);
+test('checkout charges the catalog price, not a client price', () => {
+  const order = buildOrder([{ id: 'fox', quantity: 2, price: 1 }], 'pickup');
   assert.equal(order.lines[0].price, 220);
+  assert.equal(order.lines[0].description, 'רקמת שועל משמח');
+  assert.equal(order.subtotal, 440);
 });
 
 test('gift card charges the chosen amount, not a catalog price', () => {
@@ -71,13 +61,6 @@ test('a spoofed amount on a fixed-price product is ignored', () => {
   const order = buildOrder([{ id: 'fox', quantity: 1, amount: 1 }], 'pickup');
   assert.equal(order.lines[0].price, 220);
   assert.equal(order.subtotal, 220);
-});
-
-test('Morning overlay never replaces a variable gift-card amount', () => {
-  const live = { 'gift-card': { price: 12, name: 'hack' } };
-  const order = buildOrder([{ id: 'gift-card', quantity: 1, amount: 200 }], 'pickup', live);
-  assert.equal(order.lines[0].price, 200);
-  assert.equal(order.lines[0].description, 'גיפט קארד — ₪200');
 });
 
 test('scrunchie variant charges the catalog price, not a client price', () => {
@@ -113,13 +96,6 @@ test('unknown or missing scrunchie variant is rejected', () => {
     buildOrder([{ id: 'scrunchies', quantity: 1 }], 'pickup').error,
     'סוג לא תקין'
   );
-});
-
-test('Morning overlay never replaces a scrunchie variant price', () => {
-  const live = { scrunchies: { price: 1, name: 'hack' } };
-  const order = buildOrder([{ id: 'scrunchies', quantity: 1, variant: 'fancy' }], 'pickup', live);
-  assert.equal(order.lines[0].price, 85);
-  assert.equal(order.lines[0].description, 'Fancy סקראנצ\'י');
 });
 
 test('variant fabric note is appended only to scrunchie lines', () => {

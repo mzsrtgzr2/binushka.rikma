@@ -395,7 +395,6 @@
     kindSelect.value = product.kind || 'fixed';
     kindSelect.disabled = product.slug === 'gift-card' || product.slug === 'scrunchies';
     document.getElementById('admin-cart-price').value = product.cart_price > 0 ? product.cart_price : '';
-    document.getElementById('admin-morning-id').value = product.morning_item_id || '';
     document.getElementById('admin-min-price').value = product.min_price > 0 ? product.min_price : '';
     document.getElementById('admin-max-price').value = product.max_price > 0 ? product.max_price : '';
     document.getElementById('admin-presets').value = (product.presets || []).join(', ');
@@ -421,7 +420,6 @@
       }),
       kind: kindSelect.value,
       cart_price: document.getElementById('admin-cart-price').value,
-      morning_item_id: document.getElementById('admin-morning-id').value,
       min_price: document.getElementById('admin-min-price').value,
       max_price: document.getElementById('admin-max-price').value,
       presets: parsePresets(document.getElementById('admin-presets').value),

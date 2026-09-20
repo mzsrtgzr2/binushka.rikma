@@ -3,8 +3,7 @@
  *
  * Cart products live in catalog-data.json (and _data/catalog.json).
  * The admin backoffice edits those files. Checkout charges those prices.
- * morning_item_id is optional leftover for Morning פריטים; it is not required
- * to charge. Keep slugs in sync with _store/*.md
+ * Keep slugs in sync with _store/*.md
  */
 
 const RAW_CATALOG = require('./catalog-data.json');
@@ -16,7 +15,6 @@ function fromCatalogFile(raw) {
       name: row.name || slug,
       price: Number(row.price) || 0,
     };
-    if (row.morning_item_id) product.itemId = row.morning_item_id;
     if (row.variable) {
       product.variable = true;
       product.minPrice = Number(row.min_price) || 0;
@@ -39,43 +37,10 @@ const SHIPPING = {
 const FREE_SHIPPING_MIN = 250;
 const MAX_QTY = 20;
 
-function applyLiveProduct(product, liveBySlug, slug) {
-  if (!product || product.variable || product.variants) return product;
-  const live = liveBySlug && liveBySlug[slug];
-  if (!live) return product;
-  const price = Number(live.price);
-  if (!Number.isFinite(price) || price <= 0) return product;
-  return {
-    ...product,
-    price,
-    name: live.name || product.name,
-  };
-}
-
 function fallbackPriceBook() {
   const out = {};
   for (const [slug, product] of Object.entries(PRODUCTS)) {
     out[slug] = { price: product.price, name: product.name };
-  }
-  return out;
-}
-
-function priceBookFromMorningItems(items) {
-  const byMorningId = {};
-  for (const item of items || []) {
-    if (item && item.id) byMorningId[item.id] = item;
-  }
-  const out = {};
-  for (const [slug, product] of Object.entries(PRODUCTS)) {
-    if (product.variable || product.variants || !product.itemId) continue;
-    const live = byMorningId[product.itemId];
-    if (!live) continue;
-    const price = Number(live.price);
-    if (!Number.isFinite(price) || price <= 0) continue;
-    out[slug] = {
-      price,
-      name: live.name || product.name,
-    };
   }
   return out;
 }
@@ -89,7 +54,7 @@ function shippingPrice(method, subtotal) {
   return ship.price;
 }
 
-function buildOrder(rawItems, shippingMethod, liveBySlug) {
+function buildOrder(rawItems, shippingMethod) {
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
     return { error: 'הסל ריק' };
   }
@@ -99,7 +64,7 @@ function buildOrder(rawItems, shippingMethod, liveBySlug) {
 
   for (const raw of rawItems) {
     const id = raw && raw.id;
-    const product = applyLiveProduct(PRODUCTS[id], liveBySlug, id);
+    const product = PRODUCTS[id];
     if (!product) {
       return { error: 'מוצר לא מוכר בסל' };
     }
@@ -134,7 +99,6 @@ function buildOrder(rawItems, shippingMethod, liveBySlug) {
       quantity,
       price,
       currency: 'ILS',
-      itemId: product.itemId,
     };
     if (kind) line.kind = kind;
     lines.push(line);
@@ -182,7 +146,6 @@ module.exports = {
   shippingPrice,
   buildOrder,
   fallbackPriceBook,
-  priceBookFromMorningItems,
   applyVariantNote,
   fromCatalogFile,
 };

@@ -45,6 +45,9 @@ noindex: true
         <p class="admin-message" id="admin-editor-message" hidden></p>
       </div>
 
+      <div class="admin-editor__split">
+      <div class="admin-editor__fields">
+
       <div class="admin-grid">
         <div class="form__group">
           <label class="form__label" for="admin-slug">מזהה (כתובת)</label>
@@ -137,6 +140,15 @@ noindex: true
         <button type="submit" class="button button--primary" id="admin-editor-save">שמירת מוצר</button>
         <button type="button" class="button" id="admin-editor-cancel">ביטול</button>
         <button type="button" class="admin-delete" id="admin-editor-delete" hidden>מחיקת מוצר</button>
+      </div>
+      </div>
+
+      <aside class="admin-preview" aria-label="תצוגה מקדימה כמו באתר">
+        <p class="admin-preview__kicker">תצוגה מקדימה</p>
+        <p class="admin-preview__lead">כך המוצר יופיע בחנות ובדף המוצר, לפי השדות כאן.</p>
+        <div id="admin-preview-card"></div>
+        <div id="admin-preview-page"></div>
+      </aside>
       </div>
     </form>
   </div>

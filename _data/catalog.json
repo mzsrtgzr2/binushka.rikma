@@ -39,6 +39,10 @@
     "name": "שובר מתנה - בוקר פינוק לאמהות",
     "price": 330
   },
+  "qa-check": {
+    "name": "בדיקת תשלום",
+    "price": 1
+  },
   "gift-card": {
     "name": "גיפט קארד",
     "variable": true,

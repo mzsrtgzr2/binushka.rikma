@@ -335,6 +335,13 @@ function applyPage(raw, input, { isNew } = {}) {
   yaml = setYamlBool(yaml, 'out_of_stock', Boolean(input.out_of_stock));
   yaml = setYamlBool(yaml, 'limited_stock', Boolean(input.limited_stock));
   yaml = setYamlBool(yaml, 'hide', Boolean(input.hide));
+  if (input.hide) {
+    yaml = setYamlBool(yaml, 'noindex', true);
+    yaml = setYamlBool(yaml, 'sitemap', false);
+  } else {
+    yaml = setYamlScalar(yaml, 'noindex', '');
+    yaml = setYamlScalar(yaml, 'sitemap', '');
+  }
   if (isNew && !yamlValue(yaml, 'date')) {
     yaml = setYamlScalar(yaml, 'date', nowStamp());
   }

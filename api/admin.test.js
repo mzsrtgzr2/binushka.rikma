@@ -32,6 +32,8 @@ test('applyFlags updates booleans and adds missing keys', () => {
   assert.equal(product.out_of_stock, true);
   assert.equal(product.limited_stock, false);
   assert.equal(product.hide, true);
+  assert.match(next, /noindex: true/);
+  assert.match(next, /sitemap: false/);
   assert.match(next, /body/);
 });
 

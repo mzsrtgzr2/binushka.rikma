@@ -5,7 +5,6 @@
 {%- assign gc = site.data.store-cart -%}
 {%- assign catalog = site.data.catalog -%}
 {%- for item in site.store -%}
-  {%- unless item.hide -%}
     {%- assign slug = item.slug | default: item.basename -%}
     {%- assign meta = catalog[slug] -%}
     {%- if meta and meta.enabled != false -%}
@@ -38,7 +37,6 @@
       }
       {%- assign first = false -%}
     {%- endif -%}
-  {%- endunless -%}
 {%- endfor -%}
 ]
 </script>

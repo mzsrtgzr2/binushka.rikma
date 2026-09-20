@@ -22,6 +22,7 @@ test('Jekyll catalog matches the checkout catalog file', () => {
   assert.equal(PRODUCTS.fox.price, 220);
   assert.equal(PRODUCTS['gift-card'].variable, true);
   assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
+  assert.equal(PRODUCTS['qa-check'].price, 1);
 });
 
 test('checkout charges the catalog price, not a client price', () => {

@@ -244,6 +244,7 @@
       escapeHtml(row.name || '') +
       '">' +
       '</div>' +
+      '<div class="admin-grid">' +
       '<div class="form__group">' +
       '<label class="form__label">מחיר (₪)</label>' +
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="30" value="' +
@@ -256,10 +257,10 @@
       escapeHtml(row.id || '') +
       '">' +
       '<p class="admin-hint">באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
-      '</div>' +
+      '</div></div>' +
       '<div class="form__group">' +
       '<label class="form__label">תיאור</label>' +
-      '<textarea class="form__input admin-variant__description" data-v="description" rows="10" placeholder="תיאור מלא לסוג — אפשר לכתוב כמה שורות בלי לחץ">' +
+      '<textarea class="form__input admin-body-input admin-variant__description" data-v="description" rows="8" placeholder="תיאור מלא לסוג — אפשר לכתוב כמה שורות">' +
       escapeHtml(row.description || '') +
       '</textarea>' +
       '</div>' +

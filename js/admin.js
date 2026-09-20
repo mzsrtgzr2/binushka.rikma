@@ -231,7 +231,6 @@
     var imgSrc = variantImageSrc(row.image) || imagePath;
     return (
       '<div class="admin-variant">' +
-      '<div class="admin-variant__head">' +
       '<div class="admin-variant__image">' +
       (imgSrc
         ? '<img class="admin-variant__thumb" src="' + escapeHtml(imgSrc) + '" alt="">'
@@ -248,33 +247,35 @@
         ? '<button type="button" class="admin-variant__clear-image" data-clear-variant-image>הסרת תמונה</button>'
         : '') +
       '</div></div>' +
-      '<button type="button" class="admin-variant__remove" data-remove-variant>הסרת סוג</button>' +
-      '</div>' +
       '<div class="admin-variant__fields">' +
-      '<div class="admin-variant__ids">' +
       '<div class="form__group">' +
-      '<label class="form__label">מזהה</label>' +
-      '<input class="form__input" data-v="id" dir="ltr" placeholder="id" value="' +
-      escapeHtml(row.id || '') +
-      '">' +
-      '</div>' +
-      '<div class="form__group">' +
-      '<label class="form__label">שם</label>' +
-      '<input class="form__input" data-v="name" placeholder="שם הסוג" value="' +
+      '<label class="form__label">שם הסוג</label>' +
+      '<input class="form__input" data-v="name" placeholder="למשל: קטיפה אדומה" value="' +
       escapeHtml(row.name || '') +
       '">' +
       '</div>' +
+      '<div class="admin-grid admin-variant__meta">' +
       '<div class="form__group">' +
       '<label class="form__label">מחיר (₪)</label>' +
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
       escapeHtml(row.price || '') +
       '">' +
+      '</div>' +
+      '<div class="form__group">' +
+      '<label class="form__label">מזהה</label>' +
+      '<input class="form__input" data-v="id" dir="ltr" placeholder="id" value="' +
+      escapeHtml(row.id || '') +
+      '">' +
+      '<p class="admin-hint">באנגלית, לשימוש פנימי בלבד.</p>' +
       '</div></div>' +
       '<div class="form__group admin-variant__description-group">' +
       '<label class="form__label">תיאור</label>' +
-      '<textarea class="form__input admin-variant__description" data-v="description" rows="4" placeholder="תיאור לסוג">' +
+      '<textarea class="form__input admin-variant__description" data-v="description" rows="5" placeholder="תיאור לסוג — אפשר לכתוב כמה שורות">' +
       escapeHtml(row.description || '') +
       '</textarea>' +
+      '</div>' +
+      '<div class="admin-variant__footer">' +
+      '<button type="button" class="admin-variant__remove" data-remove-variant>הסרת סוג</button>' +
       '</div></div></div>'
     );
   }

@@ -17,14 +17,36 @@ concurrency:
 jobs:
   handle-comment:
     if: >-
-      ${{
-        github.event.sender.type != 'Bot' &&
-        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
-      }}
+      ${{ github.event.sender.type != 'Bot' }}
     runs-on: ubuntu-latest
 
     steps:
+      - name: Authorize commenter
+        id: auth
+        env:
+          CURSOR_AGENT_ALLOWED_USERS: ${{ vars.CURSOR_AGENT_ALLOWED_USERS }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          COMMENTER: ${{ github.event.comment.user.login }}
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          import re
+
+          commenter = os.environ["COMMENTER"].strip().lower()
+          allowed_raw = os.environ.get("CURSOR_AGENT_ALLOWED_USERS") or os.environ["REPOSITORY_OWNER"]
+          allowed = {
+              user.strip().lower()
+              for user in re.split(r"[\s,]+", allowed_raw)
+              if user.strip()
+          }
+
+          print(f"authorized={'true' if commenter in allowed else 'false'}")
+          PY
+
       - name: Resolve Cursor PR and requested action
+        if: steps.auth.outputs.authorized == 'true'
         id: context
         env:
           GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
@@ -101,7 +123,7 @@ jobs:
           echo "title=$(jq -r '.title' "$pr_file")" >> "$GITHUB_OUTPUT"
 
       - name: Enable automatic merge
-        if: steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve'
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve'
         env:
           GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
           PR_NUMBER: ${{ steps.context.outputs.pr_number }}
@@ -117,7 +139,7 @@ jobs:
           fi
 
       - name: Checkout pull request branch
-        if: steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_GITHUB || github.token }}
@@ -126,13 +148,13 @@ jobs:
           persist-credentials: false
 
       - name: Install Cursor CLI
-        if: steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         run: |
           curl https://cursor.com/install -fsS | bash
           echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
 
       - name: Build feedback prompt
-        if: steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         id: prompt
         env:
           PR_NUMBER: ${{ steps.context.outputs.pr_number }}
@@ -163,7 +185,7 @@ jobs:
           echo "file=${prompt_file}" >> "$GITHUB_OUTPUT"
 
       - name: Run Cursor Agent on feedback
-        if: steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'gpt-5' }}
@@ -176,7 +198,7 @@ jobs:
             --output-format text
 
       - name: Commit and push feedback changes
-        if: steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         id: commit
         env:
           BRANCH_NAME: ${{ steps.context.outputs.branch }}
@@ -200,7 +222,7 @@ jobs:
           echo "has_changes=true" >> "$GITHUB_OUTPUT"
 
       - name: Reply with feedback result
-        if: steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         env:
           GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
           PR_NUMBER: ${{ steps.context.outputs.pr_number }}

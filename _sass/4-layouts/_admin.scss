@@ -581,9 +581,56 @@
 
 .admin-variant {
   display: grid;
-  grid-template-columns: 110px 1fr 90px 1fr 1fr auto;
+  grid-template-columns: 110px minmax(120px, 1fr) 90px minmax(180px, 1.2fr) minmax(120px, 1fr) auto;
   gap: 8px;
   align-items: center;
+}
+
+.admin-variant__image {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-variant__image-preview {
+  width: 100%;
+  min-height: 92px;
+  border-radius: 12px;
+  background: var(--background-alt-color);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-variant__image-thumb {
+  display: block;
+  width: 100%;
+  height: 92px;
+  object-fit: cover;
+}
+
+.admin-variant__image-empty {
+  font-size: 13px;
+  color: var(--text-alt-color);
+}
+
+.admin-variant__image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-variant__upload {
+  position: relative;
+  overflow: hidden;
+
+  input[type='file'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+  }
 }
 
 .admin-variant__remove {

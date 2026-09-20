@@ -368,6 +368,52 @@ test('variants product requires at least one priced type', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('variants product stores uploaded image files per type', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'bands',
+        title: 'גומיות',
+        kind: 'variants',
+        variants: [
+          {
+            id: 'small',
+            name: 'קטן',
+            price: 35,
+            image_upload: {
+              filename: 'small.png',
+              mime: 'image/png',
+              data: `data:image/png;base64,${TINY_PNG}`,
+            },
+            description: 'בד כותנה',
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const listed = await request(admin, {
+    method: 'GET',
+    headers: { cookie },
+    env: authEnv(root),
+  });
+  assert.equal(listed.status, 200);
+  const bands = listed.json.products.find((product) => product.slug === 'bands');
+  assert.equal(Boolean(bands), true);
+  assert.equal(bands.variants.length, 1);
+  assert.match(bands.variants[0].image, /^\/images\/store\/bands\/variants\/small-/);
+  const savedFile = path.join(root, bands.variants[0].image.replace(/^\//, ''));
+  assert.equal(fs.existsSync(savedFile), true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 const TINY_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 

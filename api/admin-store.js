@@ -172,47 +172,81 @@ function asPhotoItems(raw) {
   });
 }
 
+function prepareUploadedImage(slug, upload, folder) {
+  if (!SLUG_RE.test(slug)) throw new Error('מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)');
+  const decoded = decodeDataUrl(upload.data || upload.content);
+  if (!decoded) throw new Error('קובץ תמונה לא תקין');
+  const mime = String(upload.mime || decoded.mime || '').toLowerCase();
+  const ext = IMAGE_EXT[mime];
+  if (!ext) throw new Error('רק jpg, png, webp או gif');
+  let buffer;
+  try {
+    buffer = Buffer.from(decoded.base64, 'base64');
+  } catch {
+    throw new Error('קובץ תמונה לא תקין');
+  }
+  if (!buffer.length) throw new Error('קובץ תמונה ריק');
+  if (buffer.length > MAX_PHOTO_BYTES) throw new Error('תמונה גדולה מדי (עד 2.5MB)');
+  const filename = safePhotoName(upload.filename || upload.name, ext);
+  const repoPath = ['images/store', slug, folder, filename].filter(Boolean).join('/');
+  return {
+    file: { path: repoPath, content: decoded.base64, encoding: 'base64' },
+    publicPath: `/${repoPath}`,
+  };
+}
+
 function preparePhotos(raw) {
-  if (!Array.isArray(raw && raw.photos)) return { fields: {}, files: [] };
   const slug = String((raw && raw.slug) || '')
     .trim()
     .toLowerCase();
-  const items = asPhotoItems(raw.photos);
-  if (items.length > MAX_PHOTOS) return { error: `אפשר עד ${MAX_PHOTOS} תמונות` };
+  const hasPhotosInput = Array.isArray(raw && raw.photos);
+  const hasVariantsInput = Array.isArray(raw && raw.variants);
+  if (!hasPhotosInput && !hasVariantsInput) return { fields: {}, files: [] };
   const files = [];
-  const paths = [];
-  for (const item of items) {
-    if (item && item.upload) {
-      if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
-      const decoded = decodeDataUrl(item.upload.data || item.upload.content);
-      if (!decoded) return { error: 'קובץ תמונה לא תקין' };
-      const mime = String(item.upload.mime || decoded.mime || '').toLowerCase();
-      const ext = IMAGE_EXT[mime];
-      if (!ext) return { error: 'רק jpg, png, webp או gif' };
-      let buffer;
-      try {
-        buffer = Buffer.from(decoded.base64, 'base64');
-      } catch {
-        return { error: 'קובץ תמונה לא תקין' };
+  const items = asPhotoItems(hasPhotosInput ? raw.photos : []);
+  if (items.length > MAX_PHOTOS) return { error: `אפשר עד ${MAX_PHOTOS} תמונות` };
+  const fields = {};
+  if (hasPhotosInput) {
+    const paths = [];
+    try {
+      for (const item of items) {
+        if (item && item.upload) {
+          const prepared = prepareUploadedImage(slug, item.upload, '');
+          files.push(prepared.file);
+          paths.push(prepared.publicPath);
+          continue;
+        }
+        const pathName = publicImagePath(item && (item.path || item));
+        if (pathName) paths.push(pathName);
       }
-      if (!buffer.length) return { error: 'קובץ תמונה ריק' };
-      if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)' };
-      const filename = safePhotoName(item.upload.filename || item.upload.name, ext);
-      const repoPath = `images/store/${slug}/${filename}`;
-      files.push({ path: repoPath, content: decoded.base64, encoding: 'base64' });
-      paths.push(`/${repoPath}`);
-      continue;
+    } catch (err) {
+      return { error: err.message || 'קובץ תמונה לא תקין' };
     }
-    const pathName = publicImagePath(item && (item.path || item));
-    if (pathName) paths.push(pathName);
+    const photos = uniquePhotos(paths);
+    fields.image = photos[0] || '';
+    fields.gallery = photos.slice(1);
+    fields.photos = photos;
   }
-  const photos = uniquePhotos(paths);
+  if (hasVariantsInput) {
+    try {
+      fields.variants = raw.variants.map((row) => {
+        const next = row && typeof row === 'object' ? { ...row } : {};
+        next.image = publicImagePath(next.image) || '';
+        if (next.image_upload) {
+          const prepared = prepareUploadedImage(slug, next.image_upload, 'variants');
+          files.push(prepared.file);
+          next.image = prepared.publicPath;
+        }
+        delete next.image_upload;
+        delete next.image_preview;
+        return next;
+      });
+    } catch (err) {
+      return { error: err.message || 'קובץ תמונה לא תקין' };
+    }
+  }
   return {
-    fields: {
-      image: photos[0] || '',
-      gallery: photos.slice(1),
-      photos,
-    },
+    fields,
     files,
   };
 }
@@ -251,7 +285,7 @@ function variantsFromArray(rows) {
     out[id] = {
       name: String(row.name || id).trim() || id,
       price,
-      image: String(row.image || '').trim(),
+      image: publicImagePath(row.image) || '',
       description: String(row.description || '').trim(),
     };
   });

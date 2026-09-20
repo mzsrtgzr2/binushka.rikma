@@ -228,9 +228,12 @@
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
       escapeHtml(row.price || '') +
       '">' +
-      '<input class="form__input" data-v="image" dir="ltr" placeholder="/images/..." value="' +
-      escapeHtml(row.image || '') +
-      '">' +
+      '<div class="admin-variant__image">' +
+      '<div class="admin-variant__image-preview" data-variant-image-preview></div>' +
+      '<div class="admin-variant__image-actions">' +
+      '<label class="admin-photo__btn admin-variant__upload">העלי תמונה<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-variant-image-file></label>' +
+      '<button type="button" class="admin-photo__btn admin-photo__btn--danger" data-variant-image-clear hidden>הסירי תמונה</button>' +
+      '</div></div>' +
       '<input class="form__input" data-v="description" placeholder="תיאור" value="' +
       escapeHtml(row.description || '') +
       '">' +
@@ -239,9 +242,28 @@
     );
   }
 
+  function variantImagePreviewHtml(src) {
+    if (!src) return '<span class="admin-variant__image-empty">בלי תמונה</span>';
+    return '<img class="admin-variant__image-thumb" src="' + escapeHtml(src) + '" alt="">';
+  }
+
+  function setVariantImageState(row, pathName, upload, preview) {
+    row.dataset.imagePath = pathName || '';
+    row.dataset.imagePreview = preview || pathName || '';
+    row._imageUpload = upload || null;
+    var previewEl = row.querySelector('[data-variant-image-preview]');
+    var clearBtn = row.querySelector('[data-variant-image-clear]');
+    if (previewEl) previewEl.innerHTML = variantImagePreviewHtml(row.dataset.imagePreview || row.dataset.imagePath || '');
+    if (clearBtn) clearBtn.hidden = !(row.dataset.imagePreview || row.dataset.imagePath || row._imageUpload);
+  }
+
   function renderVariants(rows) {
     var list = rows && rows.length ? rows : [{}];
     variantsEl.innerHTML = list.map(variantRowHtml).join('');
+    Array.prototype.forEach.call(variantsEl.querySelectorAll('.admin-variant'), function (row, index) {
+      var item = list[index] || {};
+      setVariantImageState(row, item.image || '', null, item.image || '');
+    });
   }
 
   function readVariants() {
@@ -250,7 +272,9 @@
         id: (row.querySelector('[data-v="id"]') || {}).value,
         name: (row.querySelector('[data-v="name"]') || {}).value,
         price: (row.querySelector('[data-v="price"]') || {}).value,
-        image: (row.querySelector('[data-v="image"]') || {}).value,
+        image: row.dataset.imagePath || '',
+        image_preview: row.dataset.imagePreview || row.dataset.imagePath || '',
+        image_upload: row._imageUpload || null,
         description: (row.querySelector('[data-v="description"]') || {}).value,
       };
     });
@@ -648,6 +672,15 @@
 
   function previewState() {
     var data = readEditor();
+    data.variants = (data.variants || []).map(function (variant) {
+      return {
+        id: variant.id,
+        name: variant.name,
+        price: variant.price,
+        image: variant.image_preview || variant.image || '',
+        description: variant.description,
+      };
+    });
     var photos = photoItems
       .map(function (item) {
         return item.preview || item.path || '';
@@ -871,11 +904,40 @@
 
   variantsEl.addEventListener('click', function (event) {
     var btn = event.target.closest('[data-remove-variant]');
+    var clear = event.target.closest('[data-variant-image-clear]');
+    if (clear) {
+      var imageRow = clear.closest('.admin-variant');
+      if (imageRow) {
+        setVariantImageState(imageRow, '', null, '');
+        schedulePreview();
+      }
+      return;
+    }
     if (!btn) return;
     var row = btn.closest('.admin-variant');
     if (row) row.remove();
     if (!variantsEl.querySelector('.admin-variant')) renderVariants([{}]);
     schedulePreview();
+  });
+
+  variantsEl.addEventListener('change', function (event) {
+    var input = event.target.closest('[data-variant-image-file]');
+    if (!input) return;
+    var file = (input.files || [])[0];
+    input.value = '';
+    if (!file) return;
+    var row = input.closest('.admin-variant');
+    if (!row) return;
+    show(editorMessage, 'טוענת תמונה לסוג…', 'info');
+    readFileAsPhoto(file)
+      .then(function (item) {
+        setVariantImageState(row, '', item.upload, item.preview);
+        show(editorMessage, '', '');
+        schedulePreview();
+      })
+      .catch(function (err) {
+        show(editorMessage, err.message || 'לא הצלחנו להוסיף תמונה', 'error');
+      });
   });
 
   photosEl.addEventListener('click', function (event) {

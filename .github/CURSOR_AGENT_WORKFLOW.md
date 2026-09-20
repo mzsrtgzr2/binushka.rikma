@@ -49,6 +49,8 @@ The button looks good on desktop, but please make it full width on mobile.
 ```
 
 `.github/workflows/cursor-agent-feedback.yml` checks out the same PR branch, runs Cursor with that comment as the follow-up request, commits any changes, and pushes the branch so Vercel rebuilds the preview.
+The workflow comments back immediately when feedback is accepted so reviewers can see that
+Cursor started working.
 
 Authorized comments are limited to GitHub usernames listed in `CURSOR_AGENT_ALLOWED_USERS`.
 Bot comments are ignored to avoid workflow loops.

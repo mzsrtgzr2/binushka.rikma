@@ -19,6 +19,8 @@ jobs:
     if: >-
       ${{ github.event.sender.type != 'Bot' }}
     runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
 
     steps:
       - name: Authorize commenter
@@ -121,6 +123,14 @@ jobs:
           echo "branch=$(jq -r '.headRefName' "$pr_file")" >> "$GITHUB_OUTPUT"
           echo "base_branch=$(jq -r '.baseRefName' "$pr_file")" >> "$GITHUB_OUTPUT"
           echo "title=$(jq -r '.title' "$pr_file")" >> "$GITHUB_OUTPUT"
+
+      - name: Acknowledge feedback
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "Cursor received this feedback and is working on an update now."
 
       - name: Enable automatic merge
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve'

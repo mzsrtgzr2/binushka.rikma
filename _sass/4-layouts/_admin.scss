@@ -586,35 +586,34 @@
 
 .admin-variants {
   display: grid;
-  gap: 20px;
+  gap: 24px;
   margin-bottom: 16px;
 }
 
 .admin-variant {
   background: var(--background-alt-color);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px;
   min-width: 0;
 
+  .form__group {
+    margin-bottom: 20px;
+  }
+
   .form__input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
     background: var(--background-color);
   }
 
   .form__group:last-of-type {
-    margin-bottom: 12px;
-  }
-
-  .admin-grid {
-    margin-bottom: 0;
-  }
-
-  .admin-grid .form__group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 }
 
 .admin-variant__description {
-  min-height: 120px;
+  min-height: 140px;
   resize: vertical;
   font-family: inherit;
   line-height: 1.55;
@@ -629,8 +628,8 @@
 
 .admin-variant__thumb {
   display: block;
-  width: 140px;
-  height: 105px;
+  width: 160px;
+  height: 120px;
   object-fit: cover;
   border-radius: 12px;
   background: var(--background-color);
@@ -638,8 +637,8 @@
 }
 
 .admin-variant__thumb--empty {
-  width: 140px;
-  height: 105px;
+  width: 160px;
+  height: 120px;
 }
 
 .admin-variant__image-actions {
@@ -661,6 +660,7 @@
 .admin-variant__footer {
   display: flex;
   justify-content: flex-start;
+  padding-top: 4px;
 }
 
 .admin-variant__remove {

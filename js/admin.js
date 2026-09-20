@@ -225,39 +225,45 @@
     return '';
   }
 
-  function variantRowHtml(row) {
+  function variantRowHtml(row, index) {
     row = row || {};
     var imagePath = typeof row.image === 'string' ? row.image : row.image && row.image.path ? row.image.path : '';
     var imgSrc = variantImageSrc(row.image) || imagePath;
+    var n = (index == null ? 0 : index) + 1;
     return (
       '<div class="admin-variant">' +
+      '<div class="admin-variant__heading">' +
+      '<p class="admin-variant__label">סוג ' +
+      n +
+      '</p>' +
+      '<button type="button" class="admin-variant__remove" data-remove-variant>הסרת סוג</button>' +
+      '</div>' +
       '<div class="form__group">' +
       '<label class="form__label">שם הסוג</label>' +
       '<input class="form__input" data-v="name" placeholder="למשל: קטיפה אדומה" value="' +
       escapeHtml(row.name || '') +
       '">' +
       '</div>' +
-      '<div class="admin-grid">' +
       '<div class="form__group">' +
       '<label class="form__label">מחיר (₪)</label>' +
-      '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
+      '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="30" value="' +
       escapeHtml(row.price || '') +
       '">' +
       '</div>' +
       '<div class="form__group">' +
-      '<label class="form__label">מזהה</label>' +
-      '<input class="form__input" data-v="id" dir="ltr" placeholder="id" value="' +
+      '<label class="form__label">מזהה פנימי</label>' +
+      '<input class="form__input" data-v="id" dir="ltr" placeholder="regular" value="' +
       escapeHtml(row.id || '') +
       '">' +
-      '<p class="admin-hint">באנגלית, לשימוש פנימי בלבד.</p>' +
-      '</div></div>' +
+      '<p class="admin-hint">באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
+      '</div>' +
       '<div class="form__group">' +
       '<label class="form__label">תיאור</label>' +
-      '<textarea class="form__input admin-variant__description" data-v="description" rows="8" placeholder="תיאור לסוג — אפשר לכתוב כמה שורות">' +
+      '<textarea class="form__input admin-variant__description" data-v="description" rows="10" placeholder="תיאור מלא לסוג — אפשר לכתוב כמה שורות בלי לחץ">' +
       escapeHtml(row.description || '') +
       '</textarea>' +
       '</div>' +
-      '<div class="form__group">' +
+      '<div class="form__group admin-variant__image-group">' +
       '<label class="form__label">תמונה</label>' +
       '<p class="admin-hint">העלאה מהמחשב, כמו בתמונות הראשיות של המוצר.</p>' +
       '<div class="admin-variant__image">' +
@@ -275,16 +281,24 @@
       (imgSrc
         ? '<button type="button" class="admin-variant__clear-image" data-clear-variant-image>הסרת תמונה</button>'
         : '') +
-      '</div></div></div>' +
-      '<div class="admin-variant__footer">' +
-      '<button type="button" class="admin-variant__remove" data-remove-variant>הסרת סוג</button>' +
-      '</div></div>'
+      '</div></div></div></div>'
     );
   }
 
   function renderVariants(rows) {
     var list = rows && rows.length ? rows : [{}];
-    variantsEl.innerHTML = list.map(variantRowHtml).join('');
+    variantsEl.innerHTML = list
+      .map(function (row, index) {
+        return variantRowHtml(row, index);
+      })
+      .join('');
+  }
+
+  function renumberVariants() {
+    Array.prototype.forEach.call(variantsEl.querySelectorAll('.admin-variant'), function (row, index) {
+      var label = row.querySelector('.admin-variant__label');
+      if (label) label.textContent = 'סוג ' + (index + 1);
+    });
   }
 
   function readVariantImage(row) {
@@ -960,7 +974,8 @@
   });
 
   addVariantBtn.addEventListener('click', function () {
-    variantsEl.insertAdjacentHTML('beforeend', variantRowHtml({}));
+    var nextIndex = variantsEl.querySelectorAll('.admin-variant').length;
+    variantsEl.insertAdjacentHTML('beforeend', variantRowHtml({}, nextIndex));
     schedulePreview();
   });
 
@@ -979,7 +994,11 @@
     if (!btn) return;
     var row = btn.closest('.admin-variant');
     if (row) row.remove();
-    if (!variantsEl.querySelector('.admin-variant')) renderVariants([{}]);
+    if (!variantsEl.querySelector('.admin-variant')) {
+      renderVariants([{}]);
+    } else {
+      renumberVariants();
+    }
     schedulePreview();
   });
 

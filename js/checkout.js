@@ -15,7 +15,7 @@
   var grandEl = document.getElementById('checkout-grand-total');
   var formSection = document.getElementById('checkout-form-section');
 
-  var shippingConfig = { freeShippingMin: 250, methods: {} };
+  var shippingConfig = { methods: {} };
   var shippingEl = document.getElementById('store-cart-shipping');
   if (shippingEl) {
     try {
@@ -40,9 +40,6 @@
       if (method === 'pickup') return 0;
       if (method === 'registered') return 25;
       if (method === 'courier') return 40;
-      return 0;
-    }
-    if (method === 'courier' && subtotal >= (shippingConfig.freeShippingMin || 250)) {
       return 0;
     }
     return Number(row.price) || 0;

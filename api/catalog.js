@@ -34,7 +34,6 @@ const SHIPPING = {
   courier: { name: 'משלוח - שליח עד הבית', price: 40 },
 };
 
-const FREE_SHIPPING_MIN = 250;
 const MAX_QTY = 20;
 
 function fallbackPriceBook() {
@@ -45,12 +44,9 @@ function fallbackPriceBook() {
   return out;
 }
 
-function shippingPrice(method, subtotal) {
+function shippingPrice(method) {
   const ship = SHIPPING[method];
   if (!ship) return null;
-  if (method === 'courier' && subtotal >= FREE_SHIPPING_MIN) {
-    return 0;
-  }
   return ship.price;
 }
 
@@ -104,16 +100,14 @@ function buildOrder(rawItems, shippingMethod) {
     lines.push(line);
   }
 
-  const shipCost = shippingPrice(shippingMethod, subtotal);
+  const shipCost = shippingPrice(shippingMethod);
   if (shipCost == null) {
     return { error: 'שיטת משלוח לא תקינה' };
   }
 
   const ship = SHIPPING[shippingMethod];
-  const shipLabel =
-    shipCost === 0 && shippingMethod === 'courier' ? 'משלוח חינם עד הבית' : ship.name;
   lines.push({
-    description: shipLabel,
+    description: ship.name,
     quantity: 1,
     price: shipCost,
     currency: 'ILS',
@@ -142,7 +136,6 @@ function applyVariantNote(order, note) {
 module.exports = {
   PRODUCTS,
   SHIPPING,
-  FREE_SHIPPING_MIN,
   shippingPrice,
   buildOrder,
   fallbackPriceBook,

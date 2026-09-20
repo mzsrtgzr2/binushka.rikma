@@ -31,6 +31,15 @@ test('checkout charges the catalog price, not a client price', () => {
   assert.equal(order.subtotal, 440);
 });
 
+test('courier shipping stays ₪40 even on orders over ₪250', () => {
+  const order = buildOrder([{ id: 'fox', quantity: 2 }], 'courier');
+  assert.equal(order.subtotal, 440);
+  assert.equal(order.shipping, 40);
+  assert.equal(order.total, 480);
+  assert.equal(order.lines.at(-1).description, 'משלוח - שליח עד הבית');
+  assert.equal(order.lines.at(-1).price, 40);
+});
+
 test('gift card charges the chosen amount, not a catalog price', () => {
   const order = buildOrder([{ id: 'gift-card', quantity: 1, amount: 180 }], 'pickup');
   assert.equal(order.lines[0].price, 180);

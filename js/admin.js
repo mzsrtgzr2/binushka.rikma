@@ -237,6 +237,7 @@
       escapeHtml(row.name || '') +
       '">' +
       '</div>' +
+      '<div class="admin-grid">' +
       '<div class="form__group">' +
       '<label class="form__label">מחיר (₪)</label>' +
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
@@ -249,15 +250,16 @@
       escapeHtml(row.id || '') +
       '">' +
       '<p class="admin-hint">באנגלית, לשימוש פנימי בלבד.</p>' +
-      '</div>' +
+      '</div></div>' +
       '<div class="form__group">' +
       '<label class="form__label">תיאור</label>' +
-      '<textarea class="form__input admin-variant__description" data-v="description" rows="6" placeholder="תיאור לסוג — אפשר לכתוב כמה שורות">' +
+      '<textarea class="form__input admin-variant__description" data-v="description" rows="8" placeholder="תיאור לסוג — אפשר לכתוב כמה שורות">' +
       escapeHtml(row.description || '') +
       '</textarea>' +
       '</div>' +
       '<div class="form__group">' +
       '<label class="form__label">תמונה</label>' +
+      '<p class="admin-hint">העלאה מהמחשב, כמו בתמונות הראשיות של המוצר.</p>' +
       '<div class="admin-variant__image">' +
       (imgSrc
         ? '<img class="admin-variant__thumb" src="' + escapeHtml(imgSrc) + '" alt="">'

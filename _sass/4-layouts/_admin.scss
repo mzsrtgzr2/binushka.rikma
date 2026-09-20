@@ -586,12 +586,13 @@
 
 .admin-variants {
   display: grid;
-  gap: 24px;
+  gap: 20px;
   margin-bottom: 16px;
 }
 
 .admin-variant {
   background: var(--background-alt-color);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 16px;
   padding: 24px;
   min-width: 0;
@@ -600,36 +601,48 @@
     margin-bottom: 20px;
   }
 
+  .admin-grid {
+    margin-bottom: 0;
+
+    .form__group {
+      margin-bottom: 20px;
+    }
+  }
+
   .form__input {
     display: block;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
     background: var(--background-color);
   }
 
-  .form__group:last-of-type {
-    margin-bottom: 16px;
+  > .form__group:last-of-type {
+    margin-bottom: 12px;
   }
 }
 
 .admin-variant__description {
-  min-height: 140px;
+  min-height: 180px;
   resize: vertical;
   font-family: inherit;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 .admin-variant__image {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  align-items: center;
+  align-items: flex-start;
+  margin-top: 8px;
 }
 
 .admin-variant__thumb {
   display: block;
-  width: 160px;
-  height: 120px;
+  width: 180px;
+  height: 135px;
   object-fit: cover;
   border-radius: 12px;
   background: var(--background-color);
@@ -637,15 +650,19 @@
 }
 
 .admin-variant__thumb--empty {
-  width: 160px;
-  height: 120px;
+  width: 180px;
+  height: 135px;
+  border: 1px dashed rgba(0, 0, 0, 0.12);
 }
 
 .admin-variant__image-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  flex-wrap: nowrap;
   gap: 12px;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 135px;
 }
 
 .admin-variant__clear-image {
@@ -661,6 +678,8 @@
   display: flex;
   justify-content: flex-start;
   padding-top: 4px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: 4px;
 }
 
 .admin-variant__remove {
@@ -669,7 +688,7 @@
   color: var(--text-alt-color);
   cursor: pointer;
   font-size: 14px;
-  padding: 0;
+  padding: 8px 0 0;
 }
 
 .admin-toolbar .button,
@@ -703,11 +722,15 @@
     align-items: stretch;
   }
 
+  .admin-variant__image-actions {
+    min-height: 0;
+  }
+
   .admin-variant__thumb,
   .admin-variant__thumb--empty {
     width: 100%;
-    max-width: 280px;
-    height: 160px;
+    max-width: 100%;
+    height: 180px;
   }
 
   .admin-preview {

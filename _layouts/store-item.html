@@ -118,6 +118,13 @@ layout: default
           {% endif %}
         </div>
       </div>
+      {% if page.gallery and page.gallery.size > 0 %}
+      <div class="store-item-gallery">
+        {% for img in page.gallery %}
+        <img class="store-item-gallery__img lazy" data-src="{{ img | relative_url }}" alt="{{ page.title }}">
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
   </div>
   </div>

@@ -79,9 +79,9 @@ leftover if you still want a Morning item linked; new products do not need one.
 fixed-price products, gift cards, scrunchies variants, titles, photos paths,
 page text, stock, and hide.
 
-**Photos files:** put the file under `/images/` in the repo (or paste an
-existing path in admin). The backoffice stores the path, it does not upload
-binaries.
+**Photos:** `/admin/` → תמונות. Upload from the computer, reorder, first photo is
+the main store image. Extra photos are `gallery` on the product page. Files are
+committed under `images/store/<slug>/`.
 
 **Stock / hide:** same `/admin/` screen. Morning’s item API has no inventory
 field. Grow is payments only — it is not a catalog.

@@ -59,6 +59,7 @@ function parseGallery(yaml) {
   const out = [];
   let inGallery = false;
   for (const line of lines) {
+    if (/^gallery:\s*\[\]\s*$/.test(line)) break;
     if (/^gallery:\s*$/.test(line)) {
       inGallery = true;
       continue;
@@ -77,6 +78,143 @@ function parseGallery(yaml) {
     }
   }
   return out;
+}
+
+function stripGallery(yaml) {
+  const lines = String(yaml).split(/\r?\n/);
+  const out = [];
+  let inGallery = false;
+  for (const line of lines) {
+    if (/^gallery:\s*(\[\])?\s*$/.test(line)) {
+      inGallery = true;
+      continue;
+    }
+    if (inGallery) {
+      if (/^\s+-/.test(line) || /^\s*$/.test(line)) continue;
+      if (/^\S/.test(line)) inGallery = false;
+      else continue;
+    }
+    if (!inGallery) out.push(line);
+  }
+  return out.join('\n');
+}
+
+function setYamlGallery(yaml, items) {
+  let next = stripGallery(yaml).replace(/\s+$/, '');
+  const cleaned = (items || []).map((item) => String(item || '').trim()).filter(Boolean);
+  if (!cleaned.length) return `${next}\n`;
+  const block = ['gallery:', ...cleaned.map((item) => `  - ${formatYamlScalar(item)}`)].join('\n');
+  return `${next}\n${block}\n`;
+}
+
+const IMAGE_EXT = {
+  'image/jpeg': '.jpg',
+  'image/jpg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+};
+const MAX_PHOTO_BYTES = 2.5 * 1024 * 1024;
+const MAX_PHOTOS = 8;
+
+function publicImagePath(value) {
+  let pathName = String(value || '')
+    .trim()
+    .replace(/^['"]|['"]$/g, '');
+  if (!pathName) return '';
+  if (pathName.includes('..') || pathName.includes('\\')) return '';
+  if (!pathName.startsWith('/')) pathName = `/${pathName}`;
+  if (!pathName.startsWith('/images/')) return '';
+  return pathName.replace(/\/{2,}/g, '/');
+}
+
+function uniquePhotos(list) {
+  const seen = new Set();
+  const out = [];
+  for (const item of list || []) {
+    const pathName = publicImagePath(item);
+    if (!pathName || seen.has(pathName)) continue;
+    seen.add(pathName);
+    out.push(pathName);
+  }
+  return out;
+}
+
+function photosFromParsed(product) {
+  return uniquePhotos([product.image, product.hero_image, ...(product.gallery || [])]);
+}
+
+function decodeDataUrl(raw) {
+  const text = String(raw || '').trim();
+  const match = text.match(/^data:([^;]+);base64,([\s\S]+)$/);
+  if (match) return { mime: match[1].trim().toLowerCase(), base64: match[2].replace(/\s+/g, '') };
+  if (/^[A-Za-z0-9+/=\s]+$/.test(text) && text.length > 20) {
+    return { mime: '', base64: text.replace(/\s+/g, '') };
+  }
+  return null;
+}
+
+function safePhotoName(name, ext) {
+  const base = String(name || 'photo')
+    .toLowerCase()
+    .replace(/\.[a-z0-9]+$/, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'photo';
+  return `${base}-${Date.now().toString(36)}${ext}`;
+}
+
+function asPhotoItems(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => {
+    if (typeof item === 'string') return { path: item };
+    return item || {};
+  });
+}
+
+function preparePhotos(raw) {
+  if (!Array.isArray(raw && raw.photos)) return { fields: {}, files: [] };
+  const slug = String((raw && raw.slug) || '')
+    .trim()
+    .toLowerCase();
+  const items = asPhotoItems(raw.photos);
+  if (items.length > MAX_PHOTOS) return { error: `אפשר עד ${MAX_PHOTOS} תמונות` };
+  const files = [];
+  const paths = [];
+  for (const item of items) {
+    if (item && item.upload) {
+      if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
+      const decoded = decodeDataUrl(item.upload.data || item.upload.content);
+      if (!decoded) return { error: 'קובץ תמונה לא תקין' };
+      const mime = String(item.upload.mime || decoded.mime || '').toLowerCase();
+      const ext = IMAGE_EXT[mime];
+      if (!ext) return { error: 'רק jpg, png, webp או gif' };
+      let buffer;
+      try {
+        buffer = Buffer.from(decoded.base64, 'base64');
+      } catch {
+        return { error: 'קובץ תמונה לא תקין' };
+      }
+      if (!buffer.length) return { error: 'קובץ תמונה ריק' };
+      if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)' };
+      const filename = safePhotoName(item.upload.filename || item.upload.name, ext);
+      const repoPath = `images/store/${slug}/${filename}`;
+      files.push({ path: repoPath, content: decoded.base64, encoding: 'base64' });
+      paths.push(`/${repoPath}`);
+      continue;
+    }
+    const pathName = publicImagePath(item && (item.path || item));
+    if (pathName) paths.push(pathName);
+  }
+  const photos = uniquePhotos(paths);
+  return {
+    fields: {
+      image: photos[0] || '',
+      gallery: photos.slice(1),
+      photos,
+    },
+    files,
+  };
 }
 
 function nowStamp() {
@@ -134,19 +272,23 @@ function parsePage(slug, raw, catalogRow) {
   if (!parts) return null;
   const catalog = catalogRow || {};
   const kind = catalog.variable ? 'variable' : catalog.variants ? 'variants' : catalogRow ? 'fixed' : 'content';
+  const image = String(yamlValue(parts.yaml, 'image') || '').replace(/^['"]|['"]$/g, '').trim();
+  const heroImage = String(yamlValue(parts.yaml, 'hero_image') || '').replace(/^['"]|['"]$/g, '').trim();
+  const gallery = parseGallery(parts.yaml);
   return {
     slug,
     title: yamlValue(parts.yaml, 'title') || slug,
     subtitle: yamlValue(parts.yaml, 'subtitle') || '',
-    image: String(yamlValue(parts.yaml, 'image') || '').replace(/^['"]|['"]$/g, '').trim(),
+    image,
     price_display: yamlValue(parts.yaml, 'price') || '',
     body: parts.body.replace(/^\n/, ''),
     out_of_stock: yamlValue(parts.yaml, 'out_of_stock') === true,
     limited_stock: yamlValue(parts.yaml, 'limited_stock') === true,
     hide: yamlValue(parts.yaml, 'hide') === true,
     layout: yamlValue(parts.yaml, 'layout') || '',
-    hero_image: yamlValue(parts.yaml, 'hero_image') || '',
-    gallery: parseGallery(parts.yaml),
+    hero_image: heroImage,
+    gallery,
+    photos: uniquePhotos([image, heroImage, ...gallery]),
     in_cart: Boolean(catalogRow),
     kind,
     cart_price: Number(catalog.price) || 0,
@@ -177,7 +319,19 @@ function applyPage(raw, input, { isNew } = {}) {
   let yaml = parts.yaml;
   yaml = setYamlScalar(yaml, 'title', input.title);
   yaml = setYamlScalar(yaml, 'subtitle', input.subtitle);
-  yaml = setYamlScalar(yaml, 'image', input.image);
+  const hasPhotoInput =
+    Array.isArray(input.photos) || input.image || (input.gallery && input.gallery.length);
+  if (hasPhotoInput) {
+    const photos = uniquePhotos(
+      Array.isArray(input.photos) ? input.photos : [input.image, ...(input.gallery || [])]
+    );
+    const main = photos[0] || '';
+    yaml = setYamlScalar(yaml, 'image', main);
+    if (input.slug === 'scrunchies') {
+      yaml = setYamlScalar(yaml, 'hero_image', main || input.hero_image);
+    }
+    yaml = setYamlGallery(yaml, photos.slice(1));
+  }
   yaml = setYamlScalar(yaml, 'price', displayPriceFor(input));
   yaml = setYamlBool(yaml, 'out_of_stock', Boolean(input.out_of_stock));
   yaml = setYamlBool(yaml, 'limited_stock', Boolean(input.limited_stock));
@@ -271,6 +425,8 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     title,
     subtitle: String((raw && raw.subtitle) || '').trim(),
     image: String((raw && raw.image) || '').trim(),
+    gallery: Array.isArray(raw && raw.gallery) ? uniquePhotos(raw.gallery) : [],
+    photos: Array.isArray(raw && raw.photos) ? uniquePhotos(raw.photos) : undefined,
     body: raw && raw.body != null ? String(raw.body) : '',
     out_of_stock: Boolean(raw && raw.out_of_stock),
     limited_stock: Boolean(raw && raw.limited_stock),
@@ -304,6 +460,8 @@ module.exports = {
   yamlValue,
   setYamlBool,
   setYamlScalar,
+  setYamlGallery,
+  parseGallery,
   parsePage,
   applyPage,
   newPage,
@@ -314,4 +472,8 @@ module.exports = {
   parsePresets,
   prettyCatalog,
   displayPriceFor,
+  preparePhotos,
+  uniquePhotos,
+  photosFromParsed,
+  MAX_PHOTOS,
 };

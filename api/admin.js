@@ -184,7 +184,10 @@ async function commitFiles(env, files, message) {
   for (const file of files) {
     const blob = await githubJson(env, '/git/blobs', {
       method: 'POST',
-      body: JSON.stringify({ content: file.content, encoding: 'utf-8' }),
+      body: JSON.stringify({
+        content: file.content,
+        encoding: file.encoding || 'utf-8',
+      }),
     });
     blobs.push({ path: file.path, mode: '100644', type: 'blob', sha: blob.sha });
   }
@@ -294,7 +297,19 @@ function catalogFilesFrom(catalog) {
   return CATALOG_FILES.map((pathName) => ({ path: pathName, content: json }));
 }
 
-async function upsertProduct(env, input, { isNew }) {
+function writeLocalFiles(env, files) {
+  const root = localRoot(env);
+  const resolvedRoot = path.resolve(root);
+  for (const file of files) {
+    const full = path.resolve(root, file.path);
+    if (full !== resolvedRoot && !full.startsWith(`${resolvedRoot}${path.sep}`)) continue;
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    if (file.encoding === 'base64') fs.writeFileSync(full, Buffer.from(file.content, 'base64'));
+    else fs.writeFileSync(full, file.content);
+  }
+}
+
+async function upsertProduct(env, input, { isNew, files = [] }) {
   const target = writeTarget(env);
   const catalog = await readCatalog(env);
   const mdPath = `_store/${input.slug}.md`;
@@ -313,12 +328,13 @@ async function upsertProduct(env, input, { isNew }) {
     fs.mkdirSync(path.dirname(full), { recursive: true });
     fs.writeFileSync(full, markdown);
     writeLocalCatalog(env, catalog);
+    writeLocalFiles(env, files);
     return { target, slug: input.slug };
   }
 
   await commitFiles(
     env,
-    [{ path: mdPath, content: markdown }, ...catalogFilesFrom(catalog)],
+    [{ path: mdPath, content: markdown }, ...catalogFilesFrom(catalog), ...files],
     isNew ? `Add store product ${input.slug}` : `Update store product ${input.slug}`
   );
   return { target, slug: input.slug };
@@ -465,13 +481,18 @@ async function handler(req, res) {
       if (listed.error) return json(res, 503, { error: listed.error });
       const existing = new Set(listed.products.map((p) => p.slug));
       const isNew = Boolean(body.isNew);
-      const normalized = store.normalizeProductInput(body.product, {
-        isNew,
-        existingSlugs: existing,
-        catalog: listed.catalog,
-      });
+      const prepared = store.preparePhotos(body.product || {});
+      if (prepared.error) return json(res, 400, { error: prepared.error });
+      const normalized = store.normalizeProductInput(
+        { ...(body.product || {}), ...prepared.fields },
+        {
+          isNew,
+          existingSlugs: existing,
+          catalog: listed.catalog,
+        }
+      );
       if (normalized.error) return json(res, 400, { error: normalized.error });
-      const saved = await upsertProduct(env, normalized.input, { isNew });
+      const saved = await upsertProduct(env, normalized.input, { isNew, files: prepared.files });
       return json(res, 200, { ok: true, slug: saved.slug, target: saved.target });
     }
 

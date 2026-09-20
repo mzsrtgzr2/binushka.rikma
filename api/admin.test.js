@@ -365,3 +365,80 @@ test('variants product requires at least one priced type', async () => {
   assert.equal(created.json.error, 'צריך לפחות סוג אחד עם מחיר');
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+const TINY_PNG =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+test('upsert writes uploaded photos and uses the first as the main image', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'napkin',
+        title: 'מפית רקומה',
+        kind: 'fixed',
+        cart_price: 90,
+        photos: [
+          {
+            upload: {
+              filename: 'main.png',
+              mime: 'image/png',
+              data: `data:image/png;base64,${TINY_PNG}`,
+            },
+          },
+          {
+            upload: {
+              filename: 'extra.png',
+              mime: 'image/png',
+              data: `data:image/png;base64,${TINY_PNG}`,
+            },
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const md = fs.readFileSync(path.join(root, '_store', 'napkin.md'), 'utf8');
+  const product = admin.parseProduct('napkin', md);
+  assert.match(product.image, /^\/images\/store\/napkin\/main-/);
+  assert.equal(product.gallery.length, 1);
+  assert.match(product.gallery[0], /^\/images\/store\/napkin\/extra-/);
+  assert.equal(product.photos[0], product.image);
+  const mainFile = path.join(root, product.image.replace(/^\//, ''));
+  const extraFile = path.join(root, product.gallery[0].replace(/^\//, ''));
+  assert.equal(fs.existsSync(mainFile), true);
+  assert.equal(fs.existsSync(extraFile), true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('reordering photos changes which image is main', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const first = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: false,
+      product: {
+        slug: 'fox',
+        title: 'רקמת שועל משמח',
+        kind: 'fixed',
+        cart_price: 220,
+        photos: ['/images/gallery/second.png', '/images/gallery/fox.png'],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(first.status, 200);
+  const product = admin.parseProduct('fox', fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8'));
+  assert.equal(product.image, '/images/gallery/second.png');
+  assert.deepEqual(product.gallery, ['/images/gallery/fox.png']);
+  fs.rmSync(root, { recursive: true, force: true });
+});

@@ -230,10 +230,92 @@
   font-size: 15px;
 }
 
-.admin-variants {
+.admin-photos {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.admin-photo {
+  position: relative;
+  background: var(--background-alt-color);
+  border-radius: 12px;
+  overflow: hidden;
+  padding-bottom: 8px;
+}
+
+.admin-photo--main {
+  outline: 2px solid var(--brand-color);
+}
+
+.admin-photo__img {
+  display: block;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: var(--background-alt-color);
+}
+
+.admin-photo__img--empty {
+  height: 120px;
+}
+
+.admin-photo__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--brand-color);
+  color: var(--dark);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.admin-photo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+}
+
+.admin-photo__btn {
+  border: 0;
+  background: var(--background-color);
+  color: var(--heading-font-color);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.admin-photo__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.admin-photo__btn--danger {
+  color: #b42318;
+}
+
+.admin-upload-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-size: 15px;
+  cursor: pointer;
+  overflow: hidden;
+
+  input[type='file'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+  }
 }
 
 .admin-variant {

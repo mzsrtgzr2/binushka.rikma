@@ -586,35 +586,15 @@
 
 .admin-variants {
   display: grid;
-  gap: 20px;
+  gap: 24px;
   margin-bottom: 16px;
 }
 
 .admin-variant {
-  background: var(--background-alt-color);
-  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
   padding: 20px;
-  display: grid;
-  gap: 16px;
   min-width: 0;
-
-  .form__input {
-    background: var(--background-color);
-  }
-}
-
-.admin-variant__fields {
-  display: grid;
-  gap: 0;
-  min-width: 0;
-}
-
-.admin-variant__meta {
-  margin-bottom: 0;
-}
-
-.admin-variant__description-group {
-  margin-bottom: 12px;
 }
 
 .admin-variant__description {
@@ -637,7 +617,7 @@
   height: 105px;
   object-fit: cover;
   border-radius: 12px;
-  background: var(--background-color);
+  background: var(--background-alt-color);
   flex-shrink: 0;
 }
 
@@ -710,6 +690,7 @@
   .admin-variant__thumb,
   .admin-variant__thumb--empty {
     width: 100%;
+    max-width: 280px;
     height: 160px;
   }
 

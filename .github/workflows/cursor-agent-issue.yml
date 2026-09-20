@@ -1,0 +1,229 @@
+name: Cursor Agent - Issue to PR
+
+on:
+  issues:
+    types:
+      - opened
+      - labeled
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: cursor-agent-issue-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  create-pr:
+    if: >-
+      ${{
+        !github.event.issue.pull_request &&
+        (
+          contains(github.event.issue.labels.*.name, 'cursor-task') ||
+          startsWith(github.event.issue.title, '[Cursor task]:')
+        )
+      }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Authorize issue requester
+        id: auth
+        env:
+          CURSOR_AGENT_ALLOWED_USERS: ${{ vars.CURSOR_AGENT_ALLOWED_USERS }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          REQUESTER: ${{ github.event.issue.user.login }}
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          import re
+
+          requester = os.environ["REQUESTER"].strip().lower()
+          allowed_raw = os.environ.get("CURSOR_AGENT_ALLOWED_USERS") or os.environ["REPOSITORY_OWNER"]
+          allowed = {
+              user.strip().lower()
+              for user in re.split(r"[\s,]+", allowed_raw)
+              if user.strip()
+          }
+
+          print(f"authorized={'true' if requester in allowed else 'false'}")
+          PY
+
+      - name: Checkout default branch
+        if: steps.auth.outputs.authorized == 'true'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB || github.token }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Cursor CLI
+        if: steps.auth.outputs.authorized == 'true'
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Prepare task branch
+        if: steps.auth.outputs.authorized == 'true'
+        id: task
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+
+          branch="cursor/issue-${ISSUE_NUMBER}"
+          echo "branch=${branch}" >> "$GITHUB_OUTPUT"
+
+          git config user.name "Cursor Agent Bot"
+          git config user.email "cursor-agent-bot@users.noreply.github.com"
+
+          gh label create cursor-task --description "Tasks that Cursor Agent may pick up" --color "5319e7" 2>/dev/null || true
+          gh label create cursor-agent --description "Pull requests maintained by Cursor Agent automation" --color "0e8a16" 2>/dev/null || true
+          gh issue edit "$ISSUE_NUMBER" --add-label cursor-task
+
+          existing_pr="$(gh pr list --head "$branch" --state open --json url --jq '.[0].url // empty')"
+          if [ -n "$existing_pr" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "Cursor already opened a pull request for this task: $existing_pr"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git switch -c "$branch"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Build Cursor prompt
+        if: steps.auth.outputs.authorized == 'true' && steps.task.outputs.skip != 'true'
+        id: prompt
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          prompt_file="$RUNNER_TEMP/cursor-issue-prompt.md"
+          issue_title="$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")"
+          issue_body="$(jq -r '.issue.body // ""' "$GITHUB_EVENT_PATH")"
+
+          {
+            echo "You are Cursor Agent working in repository ${REPOSITORY}."
+            echo
+            echo "Implement GitHub Issue #${ISSUE_NUMBER}: ${issue_title}"
+            echo "Issue URL: ${ISSUE_URL}"
+            echo
+            echo "User request:"
+            echo '---'
+            printf '%s\n' "$issue_body"
+            echo '---'
+            echo
+            echo "Make the requested code/content changes directly in this checkout."
+            echo "Keep the change focused on the request."
+            echo "If the request is ambiguous, make the safest minimal implementation and document assumptions in your final response."
+            echo "Do not create, merge, or update pull requests yourself; the GitHub Action will handle git and PR operations after you finish."
+          } > "$prompt_file"
+
+          echo "file=${prompt_file}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Cursor Agent
+        if: steps.auth.outputs.authorized == 'true' && steps.task.outputs.skip != 'true'
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'gpt-5' }}
+        run: |
+          set -euo pipefail
+          agent -p "$(cat "${{ steps.prompt.outputs.file }}")" \
+            --model "$CURSOR_MODEL" \
+            --force \
+            --trust \
+            --output-format text
+
+      - name: Commit and push generated changes
+        if: steps.auth.outputs.authorized == 'true' && steps.task.outputs.skip != 'true'
+        id: commit
+        env:
+          BRANCH_NAME: ${{ steps.task.outputs.branch }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+        run: |
+          set -euo pipefail
+
+          git add -A
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "feat(cursor): implement issue #${ISSUE_NUMBER}"
+          gh auth setup-git
+          git push -u origin "$BRANCH_NAME"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        if: steps.auth.outputs.authorized == 'true' && steps.task.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          BRANCH_NAME: ${{ steps.task.outputs.branch }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+
+          pr_body="$RUNNER_TEMP/cursor-pr-body.md"
+          issue_body="$(jq -r '.issue.body // ""' "$GITHUB_EVENT_PATH")"
+
+          {
+            echo "Closes #${ISSUE_NUMBER}"
+            echo
+            echo "## Cursor task"
+            echo
+            printf '%s\n' "$issue_body"
+            echo
+            echo "## Review instructions"
+            echo
+            echo "- Wait for the Vercel preview deployment to appear on this pull request."
+            echo "- Comment on this pull request with any changes you want Cursor to make."
+            echo "- When the preview looks good, comment \`/approve\` to request an automatic squash merge."
+            echo
+            echo "<!-- cursor-agent-task: issue-${ISSUE_NUMBER} -->"
+          } > "$pr_body"
+
+          pr_url="$(gh pr create \
+            --title "Cursor task: issue #${ISSUE_NUMBER}" \
+            --body-file "$pr_body" \
+            --head "$BRANCH_NAME" \
+            --base "$BASE_BRANCH" \
+            --label cursor-agent \
+            --label cursor-task)"
+
+          echo "url=${pr_url}" >> "$GITHUB_OUTPUT"
+
+      - name: Reply on issue
+        if: steps.auth.outputs.authorized == 'true' && steps.task.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+        run: |
+          set -euo pipefail
+
+          reply_file="$RUNNER_TEMP/cursor-issue-reply.md"
+          {
+            echo "Cursor prepared a pull request: $PR_URL"
+            echo
+            echo "Vercel should add a preview deployment to the pull request shortly. Review that preview, then comment on the pull request with requested tweaks or comment \`/approve\` when it looks good."
+          } > "$reply_file"
+
+          gh issue comment "$ISSUE_NUMBER" --body-file "$reply_file"
+
+      - name: Reply when no changes were made
+        if: steps.auth.outputs.authorized == 'true' && steps.task.outputs.skip != 'true' && steps.commit.outputs.has_changes == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "Cursor ran on this task, but it did not produce any repository changes. Please add more detail or ask a developer to inspect the request."

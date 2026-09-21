@@ -10,7 +10,8 @@ body:
         Use this form for changes you want Cursor to prepare automatically.
 
         After you submit it, Cursor will open a pull request and Vercel will build a preview.
-        You can then comment on the pull request to ask for tweaks, or comment `/approve` when it looks good.
+        The preview link and Cursor status updates will be posted back here on this issue.
+        Keep commenting on this issue to ask for tweaks, or comment `/approve` here when it looks good.
   - type: textarea
     id: request
     attributes:

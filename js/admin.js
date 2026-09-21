@@ -245,7 +245,6 @@
       escapeHtml(row.name || '') +
       '">' +
       '</div>' +
-      '<div class="admin-grid admin-variant__meta">' +
       '<div class="form__group">' +
       '<label class="form__label">מחיר (₪)</label>' +
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="30" value="' +
@@ -257,11 +256,11 @@
       '<input class="form__input" data-v="id" dir="ltr" placeholder="regular" value="' +
       escapeHtml(row.id || '') +
       '">' +
-      '</div></div>' +
-      '<p class="admin-hint admin-variant__id-hint">המזהה באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
+      '<p class="admin-hint">באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
+      '</div>' +
       '<div class="form__group">' +
       '<label class="form__label">תיאור</label>' +
-      '<textarea class="form__input admin-body-input admin-variant__description" data-v="description" rows="12" placeholder="תיאור מלא לסוג — שורות ארוכות נשארות קריאות ונוחות לעריכה">' +
+      '<textarea class="form__input admin-body-input admin-variant__description" data-v="description" rows="12" placeholder="תיאור מלא לסוג — אפשר לכתוב כמה שורות בנוחות">' +
       escapeHtml(row.description || '') +
       '</textarea>' +
       '</div>' +

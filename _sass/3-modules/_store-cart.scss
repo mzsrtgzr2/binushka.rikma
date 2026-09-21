@@ -253,14 +253,19 @@ body.store-cart-open {
   }
 }
 
-/* Mobile / compact layout: floating cart FAB, mirrored to the WhatsApp floater */
+/* Mobile / compact layout: floating cart FAB stacked under the WhatsApp floater */
 @media only screen and (max-width: $desktop) {
+  /* Raise WhatsApp so the cart can sit under it on the same side */
+  .floating {
+    bottom: 112px; /* 40 + 60 cart + 12 gap */
+  }
+
   .store-cart,
   .store-cart.store-cart--floating {
     position: fixed;
-    /* Opposite side of .floating (WhatsApp left: 40px); same size & bottom line */
-    left: auto;
-    right: 40px;
+    /* Same side as .floating (WhatsApp left: 40px); under it at the bottom */
+    left: 40px;
+    right: auto;
     bottom: 40px;
     top: auto;
     z-index: 1205;
@@ -291,11 +296,11 @@ body.store-cart-open {
   .store-cart__panel {
     position: fixed;
     top: auto;
-    /* Above cart FAB: 40 + 60 + 16 */
-    bottom: 116px;
+    /* Above WhatsApp + cart stack: 112 + 60 + 12 */
+    bottom: 184px;
     inset-inline-start: 12px;
     inset-inline-end: 12px;
     width: auto;
-    max-height: min(70vh, calc(100vh - 160px));
+    max-height: min(70vh, calc(100vh - 220px));
   }
 }

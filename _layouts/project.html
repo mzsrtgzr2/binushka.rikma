@@ -6,12 +6,12 @@ layout: default
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
-    {% if page.registration_full %}
+    {% if page.registration_not_open %}
+      <div class="registration-full-text">ההרשמה תיפתח בקרוב</div>
+    {% elsif page.registration_full %}
       <div class="registration-full-text">אין מקומות פנויים</div>
     {% elsif page.last_places %}
       <div class="registration-full-text">מקומות אחרונים</div>
-    {% elsif page.registration_not_open %}
-      <div class="registration-full-text">ההרשמה תיפתח בקרוב</div>
     {% endif %}
 
     {% if page.subtitle %}
@@ -53,12 +53,12 @@ layout: default
       <div class="page-image animate">
         <div class="project-image-container">
           <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
-          {% if page.registration_full %}
+          {% if page.registration_not_open %}
+            <div class="registration-full">ההרשמה תיפתח בקרוב</div>
+          {% elsif page.registration_full %}
             <div class="registration-full">אין מקומות פנויים</div>
           {% elsif page.last_places %}
             <div class="registration-full">מקומות אחרונים</div>
-          {% elsif page.registration_not_open %}
-            <div class="registration-full">ההרשמה תיפתח בקרוב</div>
           {% endif %}
         </div>
       </div>

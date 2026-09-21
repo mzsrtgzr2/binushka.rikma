@@ -1,5 +1,5 @@
 /**
- * Store prices from the site catalog (admin / catalog-data.json).
+ * Store prices from `_store/*.md` (generated catalog snapshot as fallback).
  * GET /api/prices/
  */
 

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildOrder, applyVariantNote } = require('./catalog');
+const { buildOrder, applyVariantNote, applyGiftPacking } = require('./catalog');
 const checkout = require('./checkout');
 
 const customerBody = {
@@ -149,4 +149,24 @@ test('scrunchie variant income uses catalog price and optional fabric note', () 
   assert.equal(payload.amount, 85);
   assert.ok(payload.income.every((row) => !row.itemId));
   assert.ok(payload.income.every((row) => !row.kind));
+});
+
+test('gift packing appears on payment income descriptions', () => {
+  const order = applyGiftPacking(
+    buildOrder([{ id: 'fox', quantity: 1 }], 'pickup'),
+    { packAsGift: true, giftMessage: 'יום הולדת שמח' }
+  );
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: {},
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(
+    payload.income[0].description,
+    'רקמת שועל משמח — אריזה כמתנה — כרטיס ברכה: יום הולדת שמח'
+  );
 });

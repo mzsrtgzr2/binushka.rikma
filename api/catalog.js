@@ -1,12 +1,32 @@
 /**
  * Server-side catalog. Checkout never trusts prices from the browser.
  *
- * Cart products live in catalog-data.json (and _data/catalog.json).
- * The admin backoffice edits those files. Checkout charges those prices.
- * Keep slugs in sync with _store/*.md
+ * Cart products are the `_store/*.md` pages. JSON under api/ and _data/ is a
+ * generated snapshot for Jekyll and as a fallback if markdown is not bundled.
  */
 
-const RAW_CATALOG = require('./catalog-data.json');
+const fs = require('fs');
+const path = require('path');
+const store = require('./admin-store');
+
+function loadRawCatalog() {
+  const dir = path.join(__dirname, '..', '_store');
+  try {
+    if (fs.existsSync(dir)) {
+      const built = store.buildCatalogFromDir(dir);
+      if (built && Object.keys(built).length) return built;
+    }
+  } catch (err) {
+    console.error('catalog from markdown failed', err);
+  }
+  try {
+    return require('./catalog-data.json');
+  } catch {
+    return {};
+  }
+}
+
+const RAW_CATALOG = loadRawCatalog();
 
 function fromCatalogFile(raw) {
   const out = {};
@@ -133,6 +153,36 @@ function applyVariantNote(order, note) {
   };
 }
 
+function isShippingLine(line) {
+  return String((line && line.description) || '').startsWith('משלוח');
+}
+
+/**
+ * Mark product lines as gift wrapping when checkout requests pack-as-gift.
+ * Greeting text is optional and only applied when packing is requested.
+ */
+function applyGiftPacking(order, opts) {
+  if (!order || order.error) return order;
+  const pack =
+    opts &&
+    (opts.packAsGift === true || opts.packAsGift === '1' || opts.packAsGift === 1);
+  if (!pack) return order;
+
+  const message = String((opts && opts.giftMessage) || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 200);
+  let suffix = ' — אריזה כמתנה';
+  if (message) suffix += ` — כרטיס ברכה: ${message}`;
+
+  return {
+    ...order,
+    lines: (order.lines || []).map((line) =>
+      isShippingLine(line) ? line : { ...line, description: `${line.description}${suffix}` }
+    ),
+  };
+}
+
 module.exports = {
   PRODUCTS,
   SHIPPING,
@@ -140,5 +190,6 @@ module.exports = {
   buildOrder,
   fallbackPriceBook,
   applyVariantNote,
+  applyGiftPacking,
   fromCatalogFile,
 };

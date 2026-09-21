@@ -6,6 +6,7 @@ const {
   buildOrder,
   fallbackPriceBook,
   applyVariantNote,
+  applyGiftPacking,
   PRODUCTS,
 } = require('./catalog');
 
@@ -15,13 +16,27 @@ test('fallback price book includes every cart product', () => {
   assert.equal(Object.keys(book).length, Object.keys(PRODUCTS).length);
 });
 
-test('Jekyll catalog matches the checkout catalog file', () => {
+test('checkout catalog is built from store markdown', () => {
+  assert.equal(PRODUCTS.fox.price, 220);
+  assert.equal(PRODUCTS['flower-bag'].price, 240);
+  assert.equal(PRODUCTS['flower-bag'].name, 'תיק בד לזר פרחים');
+  assert.equal(PRODUCTS['gift-card'].variable, true);
+  assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
+  assert.equal(PRODUCTS['embroidery-kit-beginners'], undefined);
+  assert.equal(PRODUCTS['embroidery-kit-advanced'], undefined);
+});
+
+test('generated catalog snapshots stay in sync with each other', () => {
   const apiCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-data.json'), 'utf8'));
   const dataCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '_data', 'catalog.json'), 'utf8'));
   assert.deepEqual(apiCatalog, dataCatalog);
-  assert.equal(PRODUCTS.fox.price, 220);
-  assert.equal(PRODUCTS['gift-card'].variable, true);
-  assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
+});
+
+test('flower-bag from markdown is chargeable at checkout', () => {
+  const order = buildOrder([{ id: 'flower-bag', quantity: 1, price: 1 }], 'pickup');
+  assert.equal(order.lines[0].price, 240);
+  assert.equal(order.lines[0].description, 'תיק בד לזר פרחים');
+  assert.equal(order.subtotal, 240);
 });
 
 test('checkout charges the catalog price, not a client price', () => {
@@ -127,4 +142,35 @@ test('empty variant note is ignored and long notes are trimmed', () => {
   assert.equal(applyVariantNote(base, '   ').lines[0].description, "סקראנצ'י גודל רגיל");
   const long = applyVariantNote(base, 'א'.repeat(250));
   assert.match(long.lines[0].description, /דוגמא: א{200}$/);
+});
+
+test('gift packing marks product lines and optional greeting message', () => {
+  const order = applyGiftPacking(
+    buildOrder(
+      [
+        { id: 'fox', quantity: 1 },
+        { id: 'scrunchies', quantity: 1, variant: 'regular' },
+      ],
+      'courier'
+    ),
+    { packAsGift: true, giftMessage: '  מזל טוב!  ' }
+  );
+  assert.equal(order.lines[0].description, 'רקמת שועל משמח — אריזה כמתנה — כרטיס ברכה: מזל טוב!');
+  assert.equal(
+    order.lines[1].description,
+    "סקראנצ'י גודל רגיל — אריזה כמתנה — כרטיס ברכה: מזל טוב!"
+  );
+  assert.equal(order.lines[2].description, 'משלוח - שליח עד הבית');
+});
+
+test('gift message without pack flag is ignored; long messages are trimmed', () => {
+  const base = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
+  assert.equal(
+    applyGiftPacking(base, { giftMessage: 'מזל טוב' }).lines[0].description,
+    'רקמת שועל משמח'
+  );
+  const packed = applyGiftPacking(base, { packAsGift: '1' });
+  assert.equal(packed.lines[0].description, 'רקמת שועל משמח — אריזה כמתנה');
+  const long = applyGiftPacking(base, { packAsGift: true, giftMessage: 'ב'.repeat(250) });
+  assert.match(long.lines[0].description, /כרטיס ברכה: ב{200}$/);
 });

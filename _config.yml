@@ -91,4 +91,5 @@ exclude:
   # either.
   - lib/
   - test/
+  - scripts/
   - .env.example

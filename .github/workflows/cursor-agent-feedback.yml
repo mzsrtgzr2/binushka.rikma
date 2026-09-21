@@ -1,0 +1,357 @@
+name: Cursor Agent - Feedback and Approval
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: cursor-agent-feedback-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish-preview-to-issue:
+    if: >-
+      ${{
+        github.event.sender.login == 'vercel[bot]' &&
+        github.event.issue.pull_request
+      }}
+    runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
+
+    steps:
+      - name: Publish Vercel preview on original issue
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+
+          comment_file="$RUNNER_TEMP/vercel-comment.md"
+          pr_body_file="$RUNNER_TEMP/pr-body.md"
+          jq -r '.comment.body // ""' "$GITHUB_EVENT_PATH" > "$comment_file"
+          gh pr view "$PR_NUMBER" --json body --jq '.body // ""' > "$pr_body_file"
+
+          issue_number="$(python3 - "$pr_body_file" <<'PY'
+          import re
+          import sys
+
+          body = open(sys.argv[1], encoding="utf-8").read()
+          match = re.search(r"cursor-agent-task:\s*issue-(\d+)", body)
+          print(match.group(1) if match else "")
+          PY
+          )"
+
+          preview_url="$(python3 - "$comment_file" <<'PY'
+          import re
+          import sys
+
+          body = open(sys.argv[1], encoding="utf-8").read()
+          match = re.search(r"\[Preview\]\((https://[^)\s]+)\)", body)
+          if not match:
+              match = re.search(r"https://[^\s)<>\"']+\.vercel\.app[^\s)<>\"']*", body)
+          print(match.group(1) if match else "")
+          PY
+          )"
+
+          if [ -z "$issue_number" ] || [ -z "$preview_url" ]; then
+            exit 0
+          fi
+
+          reply_file="$RUNNER_TEMP/vercel-preview-reply.md"
+          {
+            echo "<!-- cursor-agent-status -->"
+            echo "Vercel preview is ready:"
+            echo
+            echo "$preview_url"
+            echo
+            echo "Please review that preview, then keep commenting in this issue with requested tweaks. When it looks good, comment \`/approve\` here."
+          } > "$reply_file"
+
+          gh issue comment "$issue_number" --body-file "$reply_file"
+
+  handle-comment:
+    if: >-
+      ${{ github.event.sender.type != 'Bot' }}
+    runs-on: ubuntu-latest
+    env:
+      GH_REPO: ${{ github.repository }}
+
+    steps:
+      - name: Authorize commenter
+        id: auth
+        env:
+          CURSOR_AGENT_ALLOWED_USERS: ${{ vars.CURSOR_AGENT_ALLOWED_USERS }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          COMMENTER: ${{ github.event.comment.user.login }}
+        run: |
+          set -euo pipefail
+
+          python3 <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          import re
+
+          commenter = os.environ["COMMENTER"].strip().lower()
+          allowed_raw = os.environ.get("CURSOR_AGENT_ALLOWED_USERS") or os.environ["REPOSITORY_OWNER"]
+          allowed = {
+              user.strip().lower()
+              for user in re.split(r"[\s,]+", allowed_raw)
+              if user.strip()
+          }
+
+          print(f"authorized={'true' if commenter in allowed else 'false'}")
+          PY
+
+      - name: Resolve Cursor PR and requested action
+        if: steps.auth.outputs.authorized == 'true'
+        id: context
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          ISSUE_OR_PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+
+          comment_file="$RUNNER_TEMP/cursor-comment.md"
+          pr_file="$RUNNER_TEMP/cursor-pr.json"
+          jq -r '.comment.body // ""' "$GITHUB_EVENT_PATH" > "$comment_file"
+
+          if grep -Fq '<!-- cursor-agent-status -->' "$comment_file"; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if grep -Eiq '(^|[[:space:]])/approve([[:space:]]|$)' "$comment_file"; then
+            action="approve"
+          else
+            action="feedback"
+          fi
+
+          is_pr="$(jq -r '(.issue.pull_request != null)' "$GITHUB_EVENT_PATH")"
+          if [ "$is_pr" = "true" ]; then
+            if ! gh pr view "$ISSUE_OR_PR_NUMBER" \
+              --json number,url,headRefName,baseRefName,body,state,labels,title \
+              > "$pr_file"; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          else
+            is_task_issue="$(jq -r '([.issue.labels[].name] | index("cursor-task")) != null' "$GITHUB_EVENT_PATH")"
+            if [ "$is_task_issue" != "true" ]; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            branch="cursor/issue-${ISSUE_OR_PR_NUMBER}"
+            if ! gh pr list \
+              --state open \
+              --head "$branch" \
+              --json number,url,headRefName,baseRefName,body,state,labels,title \
+              --jq '.[0] // empty' > "$pr_file"; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            if [ ! -s "$pr_file" ]; then
+              no_pr_reply="$RUNNER_TEMP/cursor-no-pr-reply.md"
+              {
+                echo "<!-- cursor-agent-status -->"
+                echo "I could not find an open Cursor pull request for this task yet."
+              } > "$no_pr_reply"
+
+              gh issue comment "$ISSUE_OR_PR_NUMBER" --body-file "$no_pr_reply"
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          is_cursor_pr="$(jq -r '
+            ([.labels[].name] | index("cursor-agent") != null) or
+            ((.body // "") | contains("cursor-agent-task:")) or
+            (.headRefName | startswith("cursor/issue-"))
+          ' "$pr_file")"
+
+          if [ "$is_cursor_pr" != "true" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          pr_state="$(jq -r '.state' "$pr_file")"
+          if [ "$pr_state" != "OPEN" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "action=${action}" >> "$GITHUB_OUTPUT"
+          echo "comment_file=${comment_file}" >> "$GITHUB_OUTPUT"
+          echo "thread_number=${ISSUE_OR_PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$(jq -r '.number' "$pr_file")" >> "$GITHUB_OUTPUT"
+          echo "pr_url=$(jq -r '.url' "$pr_file")" >> "$GITHUB_OUTPUT"
+          echo "branch=$(jq -r '.headRefName' "$pr_file")" >> "$GITHUB_OUTPUT"
+          echo "base_branch=$(jq -r '.baseRefName' "$pr_file")" >> "$GITHUB_OUTPUT"
+          echo "title=$(jq -r '.title' "$pr_file")" >> "$GITHUB_OUTPUT"
+
+      - name: Acknowledge feedback
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          THREAD_NUMBER: ${{ steps.context.outputs.thread_number }}
+        run: |
+          ack_reply="$RUNNER_TEMP/cursor-feedback-ack.md"
+          {
+            echo "<!-- cursor-agent-status -->"
+            echo "Cursor received this feedback and is working on an update now."
+          } > "$ack_reply"
+
+          gh issue comment "$THREAD_NUMBER" --body-file "$ack_reply"
+
+      - name: Enable automatic merge
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+          PR_URL: ${{ steps.context.outputs.pr_url }}
+          THREAD_NUMBER: ${{ steps.context.outputs.thread_number }}
+        run: |
+          set -euo pipefail
+
+          if gh pr merge "$PR_NUMBER" --squash --auto --delete-branch; then
+            approve_reply="$RUNNER_TEMP/cursor-approve-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Approval received. Auto-merge is enabled for $PR_URL and will complete when GitHub allows the pull request to merge."
+            } > "$approve_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$approve_reply"
+          else
+            approve_failure_reply="$RUNNER_TEMP/cursor-approve-failure-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Approval received, but I could not enable auto-merge. Please check that repository auto-merge is enabled and required checks are passing."
+            } > "$approve_failure_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$approve_failure_reply"
+            exit 1
+          fi
+
+      - name: Checkout pull request branch
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB || github.token }}
+          ref: ${{ steps.context.outputs.branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Cursor CLI
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Build feedback prompt
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        id: prompt
+        env:
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+          PR_URL: ${{ steps.context.outputs.pr_url }}
+          PR_TITLE: ${{ steps.context.outputs.title }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          prompt_file="$RUNNER_TEMP/cursor-feedback-prompt.md"
+
+          {
+            echo "You are Cursor Agent continuing work in repository ${REPOSITORY}."
+            echo
+            echo "Pull request: #${PR_NUMBER} - ${PR_TITLE}"
+            echo "PR URL: ${PR_URL}"
+            echo
+            echo "The reviewer left this follow-up request:"
+            echo '---'
+            cat "${{ steps.context.outputs.comment_file }}"
+            echo '---'
+            echo
+            echo "Apply the requested update directly to the current pull request branch."
+            echo "Keep changes focused on the feedback and preserve the rest of the PR."
+            echo "Do not create, merge, or update pull requests yourself; the GitHub Action will commit and push after you finish."
+          } > "$prompt_file"
+
+          echo "file=${prompt_file}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Cursor Agent on feedback
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'auto' }}
+        run: |
+          set -euo pipefail
+          model="$CURSOR_MODEL"
+          if [ "$model" = "gpt-5" ]; then
+            echo "::warning::Cursor CLI does not offer model 'gpt-5' for this account; falling back to 'auto'."
+            model="auto"
+          fi
+
+          agent -p "$(cat "${{ steps.prompt.outputs.file }}")" \
+            --model "$model" \
+            --force \
+            --trust \
+            --output-format text
+
+      - name: Commit and push feedback changes
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        id: commit
+        env:
+          BRANCH_NAME: ${{ steps.context.outputs.branch }}
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "Cursor Agent Bot"
+          git config user.email "cursor-agent-bot@users.noreply.github.com"
+
+          git add -A
+          if git diff --staged --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "fix(cursor): address feedback on PR #${PR_NUMBER}"
+          gh auth setup-git
+          git push origin "$BRANCH_NAME"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Reply with feedback result
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          THREAD_NUMBER: ${{ steps.context.outputs.thread_number }}
+          HAS_CHANGES: ${{ steps.commit.outputs.has_changes }}
+        run: |
+          set -euo pipefail
+
+          if [ "$HAS_CHANGES" = "true" ]; then
+            update_reply="$RUNNER_TEMP/cursor-update-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Cursor pushed an update for this feedback. Vercel should rebuild the preview shortly and I will post the new preview link here when it is ready."
+            } > "$update_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$update_reply"
+          else
+            no_changes_reply="$RUNNER_TEMP/cursor-feedback-no-changes-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Cursor ran on this feedback, but it did not produce any repository changes. Please add more detail if another adjustment is needed."
+            } > "$no_changes_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$no_changes_reply"
+          fi

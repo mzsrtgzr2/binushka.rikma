@@ -11,7 +11,7 @@ const store = require('./admin-store');
 
 const COOKIE = 'binushka-admin-v1';
 const SESSION_PAYLOAD = 'binushka-admin-session-v1';
-const CATALOG_FILES = ['api/catalog-data.json', '_data/catalog.json'];
+const CATALOG_FILES = store.CATALOG_FILES;
 
 function json(res, status, body, extraHeaders) {
   res.statusCode = status;
@@ -121,14 +121,6 @@ function writeTarget(env) {
   return null;
 }
 
-function emptyCatalog() {
-  try {
-    return JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-data.json'), 'utf8'));
-  } catch {
-    return {};
-  }
-}
-
 async function githubJson(env, pathname, opts = {}) {
   const repo = repoParts(env);
   if (!repo) {
@@ -222,38 +214,13 @@ async function githubDelete(env, filePath, message) {
   });
 }
 
-function readLocalCatalog(env) {
-  const root = localRoot(env);
-  for (const rel of CATALOG_FILES) {
-    const full = path.join(root, rel);
-    if (fs.existsSync(full)) return JSON.parse(fs.readFileSync(full, 'utf8'));
-  }
-  return emptyCatalog();
-}
-
 function writeLocalCatalog(env, catalog) {
-  const root = localRoot(env);
-  const json = store.prettyCatalog(catalog);
-  for (const rel of CATALOG_FILES) {
-    const full = path.join(root, rel);
-    fs.mkdirSync(path.dirname(full), { recursive: true });
-    fs.writeFileSync(full, json);
-  }
-}
-
-async function readCatalog(env) {
-  if (writeTarget(env) === 'local') return readLocalCatalog(env);
-  try {
-    const raw = await githubRead(env, 'api/catalog-data.json');
-    return JSON.parse(raw);
-  } catch (err) {
-    if (Number(err.status) === 404) return emptyCatalog();
-    throw err;
-  }
+  store.writeCatalogFiles(localRoot(env), catalog);
 }
 
 function listStoreFilesLocal(env) {
   const dir = path.join(localRoot(env), '_store');
+  if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
 }
 
@@ -261,35 +228,36 @@ function readStoreLocal(env, name) {
   return fs.readFileSync(path.join(localRoot(env), '_store', name), 'utf8');
 }
 
-async function listProducts(env) {
+async function readStoreMap(env) {
   const target = writeTarget(env);
   if (!target) return { error: 'חסר GITHUB_TOKEN. צריך להגדיר אותו ב-Vercel כדי לנהל את החנות.' };
-  const catalog = await readCatalog(env);
-  let names;
   const rawBySlug = {};
   if (target === 'local') {
-    names = listStoreFilesLocal(env);
-    names.forEach((name) => {
+    listStoreFilesLocal(env).forEach((name) => {
       rawBySlug[name.replace(/\.md$/, '')] = readStoreLocal(env, name);
     });
   } else {
     const branch = gitBranch(env);
     const entries = await githubJson(env, `/contents/_store?ref=${encodeURIComponent(branch)}`);
-    names = (Array.isArray(entries) ? entries : [])
+    const names = (Array.isArray(entries) ? entries : [])
       .filter((entry) => entry.name && entry.name.endsWith('.md'))
       .map((entry) => entry.name);
     for (const name of names) {
       rawBySlug[name.replace(/\.md$/, '')] = await githubRead(env, `_store/${name}`);
     }
   }
-  const products = names
-    .map((name) => {
-      const slug = name.replace(/\.md$/, '');
-      return store.parsePage(slug, rawBySlug[slug], catalog[slug]);
-    })
+  return { target, rawBySlug };
+}
+
+async function listProducts(env) {
+  const loaded = await readStoreMap(env);
+  if (loaded.error) return loaded;
+  const catalog = store.buildCatalogFromRaw(loaded.rawBySlug);
+  const products = Object.keys(loaded.rawBySlug)
+    .map((slug) => store.parsePage(slug, loaded.rawBySlug[slug]))
     .filter(Boolean)
     .sort((a, b) => String(a.title).localeCompare(String(b.title), 'he'));
-  return { target, products, catalog };
+  return { target: loaded.target, products, catalog, rawBySlug: loaded.rawBySlug };
 }
 
 function catalogFilesFrom(catalog) {
@@ -309,19 +277,14 @@ function writeLocalFiles(env, files) {
   }
 }
 
-async function upsertProduct(env, input, { isNew, files = [] }) {
+async function upsertProduct(env, input, { isNew, files = [], rawBySlug } = {}) {
   const target = writeTarget(env);
-  const catalog = await readCatalog(env);
   const mdPath = `_store/${input.slug}.md`;
-  let previous = '';
-  if (!isNew) {
-    if (target === 'local') previous = readStoreLocal(env, `${input.slug}.md`);
-    else previous = await githubRead(env, mdPath);
-  }
+  const storeMap = rawBySlug || (await readStoreMap(env)).rawBySlug || {};
+  const previous = !isNew ? storeMap[input.slug] || '' : '';
   const markdown = isNew ? store.newPage(input) : store.applyPage(previous, input);
-  const row = store.catalogRowFromInput(input);
-  if (row) catalog[input.slug] = row;
-  else delete catalog[input.slug];
+  const nextRaw = { ...storeMap, [input.slug]: markdown };
+  const catalog = store.buildCatalogFromRaw(nextRaw);
 
   if (target === 'local') {
     const full = path.join(localRoot(env), mdPath);
@@ -340,10 +303,11 @@ async function upsertProduct(env, input, { isNew, files = [] }) {
   return { target, slug: input.slug };
 }
 
-async function deleteProduct(env, slug) {
+async function deleteProduct(env, slug, { rawBySlug } = {}) {
   const target = writeTarget(env);
-  const catalog = await readCatalog(env);
-  delete catalog[slug];
+  const storeMap = { ...(rawBySlug || (await readStoreMap(env)).rawBySlug || {}) };
+  delete storeMap[slug];
+  const catalog = store.buildCatalogFromRaw(storeMap);
   const mdPath = `_store/${slug}.md`;
   if (target === 'local') {
     const full = path.join(localRoot(env), mdPath);
@@ -481,7 +445,7 @@ async function handler(req, res) {
       if (listed.error) return json(res, 503, { error: listed.error });
       const existing = new Set(listed.products.map((p) => p.slug));
       const isNew = Boolean(body.isNew);
-      const prepared = store.preparePhotos(body.product || {});
+      const prepared = store.prepareProductMedia(body.product || {});
       if (prepared.error) return json(res, 400, { error: prepared.error });
       const normalized = store.normalizeProductInput(
         { ...(body.product || {}), ...prepared.fields },
@@ -492,7 +456,11 @@ async function handler(req, res) {
         }
       );
       if (normalized.error) return json(res, 400, { error: normalized.error });
-      const saved = await upsertProduct(env, normalized.input, { isNew, files: prepared.files });
+      const saved = await upsertProduct(env, normalized.input, {
+        isNew,
+        files: prepared.files,
+        rawBySlug: listed.rawBySlug,
+      });
       return json(res, 200, { ok: true, slug: saved.slug, target: saved.target });
     }
 
@@ -504,7 +472,7 @@ async function handler(req, res) {
       if (!listed.products.some((p) => p.slug === slug)) {
         return json(res, 404, { error: 'מוצר לא נמצא' });
       }
-      const deleted = await deleteProduct(env, slug);
+      const deleted = await deleteProduct(env, slug, { rawBySlug: listed.rawBySlug });
       return json(res, 200, { ok: true, slug: deleted.slug, target: deleted.target });
     }
 
@@ -521,8 +489,8 @@ handler.COOKIE = COOKIE;
 handler.splitFrontMatter = store.splitFrontMatter;
 handler.yamlValue = store.yamlValue;
 handler.setYamlBool = store.setYamlBool;
-handler.parseProduct = (slug, raw) => store.parsePage(slug, raw, null);
-handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('x', raw, null), ...flags });
+handler.parseProduct = (slug, raw) => store.parsePage(slug, raw);
+handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('x', raw), ...flags });
 handler.normalizeUpdates = normalizeFlags;
 
 module.exports = handler;

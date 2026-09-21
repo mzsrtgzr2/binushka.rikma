@@ -17,13 +17,16 @@ hide: false
 body
 `;
 
-test('parseProduct reads stock flags and title', () => {
+test('parseProduct infers cart price from a ₪ display price', () => {
   const product = admin.parseProduct('fox', FOX);
   assert.equal(product.title, 'רקמת שועל משמח');
   assert.equal(product.out_of_stock, false);
   assert.equal(product.limited_stock, true);
   assert.equal(product.hide, false);
   assert.equal(product.image, '/images/gallery/fox.png');
+  assert.equal(product.kind, 'fixed');
+  assert.equal(product.in_cart, true);
+  assert.equal(product.cart_price, 220);
 });
 
 test('applyFlags updates booleans and adds missing keys', () => {
@@ -227,6 +230,7 @@ test('upsert creates a normal product in markdown and both catalog files', async
   const md = fs.readFileSync(path.join(root, '_store', 'napkin.md'), 'utf8');
   assert.match(md, /title: מפית רקומה/);
   assert.match(md, /price: ₪90/);
+  assert.match(md, /cart_price: 90/);
   assert.match(md, /טקסט קצר/);
   const apiCatalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
   const dataCatalog = JSON.parse(fs.readFileSync(path.join(root, '_data', 'catalog.json'), 'utf8'));
@@ -260,6 +264,7 @@ test('upsert updates an existing product price', async () => {
   assert.equal(catalog.fox.price, 240);
   const md = fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8');
   assert.match(md, /price: ₪240/);
+  assert.match(md, /cart_price: 240/);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
@@ -313,6 +318,8 @@ test('content kind drops a product from the cart catalog', async () => {
   const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
   assert.equal(catalog.fox, undefined);
   assert.equal(fs.existsSync(path.join(root, '_store', 'fox.md')), true);
+  const md = fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8');
+  assert.match(md, /in_cart: false/);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
@@ -342,6 +349,10 @@ test('variable product stores min max and presets', async () => {
   assert.equal(catalog['workshop-gift'].variable, true);
   assert.equal(catalog['workshop-gift'].min_price, 80);
   assert.deepEqual(catalog['workshop-gift'].presets, [80, 120, 200]);
+  const md = fs.readFileSync(path.join(root, '_store', 'workshop-gift.md'), 'utf8');
+  assert.match(md, /variable: true/);
+  assert.match(md, /min_price: 80/);
+  assert.match(md, /max_price: 400/);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
@@ -442,5 +453,90 @@ test('reordering photos changes which image is main', async () => {
   const product = admin.parseProduct('fox', fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8'));
   assert.equal(product.image, '/images/gallery/second.png');
   assert.deepEqual(product.gallery, ['/images/gallery/fox.png']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('upsert writes uploaded variant images into the catalog', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'bands',
+        title: 'גומיות',
+        kind: 'variants',
+        variants: [
+          {
+            id: 'small',
+            name: 'קטן',
+            price: 30,
+            image: {
+              upload: {
+                filename: 'small.png',
+                mime: 'image/png',
+                data: `data:image/png;base64,${TINY_PNG}`,
+              },
+            },
+          },
+          {
+            id: 'large',
+            name: 'גדול',
+            price: 45,
+            image: '/images/scrunchies/04.jpeg',
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.match(catalog.bands.variants.small.image, /^\/images\/store\/bands\/small-/);
+  assert.equal(catalog.bands.variants.large.image, '/images/scrunchies/04.jpeg');
+  const smallFile = path.join(root, catalog.bands.variants.small.image.replace(/^\//, ''));
+  assert.equal(fs.existsSync(smallFile), true);
+  const md = fs.readFileSync(path.join(root, '_store', 'bands.md'), 'utf8');
+  assert.match(md, /variants:/);
+  assert.match(md, /price: 30/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('saving one product rebuilds the catalog from every store markdown file', async () => {
+  const root = foxRoot();
+  fs.writeFileSync(
+    path.join(root, '_store', 'flower-bag.md'),
+    `---
+title: תיק בד לזר פרחים
+price: ₪240
+hide: false
+---
+`
+  );
+  const cookie = await loginCookie(root);
+  const updated = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: false,
+      product: {
+        slug: 'fox',
+        title: 'רקמת שועל משמח',
+        kind: 'fixed',
+        cart_price: 220,
+        body: 'body',
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(updated.status, 200);
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.fox.price, 220);
+  assert.equal(catalog['flower-bag'].price, 240);
+  assert.equal(catalog['flower-bag'].name, 'תיק בד לזר פרחים');
   fs.rmSync(root, { recursive: true, force: true });
 });

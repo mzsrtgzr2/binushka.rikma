@@ -55,10 +55,12 @@ layout: default
           <div class="project__content">
             <a href="{{project.url}}" class="project__image">
               <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
-              {% if project.registration_full %}
-                      <div class="registration-full">אין מקומות פנויים</div>
+              {% if project.registration_not_open %}
+                <div class="registration-full">ההרשמה תיפתח בקרוב</div>
+              {% elsif project.registration_full %}
+                <div class="registration-full">אין מקומות פנויים</div>
               {% elsif project.last_places %}
-                      <div class="registration-full">מקומות אחרונים</div>
+                <div class="registration-full">מקומות אחרונים</div>
               {% endif %}
             </a>
             <div class="project__info">
@@ -73,5 +75,3 @@ layout: default
     {% endfor %}
   </div>
 </div>
-
-

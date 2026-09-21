@@ -1,5 +1,5 @@
-# Cart products live in _data/catalog.json (and api/catalog-data.json).
-# The admin backoffice edits those files. Checkout charges those prices.
+# Cart products are `_store/*.md`. JSON under `_data/catalog.json` and
+# `api/catalog-data.json` is generated from those pages at build / admin save.
 # This YAML is only the cart toggle and shipping methods.
 
 enabled: true

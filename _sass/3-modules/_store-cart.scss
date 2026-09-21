@@ -253,12 +253,50 @@ body.store-cart-open {
   }
 }
 
-@media only screen and (max-width: $mobile) {
+/* Mobile / compact layout: floating cart FAB stacked under the WhatsApp floater.
+   WhatsApp bottom offset lives in floater.html (inline styles load after main CSS). */
+@media only screen and (max-width: $desktop) {
+  .store-cart,
+  .store-cart.store-cart--floating {
+    position: fixed;
+    /* Same side as .floating (WhatsApp left: 40px); under it at the bottom */
+    left: 40px;
+    right: auto;
+    bottom: 40px;
+    top: auto;
+    z-index: 1205;
+  }
+
+  .store-cart__toggle {
+    width: 60px;
+    height: 60px;
+    background: var(--brand-color);
+    color: var(--dark);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+    font-size: 30px;
+
+    &:hover {
+      color: var(--dark);
+    }
+  }
+
+  .store-cart__count {
+    top: 0;
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    background: var(--white);
+    color: var(--dark);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+  }
+
   .store-cart__panel {
     position: fixed;
-    top: 88px;
+    top: auto;
+    /* Above WhatsApp + cart stack: 112 + 60 + 12 */
+    bottom: 184px;
     inset-inline-start: 12px;
     inset-inline-end: 12px;
     width: auto;
+    max-height: min(70vh, calc(100vh - 220px));
   }
 }

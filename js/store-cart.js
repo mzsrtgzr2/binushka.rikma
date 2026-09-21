@@ -136,6 +136,11 @@
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  /* Matches $desktop in _sass/1-tools/_grid.scss — floating cart FAB layout */
+  function isFloatingCartLayout() {
+    return window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+  }
+
   function imageUrlFromEl(img) {
     if (!img) return '';
     return img.getAttribute('data-src') || img.currentSrc || img.src || '';
@@ -282,13 +287,36 @@
     checkout: document.getElementById('store-cart-checkout'),
   };
 
+  var headerHost = els.root && els.root.parentElement;
+  var headerNextSibling = els.root && els.root.nextSibling;
+
+  function syncCartPlacement() {
+    if (!els.root || !headerHost) return;
+    if (isFloatingCartLayout()) {
+      if (els.root.parentElement !== document.body) {
+        document.body.appendChild(els.root);
+      }
+      els.root.classList.add('store-cart--floating');
+    } else {
+      if (els.root.parentElement !== headerHost) {
+        if (headerNextSibling && headerNextSibling.parentElement === headerHost) {
+          headerHost.insertBefore(els.root, headerNextSibling);
+        } else {
+          headerHost.appendChild(els.root);
+        }
+      }
+      els.root.classList.remove('store-cart--floating');
+    }
+  }
+
   function openPanel() {
     if (!els.panel) return;
     els.panel.hidden = false;
     els.backdrop.hidden = false;
     els.toggle.setAttribute('aria-expanded', 'true');
     document.body.classList.add('store-cart-open');
-    if (els.toggle && els.toggle.scrollIntoView) {
+    /* Header cart can be off-screen; floating FAB is always in view */
+    if (!isFloatingCartLayout() && els.toggle && els.toggle.scrollIntoView) {
       els.toggle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
@@ -446,6 +474,15 @@
   }
 
   renderWidget();
+  syncCartPlacement();
+  if (window.matchMedia) {
+    var floatingMq = window.matchMedia('(max-width: 1024px)');
+    if (floatingMq.addEventListener) {
+      floatingMq.addEventListener('change', syncCartPlacement);
+    } else if (floatingMq.addListener) {
+      floatingMq.addListener(syncCartPlacement);
+    }
+  }
 
   fetch('/api/prices/')
     .then(function (res) {

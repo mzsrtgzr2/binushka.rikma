@@ -7,7 +7,7 @@ settings; there is nothing to type in the Vercel dashboard.
 | --- | --- | --- |
 | Framework preset | Jekyll | `vercel.json` → `framework` |
 | Install command | `bundle install` | `vercel.json` → `installCommand` |
-| Build command | `JEKYLL_ENV=production bundle exec jekyll build` | `vercel.json` → `buildCommand` |
+| Build command | `node scripts/build-catalog.js && JEKYLL_ENV=production bundle exec jekyll build` | `vercel.json` → `buildCommand` |
 | Output directory | `_site` | `vercel.json` → `outputDirectory` |
 | Production branch | `master` | Vercel project settings |
 
@@ -49,13 +49,29 @@ Scrunchies: three fixed variants (regular ₪30, large ₪45, fancy ₪85). Chec
 sends a server-validated variant id, never a client price. An optional fabric
 note from the checkout form is appended to the Morning income description.
 
+## Store catalog
+
+`_store/<slug>.md` is the only catalog you edit. Front matter is the product:
+title, photos, stock, and the price charged at checkout.
+
+- A normal product with `price: ₪240` is in the cart on the next deploy. No
+  JSON edit.
+- Gift cards use `variable: true` plus `min_price` / `max_price` / `presets`.
+- Scrunchies (or any multi-type product) use a `variants:` block.
+- A page that should not be buyable, even if it shows a ₪ price, sets
+  `in_cart: false`.
+
+`_data/catalog.json` and `api/catalog-data.json` are generated from those
+pages (`scripts/build-catalog.js`) during the Vercel build and again whenever
+`/admin/` saves. Do not hand-edit them.
+
 ## Store admin (`/admin/`)
 
 A password-protected Hebrew backoffice for **every** store product: create,
 update, delete, prices charged at checkout, gift-card amounts, scrunchie
 variants, page text, and stock/visibility. It is not linked from the public
-menu. After save it commits `_store/<slug>.md`, `api/catalog-data.json`, and
-`_data/catalog.json` to GitHub so Vercel rebuilds.
+menu. After save it commits `_store/<slug>.md` and regenerates the catalog
+JSON snapshots so Vercel rebuilds.
 
 Set these on **Production** (and Preview if you want to try it there):
 
@@ -67,16 +83,19 @@ Set these on **Production** (and Preview if you want to try it there):
 | `GITHUB_REPO` | Optional `owner/repo`. Vercel already sets the git owner/slug |
 
 For local `vercel dev`, set `ADMIN_LOCAL_ROOT` to the repo root so saves write
-the markdown/JSON files on disk instead of GitHub.
+the markdown (and regenerated catalog JSON) on disk instead of GitHub.
 
 The number saved in the admin is the number charged at checkout. Morning is
 payments and invoices only. It is not the store catalog.
 
 ## Who edits products
 
-**Everything in the catalog:** `/admin/` (password). That includes normal
-fixed-price products, gift cards, scrunchies variants, titles, photos paths,
-page text, stock, and hide.
+**GitHub:** add or edit `_store/<slug>.md`. Copy an existing product page,
+change the title / `price: ₪…` / photos. That is enough for the store grid
+and checkout. Do not edit `catalog.json`.
+
+**Admin (`/admin/`, password):** the same data, with a form. Use it for
+photos, stock, hide, gift-card amounts, and scrunchie variants.
 
 **Photos:** `/admin/` → תמונות. Upload from the computer, reorder, first photo is
 the main store image. Extra photos are `gallery` on the product page. Files are
@@ -85,14 +104,15 @@ committed under `images/store/<slug>/`.
 **Stock / hide:** same `/admin/` screen. Morning’s item API has no inventory
 field. Grow is payments only — it is not a catalog.
 
-To add a new cart product: `/admin/` → מוצר חדש. Create it on the site only.
-Morning does not need a matching item to charge.
+To add a new cart product: either `/admin/` → מוצר חדש, or a new markdown
+file in `_store/`. Morning does not need a matching item to charge.
 
 ## Local development
 
 ```bash
 bundle install
-bundle exec jekyll serve   # http://localhost:4000
+node scripts/build-catalog.js   # refresh catalog JSON from _store/*.md
+bundle exec jekyll serve        # http://localhost:4000
 ```
 
 Or with Docker: `docker compose up` (serves on http://localhost:4001).

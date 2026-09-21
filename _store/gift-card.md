@@ -7,6 +7,16 @@ price: כל סכום לבחירתך
 out_of_stock: false
 limited_stock: false
 hide: false
+variable: true
+min_price: 50
+max_price: 2000
+presets:
+  - 100
+  - 150
+  - 200
+  - 250
+  - 300
+  - 500
 form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
 ---
 

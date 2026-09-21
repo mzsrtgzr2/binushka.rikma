@@ -3,6 +3,7 @@ title: תיק בד לזר פרחים
 date: 2024-01-20 10:00:00 +0300
 subtitle: בתפירה אישית מבד וינטג׳
 image: /images/gallery/flower-bag.png
+price: ₪240
 out_of_stock: false
 limited_stock: true
 hide: false

@@ -2,10 +2,15 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "jekyll",
   "installCommand": "bundle install",
-  "buildCommand": "JEKYLL_ENV=production bundle exec jekyll build",
+  "buildCommand": "node scripts/build-catalog.js && JEKYLL_ENV=production bundle exec jekyll build",
   "outputDirectory": "_site",
   "cleanUrls": true,
   "trailingSlash": true,
+  "functions": {
+    "api/*.js": {
+      "includeFiles": "_store/**"
+    }
+  },
   "rewrites": [
     { "source": "/api/:path*/", "destination": "/api/:path*" }
   ],

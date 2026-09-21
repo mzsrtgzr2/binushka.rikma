@@ -581,9 +581,53 @@
 
 .admin-variant {
   display: grid;
-  grid-template-columns: 110px minmax(120px, 1fr) 90px minmax(180px, 1.2fr) minmax(120px, 1fr) auto;
-  gap: 8px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1.8fr) minmax(220px, 0.9fr);
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--background-alt-color);
+  border: 1px solid var(--border-color);
+  margin-bottom: 12px;
+}
+
+.admin-variants {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-variant__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr) minmax(0, 0.7fr);
+  gap: 12px 16px;
+  align-items: start;
+}
+
+.admin-variant__field {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-variant__field--description {
+  grid-column: 1 / -1;
+}
+
+.admin-variant__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-alt-color);
+}
+
+.admin-variant__textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.admin-variant__side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
 }
 
 .admin-variant__image {
@@ -600,6 +644,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.admin-variant__label--image {
+  margin: 0;
 }
 
 .admin-variant__image-thumb {
@@ -635,10 +683,13 @@
 
 .admin-variant__remove {
   border: 0;
-  background: none;
-  color: var(--text-alt-color);
+  background: transparent;
+  color: #b42318;
   cursor: pointer;
   font-size: 14px;
+  justify-self: start;
+  padding: 0;
+  text-decoration: underline;
 }
 
 .admin-toolbar .button,
@@ -661,11 +712,15 @@
   .admin-toolbar,
   .admin-editor__top,
   .admin-grid,
-  .admin-variant,
   .admin-editor__split {
     flex-direction: column;
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .admin-variant,
+  .admin-variant__fields {
+    grid-template-columns: 1fr;
   }
 
   .admin-preview {

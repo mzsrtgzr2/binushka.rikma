@@ -219,25 +219,34 @@
     row = row || {};
     return (
       '<div class="admin-variant">' +
+      '<div class="admin-variant__fields">' +
+      '<label class="admin-variant__field"><span class="admin-variant__label">מזהה</span>' +
       '<input class="form__input" data-v="id" dir="ltr" placeholder="id" value="' +
       escapeHtml(row.id || '') +
-      '">' +
+      '"></label>' +
+      '<label class="admin-variant__field"><span class="admin-variant__label">שם הסוג</span>' +
       '<input class="form__input" data-v="name" placeholder="שם" value="' +
       escapeHtml(row.name || '') +
-      '">' +
+      '"></label>' +
+      '<label class="admin-variant__field"><span class="admin-variant__label">מחיר</span>' +
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="₪" value="' +
       escapeHtml(row.price || '') +
-      '">' +
+      '"></label>' +
+      '<label class="admin-variant__field admin-variant__field--description"><span class="admin-variant__label">תיאור</span>' +
+      '<textarea class="form__input admin-variant__textarea" data-v="description" placeholder="תיאור קצר או ארוך יותר של הסוג" rows="4">' +
+      escapeHtml(row.description || '') +
+      '</textarea></label>' +
+      '</div>' +
+      '<div class="admin-variant__side">' +
       '<div class="admin-variant__image">' +
+      '<p class="admin-variant__label admin-variant__label--image">תמונה</p>' +
       '<div class="admin-variant__image-preview" data-variant-image-preview></div>' +
       '<div class="admin-variant__image-actions">' +
       '<label class="admin-photo__btn admin-variant__upload">העלי תמונה<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" data-variant-image-file></label>' +
       '<button type="button" class="admin-photo__btn admin-photo__btn--danger" data-variant-image-clear hidden>הסירי תמונה</button>' +
       '</div></div>' +
-      '<input class="form__input" data-v="description" placeholder="תיאור" value="' +
-      escapeHtml(row.description || '') +
-      '">' +
       '<button type="button" class="admin-variant__remove" data-remove-variant>הסרה</button>' +
+      '</div>' +
       '</div>'
     );
   }

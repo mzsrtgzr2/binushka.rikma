@@ -6,7 +6,7 @@
  * POST /api/v1/payments/form  (get payment form)
  */
 
-const { buildOrder, applyVariantNote } = require('./catalog');
+const { buildOrder, applyVariantNote, applyGiftPacking } = require('./catalog');
 const { resolveMorningEnv, morningHosts, getMorningToken } = require('./morning');
 
 const VAT_RATE = 0.18;
@@ -226,7 +226,10 @@ async function handler(req, res) {
   const env = resolveMorningEnv(process.env.MORNING_ENV);
 
   const body = req.body || {};
-  const order = applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote);
+  const order = applyGiftPacking(
+    applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
+    body
+  );
   if (order.error) {
     return res.status(400).json({ error: order.error });
   }

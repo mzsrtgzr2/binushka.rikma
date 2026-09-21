@@ -133,6 +133,36 @@ function applyVariantNote(order, note) {
   };
 }
 
+function isShippingLine(line) {
+  return String((line && line.description) || '').startsWith('משלוח');
+}
+
+/**
+ * Mark product lines as gift wrapping when checkout requests pack-as-gift.
+ * Greeting text is optional and only applied when packing is requested.
+ */
+function applyGiftPacking(order, opts) {
+  if (!order || order.error) return order;
+  const pack =
+    opts &&
+    (opts.packAsGift === true || opts.packAsGift === '1' || opts.packAsGift === 1);
+  if (!pack) return order;
+
+  const message = String((opts && opts.giftMessage) || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 200);
+  let suffix = ' — אריזה כמתנה';
+  if (message) suffix += ` — כרטיס ברכה: ${message}`;
+
+  return {
+    ...order,
+    lines: (order.lines || []).map((line) =>
+      isShippingLine(line) ? line : { ...line, description: `${line.description}${suffix}` }
+    ),
+  };
+}
+
 module.exports = {
   PRODUCTS,
   SHIPPING,
@@ -140,5 +170,6 @@ module.exports = {
   buildOrder,
   fallbackPriceBook,
   applyVariantNote,
+  applyGiftPacking,
   fromCatalogFile,
 };

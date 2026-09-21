@@ -118,6 +118,8 @@
     'country',
     'shipping',
     'variantNote',
+    'packAsGift',
+    'giftMessage',
   ];
 
   function loadCustomer() {
@@ -134,14 +136,21 @@
   function fieldValue(name) {
     var el = form.elements[name];
     if (!el) return '';
+    if (el.type === 'checkbox') return el.checked ? el.value || '1' : '';
     if (el.length && el[0] && el[0].type === 'radio') return el.value || '';
     return el.value || '';
   }
 
   function setFieldValue(name, value) {
+    if (name === 'packAsGift') {
+      var giftCb = form.elements.packAsGift;
+      if (giftCb) giftCb.checked = Boolean(value);
+      syncGiftMessageVisibility();
+      return;
+    }
     if (value == null || value === '') return;
     if (name === 'shipping' && ['pickup', 'registered', 'courier'].indexOf(String(value)) === -1) return;
-    if (name === 'variantNote') value = String(value).slice(0, 200);
+    if (name === 'variantNote' || name === 'giftMessage') value = String(value).slice(0, 200);
     var el = form.elements[name];
     if (!el) return;
     if (el.length && el[0] && el[0].type === 'radio') {
@@ -152,6 +161,13 @@
       return;
     }
     el.value = String(value);
+  }
+
+  function syncGiftMessageVisibility() {
+    var cb = form.elements.packAsGift;
+    var group = document.getElementById('checkout-gift-message-group');
+    if (!group || !cb) return;
+    group.hidden = !cb.checked;
   }
 
   function saveCustomer() {
@@ -172,11 +188,14 @@
     CUSTOMER_FIELDS.forEach(function (name) {
       setFieldValue(name, data[name]);
     });
+    syncGiftMessageVisibility();
   }
 
   restoreCustomer();
+  syncGiftMessageVisibility();
   form.addEventListener('input', saveCustomer);
   form.addEventListener('change', function () {
+    syncGiftMessageVisibility();
     saveCustomer();
     renderSummary();
   });
@@ -216,6 +235,10 @@
       successPath: '/thanks/',
     };
     if (data.variantNote) payload.variantNote = String(data.variantNote).trim();
+    if (data.packAsGift) {
+      payload.packAsGift = true;
+      if (data.giftMessage) payload.giftMessage = String(data.giftMessage).trim().slice(0, 200);
+    }
     saveCustomer();
 
     var submitBtn = form.querySelector('[type="submit"]');
@@ -258,6 +281,10 @@
               subtotal: subtotal,
               total: subtotal + ship,
               email: data.email,
+              packAsGift: Boolean(data.packAsGift),
+              giftMessage: data.packAsGift && data.giftMessage
+                ? String(data.giftMessage).trim().slice(0, 200)
+                : '',
             })
           );
         } catch (e) {

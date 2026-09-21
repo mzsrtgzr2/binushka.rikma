@@ -18,6 +18,11 @@ A serverless function at `/api/checkout` creates the Green Invoice / Morning pay
 `vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308 the
 function. The browser posts to `/api/checkout/`.
 
+Every file uploaded under `api/` becomes its own function, and Hobby deployments reject
+more than 12. `.vercelignore` therefore drops `api/*.test.js`: those are `node:test` files
+with no handler, so they only ever deployed as broken endpoints. Tests still run from the
+repo with `node --test`. The deployment is at 9 functions.
+
 ## Store cart
 
 Grow approved the site for clearing and pointed us at the Green Invoice payment-form API

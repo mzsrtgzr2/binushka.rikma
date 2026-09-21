@@ -23,6 +23,7 @@
   var kindSelect = document.getElementById('admin-kind');
   var photosEl = document.getElementById('admin-photos');
   var photoFiles = document.getElementById('admin-photo-files');
+  var photosMessage = document.getElementById('admin-photos-message');
   var previewCard = document.getElementById('admin-preview-card');
   var previewPage = document.getElementById('admin-preview-page');
   if (!loginForm || !board || !editor || !photosEl) return;
@@ -207,6 +208,7 @@
   function closeEditor() {
     showList();
     show(editorMessage, '', '');
+    show(photosMessage, '', '');
     editor.reset();
     editor.classList.remove('admin-editor--variants');
     variantsEl.innerHTML = '';
@@ -451,6 +453,8 @@
             upload: { filename: filename, mime: mime, data: data },
           });
         };
+        // Keep small files and animated GIFs as-is. Large still images are
+        // re-encoded as JPEG — canvas PNG export ignores quality and stays huge.
         if (file.type === 'image/gif' || file.size < 900000) {
           finish(dataUrl, file.type, file.name);
           return;
@@ -468,14 +472,22 @@
           var canvas = document.createElement('canvas');
           canvas.width = w;
           canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          var mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-          var compressed = canvas.toDataURL(mime, 0.82);
-          var filename = String(file.name || 'photo').replace(/\.[^.]+$/, mime === 'image/png' ? '.png' : '.jpg');
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          var mime = 'image/jpeg';
+          var qualities = [0.82, 0.7, 0.55, 0.4];
+          var compressed = '';
+          for (var i = 0; i < qualities.length; i++) {
+            compressed = canvas.toDataURL(mime, qualities[i]);
+            if (compressed.length <= 3500000) break;
+          }
+          var filename = String(file.name || 'photo').replace(/\.[^.]+$/, '.jpg');
           finish(compressed, mime, filename);
         };
         img.onerror = function () {
-          finish(dataUrl, file.type, file.name);
+          reject(new Error('לא הצלחנו לעבד את התמונה'));
         };
         img.src = dataUrl;
       };
@@ -518,6 +530,7 @@
     editorDelete.hidden = isNew;
     syncKindFields();
     show(editorMessage, '', '');
+    show(photosMessage, '', '');
     updatePreview();
   }
 
@@ -1057,19 +1070,25 @@
     if (!files.length) return;
     var room = 8 - photoItems.length;
     if (room <= 0) {
-      show(editorMessage, 'אפשר עד 8 תמונות', 'error');
+      show(photosMessage || editorMessage, 'אפשר עד 8 תמונות', 'error');
       return;
     }
     files = files.slice(0, room);
-    show(editorMessage, 'טוענת תמונות…', 'info');
+    show(photosMessage || editorMessage, 'טוענת תמונות…', 'info');
     Promise.all(files.map(readFileAsPhoto))
       .then(function (items) {
         photoItems = photoItems.concat(items);
         renderPhotos();
-        show(editorMessage, '', '');
+        show(
+          photosMessage || editorMessage,
+          items.length === 1
+            ? 'התמונה נוספה. לחצי «שמירת מוצר» כדי להעלות לאתר.'
+            : 'התמונות נוספו. לחצי «שמירת מוצר» כדי להעלות לאתר.',
+          'ok'
+        );
       })
       .catch(function (err) {
-        show(editorMessage, err.message || 'לא הצלחנו להוסיף תמונה', 'error');
+        show(photosMessage || editorMessage, err.message || 'לא הצלחנו להוסיף תמונה', 'error');
       });
   });
 

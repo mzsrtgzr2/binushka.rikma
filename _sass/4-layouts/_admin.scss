@@ -154,12 +154,20 @@
   font-size: 14px;
 }
 
+.admin-message--info {
+  color: var(--text-alt-color, #667085);
+}
+
 .admin-message--error {
   color: #b42318;
 }
 
 .admin-message--ok {
   color: #067647;
+}
+
+#admin-photos-message {
+  margin-top: 10px;
 }
 
 .admin-editor {

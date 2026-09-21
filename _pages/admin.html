@@ -66,12 +66,13 @@ noindex: true
 
       <fieldset class="admin-fieldset">
         <legend>תמונות</legend>
-        <p class="admin-hint">הראשונה היא התמונה המרכזית בחנות ובדף המוצר. אפשר להעלות כמה, לשנות סדר ולהסיר.</p>
+        <p class="admin-hint">הראשונה היא התמונה המרכזית בחנות ובדף המוצר. אפשר להעלות כמה, לשנות סדר ולהסיר. תמונות גדולות (כולל PNG) נדחסות אוטומטית. אחרי בחירת קובץ לחצי «שמירת מוצר» כדי להעלות לאתר.</p>
         <div class="admin-photos" id="admin-photos"></div>
         <label class="button admin-upload-btn">
           הוסיפי תמונות
           <input type="file" id="admin-photo-files" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
         </label>
+        <p class="admin-message" id="admin-photos-message" hidden></p>
       </fieldset>
 
       <div class="form__group">

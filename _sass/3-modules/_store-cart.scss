@@ -253,13 +253,9 @@ body.store-cart-open {
   }
 }
 
-/* Mobile / compact layout: floating cart FAB stacked under the WhatsApp floater */
+/* Mobile / compact layout: floating cart FAB stacked under the WhatsApp floater.
+   WhatsApp bottom offset lives in floater.html (inline styles load after main CSS). */
 @media only screen and (max-width: $desktop) {
-  /* Raise WhatsApp so the cart can sit under it on the same side */
-  .floating {
-    bottom: 112px; /* 40 + 60 cart + 12 gap */
-  }
-
   .store-cart,
   .store-cart.store-cart--floating {
     position: fixed;

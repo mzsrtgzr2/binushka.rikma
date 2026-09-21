@@ -41,6 +41,26 @@ layout: default
   </div>
 </div>
 
+{% if page.stockists %}
+<div class="container animate">
+  <section class="scrunchies-stockists">
+    <h2 class="scrunchies-stockists__title">{{ page.stockists_title | default: 'איפה אפשר למצוא את הסקראנצ׳י שלי?' }}</h2>
+    <div class="scrunchies-stockists__grid">
+      {% for stockist in page.stockists %}
+      <article class="scrunchies-stockists__city">
+        <h3>{{ stockist.city }}</h3>
+        <ul>
+          {% for location in stockist.locations %}
+          <li>{{ location.name }}</li>
+          {% endfor %}
+        </ul>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endif %}
+
 {% if page.gallery %}
 <div class="scrunchies-gallery animate">
   {% for img in page.gallery %}

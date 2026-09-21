@@ -259,6 +259,67 @@
   }
 }
 
+.scrunchies-stockists {
+  margin: 0 auto 80px;
+  max-width: 980px;
+
+  &__title {
+    font-size: 36px;
+    font-weight: 300;
+    margin-bottom: 32px;
+    text-align: center;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+
+    @media only screen and (max-width: $tablet) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media only screen and (max-width: $mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__city {
+    background: var(--background-alt-color);
+    border-radius: 16px;
+    padding: 28px 24px;
+
+    h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    li {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-alt-color);
+    }
+  }
+
+  @media only screen and (max-width: $mobile) {
+    margin-bottom: 48px;
+  }
+}
+
 .scrunchies-cta {
   text-align: center;
   margin-bottom: 80px;

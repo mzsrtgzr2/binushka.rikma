@@ -187,7 +187,20 @@ jobs:
           set -euo pipefail
 
           pr_body="$RUNNER_TEMP/cursor-pr-body.md"
+          issue_title="$(jq -r '.issue.title' "$GITHUB_EVENT_PATH")"
           issue_body="$(jq -r '.issue.body // ""' "$GITHUB_EVENT_PATH")"
+          pr_title="$(ISSUE_TITLE="$issue_title" ISSUE_NUMBER="$ISSUE_NUMBER" python3 <<'PY'
+          import os
+          import re
+
+          title = os.environ["ISSUE_TITLE"].strip()
+          issue_number = os.environ["ISSUE_NUMBER"]
+          title = re.sub(r"^\[Cursor task\]:\s*", "", title).strip()
+          if len(title) > 90:
+              title = title[:87].rstrip() + "..."
+          print(f"Cursor task: {title} (#{issue_number})")
+          PY
+          )"
 
           {
             echo "Closes #${ISSUE_NUMBER}"
@@ -206,7 +219,7 @@ jobs:
           } > "$pr_body"
 
           pr_url="$(gh pr create \
-            --title "Cursor task: issue #${ISSUE_NUMBER}" \
+            --title "$pr_title" \
             --body-file "$pr_body" \
             --head "$BRANCH_NAME" \
             --base "$BASE_BRANCH" \

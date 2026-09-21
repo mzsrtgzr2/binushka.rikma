@@ -257,11 +257,11 @@
       '<input class="form__input" data-v="id" dir="ltr" placeholder="regular" value="' +
       escapeHtml(row.id || '') +
       '">' +
-      '<p class="admin-hint">באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
       '</div></div>' +
+      '<p class="admin-hint admin-variant__id-hint">המזהה באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
       '<div class="form__group">' +
       '<label class="form__label">תיאור</label>' +
-      '<textarea class="form__input admin-variant__description" data-v="description" rows="10" placeholder="תיאור מלא לסוג — אפשר לכתוב כמה שורות בנוחות">' +
+      '<textarea class="form__input admin-body-input admin-variant__description" data-v="description" rows="12" placeholder="תיאור מלא לסוג — שורות ארוכות נשארות קריאות ונוחות לעריכה">' +
       escapeHtml(row.description || '') +
       '</textarea>' +
       '</div>' +

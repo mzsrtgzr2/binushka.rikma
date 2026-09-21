@@ -272,6 +272,30 @@
   .thanks-section + .thanks-section {
     margin-top: 24px;
   }
+
+  .thanks-gift {
+    margin: 16px 0 0;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: $global-radius;
+    background: var(--white, #fff);
+  }
+
+  .thanks-gift__pack {
+    margin: 0;
+    font-weight: 700;
+    color: var(--heading-font-color);
+  }
+
+  .thanks-gift__message {
+    margin: 8px 0 0;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .thanks-gift__label {
+    font-weight: 600;
+  }
 }
 
 @keyframes thanks-pop {

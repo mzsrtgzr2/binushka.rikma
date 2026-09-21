@@ -6,6 +6,7 @@ const {
   buildOrder,
   fallbackPriceBook,
   applyVariantNote,
+  applyGiftPacking,
   PRODUCTS,
 } = require('./catalog');
 
@@ -127,4 +128,35 @@ test('empty variant note is ignored and long notes are trimmed', () => {
   assert.equal(applyVariantNote(base, '   ').lines[0].description, "סקראנצ'י גודל רגיל");
   const long = applyVariantNote(base, 'א'.repeat(250));
   assert.match(long.lines[0].description, /דוגמא: א{200}$/);
+});
+
+test('gift packing marks product lines and optional greeting message', () => {
+  const order = applyGiftPacking(
+    buildOrder(
+      [
+        { id: 'fox', quantity: 1 },
+        { id: 'scrunchies', quantity: 1, variant: 'regular' },
+      ],
+      'courier'
+    ),
+    { packAsGift: true, giftMessage: '  מזל טוב!  ' }
+  );
+  assert.equal(order.lines[0].description, 'רקמת שועל משמח — אריזה כמתנה — כרטיס ברכה: מזל טוב!');
+  assert.equal(
+    order.lines[1].description,
+    "סקראנצ'י גודל רגיל — אריזה כמתנה — כרטיס ברכה: מזל טוב!"
+  );
+  assert.equal(order.lines[2].description, 'משלוח - שליח עד הבית');
+});
+
+test('gift message without pack flag is ignored; long messages are trimmed', () => {
+  const base = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
+  assert.equal(
+    applyGiftPacking(base, { giftMessage: 'מזל טוב' }).lines[0].description,
+    'רקמת שועל משמח'
+  );
+  const packed = applyGiftPacking(base, { packAsGift: '1' });
+  assert.equal(packed.lines[0].description, 'רקמת שועל משמח — אריזה כמתנה');
+  const long = applyGiftPacking(base, { packAsGift: true, giftMessage: 'ב'.repeat(250) });
+  assert.match(long.lines[0].description, /כרטיס ברכה: ב{200}$/);
 });

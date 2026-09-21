@@ -36,6 +36,10 @@ permalink: /thanks/
     <section class="thanks-section checkout-summary" id="thanks-order" hidden>
       <h2>מה הזמנת</h2>
       <ul class="checkout-lines" id="thanks-lines"></ul>
+      <div class="thanks-gift" id="thanks-gift" hidden>
+        <p class="thanks-gift__pack">ביקשת לארוז כמתנה</p>
+        <p class="thanks-gift__message" id="thanks-gift-message" hidden></p>
+      </div>
       <p class="checkout-subtotal" id="thanks-shipping-row" hidden></p>
       <p class="checkout-grand-total">סה״כ שולם: <strong id="thanks-total">₪0</strong></p>
     </section>

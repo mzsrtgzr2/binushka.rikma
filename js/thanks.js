@@ -63,6 +63,8 @@
     var linesEl = document.getElementById('thanks-lines');
     var totalEl = document.getElementById('thanks-total');
     var shippingEl = document.getElementById('thanks-shipping-row');
+    var giftEl = document.getElementById('thanks-gift');
+    var giftMessageEl = document.getElementById('thanks-gift-message');
     if (!orderEl || !linesEl) return;
 
     var order = loadOrder();
@@ -70,6 +72,25 @@
 
     orderEl.hidden = false;
     linesEl.innerHTML = order.items.map(lineHtml).join('');
+
+    if (giftEl) {
+      if (order.packAsGift) {
+        giftEl.hidden = false;
+        if (giftMessageEl) {
+          var greeting = String(order.giftMessage || '').trim();
+          if (greeting) {
+            giftMessageEl.hidden = false;
+            giftMessageEl.innerHTML =
+              '<span class="thanks-gift__label">כרטיס ברכה:</span> ' + escapeHtml(greeting);
+          } else {
+            giftMessageEl.hidden = true;
+            giftMessageEl.textContent = '';
+          }
+        }
+      } else {
+        giftEl.hidden = true;
+      }
+    }
 
     if (shippingEl) {
       var label = SHIPPING_LABELS[order.shipping] || order.shipping || 'משלוח';

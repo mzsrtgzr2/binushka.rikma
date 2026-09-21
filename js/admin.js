@@ -208,6 +208,7 @@
     showList();
     show(editorMessage, '', '');
     editor.reset();
+    editor.classList.remove('admin-editor--variants');
     variantsEl.innerHTML = '';
     photoItems = [];
     renderPhotos();
@@ -244,6 +245,7 @@
       escapeHtml(row.name || '') +
       '">' +
       '</div>' +
+      '<div class="admin-grid">' +
       '<div class="form__group">' +
       '<label class="form__label">מחיר (₪)</label>' +
       '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="30" value="' +
@@ -256,16 +258,16 @@
       escapeHtml(row.id || '') +
       '">' +
       '<p class="admin-hint">באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
-      '</div>' +
+      '</div></div>' +
       '<div class="form__group">' +
       '<label class="form__label">תיאור</label>' +
-      '<textarea class="form__input admin-body-input admin-variant__description" data-v="description" rows="12" placeholder="תיאור מלא לסוג — אפשר לכתוב כמה שורות בלי לחץ">' +
+      '<textarea class="form__input admin-body-input" data-v="description" rows="10" placeholder="תיאור לסוג — אפשר כמה שורות">' +
       escapeHtml(row.description || '') +
       '</textarea>' +
       '</div>' +
       '<div class="form__group admin-variant__image-group">' +
       '<label class="form__label">תמונה</label>' +
-      '<p class="admin-hint">העלאה מהמחשב, כמו בתמונות הראשיות של המוצר — בלי להדביק path.</p>' +
+      '<p class="admin-hint">העלאה מהמחשב כמו בתמונות הראשיות — בלי להדביק path.</p>' +
       '<div class="admin-variant__image">' +
       (imgSrc
         ? '<img class="admin-variant__thumb" src="' + escapeHtml(imgSrc) + '" alt="">'
@@ -485,6 +487,7 @@
     document.querySelectorAll('[data-kind-fields]').forEach(function (el) {
       el.hidden = el.getAttribute('data-kind-fields') !== kind;
     });
+    editor.classList.toggle('admin-editor--variants', kind === 'variants');
   }
 
   function fillEditor(product, isNew) {

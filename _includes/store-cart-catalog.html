@@ -15,10 +15,11 @@
         "price": {{ meta.price | default: 0 }},
         "image": {{ item.image | relative_url | jsonify }},
         "url": {{ item.url | relative_url | jsonify }},
-        "outOfStock": {% if item.out_of_stock %}true{% else %}false{% endif %},
+        "outOfStock": {% if item.out_of_stock or item.stock == 0 %}true{% else %}false{% endif %},
         {%- if item.stock != nil and item.stock != "" -%}
         "stock": {{ item.stock }},
         {%- endif -%}
+        "limitedStock": {% if item.limited_stock %}true{% else %}false{% endif %},
         "variable": {% if meta.variable %}true{% else %}false{% endif %},
         "minPrice": {{ meta.min_price | default: 0 }},
         "maxPrice": {{ meta.max_price | default: 0 }}

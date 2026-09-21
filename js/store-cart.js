@@ -12,6 +12,7 @@
 
   var byId = {};
   catalog.forEach(function (p) {
+    if (p.stock === 0) p.outOfStock = true;
     byId[p.id] = p;
   });
 
@@ -117,9 +118,24 @@
     return d.innerHTML;
   }
 
+  function availableStock(p) {
+    if (!p) return 0;
+    if (p.outOfStock || p.stock === 0) return 0;
+    if (typeof p.stock === 'number') return p.stock;
+    return Infinity;
+  }
+
+  function productQtyInCart(cart, id) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      if (parsed.id !== id) return sum;
+      return sum + (cart[key] || 0);
+    }, 0);
+  }
+
   function addToCart(id, delta, extra) {
     var p = byId[id];
-    if (!p || p.outOfStock) return false;
+    if (!p || p.outOfStock || p.stock === 0) return false;
     if (p.variable && !validGiftAmount(p, extra)) return false;
     if (p.variants && !validVariant(p, extra)) return false;
     var key = lineKey(id, extra);
@@ -127,12 +143,128 @@
     var next = (cart[key] || 0) + delta;
     if (next < 1) delete cart[key];
     else {
-      if (typeof p.stock === 'number' && next > p.stock) return false;
+      var max = availableStock(p);
+      var others = productQtyInCart(cart, id) - (cart[key] || 0);
+      if (Number.isFinite(max) && others + next > max) return false;
       cart[key] = next;
     }
     saveCart(cart);
     renderWidget();
     return true;
+  }
+
+  function clampCartToStock() {
+    var cart = loadCart();
+    var changed = false;
+    Object.keys(cart).forEach(function (key) {
+      var parsed = parseCartKey(key);
+      var p = byId[parsed.id];
+      if (!p) return;
+      var max = availableStock(p);
+      if (max <= 0) {
+        delete cart[key];
+        changed = true;
+        return;
+      }
+      if (Number.isFinite(max) && cart[key] > max) {
+        cart[key] = max;
+        changed = true;
+      }
+    });
+    // Second pass: shared stock across variant lines for the same product
+    var byProduct = {};
+    Object.keys(cart).forEach(function (key) {
+      var parsed = parseCartKey(key);
+      if (!byProduct[parsed.id]) byProduct[parsed.id] = [];
+      byProduct[parsed.id].push(key);
+    });
+    Object.keys(byProduct).forEach(function (id) {
+      var p = byId[id];
+      var max = availableStock(p);
+      if (!Number.isFinite(max)) return;
+      var keys = byProduct[id];
+      var total = keys.reduce(function (sum, key) {
+        return sum + (cart[key] || 0);
+      }, 0);
+      if (total <= max) return;
+      var remaining = max;
+      keys.forEach(function (key) {
+        if (remaining <= 0) {
+          delete cart[key];
+          changed = true;
+          return;
+        }
+        if (cart[key] > remaining) {
+          cart[key] = remaining;
+          changed = true;
+        }
+        remaining -= cart[key];
+      });
+    });
+    if (changed) saveCart(cart);
+    return changed;
+  }
+
+  function ensureOverlay(container, className, text) {
+    if (!container) return;
+    var existing = container.querySelector('.out-of-stock, .limited-stock');
+    if (existing) existing.parentNode.removeChild(existing);
+    if (!text) return;
+    var el = document.createElement('div');
+    el.className = className;
+    el.textContent = text;
+    container.appendChild(el);
+  }
+
+  function ensureStockText(host, soldOut, limited) {
+    if (!host) return;
+    var existing = host.querySelector('.out-of-stock-text, .limited-stock-text');
+    if (existing) existing.parentNode.removeChild(existing);
+    if (!soldOut && !limited) return;
+    var el = document.createElement('div');
+    el.className = soldOut ? 'out-of-stock-text' : 'limited-stock-text';
+    el.textContent = soldOut ? 'אזל מהמלאי' : 'מלאי מוגבל';
+    var price = host.querySelector('.store-item-price, [data-product-price]');
+    if (price && price.parentNode === host) host.insertBefore(el, price);
+    else host.appendChild(el);
+  }
+
+  function updateStockUi() {
+    Object.keys(byId).forEach(function (id) {
+      var p = byId[id];
+      var soldOut = Boolean(p.outOfStock) || p.stock === 0;
+      var limited = Boolean(p.limitedStock) && !soldOut;
+      var overlayLabel = soldOut ? 'אזל מהמלאי' : limited ? 'מלאי מוגבל' : '';
+      var overlayClass = soldOut ? 'out-of-stock' : 'limited-stock';
+
+      document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
+        ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
+        if (root.querySelector('.page-head')) {
+          ensureStockText(root.querySelector('.page-head'), soldOut, limited);
+          var pageActions = root.querySelector('.store-item__cart-actions');
+          if (pageActions) pageActions.hidden = soldOut;
+        }
+      });
+
+      document.querySelectorAll('[data-cart-add="' + id + '"]').forEach(function (btn) {
+        if (id === 'gift-card') return;
+        btn.disabled = soldOut;
+        if (soldOut) btn.setAttribute('aria-disabled', 'true');
+        else btn.removeAttribute('aria-disabled');
+      });
+    });
+  }
+
+  function flashStockLimit(triggerEl) {
+    if (!triggerEl || !triggerEl.classList) return;
+    var prev = triggerEl.getAttribute('data-label-orig') || triggerEl.textContent;
+    triggerEl.setAttribute('data-label-orig', prev);
+    triggerEl.textContent = 'אין מספיק מלאי';
+    triggerEl.classList.add('is-stock-limit');
+    window.setTimeout(function () {
+      triggerEl.textContent = triggerEl.getAttribute('data-label-orig') || prev;
+      triggerEl.classList.remove('is-stock-limit');
+    }, 1600);
   }
 
   function prefersReducedMotion() {
@@ -325,6 +457,9 @@
     cartItems(cart).forEach(function (item) {
       var li = document.createElement('li');
       li.className = 'store-cart__line';
+      var p = byId[item.id];
+      var max = availableStock(p);
+      var atMax = Number.isFinite(max) && productQtyInCart(cart, item.id) >= max;
       var thumb = item.image
         ? '<img class="store-cart__thumb" src="' + escapeHtml(item.image) + '" alt="">'
         : '<span class="store-cart__thumb store-cart__thumb--empty" aria-hidden="true"></span>';
@@ -337,7 +472,9 @@
         '<div class="store-cart__line-actions">' +
         '<button type="button" class="store-cart__qty" data-action="dec" data-id="' + escapeHtml(item.key) + '" aria-label="הפחתה">−</button>' +
         '<span class="store-cart__qty-val">' + item.quantity + '</span>' +
-        '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + escapeHtml(item.key) + '" aria-label="הוספה">+</button>' +
+        '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + escapeHtml(item.key) + '"' +
+        (atMax ? ' disabled' : '') +
+        ' aria-label="הוספה">+</button>' +
         '<button type="button" class="store-cart__remove" data-action="remove" data-id="' + escapeHtml(item.key) + '" aria-label="הסרה">×</button>' +
         '</div>';
       els.lines.appendChild(li);
@@ -357,7 +494,10 @@
       if (p && p.variants && (extra == null || extra === '')) {
         extra = triggerEl && triggerEl.getAttribute ? triggerEl.getAttribute('data-cart-variant') : '';
       }
-      if (!addToCart(id, 1, extra)) return;
+      if (!addToCart(id, 1, extra)) {
+        flashStockLimit(triggerEl);
+        return;
+      }
       if (triggerEl && triggerEl.classList) {
         triggerEl.classList.add('is-added');
         window.setTimeout(function () {
@@ -449,6 +589,7 @@
   }
 
   renderWidget();
+  updateStockUi();
 
   fetch('/api/prices/')
     .then(function (res) {
@@ -459,14 +600,23 @@
       if (!products) return;
       Object.keys(products).forEach(function (id) {
         var live = products[id];
-        if (!byId[id] || byId[id].variable || byId[id].variants || !live || !(Number(live.price) > 0)) return;
-        byId[id].price = Number(live.price);
+        if (!byId[id] || !live) return;
+        if (!byId[id].variable && !byId[id].variants && Number(live.price) > 0) {
+          byId[id].price = Number(live.price);
+        }
         if (live.name) byId[id].name = live.name;
+        if (typeof live.stock === 'number') byId[id].stock = live.stock;
+        else if (live.stock === null) delete byId[id].stock;
+        if (typeof live.outOfStock === 'boolean') byId[id].outOfStock = live.outOfStock;
+        if (typeof live.limitedStock === 'boolean') byId[id].limitedStock = live.limitedStock;
+        if (byId[id].stock === 0) byId[id].outOfStock = true;
       });
       document.querySelectorAll('[data-product-price]').forEach(function (el) {
         var id = el.getAttribute('data-product-price');
         if (byId[id] && !byId[id].variable && !byId[id].variants) el.textContent = '₪' + byId[id].price;
       });
+      clampCartToStock();
+      updateStockUi();
       renderWidget();
       window.dispatchEvent(new Event('binushka:prices'));
     })

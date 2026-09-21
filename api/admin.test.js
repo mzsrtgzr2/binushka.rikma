@@ -258,6 +258,50 @@ body
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('publicInventory exposes stock and sold-out from store markdown', async () => {
+  const root = foxRoot();
+  fs.writeFileSync(
+    path.join(root, '_store', 'fox.md'),
+    `---
+title: רקמת שועל משמח
+price: ₪220
+out_of_stock: false
+limited_stock: true
+stock: 1
+---
+
+body
+`
+  );
+  const book = await admin.publicInventory(authEnv(root));
+  assert.equal(book.source, 'local');
+  assert.equal(book.products.fox.stock, 1);
+  assert.equal(book.products.fox.outOfStock, false);
+  assert.equal(book.products.fox.limitedStock, true);
+
+  fs.writeFileSync(
+    path.join(root, '_store', 'fox.md'),
+    `---
+title: רקמת שועל משמח
+price: ₪220
+out_of_stock: false
+stock: 0
+---
+
+body
+`
+  );
+  const sold = await admin.publicInventory(authEnv(root));
+  assert.equal(sold.products.fox.stock, 0);
+  assert.equal(sold.products.fox.outOfStock, true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('assertInventory uses bundled store when no write target', async () => {
+  const result = await admin.assertInventory({}, [{ id: 'gift-card', quantity: 1 }]);
+  assert.equal(result.ok, true);
+});
+
 function writeCatalog(root, catalog) {
   const json = `${JSON.stringify(catalog, null, 2)}\n`;
   fs.mkdirSync(path.join(root, 'api'), { recursive: true });

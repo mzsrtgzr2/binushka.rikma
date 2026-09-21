@@ -14,11 +14,15 @@ layout: default
     {% assign sorted = site.store | sort: 'date' %}
     {% for item in sorted %}
       {% unless item.hide %}
-        <article class="store-item col col-4 col-d-6 col-t-12">
+        {% assign sold_out = false %}
+        {% if item.out_of_stock or item.stock == 0 %}
+          {% assign sold_out = true %}
+        {% endif %}
+        <article class="store-item col col-4 col-d-6 col-t-12" data-product-id="{{ item.slug | default: item.basename }}">
           <div class="store-item__content">
             <a href="{{item.url}}" class="store-item__image">
               <img class="lazy" data-src="{{ item.image }}" alt="{{ item.title }}">
-              {% if item.out_of_stock %}
+              {% if sold_out %}
                 <div class="out-of-stock">אזל מהמלאי</div>
               {% elsif item.limited_stock %}
                 <div class="limited-stock">מלאי מוגבל</div>
@@ -35,7 +39,7 @@ layout: default
               {% if item.price %}
               <div class="store-item__price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ item.price }}</div>
               {% endif %}
-              {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false and item.out_of_stock != true %}
+              {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false and sold_out != true %}
                 {% if cart_meta.variable %}
               <a href="{{ item.url }}" class="button button--primary store-item__add">
                 בחרי סכום
@@ -49,7 +53,7 @@ layout: default
                 הוסיפי לסל
               </button>
                 {% endif %}
-              {% elsif item.form_url and item.out_of_stock != true %}
+              {% elsif item.form_url and sold_out != true %}
               <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener">
                 הזמיני עכשיו
               </a>

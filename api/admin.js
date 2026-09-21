@@ -434,13 +434,19 @@ async function decrementInventory(env, purchases) {
 
 /**
  * Live stock check against GitHub/local markdown (not the cold-started catalog bundle).
+ * Falls back to the bundled `_store` snapshot when writes are not configured.
  */
 async function assertInventory(env, items) {
+  let rawBySlug = null;
   const target = writeTarget(env);
-  if (!target) return { ok: true, skipped: true };
-
-  const loaded = await readStoreMap(env);
-  if (loaded.error) return { error: loaded.error };
+  if (target) {
+    const loaded = await readStoreMap(env);
+    if (loaded.error) return { error: loaded.error };
+    rawBySlug = loaded.rawBySlug;
+  } else {
+    rawBySlug = bundledStoreRaw();
+  }
+  if (!rawBySlug) return { ok: true, skipped: true };
 
   const needed = new Map();
   for (const row of items || []) {
@@ -451,7 +457,7 @@ async function assertInventory(env, items) {
   }
 
   for (const [slug, quantity] of needed) {
-    const raw = loaded.rawBySlug[slug];
+    const raw = rawBySlug[slug];
     if (!raw) continue;
     const page = store.parsePage(slug, raw);
     if (!store.tracksInventory(page)) continue;
@@ -460,6 +466,58 @@ async function assertInventory(env, items) {
     }
   }
   return { ok: true };
+}
+
+function bundledStoreRaw() {
+  const dir = path.join(__dirname, '..', '_store');
+  if (!fs.existsSync(dir)) return null;
+  const rawBySlug = {};
+  fs.readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .forEach((name) => {
+      rawBySlug[name.replace(/\.md$/, '')] = fs.readFileSync(path.join(dir, name), 'utf8');
+    });
+  return rawBySlug;
+}
+
+/**
+ * Public inventory for the storefront cart (no auth).
+ * Prefers live GitHub/local admin target; falls back to bundled markdown.
+ */
+async function publicInventory(env) {
+  const products = {};
+  let source = 'bundled';
+  let rawBySlug = null;
+
+  const target = writeTarget(env);
+  if (target) {
+    try {
+      const loaded = await readStoreMap(env);
+      if (!loaded.error) {
+        rawBySlug = loaded.rawBySlug;
+        source = target;
+      }
+    } catch (err) {
+      console.error('publicInventory live read failed', err);
+    }
+  }
+  if (!rawBySlug) rawBySlug = bundledStoreRaw() || {};
+
+  for (const [slug, raw] of Object.entries(rawBySlug)) {
+    const page = store.parsePage(slug, raw);
+    if (!page || page.in_cart === false) continue;
+    const soldOut = Boolean(page.out_of_stock) || page.stock === 0;
+    const row = {
+      stock: page.stock == null ? null : Number(page.stock),
+      outOfStock: soldOut,
+      limitedStock: Boolean(page.limited_stock),
+    };
+    if (page.title) row.name = page.title;
+    const price = Number(page.cart_price);
+    if (price > 0) row.price = price;
+    products[slug] = row;
+  }
+  return { source, products };
 }
 
 async function handler(req, res) {
@@ -582,6 +640,7 @@ handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('
 handler.normalizeUpdates = normalizeFlags;
 handler.decrementInventory = decrementInventory;
 handler.assertInventory = assertInventory;
+handler.publicInventory = publicInventory;
 handler.parseStock = store.parseStock;
 
 module.exports = handler;

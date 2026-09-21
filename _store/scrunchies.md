@@ -10,6 +10,22 @@ model_image: /images/scrunchies/lifestyle-01.jpeg
 form_url: https://pay.grow.link/cfbcac8807a8d68eaaf19f4ec11024d7-MzMyNDczNQ
 price: "₪30 – ₪85"
 hide: false
+variants:
+  regular:
+    name: "סקראנצ'י גודל רגיל"
+    price: 30
+    image: /images/scrunchies/11.jpeg
+    description: הגומייה הקלאסית לגודל רגיל
+  large:
+    name: "סקראנצ'י לארג'"
+    price: 45
+    image: /images/scrunchies/04.jpeg
+    description: גדולה יותר, נוכחות על השיער
+  fancy:
+    name: "Fancy סקראנצ'י"
+    price: 85
+    image: /images/scrunchies/01.jpeg
+    description: תחרה ופרטים מיוחדים
 gallery:
   - /images/scrunchies/01.jpeg
   - /images/scrunchies/02.jpeg

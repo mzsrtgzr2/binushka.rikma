@@ -87,4 +87,5 @@ exclude:
   - GROW_PAYMENTS_SETUP.md
   - INSTAGRAM_SETUP.md
   - api/
+  - scripts/
   - .env.example

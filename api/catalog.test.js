@@ -16,13 +16,27 @@ test('fallback price book includes every cart product', () => {
   assert.equal(Object.keys(book).length, Object.keys(PRODUCTS).length);
 });
 
-test('Jekyll catalog matches the checkout catalog file', () => {
+test('checkout catalog is built from store markdown', () => {
+  assert.equal(PRODUCTS.fox.price, 220);
+  assert.equal(PRODUCTS['flower-bag'].price, 240);
+  assert.equal(PRODUCTS['flower-bag'].name, 'תיק בד לזר פרחים');
+  assert.equal(PRODUCTS['gift-card'].variable, true);
+  assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
+  assert.equal(PRODUCTS['embroidery-kit-beginners'], undefined);
+  assert.equal(PRODUCTS['embroidery-kit-advanced'], undefined);
+});
+
+test('generated catalog snapshots stay in sync with each other', () => {
   const apiCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-data.json'), 'utf8'));
   const dataCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '_data', 'catalog.json'), 'utf8'));
   assert.deepEqual(apiCatalog, dataCatalog);
-  assert.equal(PRODUCTS.fox.price, 220);
-  assert.equal(PRODUCTS['gift-card'].variable, true);
-  assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
+});
+
+test('flower-bag from markdown is chargeable at checkout', () => {
+  const order = buildOrder([{ id: 'flower-bag', quantity: 1, price: 1 }], 'pickup');
+  assert.equal(order.lines[0].price, 240);
+  assert.equal(order.lines[0].description, 'תיק בד לזר פרחים');
+  assert.equal(order.subtotal, 240);
 });
 
 test('checkout charges the catalog price, not a client price', () => {

@@ -258,7 +258,8 @@ body.store-cart-open {
   .store-cart,
   .store-cart.store-cart--floating {
     position: fixed;
-    inset-inline-end: 16px;
+    inset-inline-start: 16px;
+    inset-inline-end: auto;
     bottom: 16px;
     top: auto;
     z-index: 1205;

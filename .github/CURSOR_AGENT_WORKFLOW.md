@@ -53,7 +53,9 @@ The workflow comments back immediately when feedback is accepted so reviewers ca
 Cursor started working.
 
 Authorized comments are limited to GitHub usernames listed in `CURSOR_AGENT_ALLOWED_USERS`.
-Bot comments are ignored to avoid workflow loops.
+Bot comments are ignored to avoid workflow loops. Status replies (acknowledgment / result /
+approval notes) are posted with the Actions token as `github-actions[bot]`, and matching
+automation message bodies are skipped, so those comments cannot re-trigger Cursor.
 
 ## Approval flow
 

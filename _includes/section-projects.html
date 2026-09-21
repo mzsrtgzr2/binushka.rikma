@@ -22,8 +22,10 @@
                       <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
                       {% if project.registration_full %}
                         <div class="registration-full">אין מקומות פנויים</div>
-                      {% elsif page.last_places %}
+                      {% elsif project.last_places %}
                         <div class="registration-full">מקומות אחרונים</div>
+                      {% elsif project.registration_not_open %}
+                        <div class="registration-full">ההרשמה תיפתח בקרוב</div>
                       {% endif %}
                     </a>
                     <div class="project__info">

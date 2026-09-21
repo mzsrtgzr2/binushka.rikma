@@ -10,6 +10,8 @@ layout: default
       <div class="registration-full-text">אין מקומות פנויים</div>
     {% elsif page.last_places %}
       <div class="registration-full-text">מקומות אחרונים</div>
+    {% elsif page.registration_not_open %}
+      <div class="registration-full-text">ההרשמה תיפתח בקרוב</div>
     {% endif %}
 
     {% if page.subtitle %}
@@ -19,10 +21,14 @@ layout: default
 
 
   <div class="project-content animate">
-    {{ content }}
+    {% if page.registration_not_open %}
+      <p>פרטי הסדנה יפורסמו בקרוב.</p>
+    {% else %}
+      {{ content }}
+    {% endif %}
   </div>
 
-  {% unless page.registration_full %}
+  {% unless page.registration_full or page.registration_not_open %}
   <div class="project-content animate">
   <div class="container">
     <div class="row">
@@ -51,6 +57,8 @@ layout: default
             <div class="registration-full">אין מקומות פנויים</div>
           {% elsif page.last_places %}
             <div class="registration-full">מקומות אחרונים</div>
+          {% elsif page.registration_not_open %}
+            <div class="registration-full">ההרשמה תיפתח בקרוב</div>
           {% endif %}
         </div>
       </div>

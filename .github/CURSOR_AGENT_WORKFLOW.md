@@ -11,8 +11,7 @@ Add these repository secrets in GitHub Actions:
 
 Optional repository variable:
 
-- `CURSOR_MODEL` - Cursor model name to use in the workflows. Defaults to `auto`. Do not
-  set this to `gpt-5`; this Cursor CLI account does not expose that model id.
+- `CURSOR_MODEL` - Cursor model name to use in the workflows. Defaults to `gpt-5`.
 - `CURSOR_AGENT_ALLOWED_USERS` - comma- or whitespace-separated GitHub usernames allowed to
   create Cursor tasks, request PR changes, or approve merges. If this is not set, only the
   repository owner is allowed.
@@ -49,13 +48,11 @@ The button looks good on desktop, but please make it full width on mobile.
 ```
 
 `.github/workflows/cursor-agent-feedback.yml` checks out the same PR branch, runs Cursor with that comment as the follow-up request, commits any changes, and pushes the branch so Vercel rebuilds the preview.
-The workflow comments back immediately when feedback is accepted so reviewers can see that
-Cursor started working.
 
 Authorized comments are limited to GitHub usernames listed in `CURSOR_AGENT_ALLOWED_USERS`.
-Bot comments are ignored to avoid workflow loops. Status replies (acknowledgment / result /
-approval notes) are posted with the Actions token as `github-actions[bot]`, and matching
-automation message bodies are skipped, so those comments cannot re-trigger Cursor.
+Bot comments are ignored to avoid workflow loops. Cursor's own status replies
+("received this feedback", "pushed an update", etc.) are also ignored, because
+`PAT_GITHUB` posts them as the repository owner rather than as a Bot account.
 
 ## Approval flow
 

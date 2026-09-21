@@ -126,7 +126,10 @@
     var cart = loadCart();
     var next = (cart[key] || 0) + delta;
     if (next < 1) delete cart[key];
-    else cart[key] = next;
+    else {
+      if (typeof p.stock === 'number' && next > p.stock) return false;
+      cart[key] = next;
+    }
     saveCart(cart);
     renderWidget();
     return true;

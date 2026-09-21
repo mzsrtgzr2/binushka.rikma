@@ -111,6 +111,7 @@ function buildOrder(rawItems, shippingMethod) {
 
     subtotal += price * quantity;
     const line = {
+      id,
       description,
       quantity,
       price,

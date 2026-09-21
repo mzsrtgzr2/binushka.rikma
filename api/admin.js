@@ -332,14 +332,24 @@ function normalizeFlags(rawProducts, allowedSlugs) {
     if (!store.SLUG_RE.test(String(slug || '')) || !allowedSlugs.has(slug)) {
       return { error: 'מוצר לא מוכר' };
     }
-    updates.push({
+    const stockParsed = store.parseStock(row.stock);
+    if (stockParsed.error) return { error: stockParsed.error };
+    const flags = store.applyStockFlags({
       slug,
       out_of_stock: Boolean(row.out_of_stock),
       limited_stock: Boolean(row.limited_stock),
       hide: Boolean(row.hide),
+      stock: stockParsed.stock,
     });
+    updates.push(flags);
   }
   return { updates };
+}
+
+function stockEqual(a, b) {
+  const left = a == null ? null : Number(a);
+  const right = b == null ? null : Number(b);
+  return left === right;
 }
 
 async function saveFlags(env, updates) {
@@ -353,7 +363,8 @@ async function saveFlags(env, updates) {
     if (
       Boolean(current.out_of_stock) === flags.out_of_stock &&
       Boolean(current.limited_stock) === flags.limited_stock &&
-      Boolean(current.hide) === flags.hide
+      Boolean(current.hide) === flags.hide &&
+      stockEqual(current.stock, flags.stock)
     ) {
       continue;
     }
@@ -372,6 +383,83 @@ async function saveFlags(env, updates) {
     await commitFiles(env, files, 'Update store stock from admin');
   }
   return { target: listed.target, changed };
+}
+
+/**
+ * After a paid checkout starts successfully, reduce tracked stock quantities.
+ * purchases: [{ slug|id, quantity }]
+ */
+async function decrementInventory(env, purchases) {
+  const target = writeTarget(env);
+  if (!target) return { skipped: true, reason: 'no-write-target' };
+
+  const totals = new Map();
+  for (const row of purchases || []) {
+    const slug = String((row && (row.slug || row.id)) || '').trim();
+    const quantity = Number(row && row.quantity);
+    if (!store.SLUG_RE.test(slug) || !Number.isInteger(quantity) || quantity < 1) continue;
+    totals.set(slug, (totals.get(slug) || 0) + quantity);
+  }
+  if (!totals.size) return { target, changed: [] };
+
+  const loaded = await readStoreMap(env);
+  if (loaded.error) return loaded;
+
+  const files = [];
+  const changed = [];
+  const nextRaw = { ...loaded.rawBySlug };
+
+  for (const [slug, quantity] of totals) {
+    const raw = loaded.rawBySlug[slug];
+    if (!raw) continue;
+    const updated = store.decrementPageStock(raw, slug, quantity);
+    if (!updated) continue;
+    nextRaw[slug] = updated;
+    changed.push(slug);
+    if (target === 'local') {
+      fs.writeFileSync(path.join(localRoot(env), '_store', `${slug}.md`), updated);
+    } else {
+      files.push({ path: `_store/${slug}.md`, content: updated });
+    }
+  }
+
+  if (!changed.length) return { target, changed: [] };
+
+  if (target === 'local') {
+    return { target, changed };
+  }
+  await commitFiles(env, files, 'Decrement store stock after purchase');
+  return { target, changed };
+}
+
+/**
+ * Live stock check against GitHub/local markdown (not the cold-started catalog bundle).
+ */
+async function assertInventory(env, items) {
+  const target = writeTarget(env);
+  if (!target) return { ok: true, skipped: true };
+
+  const loaded = await readStoreMap(env);
+  if (loaded.error) return { error: loaded.error };
+
+  const needed = new Map();
+  for (const row of items || []) {
+    const slug = String((row && (row.id || row.slug)) || '').trim();
+    const quantity = Number(row && row.quantity);
+    if (!store.SLUG_RE.test(slug) || !Number.isInteger(quantity) || quantity < 1) continue;
+    needed.set(slug, (needed.get(slug) || 0) + quantity);
+  }
+
+  for (const [slug, quantity] of needed) {
+    const raw = loaded.rawBySlug[slug];
+    if (!raw) continue;
+    const page = store.parsePage(slug, raw);
+    if (!store.tracksInventory(page)) continue;
+    if (page.out_of_stock || page.stock < quantity) {
+      return { error: `אין מספיק מלאי עבור ${page.title || slug}` };
+    }
+  }
+  return { ok: true };
 }
 
 async function handler(req, res) {
@@ -492,5 +580,8 @@ handler.setYamlBool = store.setYamlBool;
 handler.parseProduct = (slug, raw) => store.parsePage(slug, raw);
 handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('x', raw), ...flags });
 handler.normalizeUpdates = normalizeFlags;
+handler.decrementInventory = decrementInventory;
+handler.assertInventory = assertInventory;
+handler.parseStock = store.parseStock;
 
 module.exports = handler;

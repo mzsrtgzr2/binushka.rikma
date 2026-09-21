@@ -158,6 +158,106 @@ test('authenticated save updates local markdown flags', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('parseProduct reads stock quantity', () => {
+  const md = `---
+title: שועל
+price: ₪220
+out_of_stock: false
+limited_stock: true
+stock: 3
+---
+
+body
+`;
+  const product = admin.parseProduct('fox', md);
+  assert.equal(product.stock, 3);
+});
+
+test('applyFlags writes stock and marks out of stock at zero', () => {
+  const next = admin.applyFlags(FOX, { out_of_stock: false, limited_stock: true, hide: false, stock: 0 });
+  const product = admin.parseProduct('fox', next);
+  assert.equal(product.stock, 0);
+  assert.equal(product.out_of_stock, true);
+  assert.match(next, /stock: 0/);
+});
+
+test('authenticated save updates stock quantity', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-admin-'));
+  fs.mkdirSync(path.join(root, '_store'));
+  fs.writeFileSync(path.join(root, '_store', 'fox.md'), FOX);
+  writeCatalog(root, { fox: { name: 'רקמת שועל משמח', price: 220 } });
+  const env = { ADMIN_PASSWORD: 'secret-pass', ADMIN_LOCAL_ROOT: root };
+  const login = await request(admin, {
+    method: 'POST',
+    headers: {},
+    body: { action: 'login', password: 'secret-pass' },
+    env,
+  });
+  const cookie = String(login.headers['set-cookie']).split(';')[0];
+  const saved = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'save',
+      products: [{ slug: 'fox', out_of_stock: false, limited_stock: true, hide: false, stock: 4 }],
+    },
+    env,
+  });
+  assert.equal(saved.status, 200);
+  assert.deepEqual(saved.json.changed, ['fox']);
+  const product = admin.parseProduct('fox', fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8'));
+  assert.equal(product.stock, 4);
+  assert.equal(product.out_of_stock, false);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('decrementInventory reduces stock after purchase', async () => {
+  const root = foxRoot();
+  fs.writeFileSync(
+    path.join(root, '_store', 'fox.md'),
+    `---
+title: רקמת שועל משמח
+price: ₪220
+out_of_stock: false
+limited_stock: true
+stock: 2
+---
+
+body
+`
+  );
+  const result = await admin.decrementInventory(authEnv(root), [{ slug: 'fox', quantity: 1 }]);
+  assert.deepEqual(result.changed, ['fox']);
+  const product = admin.parseProduct('fox', fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8'));
+  assert.equal(product.stock, 1);
+  assert.equal(product.out_of_stock, false);
+
+  await admin.decrementInventory(authEnv(root), [{ slug: 'fox', quantity: 1 }]);
+  const soldOut = admin.parseProduct('fox', fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8'));
+  assert.equal(soldOut.stock, 0);
+  assert.equal(soldOut.out_of_stock, true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('assertInventory rejects overselling tracked stock', async () => {
+  const root = foxRoot();
+  fs.writeFileSync(
+    path.join(root, '_store', 'fox.md'),
+    `---
+title: רקמת שועל משמח
+price: ₪220
+out_of_stock: false
+stock: 1
+---
+
+body
+`
+  );
+  const result = await admin.assertInventory(authEnv(root), [{ id: 'fox', quantity: 2 }]);
+  assert.match(result.error, /מלאי/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 function writeCatalog(root, catalog) {
   const json = `${JSON.stringify(catalog, null, 2)}\n`;
   fs.mkdirSync(path.join(root, 'api'), { recursive: true });

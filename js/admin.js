@@ -85,6 +85,7 @@
         out_of_stock: Boolean(p.out_of_stock),
         limited_stock: Boolean(p.limited_stock),
         hide: Boolean(p.hide),
+        stock: p.stock == null || p.stock === '' ? null : Number(p.stock),
       };
     });
     return map;
@@ -93,17 +94,21 @@
   function isDirty() {
     return products.some(function (p) {
       var orig = original[p.slug] || {};
+      var stock = p.stock == null || p.stock === '' ? null : Number(p.stock);
+      var origStock = orig.stock == null || orig.stock === '' ? null : Number(orig.stock);
       return (
         Boolean(p.out_of_stock) !== Boolean(orig.out_of_stock) ||
         Boolean(p.limited_stock) !== Boolean(orig.limited_stock) ||
-        Boolean(p.hide) !== Boolean(orig.hide)
+        Boolean(p.hide) !== Boolean(orig.hide) ||
+        stock !== origStock
       );
     });
   }
 
   function statusLabel(p) {
     if (p.hide) return 'מוסתר';
-    if (p.out_of_stock) return 'אזל';
+    if (p.out_of_stock || p.stock === 0) return 'אזל';
+    if (p.stock != null && p.stock !== '') return 'מלאי: ' + p.stock;
     if (p.limited_stock) return 'מלאי מוגבל';
     return 'במלאי';
   }
@@ -167,6 +172,12 @@
           escapeHtml(kindLabel(p)) +
           (price ? ' · ' + escapeHtml(price) : '') +
           '</p>' +
+          '<label class="admin-stock">כמות במלאי' +
+          '<input type="number" class="admin-stock__input" data-stock min="0" step="1" dir="ltr" ' +
+          'placeholder="—"' +
+          (p.stock != null && p.stock !== '' ? ' value="' + escapeHtml(p.stock) + '"' : '') +
+          (p.kind === 'variable' || p.kind === 'content' ? ' disabled' : '') +
+          '></label>' +
           '<label class="admin-check"><input type="checkbox" data-flag="out_of_stock"' +
           (p.out_of_stock ? ' checked' : '') +
           '> אזל מהמלאי</label>' +
@@ -501,6 +512,10 @@
       el.hidden = el.getAttribute('data-kind-fields') !== kind;
     });
     editor.classList.toggle('admin-editor--variants', kind === 'variants');
+    var stockInput = document.getElementById('admin-stock');
+    if (stockInput) {
+      stockInput.disabled = kind === 'variable' || kind === 'content' || slugInput.value === 'gift-card';
+    }
   }
 
   function fillEditor(product, isNew) {
@@ -523,6 +538,10 @@
     document.getElementById('admin-max-price').value = product.max_price > 0 ? product.max_price : '';
     document.getElementById('admin-presets').value = (product.presets || []).join(', ');
     document.getElementById('admin-body').value = product.body || '';
+    document.getElementById('admin-stock').value =
+      product.stock != null && product.stock !== '' ? product.stock : '';
+    document.getElementById('admin-stock').disabled =
+      product.kind === 'variable' || product.kind === 'content' || product.slug === 'gift-card';
     document.getElementById('admin-out-of-stock').checked = Boolean(product.out_of_stock);
     document.getElementById('admin-limited-stock').checked = Boolean(product.limited_stock);
     document.getElementById('admin-hide').checked = Boolean(product.hide);
@@ -535,6 +554,12 @@
   }
 
   function readEditor() {
+    var kind = kindSelect.value;
+    var stockRaw = document.getElementById('admin-stock').value;
+    var stock =
+      kind === 'variable' || kind === 'content' || slugInput.value.trim().toLowerCase() === 'gift-card'
+        ? null
+        : stockRaw;
     return {
       slug: slugInput.value.trim().toLowerCase(),
       title: document.getElementById('admin-title').value,
@@ -543,13 +568,14 @@
         if (item.upload) return { upload: item.upload };
         return { path: item.path };
       }),
-      kind: kindSelect.value,
+      kind: kind,
       cart_price: document.getElementById('admin-cart-price').value,
       min_price: document.getElementById('admin-min-price').value,
       max_price: document.getElementById('admin-max-price').value,
       presets: parsePresets(document.getElementById('admin-presets').value),
       variants: readVariants(),
       body: document.getElementById('admin-body').value,
+      stock: stock,
       out_of_stock: document.getElementById('admin-out-of-stock').checked,
       limited_stock: document.getElementById('admin-limited-stock').checked,
       hide: document.getElementById('admin-hide').checked,
@@ -625,13 +651,13 @@
   }
 
   function stockOverlay(p) {
-    if (p.out_of_stock) return '<div class="out-of-stock">אזל מהמלאי</div>';
+    if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock">אזל מהמלאי</div>';
     if (p.limited_stock) return '<div class="limited-stock">מלאי מוגבל</div>';
     return '';
   }
 
   function stockText(p) {
-    if (p.out_of_stock) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
+    if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
     if (p.limited_stock) return '<div class="limited-stock-text">מלאי מוגבל</div>';
     return '';
   }
@@ -647,7 +673,7 @@
   }
 
   function storeCardCta(p) {
-    if (p.out_of_stock || p.kind === 'content') return '';
+    if (p.out_of_stock || p.stock === 0 || p.kind === 'content') return '';
     if (p.kind === 'variable') return fakeButton('בחרי סכום', 'store-item__add');
     if (p.kind === 'variants') return fakeButton('בחרי סוג', 'store-item__add');
     return fakeButton('הוסיפי לסל', 'store-item__add');
@@ -701,7 +727,7 @@
   }
 
   function productCartHtml(p) {
-    if (p.out_of_stock || p.kind === 'content') return '';
+    if (p.out_of_stock || p.stock === 0 || p.kind === 'content') return '';
     if (p.kind === 'variable') {
       var chips = (p.presets || [])
         .map(function (n) {
@@ -949,6 +975,28 @@
   });
 
   listEl.addEventListener('change', function (event) {
+    var stockInput = event.target.closest('input[data-stock]');
+    if (stockInput) {
+      var stockCard = stockInput.closest('[data-slug]');
+      var stockProduct = products.find(function (p) {
+        return p.slug === stockCard.getAttribute('data-slug');
+      });
+      if (!stockProduct) return;
+      var raw = stockInput.value.trim();
+      if (raw === '') {
+        stockProduct.stock = null;
+      } else {
+        var n = Number(raw);
+        if (!Number.isInteger(n) || n < 0) {
+          stockInput.value = stockProduct.stock != null ? stockProduct.stock : '';
+          return;
+        }
+        stockProduct.stock = n;
+        if (n === 0) stockProduct.out_of_stock = true;
+      }
+      render();
+      return;
+    }
     var input = event.target.closest('input[data-flag]');
     if (!input) return;
     var card = input.closest('[data-slug]');

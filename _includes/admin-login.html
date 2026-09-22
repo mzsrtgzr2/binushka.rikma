@@ -1,0 +1,10 @@
+{%- comment -%}
+The same password and the same session cookie cover every section, so this form
+is identical wherever it appears.
+{%- endcomment -%}
+<form class="admin-login" id="admin-login">
+  <label class="form__label" for="admin-password">סיסמה</label>
+  <input class="form__input" type="password" id="admin-password" name="password" autocomplete="current-password" required>
+  <button type="submit" class="button button--primary">כניסה</button>
+  <p class="admin-message" id="admin-login-message" hidden></p>
+</form>

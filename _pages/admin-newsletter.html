@@ -1,6 +1,7 @@
 ---
 layout: admin
 admin_script: admin-newsletter.js
+admin_section: newsletter
 title: ניהול ניוזלטר
 description: כתיבה, שמירה ושליחה של גיליונות הניוזלטר
 permalink: /admin/newsletter/
@@ -10,25 +11,12 @@ noindex: true
 
 {% include admin-link-index.html %}
 
-<div class="admin-shell">
-  <header class="admin-top">
-    <a class="admin-top__brand" href="{{ '/' | relative_url }}">בינושקה</a>
-    <h1 class="admin-top__title">ניהול ניוזלטר</h1>
-    <button type="button" class="admin-top__logout" id="admin-logout" hidden>יציאה</button>
-  </header>
-
   <p class="admin-lead">
     כאן כותבים גיליון, שומרים אותו כטיוטה ושולחים לרשימת התפוצה.
     כל גיליון נשמר כקובץ באתר, ואחרי שמירה הוא מופיע בארכיון ובטיזר בעמוד הבית.
-    <a href="{{ '/admin/' | relative_url }}">למעבר לניהול החנות</a>
   </p>
 
-  <form class="admin-login" id="admin-login">
-    <label class="form__label" for="admin-password">סיסמה</label>
-    <input class="form__input" type="password" id="admin-password" name="password" autocomplete="current-password" required>
-    <button type="submit" class="button button--primary">כניסה</button>
-    <p class="admin-message" id="admin-login-message" hidden></p>
-  </form>
+  {% include admin-login.html %}
 
   <div class="admin-board" id="admin-board" hidden>
     <div id="admin-list-view">
@@ -146,4 +134,3 @@ noindex: true
       </div>
     </form>
   </div>
-</div>

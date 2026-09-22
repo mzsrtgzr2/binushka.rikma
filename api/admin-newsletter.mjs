@@ -3,7 +3,7 @@
  *
  * Writes issues as `_newsletter/<slug>.md` so Vercel rebuilds the site with the
  * new archive and teaser, and sends the finished issue to the list. Shares the
- * session cookie with the store admin, so logging in on /admin/ covers both.
+ * session cookie with the store admin, so logging in on either section covers both.
  */
 
 import { isAuthed } from '../lib/admin/auth.mjs';

@@ -68,9 +68,14 @@ title, photos, stock, and the price charged at checkout.
 
 `_data/catalog.json` and `api/catalog-data.json` are generated from those
 pages (`scripts/build-catalog.js`) during the Vercel build and again whenever
-`/admin/` saves. Do not hand-edit them.
+`/admin/store/` saves. Do not hand-edit them.
 
-## Store admin (`/admin/`)
+## Store admin (`/admin/store/`)
+
+The backoffice is split into sections that share one login and one session:
+`/admin/store/` and `/admin/newsletter/`, with tabs between them. `/admin/`
+redirects to the store, so an old bookmark still lands somewhere sensible.
+
 
 A password-protected Hebrew backoffice for **every** store product: create,
 update, delete, prices charged at checkout, gift-card amounts, scrunchie
@@ -82,7 +87,7 @@ Set these on **Production** (and Preview if you want to try it there):
 
 | Variable | What it is |
 | --- | --- |
-| `ADMIN_PASSWORD` | Shared password for `/admin/` |
+| `ADMIN_PASSWORD` | Shared password for every `/admin/` section |
 | `GITHUB_TOKEN` | Fine-grained PAT with **Contents: Read and write** on this repo |
 | `GITHUB_BRANCH` | Usually `master`. Ignored on a preview, which writes to the branch it was deployed from |
 | `GITHUB_REPO` | Optional `owner/repo`. Vercel already sets the git owner/slug |
@@ -99,17 +104,17 @@ payments and invoices only. It is not the store catalog.
 change the title / `price: ₪…` / photos. That is enough for the store grid
 and checkout. Do not edit `catalog.json`.
 
-**Admin (`/admin/`, password):** the same data, with a form. Use it for
+**Admin (`/admin/store/`, password):** the same data, with a form. Use it for
 photos, stock, hide, gift-card amounts, and scrunchie variants.
 
-**Photos:** `/admin/` → תמונות. Upload from the computer, reorder, first photo is
+**Photos:** `/admin/store/` → תמונות. Upload from the computer, reorder, first photo is
 the main store image. Extra photos are `gallery` on the product page. Files are
 committed under `images/store/<slug>/`.
 
-**Stock / hide:** same `/admin/` screen. Morning’s item API has no inventory
+**Stock / hide:** same `/admin/store/` screen. Morning’s item API has no inventory
 field. Grow is payments only — it is not a catalog.
 
-To add a new cart product: either `/admin/` → מוצר חדש, or a new markdown
+To add a new cart product: either `/admin/store/` → מוצר חדש, or a new markdown
 file in `_store/`. Morning does not need a matching item to charge.
 
 ## Newsletter

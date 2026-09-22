@@ -77,9 +77,9 @@ is the only file that knows how mail leaves the building.
 
 ## Writing and sending an issue
 
-Go to `/admin/newsletter/` and log in with `ADMIN_PASSWORD` — the same password
-as the store backoffice, and the same session, so logging into either covers
-both.
+Go to `/admin/newsletter/` and log in with `ADMIN_PASSWORD`. The backoffice is
+one place with tabs — `/admin/store/` and `/admin/newsletter/` — sharing a
+password and a session, so logging into either covers both.
 
 1. **גיליון חדש** opens the editor. The body is Markdown; the panel beside it
    previews the result as it is typed.

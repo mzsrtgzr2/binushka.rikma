@@ -21,7 +21,34 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  margin-bottom: 12px;
+}
+
+.admin-nav {
+  display: flex;
+  gap: 4px;
   margin-bottom: 20px;
+  border-bottom: 1px solid #e3e3e8;
+}
+
+.admin-nav__tab {
+  padding: 9px 18px;
+  border-bottom: 2px solid transparent;
+  // Sits on the container's own border, so the active tab reads as joined to
+  // the panel below rather than underlined beside it.
+  margin-bottom: -1px;
+  color: #6b6b75;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--heading-font-color);
+  }
+
+  &.is-active {
+    color: var(--heading-font-color);
+    border-bottom-color: var(--brand-color);
+  }
 }
 
 .admin-top__brand {

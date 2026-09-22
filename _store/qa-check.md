@@ -10,7 +10,7 @@ hide: true
 noindex: true
 sitemap: false
 cart_price: 1
-stock: 6
+stock: 5
 ---
 
 מוצר פנימי לבדיקת סליקה. לא למכירה.

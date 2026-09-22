@@ -107,6 +107,8 @@
           variant: parsed.variant || undefined,
           url: p.url,
           image: (variant && variant.image) || p.image || '',
+          kind: p.kind || 'product',
+          requiresShipping: p.requiresShipping !== false,
         };
       })
       .filter(Boolean);
@@ -223,7 +225,13 @@
     if (!soldOut && !limited) return;
     var el = document.createElement('div');
     el.className = soldOut ? 'out-of-stock-text' : 'limited-stock-text';
-    el.textContent = soldOut ? 'אזל מהמלאי' : 'מלאי מוגבל';
+    el.textContent = soldOut
+      ? host && host.closest('[data-product-kind="workshop"]')
+        ? 'אין מקומות פנויים'
+        : 'אזל מהמלאי'
+      : host && host.closest('[data-product-kind="workshop"]')
+        ? 'מקומות אחרונים'
+        : 'מלאי מוגבל';
     var price = host.querySelector('.store-item-price, [data-product-price]');
     if (price && price.parentNode === host) host.insertBefore(el, price);
     else host.appendChild(el);
@@ -234,7 +242,16 @@
       var p = byId[id];
       var soldOut = Boolean(p.outOfStock) || p.stock === 0;
       var limited = Boolean(p.limitedStock) && !soldOut;
-      var overlayLabel = soldOut ? 'אזל מהמלאי' : limited ? 'מלאי מוגבל' : '';
+      var workshop = p.kind === 'workshop';
+      var overlayLabel = soldOut
+        ? workshop
+          ? 'אין מקומות פנויים'
+          : 'אזל מהמלאי'
+        : limited
+          ? workshop
+            ? 'מקומות אחרונים'
+            : 'מלאי מוגבל'
+          : '';
       var overlayClass = soldOut ? 'out-of-stock' : 'limited-stock';
 
       document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
@@ -259,7 +276,9 @@
     if (!triggerEl || !triggerEl.classList) return;
     var prev = triggerEl.getAttribute('data-label-orig') || triggerEl.textContent;
     triggerEl.setAttribute('data-label-orig', prev);
-    triggerEl.textContent = 'אין מספיק מלאי';
+    var product = byId[triggerEl.getAttribute('data-cart-add')];
+    triggerEl.textContent =
+      product && product.kind === 'workshop' ? 'אין מספיק מקומות' : 'אין מספיק מלאי';
     triggerEl.classList.add('is-stock-limit');
     window.setTimeout(function () {
       triggerEl.textContent = triggerEl.getAttribute('data-label-orig') || prev;
@@ -489,7 +508,11 @@
       var max = availableStock(p);
       var atMax = Number.isFinite(max) && productQtyInCart(cart, item.id) >= max;
       var stockHintText = atMax
-        ? 'יש רק ' + max + ' במלאי — אי אפשר להוסיף עוד'
+        ? item.kind === 'workshop'
+          ? max === 1
+            ? 'נשאר מקום אחד לסדנה הזו'
+            : 'נשארו רק ' + max + ' מקומות לסדנה הזו'
+          : 'יש רק ' + max + ' במלאי — אי אפשר להוסיף עוד'
         : '';
       var thumb = item.image
         ? '<img class="store-cart__thumb" src="' + escapeHtml(item.image) + '" alt="">'

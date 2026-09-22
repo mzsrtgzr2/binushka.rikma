@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildOrder, applyVariantNote, applyGiftPacking } = require('./catalog');
+const { buildOrder, applyVariantNote, applyWorkshopNote, applyGiftPacking } = require('./catalog');
 const checkout = require('./checkout');
 
 const customerBody = {
@@ -169,4 +169,26 @@ test('gift packing appears on payment income descriptions', () => {
     payload.income[0].description,
     'רקמת שועל משמח — אריזה כמתנה — כרטיס ברכה: יום הולדת שמח'
   );
+});
+
+test('workshop places become income lines without shipping', () => {
+  const order = applyWorkshopNote(
+    buildOrder([{ id: 'workshop-rehovot-04-12', quantity: 2 }], 'none'),
+    'נועה כהן, מיכל לוי'
+  );
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: {},
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(payload.income.length, 1);
+  assert.equal(payload.income[0].quantity, 2);
+  assert.equal(payload.income[0].price, 330);
+  assert.match(payload.income[0].description, /משתתפות: נועה כהן, מיכל לוי$/);
+  assert.equal(payload.amount, 660);
+  assert.ok(payload.income.every((row) => !row.kind));
 });

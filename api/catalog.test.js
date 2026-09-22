@@ -6,6 +6,7 @@ const {
   buildOrder,
   fallbackPriceBook,
   applyVariantNote,
+  applyWorkshopNote,
   applyGiftPacking,
   PRODUCTS,
 } = require('./catalog');
@@ -18,8 +19,8 @@ test('fallback price book includes every cart product', () => {
 
 test('checkout catalog is built from store markdown', () => {
   assert.equal(PRODUCTS.fox.price, 220);
-  assert.equal(PRODUCTS['flower-bag'].price, 240);
   assert.equal(PRODUCTS['flower-bag'].name, 'תיק בד לזר פרחים');
+  assert.equal(PRODUCTS['flower-bag'].variants['type-1'].price, 240);
   assert.equal(PRODUCTS['gift-card'].variable, true);
   assert.equal(PRODUCTS.scrunchies.variants.large.price, 45);
   assert.equal(PRODUCTS['embroidery-kit-beginners'], undefined);
@@ -33,9 +34,9 @@ test('generated catalog snapshots stay in sync with each other', () => {
 });
 
 test('flower-bag from markdown is chargeable at checkout', () => {
-  const order = buildOrder([{ id: 'flower-bag', quantity: 1, price: 1 }], 'pickup');
+  const order = buildOrder([{ id: 'flower-bag', quantity: 1, variant: 'type-1', price: 1 }], 'pickup');
   assert.equal(order.lines[0].price, 240);
-  assert.equal(order.lines[0].description, 'תיק בד לזר פרחים');
+  assert.equal(order.lines[0].description, 'בד פרחוני תכלת אפרסק');
   assert.equal(order.subtotal, 240);
 });
 
@@ -173,4 +174,92 @@ test('gift message without pack flag is ignored; long messages are trimmed', () 
   assert.equal(packed.lines[0].description, 'רקמת שועל משמח — אריזה כמתנה');
   const long = applyGiftPacking(base, { packAsGift: true, giftMessage: 'ב'.repeat(250) });
   assert.match(long.lines[0].description, /כרטיס ברכה: ב{200}$/);
+});
+
+test('generated workshop snapshots stay in sync with each other', () => {
+  const apiWorkshops = JSON.parse(fs.readFileSync(path.join(__dirname, 'workshops-data.json'), 'utf8'));
+  const dataWorkshops = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '..', '_data', 'workshops.json'), 'utf8')
+  );
+  assert.deepEqual(apiWorkshops, dataWorkshops);
+});
+
+test('bookable workshops from markdown are in the checkout catalog', () => {
+  const workshop = PRODUCTS['workshop-rehovot-04-12'];
+  assert.equal(workshop.kind, 'workshop');
+  assert.equal(workshop.price, 330);
+  assert.equal(workshop.stock, 12);
+  assert.equal(workshop.requiresShipping, false);
+  assert.match(workshop.name, /סדנת רקמה של שישי בבוקר/);
+});
+
+test('a workshop-only order skips shipping', () => {
+  const order = buildOrder([{ id: 'workshop-rehovot-04-12', quantity: 2 }], 'none');
+  assert.equal(order.error, undefined);
+  assert.equal(order.needsShipping, false);
+  assert.equal(order.shipping, 0);
+  assert.equal(order.total, 660);
+  assert.equal(order.lines.length, 1);
+  assert.equal(order.lines[0].kind, 'workshop');
+});
+
+test('a mixed cart of a workshop and a shop product still needs shipping', () => {
+  const order = buildOrder(
+    [
+      { id: 'workshop-rehovot-04-12', quantity: 1 },
+      { id: 'fox', quantity: 1 },
+    ],
+    'courier'
+  );
+  assert.equal(order.needsShipping, true);
+  assert.equal(order.shipping, 40);
+  assert.equal(order.total, 330 + 220 + 40);
+});
+
+test('workshop places are stock: sold out and over-booking are rejected', () => {
+  assert.match(
+    buildOrder([{ id: 'workshop-2022-11-04', quantity: 1 }], 'none').error,
+    /אין מקומות פנויים/
+  );
+  assert.match(
+    buildOrder([{ id: 'workshop-rehovot-29-10', quantity: 4 }], 'none').error,
+    /נשארו 3 מקומות/
+  );
+  const ok = buildOrder([{ id: 'workshop-rehovot-29-10', quantity: 3 }], 'none');
+  assert.equal(ok.subtotal, 990);
+});
+
+test('shop out_of_stock products cannot be sold', () => {
+  assert.match(buildOrder([{ id: 'yam', quantity: 1 }], 'pickup').error, /אין מספיק מלאי/);
+});
+
+test('participant names are appended only to workshop lines', () => {
+  const order = applyWorkshopNote(
+    buildOrder(
+      [
+        { id: 'fox', quantity: 1 },
+        { id: 'workshop-rehovot-04-12', quantity: 2 },
+      ],
+      'pickup'
+    ),
+    '  נועה כהן, מיכל לוי  '
+  );
+  assert.equal(order.lines[0].description, 'רקמת שועל משמח');
+  assert.match(order.lines[1].description, /משתתפות: נועה כהן, מיכל לוי$/);
+});
+
+test('gift packing skips workshop lines', () => {
+  const order = applyGiftPacking(
+    buildOrder(
+      [
+        { id: 'fox', quantity: 1 },
+        { id: 'workshop-rehovot-04-12', quantity: 1 },
+      ],
+      'pickup'
+    ),
+    { packAsGift: true, giftMessage: 'מזל טוב' }
+  );
+  assert.equal(order.lines[0].description, 'רקמת שועל משמח — אריזה כמתנה — כרטיס ברכה: מזל טוב');
+  assert.equal(order.lines[1].kind, 'workshop');
+  assert.doesNotMatch(order.lines[1].description, /אריזה כמתנה/);
 });

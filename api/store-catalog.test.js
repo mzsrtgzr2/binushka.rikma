@@ -84,3 +84,79 @@ body
   assert.match(next, /in_cart: false/);
   assert.equal(store.parsePage('flower-bag', next).kind, 'content');
 });
+
+test('out_of_stock is also stock 0, and a small stock is last places', () => {
+  const sold = store.parsePage(
+    'fox',
+    `---
+title: שועל
+price: ₪220
+out_of_stock: true
+---
+`
+  );
+  assert.equal(sold.stock, null);
+  assert.equal(sold.out_of_stock, true);
+  assert.equal(store.catalogRowFromParsed(sold).stock, undefined);
+
+  const last = store.parsePage(
+    'fox',
+    `---
+title: שועל
+price: ₪220
+stock: 2
+---
+`
+  );
+  assert.equal(last.stock, 2);
+  assert.equal(last.limited_stock, true);
+  assert.equal(last.out_of_stock, false);
+  assert.equal(store.catalogRowFromParsed(last).stock, undefined);
+});
+
+test('workshop catalog uses filename slugs and treats spots as stock', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-workshops-'));
+  writePage(
+    dir,
+    '2022-01-25-rehovot-04-12',
+    `title: סדנת רקמה
+subtitle: שישי בבוקר
+cart_price: 330
+spots: 12
+`
+  );
+  writePage(
+    dir,
+    '2022-11-04',
+    `title: מסיבת מדיומים
+cart_price: 330
+registration_full: true
+spots: 8
+`
+  );
+  writePage(
+    dir,
+    '2022-01-09-coming-soon',
+    `title: סדנה עתידית
+cart_price: 330
+registration_not_open: true
+spots: 10
+`
+  );
+  writePage(
+    dir,
+    '2022-01-05-private-workshop',
+    `title: סדנה פרטית
+form_url: https://pay.grow.link/example
+`
+  );
+  const catalog = store.buildWorkshopCatalogFromDir(dir);
+  assert.equal(catalog['workshop-rehovot-04-12'].price, 330);
+  assert.equal(catalog['workshop-rehovot-04-12'].stock, 12);
+  assert.equal(catalog['workshop-rehovot-04-12'].kind, 'workshop');
+  assert.equal(catalog['workshop-rehovot-04-12'].shipping, false);
+  assert.equal(catalog['workshop-2022-11-04'].stock, 0);
+  assert.equal(catalog['workshop-coming-soon'], undefined);
+  assert.equal(catalog['workshop-private-workshop'], undefined);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

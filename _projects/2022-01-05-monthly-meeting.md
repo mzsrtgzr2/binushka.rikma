@@ -5,6 +5,8 @@ subtitle:  רביעי בבוקר אחת לחודש
 image: '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
 permalink: /projects/monthly-meeting/
 form_url: https://pages.greeninvoice.co.il/payments/links/59988810-26f7-4902-9e5d-0d9a5cb1d8ac
+cart_price: 110
+spots: 12
 ---
 
 ## פרטי מפגשי רקמה למנוסות

@@ -125,6 +125,12 @@ noindex: true
         <p class="admin-hint">Markdown, כמו בקבצי המוצר הקיימים.</p>
       </div>
 
+      <div class="form__group">
+        <label class="form__label" for="admin-stock">מלאי (כמות)</label>
+        <input class="form__input" id="admin-stock" name="stock" type="number" min="0" step="1" dir="ltr" placeholder="ריק = בלי מעקב">
+        <p class="admin-hint">מספר הפריטים שאפשר לקנות. 0 = אזל, 1–3 = מלאי מוגבל. בסדנה זה מספר המקומות. ריק משאיר את הסימונים הידניים למטה.</p>
+      </div>
+
       <div class="admin-flags">
         <label class="admin-stock admin-stock--editor" for="admin-stock">כמות במלאי
           <input class="form__input admin-stock__input" id="admin-stock" name="stock" type="number" min="0" step="1" dir="ltr" placeholder="לא מוגדר">

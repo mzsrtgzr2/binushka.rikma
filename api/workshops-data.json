@@ -1,0 +1,51 @@
+{
+  "workshop-2022-11-04": {
+    "name": "מסיבת מדיומים לאמהות — ב4.11 בלי ילדים🫣",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 0
+  },
+  "workshop-monthly-meeting": {
+    "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",
+    "price": 110,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 12
+  },
+  "workshop-mothers-1-6": {
+    "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה2 בנובמבר",
+    "price": 1090,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 10
+  },
+  "workshop-mothers-5-10-26": {
+    "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה5 באוקטובר",
+    "price": 1090,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 3
+  },
+  "workshop-rehovot-04-12": {
+    "name": "סדנת רקמה של שישי בבוקר — ב4.12 ברחובות",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 12
+  },
+  "workshop-rehovot-09-10": {
+    "name": "סדנת קרושה למתחילות — 9.10 שישי בבוקר",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 12
+  },
+  "workshop-rehovot-29-10": {
+    "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 3
+  }
+}

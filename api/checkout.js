@@ -6,7 +6,12 @@
  * POST /api/v1/payments/form  (get payment form)
  */
 
-const { buildOrder, applyVariantNote, applyGiftPacking } = require('./catalog');
+const {
+  buildOrder,
+  applyVariantNote,
+  applyWorkshopNote,
+  applyGiftPacking,
+} = require('./catalog');
 const { resolveMorningEnv, morningHosts, getMorningToken } = require('./morning');
 const admin = require('./admin');
 
@@ -247,7 +252,10 @@ async function handler(req, res) {
 
   const body = req.body || {};
   const order = applyGiftPacking(
-    applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
+    applyWorkshopNote(
+      applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
+      body.participantsNote
+    ),
     body
   );
   if (order.error) {

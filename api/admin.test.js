@@ -256,6 +256,43 @@ body
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('decrementInventory reduces workshop spots after booking', async () => {
+  const root = foxRoot();
+  fs.mkdirSync(path.join(root, '_projects'));
+  fs.writeFileSync(
+    path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'),
+    `---
+title: סדנת רקמה
+subtitle: שישי בבוקר
+cart_price: 330
+spots: 2
+registration_full: false
+---
+
+body
+`
+  );
+  const result = await admin.decrementInventory(authEnv(root), [
+    { id: 'workshop-rehovot-04-12', quantity: 1 },
+  ]);
+  assert.deepEqual(result.changed, ['workshop-rehovot-04-12']);
+  const page = require('./admin-store').parseWorkshopPage(
+    'rehovot-04-12',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
+  );
+  assert.equal(page.spots, 1);
+  assert.equal(page.registration_full, false);
+
+  await admin.decrementInventory(authEnv(root), [{ id: 'workshop-rehovot-04-12', quantity: 1 }]);
+  const full = require('./admin-store').parseWorkshopPage(
+    'rehovot-04-12',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
+  );
+  assert.equal(full.spots, 0);
+  assert.equal(full.registration_full, true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('assertInventory rejects overselling tracked stock', async () => {
   const root = foxRoot();
   fs.writeFileSync(
@@ -398,6 +435,37 @@ test('upsert creates a normal product in markdown and both catalog files', async
   assert.equal(apiCatalog.napkin.price, 90);
   assert.equal(apiCatalog.napkin.name, 'מפית רקומה');
   assert.deepEqual(apiCatalog, dataCatalog);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('upsert writes numeric stock onto the product page', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const updated = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: false,
+      product: {
+        slug: 'fox',
+        title: 'רקמת שועל משמח',
+        kind: 'fixed',
+        cart_price: 220,
+        stock: 5,
+        body: 'body',
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(updated.status, 200);
+  const md = fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8');
+  assert.match(md, /stock: 5/);
+  const product = admin.parseProduct('fox', md);
+  assert.equal(product.stock, 5);
+  assert.equal(product.out_of_stock, false);
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.fox.price, 220);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

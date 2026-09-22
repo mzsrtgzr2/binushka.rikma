@@ -221,11 +221,22 @@ jobs:
         run: |
           set -euo pipefail
 
-          if gh pr merge "$PR_NUMBER" --squash --auto --delete-branch; then
+          merge_log="$RUNNER_TEMP/cursor-merge.log"
+          if gh pr merge "$PR_NUMBER" --squash --auto --delete-branch >"$merge_log" 2>&1; then
             approve_reply="$RUNNER_TEMP/cursor-approve-reply.md"
             {
               echo "<!-- cursor-agent-status -->"
               echo "Approval received. Auto-merge is enabled for $PR_URL and will complete when GitHub allows the pull request to merge."
+            } > "$approve_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$approve_reply"
+          elif grep -Fq "Protected branch rules not configured" "$merge_log"; then
+            gh pr merge "$PR_NUMBER" --squash --delete-branch
+
+            approve_reply="$RUNNER_TEMP/cursor-approve-immediate-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Approval received. This repository does not have protected branch rules for GitHub auto-merge, so I squash-merged $PR_URL now."
             } > "$approve_reply"
 
             gh issue comment "$THREAD_NUMBER" --body-file "$approve_reply"
@@ -234,6 +245,11 @@ jobs:
             {
               echo "<!-- cursor-agent-status -->"
               echo "Approval received, but I could not enable auto-merge. Please check that repository auto-merge is enabled and required checks are passing."
+              echo
+              echo "GitHub CLI output:"
+              echo '```'
+              cat "$merge_log"
+              echo '```'
             } > "$approve_failure_reply"
 
             gh issue comment "$THREAD_NUMBER" --body-file "$approve_failure_reply"

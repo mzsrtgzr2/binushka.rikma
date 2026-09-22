@@ -17,7 +17,26 @@
   },
   "flower-bag": {
     "name": "תיק בד לזר פרחים",
-    "price": 240
+    "variants": {
+      "type-1": {
+        "name": "בד פרחוני תכלת אפרסק",
+        "price": 240,
+        "image": "/images/store/flower-bag/flower-bag-mucouc2e.jpg",
+        "description": "",
+        "gallery": [
+          "/images/store/flower-bag/screenshot-2026-09-21-at-21-21-45-mucouc2f.jpg"
+        ]
+      },
+      "type-2": {
+        "name": "פרחוני גווני צהוב וירוק",
+        "price": 170,
+        "image": "/images/store/flower-bag/screenshot-2026-09-22-at-14-54-13-mucouc2f.jpg",
+        "description": "יפהיפה, עם פספוס בתפירה, לכן נמכר בהנחה של 30%.\\nמושלם לשימוש :)",
+        "gallery": [
+          "/images/store/flower-bag/screenshot-2026-09-22-at-12-05-46-mucouc2g.jpg"
+        ]
+      }
+    }
   },
   "flowers-yumiko-1": {
     "name": "פרחים בהשראת הטבע ויומיקו",

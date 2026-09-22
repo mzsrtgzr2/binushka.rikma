@@ -74,4 +74,6 @@ The feedback workflow will run:
 gh pr merge --squash --auto --delete-branch
 ```
 
-If auto-merge is enabled and GitHub allows the PR to merge, GitHub will merge it in the background once checks pass.
+If GitHub supports auto-merge for the PR, GitHub will merge it in the background once checks
+pass. If GitHub rejects auto-merge because protected branch rules are not configured, the
+workflow falls back to an immediate squash merge after the authorized `/approve` comment.

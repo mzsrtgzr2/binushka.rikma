@@ -379,6 +379,39 @@ test('variants product requires at least one priced type', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('variants product auto-generates ids when missing', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'flower-bags',
+        title: 'תיקי פרחים',
+        kind: 'variants',
+        variants: [
+          { id: '', name: 'קטן', price: 240 },
+          { name: 'גדול', price: 280 },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200, created.json.error || '');
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(Object.keys(catalog['flower-bags'].variants).length, 2);
+  assert.equal(catalog['flower-bags'].variants['type-1'].price, 240);
+  assert.equal(catalog['flower-bags'].variants['type-1'].name, 'קטן');
+  assert.equal(catalog['flower-bags'].variants['type-2'].price, 280);
+  const md = fs.readFileSync(path.join(root, '_store', 'flower-bags.md'), 'utf8');
+  assert.match(md, /type-1:/);
+  assert.match(md, /type-2:/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 const TINY_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 
@@ -502,6 +535,61 @@ test('upsert writes uploaded variant images into the catalog', async () => {
   const md = fs.readFileSync(path.join(root, '_store', 'bands.md'), 'utf8');
   assert.match(md, /variants:/);
   assert.match(md, /price: 30/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('upsert stores multiple images per variant', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'bags',
+        title: 'תיקים',
+        kind: 'variants',
+        variants: [
+          {
+            name: 'פרחוני',
+            price: 240,
+            images: [
+              {
+                upload: {
+                  filename: 'one.png',
+                  mime: 'image/png',
+                  data: `data:image/png;base64,${TINY_PNG}`,
+                },
+              },
+              {
+                upload: {
+                  filename: 'two.png',
+                  mime: 'image/png',
+                  data: `data:image/png;base64,${TINY_PNG}`,
+                },
+              },
+              '/images/scrunchies/04.jpeg',
+            ],
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200, created.json.error || '');
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  const variant = catalog.bags.variants['type-1'];
+  assert.match(variant.image, /^\/images\/store\/bags\//);
+  assert.equal(variant.gallery.length, 2);
+  assert.match(variant.gallery[0], /^\/images\/store\/bags\//);
+  assert.equal(variant.gallery[1], '/images/scrunchies/04.jpeg');
+  const md = fs.readFileSync(path.join(root, '_store', 'bags.md'), 'utf8');
+  assert.match(md, /gallery:/);
+  const product = admin.parseProduct('bags', md);
+  assert.equal(product.variants[0].images.length, 3);
+  assert.equal(product.variants[0].gallery.length, 2);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

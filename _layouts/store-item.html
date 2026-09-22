@@ -70,8 +70,17 @@ layout: default
               {% assign vid = variant[0] %}
               {% assign v = variant[1] %}
               <article class="store-variant">
-                {% if v.image %}
-                <img class="store-variant__photo lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+                {% if v.image or v.gallery %}
+                <div class="store-variant__photos">
+                  {% if v.image %}
+                  <img class="store-variant__photo lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+                  {% endif %}
+                  {% if v.gallery %}
+                  {% for gimg in v.gallery %}
+                  <img class="store-variant__photo lazy" data-src="{{ gimg | relative_url }}" alt="{{ v.name }}">
+                  {% endfor %}
+                  {% endif %}
+                </div>
                 {% endif %}
                 <div class="store-variant__info">
                   <h3 class="store-variant__name">{{ v.name }}</h3>

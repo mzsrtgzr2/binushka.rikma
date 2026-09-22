@@ -1,19 +1,7 @@
 {
-  "kit": {
-    "name": "ערכת רקמה מפנקת",
-    "price": 210
-  },
   "birth-hoop": {
     "name": "תעודת לידה רקומה",
     "price": 450
-  },
-  "portrait": {
-    "name": "מסגרת רקומה",
-    "price": 250
-  },
-  "fox": {
-    "name": "רקמת שועל משמח",
-    "price": 220
   },
   "embroidery-case": {
     "name": "קלמר פשתן עם רקמת כותנה",
@@ -23,61 +11,67 @@
     "name": "זר פרחים רקום",
     "price": 300
   },
+  "embroidery-kit-advanced": {
+    "name": "ערכת רקמה מתקדמת",
+    "price": 180
+  },
+  "embroidery-kit-beginners": {
+    "name": "ערכת רקמה למתחילים",
+    "price": 60
+  },
   "embroidery-tshirt": {
     "name": "רקמה בהזמנה אישית",
     "price": 100
+  },
+  "flowers-bag": {
+    "name": "תיק בד לזר פרחים",
+    "variants": {
+      "type-1": {
+        "name": "תיק בד כחול אפרסק",
+        "price": 240,
+        "image": "/images/store/flowers-bag/flower-bag-mucogyhr.jpg",
+        "description": "בלה בלה בלה",
+        "gallery": [
+          "/images/store/flowers-bag/screenshot-2026-09-21-at-21-21-45-mucogyhr.jpg"
+        ]
+      },
+      "type-2": {
+        "name": "בד פרחים צהוב ירוק",
+        "price": 170,
+        "image": "/images/store/flowers-bag/screenshot-2026-09-22-at-12-05-46-mucogyhr.jpg",
+        "description": "תיק בד לפרחים עם דפקט",
+        "gallery": [
+          "/images/store/flowers-bag/screenshot-2026-09-22-at-14-54-13-mucogyhs.jpg"
+        ]
+      }
+    }
   },
   "flowers-yumiko-1": {
     "name": "פרחים בהשראת הטבע ויומיקו",
     "price": 300
   },
-  "yam": {
-    "name": "רקמת בטטה מושרשת",
-    "price": 300
+  "fox": {
+    "name": "רקמת שועל משמח",
+    "price": 220
   },
-  "voucher-gift": {
-    "name": "שובר מתנה - בוקר פינוק לאמהות",
-    "price": 330
+  "kit": {
+    "name": "ערכת רקמה מפנקת",
+    "price": 210
+  },
+  "portrait": {
+    "name": "מסגרת רקומה",
+    "price": 250
   },
   "qa-check": {
     "name": "בדיקת תשלום",
     "price": 1
   },
-  "gift-card": {
-    "name": "גיפט קארד",
-    "variable": true,
-    "min_price": 50,
-    "max_price": 2000,
-    "presets": [
-      100,
-      150,
-      200,
-      250,
-      300,
-      500
-    ]
+  "voucher-gift": {
+    "name": "שובר מתנה - בוקר פינוק לאמהות",
+    "price": 330
   },
-  "scrunchies": {
-    "name": "סקראנצ'יז בעבודת יד",
-    "variants": {
-      "regular": {
-        "name": "סקראנצ'י גודל רגיל",
-        "price": 30,
-        "image": "/images/scrunchies/11.jpeg",
-        "description": "הגומייה הקלאסית לגודל רגיל"
-      },
-      "large": {
-        "name": "סקראנצ'י לארג'",
-        "price": 45,
-        "image": "/images/scrunchies/04.jpeg",
-        "description": "גדולה יותר, נוכחות על השיער"
-      },
-      "fancy": {
-        "name": "Fancy סקראנצ'י",
-        "price": 85,
-        "image": "/images/scrunchies/01.jpeg",
-        "description": "תחרה ופרטים מיוחדים"
-      }
-    }
+  "yam": {
+    "name": "רקמת בטטה מושרשת",
+    "price": 300
   }
 }

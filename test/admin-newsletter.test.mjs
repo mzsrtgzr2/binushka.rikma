@@ -255,6 +255,69 @@ test('deleting something that is not there reports not found', async () => {
   assert.equal(res.statusCode, 404);
 });
 
+test('a sent issue can be corrected without becoming sendable again', async () => {
+  fs.mkdirSync(path.join(root, issues.DIR), { recursive: true });
+  fs.writeFileSync(
+    issueFile('גיליון-שנשלח'),
+    issues.serialize({
+      title: 'כותרת עם שגיאת כתיב',
+      slug: 'גיליון-שנשלח',
+      date: '2026-09-01',
+      status: 'sent',
+      sent_at: '2026-09-02T10:00:00.000Z',
+      recipients: 42,
+      body: 'טקסט עם שגיאה',
+    })
+  );
+
+  const res = await call({
+    body: {
+      action: 'save',
+      slug: 'גיליון-שנשלח',
+      issue: { title: 'כותרת מתוקנת', body: 'טקסט מתוקן' },
+    },
+  });
+
+  assert.equal(res.statusCode, 200);
+
+  const saved = issues.parse('גיליון-שנשלח', fs.readFileSync(issueFile('גיליון-שנשלח'), 'utf8'));
+  assert.equal(saved.title, 'כותרת מתוקנת');
+  assert.equal(saved.body, 'טקסט מתוקן');
+
+  // The record of what actually went out survives the correction, which is
+  // what stops a fixed typo from turning into a second send.
+  assert.equal(saved.status, 'sent');
+  assert.equal(saved.sent_at, '2026-09-02T10:00:00.000Z');
+  assert.equal(saved.recipients, 42);
+});
+
+test('correcting a sent issue does not let it be sent again', async () => {
+  fs.mkdirSync(path.join(root, issues.DIR), { recursive: true });
+  fs.writeFileSync(
+    issueFile('כבר-יצא'),
+    issues.serialize({
+      title: 'כבר יצא',
+      slug: 'כבר-יצא',
+      date: '2026-09-01',
+      status: 'sent',
+      sent_at: '2026-09-02T10:00:00.000Z',
+      recipients: 5,
+      body: 'טקסט',
+    })
+  );
+
+  await call({ body: { action: 'save', slug: 'כבר-יצא', issue: { title: 'כבר יצא', body: 'מתוקן' } } });
+
+  process.env.GMAIL_USER = 'sender@example.test';
+  process.env.GMAIL_APP_PASSWORD = 'app-password';
+  process.env.NEWSLETTER_SECRET = 'secret';
+
+  const res = await call({ body: { action: 'send', slug: 'כבר-יצא' } });
+
+  assert.equal(res.statusCode, 409);
+  assert.equal(res.body.code, 'already_sent');
+});
+
 /* ----------------------------------------------------------------- preview */
 
 test('a preview deployment writes to its own branch, not the production one', () => {

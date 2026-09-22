@@ -35,6 +35,12 @@ async function loadIssue(env, slug) {
   return raw ? issues.parse(slug, raw) : null;
 }
 
+/**
+ * A sent issue can still be saved: the archive is a page on the site, and a
+ * typo there is worth fixing even though the mail has gone. normalize() keeps
+ * the sent status and its record of when and to how many, so a correction
+ * cannot turn into a second send.
+ */
 async function handleSave(req, res, env, body) {
   const existing = body.slug ? await loadIssue(env, body.slug) : null;
 

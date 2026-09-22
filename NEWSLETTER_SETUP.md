@@ -103,8 +103,23 @@ both.
    the recipient count. The issue then appears in the archive and as the teaser
    on the home page.
 
-A sent issue becomes read-only and cannot be deleted. The archive is the public
-record of what people received, so it has to keep matching their inboxes.
+### Editing and deleting
+
+Any issue in the list opens in the editor, and saving writes over the same
+file. Renaming the title of an issue that already exists keeps the slug it was
+first saved under, so the URL does not move and no second file appears
+alongside the first.
+
+A draft can be deleted from inside the editor. Images uploaded into it stay
+where they are: another issue may point at the same file, and an orphaned
+image costs nothing.
+
+A sent issue can still be edited, because the archive is a page on the site and
+a typo there is worth fixing after the mail has gone. What it cannot do is go
+out again or be deleted — sending is refused with `already_sent`, the delete
+button is hidden, and a save keeps the sent status along with when it went and
+how many received it. So a correction improves the page without ever turning
+into a second send, and the record of what actually happened survives it.
 
 ### The file format
 

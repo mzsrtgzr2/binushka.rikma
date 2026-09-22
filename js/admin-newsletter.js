@@ -337,9 +337,7 @@
         (sent && issue.recipients ? ' · ' + issue.recipients + ' נמענים' : '') +
         '</p>' +
         '</div>' +
-        '<button type="button" class="button" data-edit="' + escapeHtml(issue.slug) + '">' +
-        (sent ? 'צפייה' : 'עריכה') +
-        '</button>' +
+        '<button type="button" class="button" data-edit="' + escapeHtml(issue.slug) + '">עריכה</button>' +
         '</li>'
       );
     }).join('');
@@ -362,22 +360,17 @@
     bodyInput.value = issue ? issue.body : '';
     promotionalInput.checked = issue ? issue.promotional !== false : true;
 
-    // A sent issue is a record of what went out; editing it would make the
-    // archive disagree with the inboxes it already landed in.
-    [
-      titleInput, subtitleInput, thumbnailInput, bodyInput, promotionalInput,
-      thumbnailPick, imagePick,
-    ].forEach(function (field) {
-      field.disabled = sent;
-    });
-
+    // A sent issue stays editable so a typo can be corrected in the archive.
+    // What it cannot do is go out again or disappear: the copies already in
+    // people's inboxes are not coming back either way.
     editorDelete.hidden = !issue || sent;
     sendBtn.disabled = sent || !state.canSend;
     sendTestBtn.disabled = !issue || !state.canSend;
 
     if (sent) {
       sendStateEl.textContent = 'נשלח ב־' + formatDate(issue.sent_at) +
-        (issue.recipients ? ' אל ' + issue.recipients + ' נמענים' : '');
+        (issue.recipients ? ' אל ' + issue.recipients + ' נמענים' : '') +
+        '. עריכה כאן מתקנת את הארכיון באתר בלבד — הגיליון לא נשלח שוב.';
     } else if (!issue) {
       sendStateEl.textContent = 'צריך לשמור את הגיליון לפני שאפשר לשלוח אותו.';
     } else if (!state.canSend) {

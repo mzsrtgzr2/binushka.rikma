@@ -135,6 +135,35 @@ function yamlNumber(yaml, key) {
   return Number.isFinite(n) ? n : 0;
 }
 
+/** Stock quantity: null = not tracked; otherwise integer >= 0. */
+function parseStock(raw) {
+  if (raw === undefined || raw === null || raw === '') return { stock: null };
+  if (typeof raw === 'boolean') return { error: 'כמות מלאי לא תקינה' };
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 0 || n > 99999) return { error: 'כמות מלאי לא תקינה' };
+  return { stock: n };
+}
+
+function yamlStock(yaml) {
+  const value = yamlValue(yaml, 'stock');
+  if (value === undefined) return null;
+  const parsed = parseStock(value);
+  return parsed.error ? null : parsed.stock;
+}
+
+function tracksInventory(page) {
+  if (!page) return false;
+  if (page.kind === 'variable' || page.kind === 'content' || page.in_cart === false) return false;
+  return page.stock != null;
+}
+
+function applyStockFlags(input) {
+  const next = { ...input };
+  if (next.stock === 0) next.out_of_stock = true;
+  else if (next.stock != null && Number(next.stock) > 0) next.out_of_stock = false;
+  return next;
+}
+
 function stripYamlKeyBlock(yaml, key) {
   const lines = String(yaml).split(/\r?\n/);
   const out = [];
@@ -610,6 +639,7 @@ function parsePage(slug, raw) {
     out_of_stock: yamlValue(yaml, 'out_of_stock') === true,
     limited_stock: yamlValue(yaml, 'limited_stock') === true,
     hide: yamlValue(yaml, 'hide') === true,
+    stock: yamlStock(yaml),
     layout: yamlValue(yaml, 'layout') || '',
     hero_image: heroImage,
     gallery,
@@ -662,10 +692,16 @@ function applyPage(raw, input, { isNew } = {}) {
   } else if (input.kind !== 'content') {
     yaml = setYamlScalar(yaml, 'price', '');
   }
-  yaml = setYamlBool(yaml, 'out_of_stock', Boolean(input.out_of_stock));
-  yaml = setYamlBool(yaml, 'limited_stock', Boolean(input.limited_stock));
-  yaml = setYamlBool(yaml, 'hide', Boolean(input.hide));
-  if (input.hide) {
+  const withFlags = applyStockFlags(input);
+  yaml = setYamlBool(yaml, 'out_of_stock', Boolean(withFlags.out_of_stock));
+  yaml = setYamlBool(yaml, 'limited_stock', Boolean(withFlags.limited_stock));
+  yaml = setYamlBool(yaml, 'hide', Boolean(withFlags.hide));
+  if (withFlags.stock == null) {
+    yaml = setYamlScalar(yaml, 'stock', '');
+  } else {
+    yaml = setYamlScalar(yaml, 'stock', Number(withFlags.stock));
+  }
+  if (withFlags.hide) {
     yaml = setYamlBool(yaml, 'noindex', true);
     yaml = setYamlBool(yaml, 'sitemap', false);
   } else {
@@ -754,7 +790,10 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     variants = variantsToArray(variants);
   }
 
-  const input = {
+  const stockParsed = parseStock(raw && raw.stock);
+  if (stockParsed.error) return { error: stockParsed.error };
+
+  const input = applyStockFlags({
     slug,
     title,
     subtitle: String((raw && raw.subtitle) || '').trim(),
@@ -765,6 +804,7 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     out_of_stock: Boolean(raw && raw.out_of_stock),
     limited_stock: Boolean(raw && raw.limited_stock),
     hide: Boolean(raw && raw.hide),
+    stock: stockParsed.stock,
     kind,
     in_cart: kind !== 'content',
     cart_price: Number(raw && raw.cart_price),
@@ -772,7 +812,7 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     max_price: Number(raw && raw.max_price),
     presets: parsePresets(raw && raw.presets),
     variants,
-  };
+  });
 
   try {
     if (input.in_cart) catalogRowFromInput(input);
@@ -781,6 +821,24 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   }
 
   return { input };
+}
+
+/**
+ * Reduce tracked stock for purchased lines. Returns updated markdown or null if unchanged.
+ * Variable/content products and products without a stock field are skipped.
+ */
+function decrementPageStock(raw, slug, quantity) {
+  const qty = Number(quantity);
+  if (!Number.isInteger(qty) || qty < 1) return null;
+  const page = parsePage(slug, raw);
+  if (!tracksInventory(page)) return null;
+  const nextStock = Math.max(0, Number(page.stock) - qty);
+  if (nextStock === page.stock) return null;
+  return applyPage(raw, {
+    ...page,
+    stock: nextStock,
+    out_of_stock: nextStock === 0,
+  });
 }
 
 function catalogRowFromParsed(page) {
@@ -849,6 +907,11 @@ module.exports = {
   variantsFromArray,
   parsePresets,
   parseShekelPrice,
+  parseStock,
+  yamlStock,
+  tracksInventory,
+  applyStockFlags,
+  decrementPageStock,
   prettyCatalog,
   buildCatalogFromRaw,
   buildCatalogFromDir,

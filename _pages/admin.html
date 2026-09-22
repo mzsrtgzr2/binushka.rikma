@@ -126,10 +126,14 @@ noindex: true
       </div>
 
       <div class="admin-flags">
+        <label class="admin-stock admin-stock--editor" for="admin-stock">כמות במלאי
+          <input class="form__input admin-stock__input" id="admin-stock" name="stock" type="number" min="0" step="1" dir="ltr" placeholder="לא מוגדר">
+        </label>
         <label class="admin-check"><input type="checkbox" id="admin-out-of-stock"> אזל מהמלאי</label>
         <label class="admin-check"><input type="checkbox" id="admin-limited-stock"> מלאי מוגבל</label>
         <label class="admin-check"><input type="checkbox" id="admin-hide"> הסתר מהחנות</label>
       </div>
+      <p class="admin-hint">כמות במלאי יורדת אוטומטית כשלקוחה עוברת לתשלום. כשמתאפסת — המוצר מסומן כאזל. השאירי ריק למוצרים בלי מעקב מלאי (למשל גיפט קארד).</p>
       <p class="admin-hint">הסתרה מורידה את המוצר מרשימת החנות ומגוגל. הדף נשאר בכתובת /store/המזהה/ ואפשר לקנות משם — מתאים לבדיקת תשלום.</p>
 
       <div class="admin-editor__actions">

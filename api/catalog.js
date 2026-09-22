@@ -56,10 +56,42 @@ const SHIPPING = {
 
 const MAX_QTY = 20;
 
+/** Stock snapshot from bundled `_store/*.md` (updated on each deploy). */
+function inventoryFromStoreDir(dir) {
+  const root = dir || path.join(__dirname, '..', '_store');
+  const out = {};
+  try {
+    if (!fs.existsSync(root)) return out;
+    fs.readdirSync(root)
+      .filter((name) => name.endsWith('.md'))
+      .forEach((name) => {
+        const slug = name.replace(/\.md$/, '');
+        const page = store.parsePage(slug, fs.readFileSync(path.join(root, name), 'utf8'));
+        if (!page || page.in_cart === false) return;
+        const soldOut = Boolean(page.out_of_stock) || page.stock === 0;
+        out[slug] = {
+          stock: page.stock == null ? null : Number(page.stock),
+          outOfStock: soldOut,
+          limitedStock: Boolean(page.limited_stock),
+        };
+      });
+  } catch (err) {
+    console.error('inventory from store dir failed', err);
+  }
+  return out;
+}
+
+const BUNDLED_INVENTORY = inventoryFromStoreDir();
+
 function fallbackPriceBook() {
   const out = {};
   for (const [slug, product] of Object.entries(PRODUCTS)) {
-    out[slug] = { price: product.price, name: product.name };
+    const inv = BUNDLED_INVENTORY[slug] || {};
+    const row = { price: product.price, name: product.name };
+    if (inv.stock != null) row.stock = inv.stock;
+    if (typeof inv.outOfStock === 'boolean') row.outOfStock = inv.outOfStock;
+    if (inv.limitedStock) row.limitedStock = true;
+    out[slug] = row;
   }
   return out;
 }
@@ -89,6 +121,11 @@ function buildOrder(rawItems, shippingMethod) {
       return { error: 'כמות לא תקינה' };
     }
 
+    const inv = BUNDLED_INVENTORY[id];
+    if (inv && (inv.outOfStock || (inv.stock != null && quantity > inv.stock))) {
+      return { error: `אין מספיק מלאי עבור ${product.name || id}` };
+    }
+
     let price = product.price;
     let description = product.name;
     let kind;
@@ -111,6 +148,7 @@ function buildOrder(rawItems, shippingMethod) {
 
     subtotal += price * quantity;
     const line = {
+      id,
       description,
       quantity,
       price,
@@ -189,6 +227,7 @@ module.exports = {
   shippingPrice,
   buildOrder,
   fallbackPriceBook,
+  inventoryFromStoreDir,
   applyVariantNote,
   applyGiftPacking,
   fromCatalogFile,

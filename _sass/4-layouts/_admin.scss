@@ -149,6 +149,33 @@
   cursor: pointer;
 }
 
+.admin-stock {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 15px;
+  margin: 8px 0 4px;
+}
+
+.admin-stock__input {
+  width: 5.5rem;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--heading-font-color, #333) 18%, transparent);
+  border-radius: 6px;
+  font: inherit;
+  text-align: center;
+}
+
+.admin-stock--editor {
+  flex-basis: 100%;
+  margin: 0 0 4px;
+}
+
+.admin-stock--editor .admin-stock__input {
+  width: 7rem;
+  padding: 8px 10px;
+}
+
 .admin-message {
   margin: 0;
   font-size: 14px;

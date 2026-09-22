@@ -259,6 +259,177 @@
   }
 }
 
+.scrunchies-stockists {
+  margin: 0 auto 80px;
+  max-width: 980px;
+
+  &__title {
+    font-size: 36px;
+    font-weight: 300;
+    margin-bottom: 32px;
+    text-align: center;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 28px;
+      margin-bottom: 24px;
+    }
+  }
+
+  &__subtitle {
+    color: var(--text-alt-color);
+    font-size: 16px;
+    text-align: center;
+    margin: -20px auto 40px;
+    max-width: 520px;
+
+    @media only screen and (max-width: $mobile) {
+      margin: -12px auto 28px;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+
+    @media only screen and (max-width: $tablet) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media only screen and (max-width: $mobile) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+
+  @media only screen and (max-width: $mobile) {
+    margin-bottom: 48px;
+  }
+}
+
+.scrunchies-stockist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 20px 22px;
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  background: var(--background-color);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &__logo {
+    width: 100%;
+    height: 104px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    background: linear-gradient(160deg, rgba(254, 200, 36, 0.14), var(--background-alt-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      mix-blend-mode: multiply;
+    }
+
+    @media only screen and (max-width: $mobile) {
+      height: 88px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+  }
+
+  &__monogram {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--text-alt-color);
+
+    @media only screen and (max-width: $mobile) {
+      width: 54px;
+      height: 54px;
+      font-size: 26px;
+    }
+  }
+
+  &__name {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.45;
+    margin-bottom: 10px;
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 15px;
+    }
+  }
+
+  &__city {
+    font-size: 13px;
+    color: var(--text-color);
+    background: rgba(254, 200, 36, 0.16);
+    border-radius: 100px;
+    padding: 4px 12px;
+    margin: 0 0 auto;
+
+    &::before {
+      content: '📍';
+      margin-inline-end: 4px;
+    }
+  }
+
+  &__link {
+    font-size: 13px;
+    color: var(--text-alt-color);
+    margin: 14px 0 0;
+
+    &::after {
+      content: '←';
+      margin-inline-start: 4px;
+    }
+  }
+
+  &--link:hover {
+    transform: translateY(-4px);
+    border-color: var(--brand-color);
+    box-shadow: 0 8px 28px rgba(254, 200, 36, 0.18);
+
+    .scrunchies-stockist__link {
+      color: var(--text-color);
+    }
+  }
+
+  @media only screen and (max-width: $mobile) {
+    padding: 16px 14px 18px;
+  }
+}
+
+:root[dark] .scrunchies-stockist__logo {
+  background: #fff;
+
+  img {
+    mix-blend-mode: normal;
+  }
+}
+
+:root[dark] .scrunchies-stockist__monogram {
+  background: var(--background-alt-color);
+  color: var(--heading-font-color);
+}
+
 .scrunchies-cta {
   text-align: center;
   margin-bottom: 80px;

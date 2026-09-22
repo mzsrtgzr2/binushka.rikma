@@ -460,6 +460,9 @@
       var p = byId[item.id];
       var max = availableStock(p);
       var atMax = Number.isFinite(max) && productQtyInCart(cart, item.id) >= max;
+      var stockHintText = atMax
+        ? 'יש רק ' + max + ' במלאי — אי אפשר להוסיף עוד'
+        : '';
       var thumb = item.image
         ? '<img class="store-cart__thumb" src="' + escapeHtml(item.image) + '" alt="">'
         : '<span class="store-cart__thumb store-cart__thumb--empty" aria-hidden="true"></span>';
@@ -469,13 +472,18 @@
         '<a href="' + item.url + '">' + escapeHtml(item.name) + '</a>' +
         '<span class="store-cart__line-price">₪' + item.price * item.quantity + '</span>' +
         '</div>' +
-        '<div class="store-cart__line-actions">' +
+        '<div class="store-cart__line-actions' + (atMax ? ' is-at-max' : '') + '">' +
+        '<div class="store-cart__qty-row">' +
         '<button type="button" class="store-cart__qty" data-action="dec" data-id="' + escapeHtml(item.key) + '" aria-label="הפחתה">−</button>' +
         '<span class="store-cart__qty-val">' + item.quantity + '</span>' +
         '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + escapeHtml(item.key) + '"' +
-        (atMax ? ' disabled' : '') +
-        ' aria-label="הוספה">+</button>' +
+        (atMax ? ' disabled title="' + escapeHtml(stockHintText) + '"' : '') +
+        ' aria-label="' + (atMax ? escapeHtml(stockHintText) : 'הוספה') + '">+</button>' +
         '<button type="button" class="store-cart__remove" data-action="remove" data-id="' + escapeHtml(item.key) + '" aria-label="הסרה">×</button>' +
+        '</div>' +
+        (atMax
+          ? '<span class="store-cart__stock-hint">' + escapeHtml(stockHintText) + '</span>'
+          : '') +
         '</div>';
       els.lines.appendChild(li);
     });

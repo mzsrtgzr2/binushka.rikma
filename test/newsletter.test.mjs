@@ -17,7 +17,7 @@ import subscribe from '../api/newsletter/subscribe.mjs';
 import unsubscribe from '../api/newsletter/unsubscribe.mjs';
 import * as store from '../lib/newsletter/subscribers.mjs';
 import * as tokens from '../lib/newsletter/tokens.mjs';
-import { buildSubject, markdownToHtml, renderIssueEmail } from '../lib/newsletter/mailer.mjs';
+import { buildSubject, markdownToHtml, renderIssueEmail, sendIssue } from '../lib/newsletter/mailer.mjs';
 import { siteUrl, unsubscribeUrl } from '../lib/newsletter/urls.mjs';
 
 function makeRequest({ method = 'POST', url = '/api/newsletter/x', body, headers = {} } = {}) {
@@ -194,6 +194,100 @@ test('mail bodies escape values that came from the editor', () => {
 
   assert.equal(html.includes('<script>alert(1)</script>'), false);
   assert.ok(html.includes('&lt;script&gt;'));
+});
+
+/* -------------------------------------------------------------- delivering */
+
+/** Collects what would have been sent instead of opening an SMTP connection. */
+function recordingTransport({ failFor = [] } = {}) {
+  const messages = [];
+
+  return {
+    messages,
+    create: async () => ({
+      sendMail: async (message) => {
+        if (failFor.includes(message.to)) throw new Error('mailbox unavailable');
+        messages.push(message);
+        return { accepted: [message.to] };
+      },
+      close() {},
+    }),
+  };
+}
+
+function send(recipients, extra = {}) {
+  const transport = recordingTransport(extra.transportOptions);
+
+  return sendIssue({
+    issue: { title: 'גיליון', body: 'שלום' },
+    settings: { email: { from_name: 'בינושקה' } },
+    recipients,
+    issueUrl: 'https://example.test/newsletter/x/',
+    unsubscribeUrlFor: (recipient) => `https://example.test/u?who=${encodeURIComponent(recipient)}`,
+    createTransport: transport.create,
+    gapMs: 0,
+    ...extra.options,
+  }).then((result) => ({ result, messages: transport.messages }));
+}
+
+test('each recipient gets their own message, not one blast', async () => {
+  const { result, messages } = await send(['a@example.test', 'b@example.test', 'c@example.test']);
+
+  assert.equal(result.sent.length, 3);
+  assert.deepEqual(messages.map((m) => m.to), ['a@example.test', 'b@example.test', 'c@example.test']);
+  messages.forEach((message) => {
+    assert.equal(message.cc, undefined);
+    assert.equal(message.bcc, undefined);
+  });
+});
+
+test('each message carries an unsubscribe link for that recipient alone', async () => {
+  const { messages } = await send(['a@example.test', 'b@example.test']);
+
+  assert.ok(messages[0].html.includes('who=a%40example.test'));
+  assert.equal(messages[0].html.includes('b%40example.test'), false);
+  assert.ok(messages[1].html.includes('who=b%40example.test'));
+});
+
+test('every message carries the one-click unsubscribe headers', async () => {
+  const { messages } = await send(['a@example.test']);
+
+  assert.equal(messages[0].headers['List-Unsubscribe'], '<https://example.test/u?who=a%40example.test>');
+  assert.equal(messages[0].headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click');
+});
+
+test('one bad address does not stop the rest of the send', async () => {
+  const { result, messages } = await send(['a@example.test', 'bad@example.test', 'c@example.test'], {
+    transportOptions: { failFor: ['bad@example.test'] },
+  });
+
+  assert.deepEqual(result.sent, ['a@example.test', 'c@example.test']);
+  assert.equal(result.failed.length, 1);
+  assert.equal(result.failed[0].email, 'bad@example.test');
+  assert.equal(messages.length, 2);
+});
+
+test('the daily cap stops the run and reports what is left', async () => {
+  process.env.NEWSLETTER_DAILY_CAP = '2';
+
+  const { result } = await send(['a@example.test', 'b@example.test', 'c@example.test', 'd@example.test']);
+
+  assert.equal(result.sent.length, 2);
+  assert.equal(result.remaining.length, 2, 'the rest must be reported so the send can resume');
+  assert.deepEqual(result.remaining, ['c@example.test', 'd@example.test']);
+
+  delete process.env.NEWSLETTER_DAILY_CAP;
+});
+
+test('running out of time reports the remainder rather than dropping it', async () => {
+  // Jump the clock past the function budget after the first message.
+  let calls = 0;
+  const clock = () => (calls++ === 0 ? 0 : 10 ** 9);
+
+  const { result } = await send(['a@example.test', 'b@example.test'], { options: { now: clock } });
+
+  assert.equal(result.sent.length, 0);
+  assert.equal(result.remaining.length, 2);
 });
 
 /* -------------------------------------------------------------- subscribe */

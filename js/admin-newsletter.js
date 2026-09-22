@@ -210,13 +210,18 @@
     listEl.innerHTML = issues.map(function (issue) {
       var sent = issue.status === 'sent';
       return (
-        '<li class="admin-card">' +
+        '<li class="admin-card admin-card--issue">' +
         (issue.thumbnail
           ? '<img class="admin-card__thumb" src="' + escapeHtml(issue.thumbnail) + '" alt="">'
-          : '<span class="admin-card__thumb"></span>') +
-        '<div>' +
+          : '<span class="admin-card__thumb admin-card__thumb--empty"></span>') +
+        '<div class="admin-card__main">' +
+        '<div class="admin-card__heading">' +
         '<strong>' + escapeHtml(issue.title) + '</strong>' +
-        '<span class="admin-card__badge">' + (sent ? 'נשלח' : 'טיוטה') + '</span>' +
+        '<span class="admin-card__badge admin-card__badge--' + (sent ? 'sent' : 'draft') + '">' +
+        (sent ? 'נשלח' : 'טיוטה') +
+        '</span>' +
+        '</div>' +
+        (issue.subtitle ? '<p class="admin-card__meta">' + escapeHtml(issue.subtitle) + '</p>' : '') +
         '<p class="admin-hint">' +
         escapeHtml(formatDate(sent ? issue.sent_at || issue.date : issue.date)) +
         (sent && issue.recipients ? ' · ' + issue.recipients + ' נמענים' : '') +

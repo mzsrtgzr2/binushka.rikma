@@ -784,13 +784,56 @@
   }
 }
 
-/* Newsletter backoffice: the Markdown editor and its email preview. */
+/* Newsletter backoffice: the issue list, the Markdown editor, the preview. */
+
+.admin-card--issue {
+  grid-template-columns: 88px 1fr auto;
+  align-items: center;
+}
+
+.admin-card__main {
+  min-width: 0;
+}
+
+.admin-card__heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.admin-card__badge--draft,
+.admin-card__badge--sent {
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+.admin-card__badge--draft {
+  background: var(--background-alt-color);
+}
+
+.admin-card__badge--sent {
+  background: rgba(46, 160, 67, 0.12);
+  color: #2b7a3d;
+}
 
 .admin-markdown {
   font-family: 'Courier New', Courier, monospace;
   line-height: 1.7;
   resize: vertical;
   min-height: 320px;
+  /* Hebrew prose and Markdown punctuation share these lines. Letting each
+     line pick its own direction keeps `##` and `- ` where they were typed. */
+  unicode-bidi: plaintext;
+}
+
+/* Paths and addresses are Latin; forcing RTL on them moves the leading slash
+   to the end of the field. */
+.admin-input--ltr {
+  direction: ltr;
+  text-align: left;
 }
 
 .admin-preview__email {

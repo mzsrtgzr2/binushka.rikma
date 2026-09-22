@@ -57,7 +57,8 @@ hero:
 
 
 #-------------------------------
-# Newsletter (powered by beehiiv - see NEWSLETTER_SETUP.md)
+# Newsletter - on-site copy only. The strings used inside the mails we send
+# live in lib/newsletter/email-copy.mjs. See NEWSLETTER_SETUP.md.
 newsletter:
   enabled: true
   locale: he-IL

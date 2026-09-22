@@ -63,8 +63,9 @@ async function call(options) {
 let root;
 
 test.beforeEach(() => {
+  // Deliberately no _newsletter/ directory: git cannot track an empty one, so
+  // on a fresh checkout the first save has to create it.
   root = fs.mkdtempSync(path.join(os.tmpdir(), 'newsletter-admin-'));
-  fs.mkdirSync(path.join(root, issues.DIR), { recursive: true });
 
   process.env.ADMIN_PASSWORD = PASSWORD;
   process.env.ADMIN_LOCAL_ROOT = root;
@@ -224,6 +225,7 @@ test('a draft can be deleted', async () => {
 });
 
 test('a sent issue cannot be deleted', async () => {
+  fs.mkdirSync(path.join(root, issues.DIR), { recursive: true });
   fs.writeFileSync(
     issueFile('כבר-נשלח'),
     issues.serialize({

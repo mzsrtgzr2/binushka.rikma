@@ -7,17 +7,17 @@
 
 <a class="newsletter-teaser__card" href="{{ issue.url | relative_url }}">
   {% if issue.thumbnail %}
-    <span class="newsletter-teaser__media">
+    <div class="newsletter-teaser__media">
       <img src="{{ issue.thumbnail | relative_url }}" alt="" loading="lazy">
-    </span>
+    </div>
   {% endif %}
 
-  <span class="newsletter-teaser__body">
-    <span class="newsletter-teaser__date">{% include hebrew-date.html date=issue.date %}</span>
-    <span class="newsletter-teaser__title">{{ issue.title }}</span>
+  <div class="newsletter-teaser__body">
+    <p class="newsletter-teaser__date">{% include hebrew-date.html date=issue.date %}</p>
+    <h4 class="newsletter-teaser__title">{{ issue.title }}</h4>
     {% if issue.subtitle %}
-      <span class="newsletter-teaser__excerpt">{{ issue.subtitle }}</span>
+      <p class="newsletter-teaser__excerpt">{{ issue.subtitle }}</p>
     {% endif %}
     <span class="newsletter-teaser__cta">{{ newsletter.messages.read_issue | default: 'לקריאת הגיליון' }}</span>
-  </span>
+  </div>
 </a>

@@ -114,36 +114,42 @@ file in `_store/`. Morning does not need a matching item to charge.
 
 ## Newsletter
 
-Signups go to beehiiv through `/api/newsletter/subscribe`, `/api/newsletter/unsubscribe`
-and `/api/newsletter/latest`. `NEWSLETTER_SETUP.md` covers creating the publication;
-these are the deployment-side details.
+The newsletter has no provider: issues are files in `_newsletter/`, the
+subscriber list is in Vercel Blob, and mail goes out through Gmail.
+`NEWSLETTER_SETUP.md` covers the full setup; these are the deployment-side
+details.
 
 Set these per environment. Preview needs its own copy — Vercel does not share
 environment variables between Preview and Production:
 
 | Variable | What it is |
 | --- | --- |
-| `BEEHIIV_API_KEY` | beehiiv → Settings → Integrations → API |
-| `BEEHIIV_PUBLICATION_ID` | the `pub_...` id on the same page |
-| `BEEHIIV_DOUBLE_OPT_IN` | optional `on` / `off` / `not_set` override of the publication setting |
+| `BLOB_READ_WRITE_TOKEN` | added automatically when a Blob store is connected to the project |
+| `NEWSLETTER_SECRET` | `openssl rand -hex 32`; signs unsubscribe links |
+| `GMAIL_USER` | the sending address |
+| `GMAIL_APP_PASSWORD` | 16-character app password, not the account password |
+| `SITE_URL` | `https://rikma.binushka.com` |
+| `NEWSLETTER_DAILY_CAP` | optional; defaults to 400 recipients per send |
 
-Until both required variables are set, the forms answer "ההרשמה לניוזלטר לא זמינה
-כרגע" and the home page teaser stays hidden. The page still builds and renders, so
-a preview without the variables shows the layout but cannot collect an address.
+Until the first three are set the signup form answers "ההרשמה לניוזלטר לא זמינה
+כרגע". The pages still build and render, so a preview without them shows the
+layout but cannot collect an address. The archive and teaser are rendered at
+build time from `_newsletter/`, so they work in any environment regardless.
 
 As with the cart, changing env vars does not update an already-built Preview —
 redeploy the branch afterwards.
 
-`GET /api/newsletter/subscribe/` returns `{ configured, hasApiKey, hasPublicationId,
-doubleOptIn }` so you can confirm an environment picked up the pair without printing
-the key.
+`GET /api/newsletter/subscribe/` returns
+`{ configured, hasSubscriberStore, hasSigningSecret, hasMailer }` so you can
+confirm an environment picked them up without printing any value.
 
-Pointing Preview at the same publication as Production puts test signups on the real
-list. Either use a throwaway address and remove it afterwards, or create a second
-beehiiv publication for Preview.
+**Preview shares Production's list and mailbox** if you give it the same
+variables. A signup on a preview deploy lands on the real list, and a send goes
+to real people. Either leave the Blob token out of Preview, or connect a second
+Blob store to it.
 
-`/api/newsletter/latest` is cached at the edge for 30 minutes, so a freshly published
-issue does not appear in the teaser immediately.
+`SITE_URL` matters most here: without it a send triggered from a preview puts
+`*.vercel.app` links inside mail that real readers receive.
 
 ## Local development
 

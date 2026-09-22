@@ -206,6 +206,7 @@ function parseVariantsYaml(yaml) {
   if (i >= lines.length) return {};
   const out = {};
   let currentId = null;
+  let inGallery = false;
   for (i += 1; i < lines.length; i += 1) {
     const line = lines[i];
     if (line.trim() === '') continue;
@@ -213,14 +214,35 @@ function parseVariantsYaml(yaml) {
     const idMatch = line.match(/^  ([a-z0-9-]+):\s*$/);
     if (idMatch) {
       currentId = idMatch[1];
-      out[currentId] = { name: currentId, price: 0, image: '', description: '' };
+      inGallery = false;
+      out[currentId] = { name: currentId, price: 0, image: '', gallery: [], description: '' };
       continue;
     }
+    if (!currentId) continue;
+    if (/^    gallery:\s*\[\]\s*$/.test(line)) {
+      inGallery = false;
+      out[currentId].gallery = [];
+      continue;
+    }
+    if (/^    gallery:\s*$/.test(line)) {
+      inGallery = true;
+      out[currentId].gallery = out[currentId].gallery || [];
+      continue;
+    }
+    if (inGallery) {
+      const item = line.match(/^      -\s+(\S.*)$/);
+      if (item) {
+        out[currentId].gallery.push(unquote(item[1]));
+        continue;
+      }
+      inGallery = false;
+    }
     const field = line.match(/^    ([a-z_]+):\s*(.*)$/);
-    if (field && currentId) {
+    if (field) {
       const key = field[1];
       const value = unquote(field[2]);
       if (key === 'price') out[currentId].price = Number(value) || 0;
+      else if (key === 'gallery') out[currentId].gallery = [];
       else out[currentId][key] = value;
     }
   }
@@ -234,10 +256,17 @@ function setYamlVariants(yaml, variants) {
   const lines = ['variants:'];
   ids.forEach((id) => {
     const row = variants[id];
+    const images = uniquePhotos([row.image, ...(row.gallery || []), ...(row.images || [])]);
     lines.push(`  ${id}:`);
     lines.push(`    name: ${formatYamlScalar(row.name || id)}`);
     lines.push(`    price: ${Number(row.price) || 0}`);
-    if (row.image) lines.push(`    image: ${formatYamlScalar(row.image)}`);
+    if (images[0]) lines.push(`    image: ${formatYamlScalar(images[0])}`);
+    if (images.length > 1) {
+      lines.push('    gallery:');
+      images.slice(1).forEach((img) => {
+        lines.push(`      - ${formatYamlScalar(img)}`);
+      });
+    }
     if (row.description) lines.push(`    description: ${formatYamlScalar(row.description)}`);
   });
   return `${next}\n${lines.join('\n')}\n`;
@@ -418,16 +447,31 @@ function prepareVariants(raw) {
       variants.push(row);
       continue;
     }
-    const idHint = String(row.id || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '') || 'variant';
-    const resolved = resolveVariantImage(slug, row.image, idHint);
-    if (resolved.error) return resolved;
-    if (resolved.file) files.push(resolved.file);
+    const idHint =
+      sanitizeVariantId(row.id) || sanitizeVariantId(row.name) || 'variant';
+    const imageItems = [];
+    if (Array.isArray(row.images) && row.images.length) {
+      imageItems.push(...row.images);
+    } else {
+      if (row.image) imageItems.push(row.image);
+      if (Array.isArray(row.gallery)) imageItems.push(...row.gallery);
+    }
+    if (imageItems.length > MAX_PHOTOS) {
+      return { error: `אפשר עד ${MAX_PHOTOS} תמונות לכל סוג` };
+    }
+    const paths = [];
+    for (const item of imageItems) {
+      const resolved = resolveVariantImage(slug, item, idHint);
+      if (resolved.error) return resolved;
+      if (resolved.file) files.push(resolved.file);
+      if (resolved.pathName) paths.push(resolved.pathName);
+    }
+    const photos = uniquePhotos(paths);
     variants.push({
       ...row,
-      image: resolved.pathName || '',
+      image: photos[0] || '',
+      gallery: photos.slice(1),
+      images: photos,
     });
   }
   return { fields: { variants }, files };
@@ -454,37 +498,73 @@ function nowStamp() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00 ${sign}${oh}${om}`;
 }
 
+function sanitizeVariantId(raw) {
+  return String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/^-+|-+$/g, '');
+}
+
+function variantPhotoList(row) {
+  if (!row || typeof row !== 'object') return [];
+  if (Array.isArray(row.images) && row.images.length) {
+    return uniquePhotos(
+      row.images.map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') return item.path || item.preview || '';
+        return '';
+      })
+    );
+  }
+  const primary =
+    row.image && typeof row.image === 'object'
+      ? publicImagePath(row.image.path || '')
+      : publicImagePath(row.image) || String(row.image || '').trim();
+  return uniquePhotos([primary, ...(row.gallery || [])]);
+}
+
 function variantsToArray(variants) {
   if (!variants || typeof variants !== 'object' || Array.isArray(variants)) return [];
-  return Object.keys(variants).map((id) => ({
-    id,
-    name: variants[id].name || id,
-    price: Number(variants[id].price) || 0,
-    image: variants[id].image || '',
-    description: variants[id].description || '',
-  }));
+  return Object.keys(variants).map((id) => {
+    const row = variants[id] || {};
+    const images = variantPhotoList(row);
+    return {
+      id,
+      name: row.name || id,
+      price: Number(row.price) || 0,
+      image: images[0] || '',
+      gallery: images.slice(1),
+      images,
+      description: row.description || '',
+    };
+  });
 }
 
 function variantsFromArray(rows) {
   const out = {};
-  (rows || []).forEach((row) => {
-    const id = String((row && row.id) || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '');
-    if (!id) return;
-    const price = Number(row.price);
+  const used = new Set();
+  (rows || []).forEach((row, index) => {
+    let id = sanitizeVariantId(row && row.id);
+    if (!id) id = sanitizeVariantId(row && row.name);
+    if (!id) id = `type-${index + 1}`;
+    let unique = id;
+    let n = 2;
+    while (used.has(unique)) {
+      unique = `${id}-${n}`;
+      n += 1;
+    }
+    used.add(unique);
+    const price = Number(row && row.price);
     if (!(price > 0)) return;
-    const image =
-      row.image && typeof row.image === 'object'
-        ? publicImagePath(row.image.path || '')
-        : publicImagePath(row.image) || String(row.image || '').trim();
-    out[id] = {
-      name: String(row.name || id).trim() || id,
+    const images = variantPhotoList(row);
+    out[unique] = {
+      name: String((row && row.name) || unique).trim() || unique,
       price,
-      image,
-      description: String(row.description || '').trim(),
+      image: images[0] || '',
+      description: String((row && row.description) || '').trim(),
     };
+    if (images.length > 1) out[unique].gallery = images.slice(1);
   });
   return out;
 }

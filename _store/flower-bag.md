@@ -4,11 +4,11 @@ date: 2024-01-20 10:00:00 +0300
 subtitle: בתפירה אישית מבד וינטג׳
 image: /images/gallery/flower-bag.png
 price: ₪240
-out_of_stock: true
+out_of_stock: false
 limited_stock: true
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-stock: 0
+stock: 1
 cart_price: 240
 ---
 

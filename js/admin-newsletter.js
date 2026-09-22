@@ -28,6 +28,13 @@
   var thumbnailFile = document.getElementById('issue-thumbnail-file');
   var imagePick = document.getElementById('issue-image-pick');
   var imageFile = document.getElementById('issue-image-file');
+  var linkPick = document.getElementById('issue-link-pick');
+  var linkBox = document.getElementById('issue-linkbox');
+  var linkTextInput = document.getElementById('issue-link-text');
+  var linkUrlInput = document.getElementById('issue-link-url');
+  var linkResults = document.getElementById('issue-link-results');
+  var linkInsert = document.getElementById('issue-link-insert');
+  var linkCancel = document.getElementById('issue-link-cancel');
   var previewEl = document.getElementById('issue-preview');
   var sendStateEl = document.getElementById('issue-send-state');
   var testToInput = document.getElementById('issue-test-to');
@@ -203,6 +210,126 @@
     textarea.focus();
   }
 
+  /* ------------------------------------------------------------------- links
+
+     Suggestions come from a JSON block the site build writes into this page,
+     so they are whatever is actually published. Something added since the last
+     deploy will not be listed yet; pasting its address still works. */
+  var linkIndex = (function () {
+    var el = document.getElementById('admin-link-index');
+    if (!el) return [];
+
+    try {
+      return JSON.parse(el.textContent) || [];
+    } catch (error) {
+      return [];
+    }
+  })();
+
+  var linkMatches = [];
+  var linkActive = -1;
+
+  function searchLinks(query) {
+    var needle = String(query || '').trim().toLowerCase();
+    if (!needle) return linkIndex.slice(0, 8);
+
+    var starts = [];
+    var contains = [];
+
+    linkIndex.forEach(function (entry) {
+      var title = String(entry.title || '').toLowerCase();
+      var url = String(entry.url || '').toLowerCase();
+      var at = title.indexOf(needle);
+
+      // A title that begins with what was typed is almost always the one
+      // meant, so it outranks a match buried in the middle or in the address.
+      if (at === 0) starts.push(entry);
+      else if (at > 0 || url.indexOf(needle) >= 0) contains.push(entry);
+    });
+
+    return starts.concat(contains).slice(0, 8);
+  }
+
+  function renderLinkResults() {
+    if (!linkMatches.length) {
+      linkResults.hidden = true;
+      linkResults.innerHTML = '';
+      return;
+    }
+
+    linkResults.innerHTML = linkMatches.map(function (entry, index) {
+      return (
+        '<li><button type="button" class="admin-linkbox__result' +
+        (index === linkActive ? ' is-active' : '') +
+        '" data-link-index="' + index + '">' +
+        '<span class="admin-linkbox__result-title">' + escapeHtml(entry.title) + '</span>' +
+        '<span class="admin-linkbox__result-kind">' + escapeHtml(entry.kind) + '</span>' +
+        '<span class="admin-linkbox__result-url" dir="ltr">' + escapeHtml(entry.url) + '</span>' +
+        '</button></li>'
+      );
+    }).join('');
+
+    linkResults.hidden = false;
+  }
+
+  function chooseLink(entry) {
+    linkUrlInput.value = entry.url;
+    // The title is the obvious link text, but only when nothing was selected
+    // in the body and nothing has been typed by hand.
+    if (!linkTextInput.value.trim()) linkTextInput.value = entry.title;
+
+    linkMatches = [];
+    linkActive = -1;
+    renderLinkResults();
+    linkTextInput.focus();
+  }
+
+  function openLinkBox() {
+    var selected = bodyInput.value.slice(bodyInput.selectionStart, bodyInput.selectionEnd).trim();
+
+    linkTextInput.value = selected;
+    linkUrlInput.value = '';
+    linkMatches = searchLinks('');
+    linkActive = -1;
+    renderLinkResults();
+
+    linkBox.hidden = false;
+    (selected ? linkUrlInput : linkTextInput).focus();
+  }
+
+  function closeLinkBox() {
+    linkBox.hidden = true;
+    linkMatches = [];
+    linkActive = -1;
+    renderLinkResults();
+    bodyInput.focus();
+  }
+
+  function insertLink() {
+    var url = linkUrlInput.value.trim();
+    if (!url) {
+      show(editorMessage, 'צריך לבחור עמוד או להדביק כתובת', 'error');
+      return;
+    }
+
+    var text = linkTextInput.value.trim() || url;
+    var selectionLength = bodyInput.selectionEnd - bodyInput.selectionStart;
+
+    // Replaces the selection when the link was built around one, so the words
+    // do not end up written twice.
+    if (selectionLength > 0) {
+      var start = bodyInput.selectionStart;
+      bodyInput.value =
+        bodyInput.value.slice(0, start) + '[' + text + '](' + url + ')' + bodyInput.value.slice(bodyInput.selectionEnd);
+      bodyInput.selectionStart = bodyInput.selectionEnd = start + text.length + url.length + 4;
+    } else {
+      insertAtCaret(bodyInput, '[' + text + '](' + url + ')');
+    }
+
+    closeLinkBox();
+    updatePreview();
+  }
+
   /* ---------------------------------------------------------------- markdown
 
      Covers the subset documented under the editor. The mail itself is rendered
@@ -363,6 +490,7 @@
     // A sent issue stays editable so a typo can be corrected in the archive.
     // What it cannot do is go out again or disappear: the copies already in
     // people's inboxes are not coming back either way.
+    linkBox.hidden = true;
     editorDelete.hidden = !issue || sent;
     sendBtn.disabled = sent || !state.canSend;
     sendTestBtn.disabled = !issue || !state.canSend;
@@ -451,6 +579,58 @@
 
   thumbnailPick.addEventListener('click', function () { thumbnailFile.click(); });
   imagePick.addEventListener('click', function () { imageFile.click(); });
+
+  linkPick.addEventListener('click', function () {
+    if (linkBox.hidden) openLinkBox();
+    else closeLinkBox();
+  });
+
+  linkCancel.addEventListener('click', closeLinkBox);
+  linkInsert.addEventListener('click', insertLink);
+
+  linkUrlInput.addEventListener('input', function () {
+    linkMatches = searchLinks(linkUrlInput.value);
+    linkActive = -1;
+    renderLinkResults();
+  });
+
+  linkUrlInput.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (!linkMatches.length) return;
+      event.preventDefault();
+      var step = event.key === 'ArrowDown' ? 1 : -1;
+      linkActive = (linkActive + step + linkMatches.length) % linkMatches.length;
+      renderLinkResults();
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      // Enter inside the editor form would otherwise submit and save.
+      event.preventDefault();
+      if (linkActive >= 0 && linkMatches[linkActive]) chooseLink(linkMatches[linkActive]);
+      else insertLink();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeLinkBox();
+    }
+  });
+
+  linkResults.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-link-index]');
+    if (!button) return;
+
+    var entry = linkMatches[Number(button.getAttribute('data-link-index'))];
+    if (entry) chooseLink(entry);
+  });
+
+  linkTextInput.addEventListener('keydown', function (event) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    insertLink();
+  });
 
   function handlePicked(input, onUploaded) {
     var file = input.files && input.files[0];

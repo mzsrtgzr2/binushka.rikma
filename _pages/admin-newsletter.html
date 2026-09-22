@@ -8,6 +8,8 @@ sitemap: false
 noindex: true
 ---
 
+{% include admin-link-index.html %}
+
 <div class="admin-shell">
   <header class="admin-top">
     <a class="admin-top__brand" href="{{ '/' | relative_url }}">בינושקה</a>
@@ -76,8 +78,28 @@ noindex: true
             <div class="form__group">
               <div class="admin-label-row">
                 <label class="form__label" for="issue-body">גוף הגיליון (Markdown)</label>
-                <button type="button" class="button admin-upload-btn" id="issue-image-pick">הוספת תמונה לטקסט</button>
+                <span class="admin-label-row__actions">
+                  <button type="button" class="button admin-upload-btn" id="issue-link-pick">הוספת קישור</button>
+                  <button type="button" class="button admin-upload-btn" id="issue-image-pick">הוספת תמונה לטקסט</button>
+                </span>
                 <input type="file" id="issue-image-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+              </div>
+
+              <div class="admin-linkbox" id="issue-linkbox" hidden>
+                <div class="form__group">
+                  <label class="form__label" for="issue-link-text">מלל הקישור</label>
+                  <input class="form__input" type="text" id="issue-link-text" placeholder="מה יופיע בטקסט">
+                </div>
+                <div class="form__group admin-linkbox__search">
+                  <label class="form__label" for="issue-link-url">לאן מקשר</label>
+                  <input class="form__input admin-input--ltr" type="text" id="issue-link-url" dir="ltr"
+                         autocomplete="off" placeholder="חיפוש בעמודי האתר, או הדבקת כתובת">
+                  <ul class="admin-linkbox__results" id="issue-link-results" hidden></ul>
+                </div>
+                <div class="admin-linkbox__actions">
+                  <button type="button" class="button button--primary" id="issue-link-insert">הוספה</button>
+                  <button type="button" class="button" id="issue-link-cancel">ביטול</button>
+                </div>
               </div>
               <textarea class="form__input admin-markdown" id="issue-body" rows="18"
                         placeholder="## כותרת משנה&#10;&#10;פסקה רגילה.&#10;&#10;- פריט&#10;- עוד פריט&#10;&#10;[טקסט הקישור](https://example.com)"></textarea>

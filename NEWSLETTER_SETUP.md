@@ -94,6 +94,20 @@ both.
    A freshly uploaded image is only served from `/images/...` after the next
    site build, so until then the preview shows the copy the browser already
    has rather than a broken image.
+
+   **הוספת קישור** opens a small panel that searches the site — store items,
+   posts, projects, pages and issues that have already gone out — and inserts
+   the choice as a Markdown link. Type to filter, move with the arrow keys,
+   Enter picks the highlighted row. Selecting words in the body before opening
+   the panel uses them as the link text and wraps them in place instead of
+   repeating them. Anything not on the site can be pasted into the address
+   field directly.
+
+   The suggestions come from a JSON block that `_includes/admin-link-index.html`
+   writes into the page at build time, so the list reflects the last deploy: a
+   store item added minutes ago appears once its build has run. Only published
+   things are listed — draft issues are left out, and so are the admin screens,
+   which is what their `noindex` is taken to mean.
 2. **שמירה** commits `_newsletter/<slug>.md` as a draft. Drafts get a page so
    they can be previewed and linked, but they are `noindex`, kept out of the
    sitemap, and left out of the archive and the teaser.

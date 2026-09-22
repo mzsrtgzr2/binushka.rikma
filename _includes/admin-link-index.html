@@ -1,0 +1,51 @@
+{%- comment -%}
+Everything on the site a newsletter issue might link to, for the editor's link
+autocomplete. Built with the site, so it lists what is actually published: a
+store item added after the last deploy shows up once that deploy has run.
+
+Admin screens set noindex, which is also the right signal for "not something to
+link a reader to", so they are skipped.
+{%- endcomment -%}
+<script type="application/json" id="admin-link-index">
+[
+{%- assign first = true -%}
+
+{%- for item in site.store -%}
+  {%- unless first -%},{%- endunless -%}
+  {"title": {{ item.title | jsonify }}, "url": {{ item.url | relative_url | jsonify }}, "kind": "חנות"}
+  {%- assign first = false -%}
+{%- endfor -%}
+
+{%- assign sorted_posts = site.posts | sort: 'date' | reverse -%}
+{%- for post in sorted_posts -%}
+  {%- unless first -%},{%- endunless -%}
+  {"title": {{ post.title | jsonify }}, "url": {{ post.url | relative_url | jsonify }}, "kind": "בלוג"}
+  {%- assign first = false -%}
+{%- endfor -%}
+
+{%- for project in site.projects -%}
+  {%- unless first -%},{%- endunless -%}
+  {"title": {{ project.title | jsonify }}, "url": {{ project.url | relative_url | jsonify }}, "kind": "פרויקט"}
+  {%- assign first = false -%}
+{%- endfor -%}
+
+{%- for issue in site.newsletter -%}
+  {%- if issue.status == 'sent' -%}
+    {%- unless first -%},{%- endunless -%}
+    {"title": {{ issue.title | jsonify }}, "url": {{ issue.url | relative_url | jsonify }}, "kind": "ניוזלטר"}
+    {%- assign first = false -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- for page in site.pages -%}
+  {%- if page.title and page.noindex != true -%}
+    {%- unless first -%},{%- endunless -%}
+    {"title": {{ page.title | jsonify }}, "url": {{ page.url | relative_url | jsonify }}, "kind": "עמוד"}
+    {%- assign first = false -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- unless first -%},{%- endunless -%}
+{"title": "דף הבית", "url": {{ "/" | relative_url | jsonify }}, "kind": "עמוד"}
+]
+</script>

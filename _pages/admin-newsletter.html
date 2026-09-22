@@ -65,12 +65,20 @@ noindex: true
 
             <div class="form__group">
               <label class="form__label" for="issue-thumbnail">תמונה ראשית</label>
-              <input class="form__input admin-input--ltr" type="text" id="issue-thumbnail" dir="ltr" placeholder="/images/gallery/fox.png">
-              <p class="admin-hint">נתיב לתמונה שכבר קיימת באתר. אפשר להשאיר ריק.</p>
+              <div class="admin-upload-row">
+                <input class="form__input admin-input--ltr" type="text" id="issue-thumbnail" dir="ltr" placeholder="/images/newsletter/2026-09/...">
+                <button type="button" class="button admin-upload-btn" id="issue-thumbnail-pick">העלאת תמונה</button>
+                <input type="file" id="issue-thumbnail-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+              </div>
+              <p class="admin-hint">אפשר להעלות תמונה מהמחשב, או להדביק נתיב לתמונה שכבר קיימת באתר. אפשר גם להשאיר ריק.</p>
             </div>
 
             <div class="form__group">
-              <label class="form__label" for="issue-body">גוף הגיליון (Markdown)</label>
+              <div class="admin-label-row">
+                <label class="form__label" for="issue-body">גוף הגיליון (Markdown)</label>
+                <button type="button" class="button admin-upload-btn" id="issue-image-pick">הוספת תמונה לטקסט</button>
+                <input type="file" id="issue-image-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+              </div>
               <textarea class="form__input admin-markdown" id="issue-body" rows="18"
                         placeholder="## כותרת משנה&#10;&#10;פסקה רגילה.&#10;&#10;- פריט&#10;- עוד פריט&#10;&#10;[טקסט הקישור](https://example.com)"></textarea>
               <p class="admin-hint">

@@ -67,6 +67,7 @@ export default async function handler(req, res) {
         recipients: [email],
         issueUrl: `${base}/newsletter/`,
         unsubscribeUrlFor: (recipient) => unsubscribeUrl(base, recipient),
+        baseUrl: base,
       });
     } catch (error) {
       // The address is already stored; a failed welcome must not fail signup.

@@ -819,6 +819,34 @@
   color: #2b7a3d;
 }
 
+.admin-upload-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  .form__input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.admin-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .form__label {
+    margin-bottom: 0;
+  }
+}
+
+.admin-upload-btn {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
 .admin-markdown {
   font-family: 'Courier New', Courier, monospace;
   line-height: 1.7;

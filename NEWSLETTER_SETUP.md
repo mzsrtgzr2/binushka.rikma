@@ -83,6 +83,17 @@ both.
 
 1. **גיליון חדש** opens the editor. The body is Markdown; the panel beside it
    previews the result as it is typed.
+
+   Images can be uploaded from either **העלאת תמונה** (the issue's main image)
+   or **הוספת תמונה לטקסט** (inserted as `![](...)` wherever the caret is). The
+   browser resizes anything over 1600px and re-encodes it as JPEG first, then
+   the file is committed to `images/newsletter/<year-month>/` with a unique
+   name, so uploading the same filename twice never replaces an image an
+   already-sent issue still points at.
+
+   A freshly uploaded image is only served from `/images/...` after the next
+   site build, so until then the preview shows the copy the browser already
+   has rather than a broken image.
 2. **שמירה** commits `_newsletter/<slug>.md` as a draft. Drafts get a page so
    they can be previewed and linked, but they are `noindex`, kept out of the
    sitemap, and left out of the archive and the teaser.
@@ -113,6 +124,11 @@ Markdown body.
 
 `promotional: false` drops the `פרסומת:` prefix from the subject. Leave it off
 for anything that advertises, which is nearly everything.
+
+Paths in the body are written site-relative, the way they are everywhere else
+in this repository. They are rewritten to absolute URLs when an issue is sent:
+an inbox has no page to resolve `/images/...` against, so a relative path there
+would simply never load.
 
 ## Unsubscribing
 

@@ -184,6 +184,42 @@ test('every rendered mail carries the unsubscribe link and the sender identity',
   assert.ok(text.includes('https://example.test/api/newsletter/unsubscribe?t=abc'));
 });
 
+test('site-relative images and links become absolute in the mail', () => {
+  const { html, text } = renderIssueEmail({
+    issue: {
+      title: 'גיליון',
+      thumbnail: '/images/newsletter/2026-09/hero.jpg',
+      body: '![](/images/newsletter/2026-09/a.jpg)\n\n[לחנות](/store/)',
+    },
+    settings: { email: {} },
+    issueUrl: 'https://rikma.binushka.com/newsletter/x/',
+    unsubscribeUrl: 'https://rikma.binushka.com/u',
+    baseUrl: 'https://rikma.binushka.com',
+  });
+
+  // An inbox has no page to resolve a path against, so anything still relative
+  // here simply never loads for the reader.
+  assert.ok(html.includes('src="https://rikma.binushka.com/images/newsletter/2026-09/a.jpg"'));
+  assert.ok(html.includes('src="https://rikma.binushka.com/images/newsletter/2026-09/hero.jpg"'));
+  assert.ok(html.includes('href="https://rikma.binushka.com/store/"'));
+  assert.equal(/src="\/(?!\/)/.test(html), false, 'no relative image is left behind');
+  assert.equal(/href="\/(?!\/)/.test(html), false, 'no relative link is left behind');
+  assert.ok(text.includes('https://rikma.binushka.com/store/'));
+});
+
+test('already-absolute and protocol-relative URLs are left alone', () => {
+  const { html } = renderIssueEmail({
+    issue: { title: 'x', body: '[a](https://example.test/x) [b](//cdn.example.test/y)' },
+    settings: { email: {} },
+    issueUrl: 'https://rikma.binushka.com/newsletter/x/',
+    unsubscribeUrl: 'https://rikma.binushka.com/u',
+    baseUrl: 'https://rikma.binushka.com',
+  });
+
+  assert.ok(html.includes('href="https://example.test/x"'));
+  assert.ok(html.includes('href="//cdn.example.test/y"'));
+});
+
 test('mail bodies escape values that came from the editor', () => {
   const { html } = renderIssueEmail({
     issue: { title: '<script>alert(1)</script>', body: 'x' },

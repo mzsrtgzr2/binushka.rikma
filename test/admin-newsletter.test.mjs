@@ -252,6 +252,52 @@ test('deleting something that is not there reports not found', async () => {
   assert.equal(res.statusCode, 404);
 });
 
+/* ------------------------------------------------------------------ images */
+
+// A 1x1 GIF, small enough to inline.
+const TINY_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+test('an uploaded image is committed and its URL returned', async () => {
+  const res = await call({
+    body: { action: 'upload', file: { filename: 'Fox Photo.gif', mime: 'image/gif', data: TINY_GIF } },
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.match(res.body.url, /^\/images\/newsletter\/\d{4}-\d{2}\/fox-photo-[a-z0-9]+\.gif$/);
+  assert.ok(fs.existsSync(path.join(root, res.body.url.replace(/^\//, ''))));
+});
+
+test('uploading the same name twice does not overwrite the first image', async () => {
+  const upload = () =>
+    call({ body: { action: 'upload', file: { filename: 'photo.gif', mime: 'image/gif', data: TINY_GIF } } });
+
+  const first = await upload();
+  await new Promise((resolve) => setTimeout(resolve, 2));
+  const second = await upload();
+
+  // An already-sent issue may still point at the first one.
+  assert.notEqual(first.body.url, second.body.url);
+  assert.ok(fs.existsSync(path.join(root, first.body.url.replace(/^\//, ''))));
+});
+
+test('a non-image upload is refused', async () => {
+  const res = await call({
+    body: {
+      action: 'upload',
+      file: { filename: 'notes.pdf', mime: 'application/pdf', data: 'data:application/pdf;base64,JVBERi0=' },
+    },
+  });
+
+  assert.equal(res.statusCode, 422);
+  assert.match(res.body.error, /jpg/);
+});
+
+test('a malformed upload is refused rather than crashing', async () => {
+  const res = await call({ body: { action: 'upload', file: { filename: 'x.png', data: 'not-a-data-url' } } });
+
+  assert.equal(res.statusCode, 422);
+});
+
 /* -------------------------------------------------------------------- send */
 
 test('sending is refused while the mailer is unconfigured', async () => {

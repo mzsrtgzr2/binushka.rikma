@@ -12,12 +12,14 @@ import { emailCopy } from '../lib/newsletter/email-copy.mjs';
 import { readJsonBody, sendJson } from '../lib/newsletter/http.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
 import * as mailer from '../lib/newsletter/mailer.mjs';
+import { MediaError, prepareUpload } from '../lib/newsletter/media.mjs';
 import * as store from '../lib/newsletter/subscribers.mjs';
 import * as tokens from '../lib/newsletter/tokens.mjs';
 import { issueUrl, siteUrl, unsubscribeUrl } from '../lib/newsletter/urls.mjs';
 
-// An issue is prose, not a form field.
-const MAX_ISSUE_BYTES = 512 * 1024;
+// An issue is prose, not a form field, and an upload is a base64 image on top
+// of that — roughly a third larger than the 2.5MB the image itself may be.
+const MAX_BODY_BYTES = 8 * 1024 * 1024;
 
 async function loadIssues(env) {
   const files = await repo.listDir(env, issues.DIR);
@@ -54,6 +56,20 @@ async function handleSave(req, res, env, body) {
   );
 
   return sendJson(res, 200, { ok: true, slug: issue.slug, target: repo.writeTarget(env) });
+}
+
+async function handleUpload(req, res, env, body) {
+  let prepared;
+  try {
+    prepared = prepareUpload(body.file || {});
+  } catch (error) {
+    if (error instanceof MediaError) return sendJson(res, 422, { ok: false, error: error.message });
+    throw error;
+  }
+
+  await repo.commitFiles(env, [prepared.file], `Add newsletter image ${prepared.file.path}`);
+
+  return sendJson(res, 200, { ok: true, url: prepared.url });
 }
 
 async function handleDelete(req, res, env, body) {
@@ -106,6 +122,7 @@ async function handleSend(req, res, env, body) {
     recipients,
     issueUrl: issueUrl(base, issue.slug),
     unsubscribeUrlFor: (recipient) => unsubscribeUrl(base, recipient),
+    baseUrl: base,
   });
 
   if (testTo) {
@@ -183,13 +200,14 @@ export default async function handler(req, res) {
 
   let body;
   try {
-    body = await readJsonBody(req, MAX_ISSUE_BYTES);
+    body = await readJsonBody(req, MAX_BODY_BYTES);
   } catch {
     return sendJson(res, 400, { ok: false, code: 'invalid_request' });
   }
 
   try {
     if (body.action === 'save') return await handleSave(req, res, env, body);
+    if (body.action === 'upload') return await handleUpload(req, res, env, body);
     if (body.action === 'delete') return await handleDelete(req, res, env, body);
     if (body.action === 'send') return await handleSend(req, res, env, body);
   } catch (error) {

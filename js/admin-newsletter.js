@@ -24,6 +24,10 @@
   var thumbnailInput = document.getElementById('issue-thumbnail');
   var bodyInput = document.getElementById('issue-body');
   var promotionalInput = document.getElementById('issue-promotional');
+  var thumbnailPick = document.getElementById('issue-thumbnail-pick');
+  var thumbnailFile = document.getElementById('issue-thumbnail-file');
+  var imagePick = document.getElementById('issue-image-pick');
+  var imageFile = document.getElementById('issue-image-file');
   var previewEl = document.getElementById('issue-preview');
   var sendStateEl = document.getElementById('issue-send-state');
   var testToInput = document.getElementById('issue-test-to');
@@ -35,6 +39,11 @@
   var current = null;
   var state = {};
   var previewTimer;
+
+  /* Committed path -> the data URL the browser already has. An image is only
+     served from /images/... after the next site build, so until then the
+     preview would show a broken image of something just uploaded. */
+  var localPreviews = {};
 
   function escapeHtml(value) {
     var holder = document.createElement('div');
@@ -95,6 +104,103 @@
     return messages[code] || '';
   }
 
+  /* ------------------------------------------------------------------ images
+
+     Shrunk in the browser before upload: the request travels as base64 inside
+     a JSON body, and the file ends up committed to the repository, so sending
+     a 6MB phone photo through untouched helps nobody. */
+  function readImage(file) {
+    return new Promise(function (resolve, reject) {
+      if (!/^image\/(jpeg|jpg|png|webp|gif)$/i.test(file.type)) {
+        reject(new Error('רק jpg, png, webp או gif'));
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onerror = function () { reject(new Error('לא הצלחנו לקרוא את הקובץ')); };
+      reader.onload = function () {
+        var dataUrl = String(reader.result || '');
+
+        function finish(data, mime, filename) {
+          if (data.length > 3400000) {
+            reject(new Error('תמונה גדולה מדי (עד 2.5MB אחרי דחיסה)'));
+            return;
+          }
+          resolve({ filename: filename, mime: mime, data: data });
+        }
+
+        // Animated GIFs and already-small files go as they are; re-encoding a
+        // GIF through a canvas would keep only its first frame.
+        if (file.type === 'image/gif' || file.size < 900000) {
+          finish(dataUrl, file.type, file.name);
+          return;
+        }
+
+        var img = new Image();
+        img.onerror = function () { reject(new Error('לא הצלחנו לעבד את התמונה')); };
+        img.onload = function () {
+          var max = 1600;
+          var w = img.width;
+          var h = img.height;
+          if (w > max || h > max) {
+            var scale = Math.min(max / w, max / h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          // Transparent PNGs would otherwise go black once flattened to JPEG.
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+
+          var qualities = [0.82, 0.7, 0.55, 0.4];
+          var compressed = '';
+          for (var i = 0; i < qualities.length; i++) {
+            compressed = canvas.toDataURL('image/jpeg', qualities[i]);
+            if (compressed.length <= 3400000) break;
+          }
+
+          finish(compressed, 'image/jpeg', String(file.name || 'image').replace(/\.[^.]+$/, '.jpg'));
+        };
+        img.src = dataUrl;
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function uploadImage(file) {
+    return readImage(file).then(function (payload) {
+      return api('POST', { action: 'upload', file: payload }).then(function (data) {
+        localPreviews[data.url] = payload.data;
+        return data.url;
+      });
+    });
+  }
+
+  function previewSrc(url) {
+    return localPreviews[url] || url;
+  }
+
+  /** Drops text where the caret is rather than at the end of the issue. */
+  function insertAtCaret(textarea, snippet) {
+    var start = textarea.selectionStart;
+    var end = textarea.selectionEnd;
+
+    if (typeof start !== 'number') {
+      textarea.value += snippet;
+    } else {
+      textarea.value = textarea.value.slice(0, start) + snippet + textarea.value.slice(end);
+      textarea.selectionStart = textarea.selectionEnd = start + snippet.length;
+    }
+
+    textarea.focus();
+  }
+
   /* ---------------------------------------------------------------- markdown
 
      Covers the subset documented under the editor. The mail itself is rendered
@@ -108,7 +214,9 @@
 
     function inline(text) {
       return escapeHtml(text)
-        .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img src="$2" alt="$1">')
+        .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, function (match, alt, url) {
+          return '<img src="' + escapeHtml(previewSrc(url)) + '" alt="' + alt + '">';
+        })
         .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>')
@@ -170,7 +278,7 @@
     var thumbnail = thumbnailInput.value.trim();
 
     previewEl.innerHTML =
-      (thumbnail ? '<img class="admin-preview__hero" src="' + escapeHtml(thumbnail) + '" alt="">' : '') +
+      (thumbnail ? '<img class="admin-preview__hero" src="' + escapeHtml(previewSrc(thumbnail)) + '" alt="">' : '') +
       '<h1>' + escapeHtml(title || 'ללא כותרת') + '</h1>' +
       (subtitle ? '<p class="admin-preview__subtitle">' + escapeHtml(subtitle) + '</p>' : '') +
       renderMarkdown(bodyInput.value) +
@@ -254,7 +362,10 @@
 
     // A sent issue is a record of what went out; editing it would make the
     // archive disagree with the inboxes it already landed in.
-    [titleInput, subtitleInput, thumbnailInput, bodyInput, promotionalInput].forEach(function (field) {
+    [
+      titleInput, subtitleInput, thumbnailInput, bodyInput, promotionalInput,
+      thumbnailPick, imagePick,
+    ].forEach(function (field) {
       field.disabled = sent;
     });
 
@@ -342,6 +453,42 @@
   });
 
   editorCancel.addEventListener('click', closeEditor);
+
+  thumbnailPick.addEventListener('click', function () { thumbnailFile.click(); });
+  imagePick.addEventListener('click', function () { imageFile.click(); });
+
+  function handlePicked(input, onUploaded) {
+    var file = input.files && input.files[0];
+    if (!file) return;
+
+    show(editorMessage, 'מעלה תמונה...', 'info');
+
+    uploadImage(file)
+      .then(function (url) {
+        onUploaded(url);
+        updatePreview();
+        show(editorMessage, 'התמונה הועלתה.', 'ok');
+      })
+      .catch(function (error) {
+        show(editorMessage, error.message, 'error');
+      })
+      .then(function () {
+        // Cleared so picking the same file again still fires a change event.
+        input.value = '';
+      });
+  }
+
+  thumbnailFile.addEventListener('change', function () {
+    handlePicked(thumbnailFile, function (url) {
+      thumbnailInput.value = url;
+    });
+  });
+
+  imageFile.addEventListener('change', function () {
+    handlePicked(imageFile, function (url) {
+      insertAtCaret(bodyInput, '\n\n![](' + url + ')\n\n');
+    });
+  });
 
   [titleInput, subtitleInput, thumbnailInput, bodyInput].forEach(function (field) {
     field.addEventListener('input', schedulePreview);

@@ -42,6 +42,25 @@ gallery:
   - /images/scrunchies/13.jpeg
   - /images/scrunchies/14.jpeg
   - /images/scrunchies/15.jpeg
+stockists_title: איפה אפשר למצוא את הסקראנצ׳י שלי?
+stockists:
+  - city: רחובות
+    locations:
+      - name: בתיה פרחים משמחים
+      - name: רישי יוגה | בית ליוגה במרכז רחובות
+  - city: נס ציונה
+    locations:
+      - name: זוהר פילאטיס סטודיו
+      - name: סטרונג סטודיו - Strong studio
+  - city: תל אביב
+    locations:
+      - name: השמורה
+  - city: יודפת
+    locations:
+      - name: עידית לוי - קעקועים בוטניים
+  - city: קיבוץ חולדה
+    locations:
+      - name: ReVibe בוטיק יד שנייה
 ---
 
 ב-2026 הוצאתי את מכונת התפירה הוינטג׳ של אמא שלי מהמחסן, ומאז אני תופרת כל סקראנצ׳י בעצמי — כל אחת בבד אחר, כל אחת ייחודית.

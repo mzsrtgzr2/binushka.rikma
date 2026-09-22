@@ -174,6 +174,38 @@ printing any of them:
 The backoffice shows the same thing as a line above the issue list, along with
 the subscriber count and the sending address.
 
+## Trying it on a preview deployment
+
+A preview is a full copy of the API, so everything except the final send can be
+exercised there. Two things make that safe.
+
+A preview commits to the branch it was deployed from, ignoring `GITHUB_BRANCH`
+even when that variable names the production branch for every environment at
+once. Saving an issue on a preview therefore rebuilds that same preview, and
+cannot touch what the public site is built from.
+
+A full send from a preview is refused with `preview_send_blocked`. The blob
+store is normally shared with production, which means the subscriber list on a
+preview is the real one, and mail cannot be recalled. Test sends to a single
+address always work, and that is what the layout should be checked with.
+
+For the preview's API to work at all, the newsletter variables have to be
+enabled for the Preview environment in Vercel, not only for Production:
+`BLOB_READ_WRITE_TOKEN`, `NEWSLETTER_SECRET`, `GMAIL_USER`,
+`GMAIL_APP_PASSWORD`, `ADMIN_PASSWORD` and `GITHUB_TOKEN`.
+
+Leave `SITE_URL` unset for Preview. Links inside a mail then point at the
+preview's own host, so an unsubscribe link from a test send exercises the
+preview rather than production. With `SITE_URL` set to the live domain, a test
+send's links lead to the live site instead — correct for production, confusing
+while testing.
+
+Two caveats worth expecting. A preview subscribing through the signup form
+writes to the shared blob store, so it adds a real subscriber; unsubscribe
+afterwards, or connect a separate store to Preview. And an image uploaded on a
+preview is committed to the branch, so it only appears at `/images/...` once
+that push has redeployed — the editor's preview shows it immediately either way.
+
 ## Running it locally
 
 ```bash

@@ -15,6 +15,7 @@ import path from 'node:path';
 import { Readable } from 'node:stream';
 
 import handler from '../api/admin-newsletter.mjs';
+import * as repo from '../lib/admin/repo.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
 
 const PASSWORD = 'test-password';
@@ -73,6 +74,8 @@ test.beforeEach(() => {
   delete process.env.BLOB_READ_WRITE_TOKEN;
   delete process.env.GMAIL_USER;
   delete process.env.GMAIL_APP_PASSWORD;
+  delete process.env.VERCEL_ENV;
+  delete process.env.NEWSLETTER_ALLOW_PREVIEW_SEND;
 });
 
 test.afterEach(() => {
@@ -250,6 +253,64 @@ test('deleting something that is not there reports not found', async () => {
   const res = await call({ body: { action: 'delete', slug: 'no-such-issue' } });
 
   assert.equal(res.statusCode, 404);
+});
+
+/* ----------------------------------------------------------------- preview */
+
+test('a preview deployment writes to its own branch, not the production one', () => {
+  const branch = repo.gitBranch({
+    VERCEL_ENV: 'preview',
+    VERCEL_GIT_COMMIT_REF: 'cursor/newsletter-b2c9',
+    // Set for every environment at once, the way Vercel variables usually are.
+    GITHUB_BRANCH: 'master',
+  });
+
+  assert.equal(branch, 'cursor/newsletter-b2c9');
+});
+
+test('production still honours the configured branch', () => {
+  assert.equal(
+    repo.gitBranch({ VERCEL_ENV: 'production', VERCEL_GIT_COMMIT_REF: 'master', GITHUB_BRANCH: 'master' }),
+    'master'
+  );
+  assert.equal(repo.gitBranch({}), 'master');
+});
+
+test('a preview refuses to send to the whole list', async () => {
+  fs.mkdirSync(path.join(root, issues.DIR), { recursive: true });
+  fs.writeFileSync(
+    issueFile('טיוטה-לפריוויו'),
+    issues.serialize({ title: 'טיוטה', slug: 'טיוטה-לפריוויו', date: '2026-09-01', body: 'שלום' })
+  );
+
+  process.env.VERCEL_ENV = 'preview';
+  process.env.GMAIL_USER = 'sender@example.test';
+  process.env.GMAIL_APP_PASSWORD = 'app-password';
+  process.env.NEWSLETTER_SECRET = 'secret';
+
+  const res = await call({ body: { action: 'send', slug: 'טיוטה-לפריוויו' } });
+
+  // Mail cannot be recalled, and a preview shares the production list.
+  assert.equal(res.statusCode, 403);
+  assert.equal(res.body.code, 'preview_send_blocked');
+});
+
+test('a preview may still send a test to one address', async () => {
+  fs.mkdirSync(path.join(root, issues.DIR), { recursive: true });
+  fs.writeFileSync(
+    issueFile('בדיקה-בפריוויו'),
+    issues.serialize({ title: 'בדיקה', slug: 'בדיקה-בפריוויו', date: '2026-09-01', body: 'שלום' })
+  );
+
+  process.env.VERCEL_ENV = 'preview';
+  process.env.GMAIL_USER = 'sender@example.test';
+  process.env.GMAIL_APP_PASSWORD = 'app-password';
+  process.env.NEWSLETTER_SECRET = 'secret';
+
+  const res = await call({ body: { action: 'send', slug: 'בדיקה-בפריוויו', testTo: 'me@example.test' } });
+
+  assert.notEqual(res.body.code, 'preview_send_blocked');
+  assert.notEqual(res.statusCode, 403);
 });
 
 /* ------------------------------------------------------------------ images */

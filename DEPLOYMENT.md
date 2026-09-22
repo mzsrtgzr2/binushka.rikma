@@ -84,7 +84,7 @@ Set these on **Production** (and Preview if you want to try it there):
 | --- | --- |
 | `ADMIN_PASSWORD` | Shared password for `/admin/` |
 | `GITHUB_TOKEN` | Fine-grained PAT with **Contents: Read and write** on this repo |
-| `GITHUB_BRANCH` | Usually `master`. Admin always writes this branch |
+| `GITHUB_BRANCH` | Usually `master`. Ignored on a preview, which writes to the branch it was deployed from |
 | `GITHUB_REPO` | Optional `owner/repo`. Vercel already sets the git owner/slug |
 
 For local `vercel dev`, set `ADMIN_LOCAL_ROOT` to the repo root so saves write

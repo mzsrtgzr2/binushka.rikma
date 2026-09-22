@@ -98,6 +98,8 @@
       mailer_not_configured: 'חסרות הגדרות שליחה (GMAIL_USER / GMAIL_APP_PASSWORD)',
       no_recipients: 'אין אף נמען ברשימה',
       already_sent: 'הגיליון הזה כבר נשלח',
+      preview_send_blocked:
+        'זו סביבת preview שמחוברת לרשימת הנמענים האמיתית. אפשר לשלוח מכאן בדיקה לכתובת אחת; שליחה לכל הרשימה רק מהאתר עצמו',
       slug_taken: 'כבר קיים גיליון עם הכתובת הזאת',
       title_required: 'צריך כותרת'
     };

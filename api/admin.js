@@ -108,7 +108,14 @@ function repoParts(env) {
 }
 
 function gitBranch(env) {
-  return String(env.GITHUB_BRANCH || 'master').trim() || 'master';
+  const explicit = String(env.GITHUB_BRANCH || '').trim();
+  const deployed = String(env.VERCEL_GIT_COMMIT_REF || '').trim();
+
+  // A preview writes to the branch it was deployed from, so editing the store
+  // from a preview cannot commit to what the public site is built from.
+  if (env.VERCEL_ENV === 'preview' && deployed) return deployed;
+
+  return explicit || deployed || 'master';
 }
 
 function localRoot(env) {

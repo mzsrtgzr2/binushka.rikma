@@ -109,6 +109,13 @@ async function handleSend(req, res, env, body) {
   if (testTo) {
     recipients = [testTo];
   } else {
+    // A preview usually points at the same blob store as production, so its
+    // list is the real one. Mail cannot be recalled, so a full send from a
+    // preview has to be asked for deliberately; a test send stays open.
+    if (env.VERCEL_ENV === 'preview' && env.NEWSLETTER_ALLOW_PREVIEW_SEND !== '1') {
+      return sendJson(res, 403, { ok: false, code: 'preview_send_blocked' });
+    }
+
     if (!store.isConfigured()) return sendJson(res, 503, { ok: false, code: 'not_configured' });
     recipients = (await store.all()).map((record) => record.email);
   }

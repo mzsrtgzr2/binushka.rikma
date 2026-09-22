@@ -1,4 +1,6 @@
-/* Newsletter signup, self-serve unsubscribe, and the latest-issue teaser. */
+/* Newsletter signup and self-serve unsubscribe.
+   The issue teaser and archive are rendered by Jekyll from the `newsletter`
+   collection, so nothing here fetches them. */
 (function () {
   'use strict';
 
@@ -14,28 +16,6 @@
 
   var endpoints = config.endpoints || {};
   var text = config.text || {};
-  var dateFormatter = null;
-
-  function formatDate(isoDate) {
-    if (!isoDate) return '';
-
-    var date = new Date(isoDate);
-    if (isNaN(date.getTime())) return '';
-
-    if (!dateFormatter) {
-      try {
-        dateFormatter = new Intl.DateTimeFormat(config.locale || 'he-IL', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        });
-      } catch (error) {
-        dateFormatter = { format: function (value) { return value.toLocaleDateString(); } };
-      }
-    }
-
-    return dateFormatter.format(date);
-  }
 
   function setStatus(element, message, state) {
     if (!element) return;
@@ -126,9 +106,7 @@
         url: endpoints.subscribe,
         busyLabel: text.sending,
         source: form.getAttribute('data-newsletter-source') || 'website',
-        successMessage: function (body) {
-          return body.status === 'pending' ? text.confirmPending : text.success;
-        }
+        successMessage: function () { return text.success; }
       });
     });
   }
@@ -145,87 +123,22 @@
     });
   }
 
-  function buildTeaserCard(post) {
-    var card = document.createElement('a');
-    card.className = 'newsletter-teaser__card';
-    card.href = post.url;
-    card.target = '_blank';
-    card.rel = 'noopener';
+  /* Someone who clicked the link in an issue footer is already removed by the
+     time they land here; the redirect just needs to say so. */
+  function initUnsubscribeNotice() {
+    if (window.location.search.indexOf('unsubscribed=1') === -1) return;
 
-    if (post.thumbnail) {
-      var figure = document.createElement('div');
-      figure.className = 'newsletter-teaser__media';
+    var form = document.querySelector('[data-newsletter-unsubscribe-form]');
+    if (!form) return;
 
-      var image = document.createElement('img');
-      image.src = post.thumbnail;
-      image.alt = post.title || '';
-      image.loading = 'lazy';
-
-      figure.appendChild(image);
-      card.appendChild(figure);
-    }
-
-    var body = document.createElement('div');
-    body.className = 'newsletter-teaser__body';
-
-    var publishedAt = formatDate(post.publishedAt);
-    if (publishedAt) {
-      var date = document.createElement('p');
-      date.className = 'newsletter-teaser__date';
-      date.textContent = publishedAt;
-      body.appendChild(date);
-    }
-
-    var title = document.createElement('h4');
-    title.className = 'newsletter-teaser__title';
-    title.textContent = post.title || text.untitledIssue;
-    body.appendChild(title);
-
-    var excerpt = post.subtitle || post.previewText;
-    if (excerpt) {
-      var paragraph = document.createElement('p');
-      paragraph.className = 'newsletter-teaser__excerpt';
-      paragraph.textContent = excerpt;
-      body.appendChild(paragraph);
-    }
-
-    var cta = document.createElement('span');
-    cta.className = 'newsletter-teaser__cta';
-    cta.textContent = text.readIssue;
-    body.appendChild(cta);
-
-    card.appendChild(body);
-    return card;
-  }
-
-  function initLatestIssues() {
-    var containers = document.querySelectorAll('[data-newsletter-latest]');
-    if (!containers.length || !endpoints.latest) return;
-
-    Array.prototype.forEach.call(containers, function (container) {
-      var limit = parseInt(container.getAttribute('data-newsletter-limit'), 10) || 1;
-      var target = container.querySelector('[data-newsletter-latest-target]') || container;
-
-      fetch(endpoints.latest + '?limit=' + limit, { headers: { Accept: 'application/json' } })
-        .then(function (response) { return response.json(); })
-        .then(function (body) {
-          var posts = (body && body.posts) || [];
-          // Nothing published yet: leave the section hidden instead of
-          // advertising an empty archive.
-          if (!posts.length) return;
-
-          target.innerHTML = '';
-          posts.forEach(function (post) { target.appendChild(buildTeaserCard(post)); });
-          container.hidden = false;
-        })
-        .catch(function () { /* the section stays hidden */ });
-    });
+    setStatus(form.querySelector('[data-newsletter-status]'), text.unsubscribed, 'success');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   function init() {
     initSignupForms();
     initUnsubscribeForms();
-    initLatestIssues();
+    initUnsubscribeNotice();
   }
 
   if (document.readyState === 'loading') {

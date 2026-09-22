@@ -14,14 +14,18 @@ description: עדכונים על סדנאות חדשות, מוצרים ורעי�
     {% include newsletter-signup.html source="newsletter-page" %}
   </section>
 
-  <section class="newsletter-page__section newsletter-page__section--archive"
-           data-newsletter-latest
-           data-newsletter-limit="3"
-           hidden>
-    <h2 class="newsletter-page__heading">גיליונות אחרונים</h2>
-    <p class="newsletter-page__intro">ככה זה נראה. אפשר להציץ לפני שנרשמים.</p>
-    <div class="newsletter-teaser__grid" data-newsletter-latest-target></div>
-  </section>
+  {% assign sent_issues = site.newsletter | where: 'status', 'sent' | sort: 'date' | reverse %}
+  {% if sent_issues.size > 0 %}
+    <section class="newsletter-page__section newsletter-page__section--archive">
+      <h2 class="newsletter-page__heading">גיליונות אחרונים</h2>
+      <p class="newsletter-page__intro">ככה זה נראה. אפשר להציץ לפני שנרשמים.</p>
+      <div class="newsletter-teaser__grid">
+        {% for issue in sent_issues limit: 3 %}
+          {% include newsletter-teaser-card.html issue=issue %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
 
   <section class="newsletter-page__section newsletter-page__section--unsubscribe">
     <h2 class="newsletter-page__heading">ביטול הרשמה</h2>

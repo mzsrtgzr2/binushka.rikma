@@ -1,0 +1,23 @@
+{% comment %}
+  One issue, rendered as a teaser card. Expects `include.issue` — a document
+  from the `newsletter` collection.
+{% endcomment %}
+{% assign issue = include.issue %}
+{% assign newsletter = site.data.settings.newsletter %}
+
+<a class="newsletter-teaser__card" href="{{ issue.url | relative_url }}">
+  {% if issue.thumbnail %}
+    <span class="newsletter-teaser__media">
+      <img src="{{ issue.thumbnail | relative_url }}" alt="" loading="lazy">
+    </span>
+  {% endif %}
+
+  <span class="newsletter-teaser__body">
+    <span class="newsletter-teaser__date">{% include hebrew-date.html date=issue.date %}</span>
+    <span class="newsletter-teaser__title">{{ issue.title }}</span>
+    {% if issue.subtitle %}
+      <span class="newsletter-teaser__excerpt">{{ issue.subtitle }}</span>
+    {% endif %}
+    <span class="newsletter-teaser__cta">{{ newsletter.messages.read_issue | default: 'לקריאת הגיליון' }}</span>
+  </span>
+</a>

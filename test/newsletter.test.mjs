@@ -1,9 +1,13 @@
 /**
- * Tests for the /api/newsletter functions.
+ * Tests for the newsletter: the /api/newsletter functions and the pure helpers
+ * they lean on.
  *
- * These live outside api/ on purpose: Vercel turns every file under api/ into
- * a serverless function, and the deployment is already at the plan's function
- * limit. `node --test` from the repo root picks them up either way.
+ * These live outside api/ on purpose: Vercel turns every file under api/ into a
+ * serverless function. `node --test` from the repo root picks them up anyway.
+ *
+ * Nothing here talks to Vercel Blob or to Gmail. The handler tests cover the
+ * paths that resolve before any network call, and the delivery logic is tested
+ * through `sendIssue`'s injected transport.
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -11,10 +15,10 @@ import { Readable } from 'node:stream';
 
 import subscribe from '../api/newsletter/subscribe.mjs';
 import unsubscribe from '../api/newsletter/unsubscribe.mjs';
-import latest from '../api/newsletter/latest.mjs';
-
-const PUBLICATION = 'pub_test';
-const realFetch = globalThis.fetch;
+import * as store from '../lib/newsletter/subscribers.mjs';
+import * as tokens from '../lib/newsletter/tokens.mjs';
+import { buildSubject, markdownToHtml, renderIssueEmail } from '../lib/newsletter/mailer.mjs';
+import { siteUrl, unsubscribeUrl } from '../lib/newsletter/urls.mjs';
 
 function makeRequest({ method = 'POST', url = '/api/newsletter/x', body, headers = {} } = {}) {
   const payload = body === undefined ? '' : JSON.stringify(body);
@@ -35,172 +39,167 @@ function makeResponse() {
     statusCode: 0,
     headers: {},
     body: null,
+    ended: false,
     setHeader(name, value) { this.headers[name.toLowerCase()] = value; },
-    end(chunk) { this.body = chunk ? JSON.parse(chunk) : null; },
+    end(chunk) { this.ended = true; this.body = chunk ? JSON.parse(chunk) : null; },
   };
 }
 
-/** Records every beehiiv call and answers from a route table. */
-function stubBeehiiv(routes) {
-  const calls = [];
-
-  globalThis.fetch = async (url, init = {}) => {
-    const target = new URL(url);
-    const key = `${init.method || 'GET'} ${target.pathname}`;
-
-    calls.push({
-      key,
-      query: Object.fromEntries(target.searchParams),
-      body: init.body ? JSON.parse(init.body) : null,
-      authorization: init.headers?.Authorization,
-    });
-
-    const route = routes[key];
-    if (!route) throw new Error(`unexpected beehiiv call: ${key}`);
-
-    return {
-      ok: (route.status || 200) < 400,
-      status: route.status || 200,
-      statusText: 'stub',
-      json: async () => route.payload,
-    };
-  };
-
-  return calls;
-}
-
-function configure(overrides = {}) {
-  process.env.BEEHIIV_API_KEY = 'key_test';
-  process.env.BEEHIIV_PUBLICATION_ID = PUBLICATION;
-  delete process.env.BEEHIIV_DOUBLE_OPT_IN;
-  Object.assign(process.env, overrides);
+function configure() {
+  process.env.BLOB_READ_WRITE_TOKEN = 'vercel_blob_rw_test';
+  process.env.NEWSLETTER_SECRET = 'secret-for-tests';
+  delete process.env.GMAIL_USER;
+  delete process.env.GMAIL_APP_PASSWORD;
 }
 
 function clearCredentials() {
-  delete process.env.BEEHIIV_API_KEY;
-  delete process.env.BEEHIIV_PUBLICATION_ID;
+  delete process.env.BLOB_READ_WRITE_TOKEN;
+  delete process.env.NEWSLETTER_SECRET;
+  delete process.env.GMAIL_USER;
+  delete process.env.GMAIL_APP_PASSWORD;
 }
 
 test.afterEach(() => {
-  globalThis.fetch = realFetch;
   clearCredentials();
+  delete process.env.SITE_URL;
 });
 
-const SUBSCRIPTIONS = `POST /v2/publications/${PUBLICATION}/subscriptions`;
-const LOOKUP = `GET /v2/publications/${PUBLICATION}/subscriptions`;
-const POSTS = `GET /v2/publications/${PUBLICATION}/posts`;
+/* -------------------------------------------------------------- addresses */
 
-test('subscribe normalizes the address and creates the subscription', async () => {
+test('addresses are trimmed and lowercased', () => {
+  assert.equal(store.normalizeEmail('  Someone@Example.COM '), 'someone@example.com');
+});
+
+test('obvious non-addresses are rejected', () => {
+  ['', 'nope', 'a@b', 'no spaces@example.com', null, undefined, 42].forEach((value) => {
+    assert.equal(store.normalizeEmail(value), '', `expected ${JSON.stringify(value)} to be rejected`);
+  });
+});
+
+test('the storage path is derived from the address and hides it', () => {
+  const path = store.pathFor('someone@example.com');
+
+  assert.match(path, /^newsletter\/subscribers\/[a-f0-9]{64}\.json$/);
+  assert.equal(path.includes('someone'), false, 'a leaked path must not reveal the address');
+  assert.equal(path, store.pathFor('someone@example.com'), 'the same address maps to the same path');
+  assert.notEqual(path, store.pathFor('other@example.com'));
+});
+
+/* ----------------------------------------------------------------- tokens */
+
+test('an unsubscribe token round-trips back to its address', () => {
   configure();
-  const calls = stubBeehiiv({ [SUBSCRIPTIONS]: { payload: { data: { id: 'sub_1', status: 'active' } } } });
 
-  const res = makeResponse();
-  await subscribe(makeRequest({
-    body: { email: '  Bina@Example.COM ' },
-    headers: { referer: 'https://rikma.binushka.com/', 'x-test-ip': '198.51.100.10' },
-  }), res);
-
-  assert.equal(res.statusCode, 200);
-  assert.deepEqual(res.body, { ok: true, status: 'active' });
-  assert.equal(res.headers['cache-control'], 'no-store');
-  assert.equal(calls[0].body.email, 'bina@example.com');
-  assert.equal(calls[0].body.reactivate_existing, true);
-  assert.equal(calls[0].body.referring_site, 'https://rikma.binushka.com/');
-  assert.equal(calls[0].authorization, 'Bearer key_test');
+  const token = tokens.createToken('someone@example.com');
+  assert.equal(tokens.readToken(token), 'someone@example.com');
 });
 
-test('subscribe reports the double opt-in pending status', async () => {
-  configure({ BEEHIIV_DOUBLE_OPT_IN: 'on' });
-  const calls = stubBeehiiv({ [SUBSCRIPTIONS]: { payload: { data: { status: 'pending' } } } });
-
-  const res = makeResponse();
-  await subscribe(makeRequest({ body: { email: 'a@b.co' }, headers: { 'x-test-ip': '198.51.100.11' } }), res);
-
-  assert.deepEqual(res.body, { ok: true, status: 'pending' });
-  assert.equal(calls[0].body.double_opt_override, 'on');
-});
-
-test('subscribe rejects malformed addresses without calling beehiiv', async () => {
+test('a token for one address cannot be edited into another', () => {
   configure();
-  const calls = stubBeehiiv({});
 
-  for (const email of ['nope', 'a@b', 'a b@c.com', '@c.com', 'a@.com', '']) {
-    const res = makeResponse();
-    await subscribe(makeRequest({ body: { email }, headers: { 'x-test-ip': '198.51.100.12' } }), res);
+  const token = tokens.createToken('someone@example.com');
+  const signature = token.slice(token.lastIndexOf('.'));
+  const forged = Buffer.from('victim@example.com').toString('base64url') + signature;
 
-    assert.equal(res.statusCode, 422, `expected 422 for ${JSON.stringify(email)}`);
-    assert.equal(res.body.code, 'invalid_email');
-  }
-
-  assert.equal(calls.length, 0);
+  assert.equal(tokens.readToken(forged), '', 'a swapped address must not verify');
 });
 
-test('subscribe accepts a honeypot submission without forwarding it', async () => {
+test('tokens signed with a different secret are refused', () => {
   configure();
-  const calls = stubBeehiiv({});
+  const token = tokens.createToken('someone@example.com');
 
-  const res = makeResponse();
-  await subscribe(makeRequest({
-    body: { email: 'bot@spam.example', website: 'http://spam.example' },
-    headers: { 'x-test-ip': '198.51.100.13' },
-  }), res);
-
-  assert.deepEqual(res.body, { ok: true, status: 'active' });
-  assert.equal(calls.length, 0);
+  process.env.NEWSLETTER_SECRET = 'a-different-secret';
+  assert.equal(tokens.readToken(token), '');
 });
 
-test('subscribe rate limits a burst from one address', async () => {
+test('malformed tokens are refused rather than throwing', () => {
   configure();
-  stubBeehiiv({ [SUBSCRIPTIONS]: { payload: { data: { status: 'active' } } } });
 
-  const statuses = [];
-  for (let attempt = 0; attempt < 7; attempt += 1) {
-    const res = makeResponse();
-    await subscribe(makeRequest({
-      body: { email: `burst${attempt}@example.com` },
-      headers: { 'x-test-ip': '198.51.100.99' },
-    }), res);
-    statuses.push(res.statusCode);
-  }
-
-  assert.deepEqual(statuses, [200, 200, 200, 200, 200, 429, 429]);
+  ['', 'no-dot', '.', 'a.b', null, undefined, 42].forEach((value) => {
+    assert.equal(tokens.readToken(value), '');
+  });
 });
 
-test('subscribe turns a provider rejection into invalid_email', async () => {
+/* ------------------------------------------------------------------- urls */
+
+test('SITE_URL wins so links in mail never point at a preview deploy', () => {
+  process.env.SITE_URL = 'https://rikma.binushka.com/';
+  const request = makeRequest({ headers: { host: 'some-preview.vercel.app' } });
+
+  assert.equal(siteUrl(request), 'https://rikma.binushka.com');
+});
+
+test('without SITE_URL the request host is used', () => {
+  const request = makeRequest({ headers: { host: 'example.test', 'x-forwarded-proto': 'https' } });
+  assert.equal(siteUrl(request), 'https://example.test');
+});
+
+test('the unsubscribe link carries a verifiable token', () => {
   configure();
-  stubBeehiiv({ [SUBSCRIPTIONS]: { status: 400, payload: { errors: [{ message: 'bad email' }] } } });
 
-  const res = makeResponse();
-  await subscribe(makeRequest({ body: { email: 'x@example.com' }, headers: { 'x-test-ip': '198.51.100.14' } }), res);
+  const url = new URL(unsubscribeUrl('https://example.test', 'someone@example.com'));
 
-  assert.equal(res.statusCode, 422);
-  assert.equal(res.body.code, 'invalid_email');
+  assert.equal(url.pathname, '/api/newsletter/unsubscribe');
+  assert.equal(tokens.readToken(url.searchParams.get('t')), 'someone@example.com');
 });
 
-test('subscribe reports a provider outage as 502', async () => {
+/* ------------------------------------------------------------ mail bodies */
+
+test('markdown becomes HTML', () => {
+  const html = markdownToHtml('## כותרת\n\nטקסט עם [קישור](https://example.test).');
+
+  assert.match(html, /<h2/);
+  assert.match(html, /<a href="https:\/\/example\.test"/);
+});
+
+test('commercial issues are marked as advertising in the subject', () => {
+  const settings = { email: { subject_prefix: 'פרסומת:' } };
+
+  assert.equal(buildSubject({ title: 'גיליון ספטמבר' }, settings), 'פרסומת: גיליון ספטמבר');
+});
+
+test('the advertising prefix is not doubled', () => {
+  const settings = { email: { subject_prefix: 'פרסומת:' } };
+
+  assert.equal(buildSubject({ title: 'פרסומת: כבר מסומן' }, settings), 'פרסומת: כבר מסומן');
+});
+
+test('an issue can opt out of the advertising prefix', () => {
+  const settings = { email: { subject_prefix: 'פרסומת:' } };
+
+  assert.equal(buildSubject({ title: 'עדכון', promotional: false }, settings), 'עדכון');
+});
+
+test('every rendered mail carries the unsubscribe link and the sender identity', () => {
+  const { html, text } = renderIssueEmail({
+    issue: { title: 'גיליון', subtitle: 'תת כותרת', body: 'שלום' },
+    settings: { email: { sender_line: 'בינושקה · rikma.binushka.com', unsubscribe_text: 'להסרה' } },
+    issueUrl: 'https://example.test/newsletter/x/',
+    unsubscribeUrl: 'https://example.test/api/newsletter/unsubscribe?t=abc',
+  });
+
+  assert.match(html, /dir="rtl"/);
+  assert.ok(html.includes('https://example.test/api/newsletter/unsubscribe?t=abc'));
+  assert.ok(html.includes('בינושקה · rikma.binushka.com'));
+  assert.ok(text.includes('https://example.test/api/newsletter/unsubscribe?t=abc'));
+});
+
+test('mail bodies escape values that came from the editor', () => {
+  const { html } = renderIssueEmail({
+    issue: { title: '<script>alert(1)</script>', body: 'x' },
+    settings: { email: {} },
+    issueUrl: 'https://example.test/',
+    unsubscribeUrl: 'https://example.test/u',
+  });
+
+  assert.equal(html.includes('<script>alert(1)</script>'), false);
+  assert.ok(html.includes('&lt;script&gt;'));
+});
+
+/* -------------------------------------------------------------- subscribe */
+
+test('a GET reports whether the deploy has what it needs, without leaking it', async () => {
   configure();
-  stubBeehiiv({ [SUBSCRIPTIONS]: { status: 500, payload: {} } });
-
-  const res = makeResponse();
-  await subscribe(makeRequest({ body: { email: 'x@example.com' }, headers: { 'x-test-ip': '198.51.100.15' } }), res);
-
-  assert.equal(res.statusCode, 502);
-  assert.equal(res.body.code, 'provider_error');
-});
-
-test('subscribe answers 503 while the credentials are missing', async () => {
-  clearCredentials();
-  stubBeehiiv({});
-
-  const res = makeResponse();
-  await subscribe(makeRequest({ body: { email: 'x@example.com' }, headers: { 'x-test-ip': '198.51.100.16' } }), res);
-
-  assert.equal(res.statusCode, 503);
-  assert.equal(res.body.code, 'not_configured');
-});
-
-test('a GET reports whether the deploy has credentials, without leaking them', async () => {
-  configure({ BEEHIIV_DOUBLE_OPT_IN: 'on' });
 
   const res = makeResponse();
   await subscribe(makeRequest({ method: 'GET' }), res);
@@ -208,14 +207,14 @@ test('a GET reports whether the deploy has credentials, without leaking them', a
   assert.equal(res.statusCode, 200);
   assert.deepEqual(res.body, {
     configured: true,
-    hasApiKey: true,
-    hasPublicationId: true,
-    doubleOptIn: 'on',
+    hasSubscriberStore: true,
+    hasSigningSecret: true,
+    hasMailer: false,
   });
   assert.equal(
-    JSON.stringify(res.body).includes('key_test'),
+    JSON.stringify(res.body).includes('secret-for-tests'),
     false,
-    'the env check must never echo the API key',
+    'the env check must never echo a secret',
   );
 });
 
@@ -227,8 +226,7 @@ test('a GET reports an unconfigured deploy', async () => {
 
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.configured, false);
-  assert.equal(res.body.hasApiKey, false);
-  assert.equal(res.body.hasPublicationId, false);
+  assert.equal(res.body.hasSubscriberStore, false);
 });
 
 test('subscribe rejects other methods', async () => {
@@ -241,125 +239,90 @@ test('subscribe rejects other methods', async () => {
   assert.equal(res.headers.allow, 'GET, POST');
 });
 
-test('unsubscribe looks the address up and unsubscribes it', async () => {
-  configure();
-  const calls = stubBeehiiv({
-    [LOOKUP]: { payload: { data: [{ id: 'sub_9', status: 'active' }] } },
-    [`PUT /v2/publications/${PUBLICATION}/subscriptions/sub_9`]: { payload: { data: { status: 'inactive' } } },
-  });
-
-  const res = makeResponse();
-  await unsubscribe(makeRequest({ body: { email: 'Bina@Example.com' }, headers: { 'x-test-ip': '198.51.100.20' } }), res);
-
-  assert.deepEqual(res.body, { ok: true });
-  assert.equal(calls[0].query.email, 'bina@example.com');
-  assert.deepEqual(calls[1].body, { unsubscribe: true });
-});
-
-test('unsubscribe answers ok for an address that is not on the list', async () => {
-  configure();
-  const calls = stubBeehiiv({ [LOOKUP]: { payload: { data: [] } } });
-
-  const res = makeResponse();
-  await unsubscribe(makeRequest({ body: { email: 'ghost@example.com' }, headers: { 'x-test-ip': '198.51.100.21' } }), res);
-
-  assert.deepEqual(res.body, { ok: true });
-  assert.equal(calls.length, 1, 'an unknown address must not trigger a write');
-});
-
-test('unsubscribe leaves an already inactive subscription alone', async () => {
-  configure();
-  const calls = stubBeehiiv({ [LOOKUP]: { payload: { data: [{ id: 'sub_3', status: 'inactive' }] } } });
-
-  const res = makeResponse();
-  await unsubscribe(makeRequest({ body: { email: 'gone@example.com' }, headers: { 'x-test-ip': '198.51.100.22' } }), res);
-
-  assert.deepEqual(res.body, { ok: true });
-  assert.equal(calls.length, 1);
-});
-
-const nowSeconds = Math.floor(Date.now() / 1000);
-const samplePost = (overrides = {}) => ({
-  id: 'post_1',
-  title: 'גיליון ראשון',
-  subtitle: 'תת כותרת',
-  preview_text: 'preview',
-  web_url: 'https://binushka.beehiiv.com/p/first',
-  thumbnail_url: 'https://img.example/x.png',
-  publish_date: nowSeconds - 3600,
-  ...overrides,
-});
-
-test('latest returns a trimmed teaser that the edge can cache', async () => {
-  configure();
-  const calls = stubBeehiiv({ [POSTS]: { payload: { data: [samplePost()] } } });
-
-  const res = makeResponse();
-  await latest(makeRequest({ method: 'GET', url: '/api/newsletter/latest' }), res);
-
-  assert.equal(res.statusCode, 200);
-  assert.equal(res.body.posts.length, 1);
-  assert.deepEqual(
-    Object.keys(res.body.posts[0]).sort(),
-    ['id', 'previewText', 'publishedAt', 'subtitle', 'thumbnail', 'title', 'url'],
-  );
-  assert.match(res.headers['cache-control'], /s-maxage=1800/);
-  assert.equal(calls[0].query.status, 'confirmed');
-  assert.equal(calls[0].query.hidden_from_feed, 'false');
-  assert.equal(calls[0].query.limit, '1');
-});
-
-test('latest withholds a post that is scheduled for the future', async () => {
-  configure();
-  stubBeehiiv({ [POSTS]: { payload: { data: [samplePost({ publish_date: nowSeconds + 86400 })] } } });
-
-  const res = makeResponse();
-  await latest(makeRequest({ method: 'GET', url: '/api/newsletter/latest' }), res);
-
-  assert.deepEqual(res.body.posts, []);
-});
-
-test('latest prefers displayed_date over publish_date', async () => {
-  configure();
-  const displayed = nowSeconds - 7200;
-  stubBeehiiv({ [POSTS]: { payload: { data: [samplePost({ displayed_date: displayed })] } } });
-
-  const res = makeResponse();
-  await latest(makeRequest({ method: 'GET', url: '/api/newsletter/latest' }), res);
-
-  assert.equal(res.body.posts[0].publishedAt, new Date(displayed * 1000).toISOString());
-});
-
-test('latest clamps the requested limit', async () => {
-  configure();
-  const calls = stubBeehiiv({ [POSTS]: { payload: { data: [] } } });
-
-  for (const [requested, expected] of [['3', '3'], ['99', '6'], ['0', '1'], ['-4', '1'], ['abc', '1']]) {
-    const res = makeResponse();
-    await latest(makeRequest({ method: 'GET', url: `/api/newsletter/latest?limit=${requested}` }), res);
-
-    assert.equal(calls.at(-1).query.limit, expected, `limit=${requested}`);
-  }
-});
-
-test('latest returns an empty list rather than an error when unconfigured', async () => {
+test('subscribe reports itself unavailable when unconfigured', async () => {
   clearCredentials();
-  stubBeehiiv({});
 
   const res = makeResponse();
-  await latest(makeRequest({ method: 'GET', url: '/api/newsletter/latest' }), res);
+  await subscribe(makeRequest({ body: { email: 'someone@example.com' } }), res);
 
-  assert.equal(res.statusCode, 200);
-  assert.deepEqual(res.body, { ok: true, posts: [] });
+  assert.equal(res.statusCode, 503);
+  assert.equal(res.body.code, 'not_configured');
 });
 
-test('latest degrades to an empty list when beehiiv is down', async () => {
+test('a filled honeypot is accepted without storing anything', async () => {
   configure();
-  stubBeehiiv({ [POSTS]: { status: 500, payload: {} } });
 
   const res = makeResponse();
-  await latest(makeRequest({ method: 'GET', url: '/api/newsletter/latest' }), res);
+  await subscribe(
+    makeRequest({ body: { email: 'bot@example.com', website: 'http://spam' } }),
+    res,
+  );
 
+  // A bot that is told it failed simply tries again, so this looks like success.
   assert.equal(res.statusCode, 200);
-  assert.deepEqual(res.body.posts, []);
+  assert.deepEqual(res.body, { ok: true, status: 'active' });
+});
+
+test('subscribe rejects a malformed address before touching storage', async () => {
+  configure();
+
+  const res = makeResponse();
+  await subscribe(makeRequest({ body: { email: 'not-an-address' } }), res);
+
+  assert.equal(res.statusCode, 422);
+  assert.equal(res.body.code, 'invalid_email');
+});
+
+/* ------------------------------------------------------------ unsubscribe */
+
+test('unsubscribe rejects other methods', async () => {
+  configure();
+
+  const res = makeResponse();
+  await unsubscribe(makeRequest({ method: 'PUT' }), res);
+
+  assert.equal(res.statusCode, 405);
+  assert.equal(res.headers.allow, 'GET, POST');
+});
+
+test('unsubscribe reports itself unavailable when unconfigured', async () => {
+  clearCredentials();
+
+  const res = makeResponse();
+  await unsubscribe(makeRequest({ body: { email: 'someone@example.com' } }), res);
+
+  assert.equal(res.statusCode, 503);
+});
+
+test('a one-click POST with an unsigned token is refused', async () => {
+  configure();
+
+  const res = makeResponse();
+  await unsubscribe(
+    makeRequest({ method: 'POST', url: '/api/newsletter/unsubscribe?t=forged.0123456789abcdef0123456789abcdef' }),
+    res,
+  );
+
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.code, 'invalid_token');
+});
+
+test('a footer click with no token just lands on the newsletter page', async () => {
+  configure();
+
+  const res = makeResponse();
+  await unsubscribe(makeRequest({ method: 'GET', url: '/api/newsletter/unsubscribe' }), res);
+
+  assert.equal(res.statusCode, 302);
+  assert.equal(res.headers.location, '/newsletter/');
+});
+
+test('unsubscribe rejects a malformed address', async () => {
+  configure();
+
+  const res = makeResponse();
+  await unsubscribe(makeRequest({ body: { email: 'nope' } }), res);
+
+  assert.equal(res.statusCode, 422);
+  assert.equal(res.body.code, 'invalid_email');
 });

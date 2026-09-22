@@ -1,0 +1,17 @@
+{
+  "name": "binushka-rikma",
+  "private": true,
+  "description": "Serverless dependencies for the Vercel functions under api/.",
+  "scripts": {
+    "test": "node --test",
+    "build:catalog": "node scripts/build-catalog.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.0",
+    "marked": "^18.0.14",
+    "nodemailer": "^10.0.10"
+  }
+}

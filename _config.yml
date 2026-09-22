@@ -31,6 +31,9 @@ collections:
   store:
     output: true
     permalink: /store/:slug
+  newsletter:
+    output: true
+    permalink: /newsletter/:slug
 
 # Pages Path
 defaults:
@@ -58,6 +61,11 @@ defaults:
       type: "store"
     values:
       layout: "store-item"
+  - scope:
+      path: ""
+      type: "newsletter"
+    values:
+      layout: "newsletter-issue"
 
 sass:
   sass_dir: _sass

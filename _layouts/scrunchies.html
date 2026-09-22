@@ -52,7 +52,7 @@ layout: default
       {% for stockist in page.stockists %}
       {% for location in stockist.locations %}
       {% if location.url %}
-      <a class="scrunchies-stockist" href="{{ location.url }}" target="_blank" rel="noopener">
+      <a class="scrunchies-stockist scrunchies-stockist--link" href="{{ location.url }}" target="_blank" rel="noopener">
       {% else %}
       <div class="scrunchies-stockist">
       {% endif %}
@@ -65,6 +65,9 @@ layout: default
         </div>
         <h3 class="scrunchies-stockist__name">{{ location.name }}</h3>
         <p class="scrunchies-stockist__city">{{ stockist.city }}</p>
+        {% if location.url %}
+        <p class="scrunchies-stockist__link">{% if location.url contains 'instagram' %}לאינסטגרם{% else %}לאתר{% endif %}</p>
+        {% endif %}
       {% if location.url %}
       </a>
       {% else %}

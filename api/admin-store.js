@@ -160,6 +160,7 @@ function tracksInventory(page) {
 function applyStockFlags(input) {
   const next = { ...input };
   if (next.stock === 0) next.out_of_stock = true;
+  else if (next.stock != null && Number(next.stock) > 0) next.out_of_stock = false;
   return next;
 }
 
@@ -756,7 +757,7 @@ function decrementPageStock(raw, slug, quantity) {
   return applyPage(raw, {
     ...page,
     stock: nextStock,
-    out_of_stock: nextStock === 0 ? true : page.out_of_stock,
+    out_of_stock: nextStock === 0,
   });
 }
 

@@ -518,6 +518,15 @@
     }
   }
 
+  /** Quantity drives «אזל מהמלאי»: 0 → on, >0 → off; empty/untracked leaves the flag alone. */
+  function syncEditorOutOfStock(stock, fallback) {
+    var box = document.getElementById('admin-out-of-stock');
+    if (!box) return;
+    if (stock === 0 || stock === '0') box.checked = true;
+    else if (stock != null && stock !== '' && Number(stock) > 0) box.checked = false;
+    else if (fallback != null) box.checked = Boolean(fallback);
+  }
+
   function fillEditor(product, isNew) {
     editingNew = Boolean(isNew);
     editorTitle.textContent = isNew ? 'מוצר חדש' : 'עריכת ' + (product.title || product.slug);
@@ -542,7 +551,7 @@
       product.stock != null && product.stock !== '' ? product.stock : '';
     document.getElementById('admin-stock').disabled =
       product.kind === 'variable' || product.kind === 'content' || product.slug === 'gift-card';
-    document.getElementById('admin-out-of-stock').checked = Boolean(product.out_of_stock);
+    syncEditorOutOfStock(product.stock, Boolean(product.out_of_stock));
     document.getElementById('admin-limited-stock').checked = Boolean(product.limited_stock);
     document.getElementById('admin-hide').checked = Boolean(product.hide);
     renderVariants(product.variants);
@@ -560,6 +569,9 @@
       kind === 'variable' || kind === 'content' || slugInput.value.trim().toLowerCase() === 'gift-card'
         ? null
         : stockRaw;
+    var outOfStock = document.getElementById('admin-out-of-stock').checked;
+    if (stock === 0 || stock === '0') outOfStock = true;
+    else if (stock != null && stock !== '' && Number(stock) > 0) outOfStock = false;
     return {
       slug: slugInput.value.trim().toLowerCase(),
       title: document.getElementById('admin-title').value,
@@ -576,7 +588,7 @@
       variants: readVariants(),
       body: document.getElementById('admin-body').value,
       stock: stock,
-      out_of_stock: document.getElementById('admin-out-of-stock').checked,
+      out_of_stock: outOfStock,
       limited_stock: document.getElementById('admin-limited-stock').checked,
       hide: document.getElementById('admin-hide').checked,
     };
@@ -993,6 +1005,7 @@
         }
         stockProduct.stock = n;
         if (n === 0) stockProduct.out_of_stock = true;
+        else if (n > 0) stockProduct.out_of_stock = false;
       }
       render();
       return;
@@ -1031,6 +1044,13 @@
   kindSelect.addEventListener('change', function () {
     syncKindFields();
     schedulePreview();
+  });
+
+  document.getElementById('admin-stock').addEventListener('input', function () {
+    syncEditorOutOfStock(this.value);
+  });
+  document.getElementById('admin-stock').addEventListener('change', function () {
+    syncEditorOutOfStock(this.value);
   });
 
   slugInput.addEventListener('input', function () {

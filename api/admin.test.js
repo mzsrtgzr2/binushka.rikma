@@ -181,6 +181,23 @@ test('applyFlags writes stock and marks out of stock at zero', () => {
   assert.match(next, /stock: 0/);
 });
 
+test('applyFlags clears out of stock when quantity is above zero', () => {
+  const soldOut = `---
+title: שועל
+price: ₪220
+out_of_stock: true
+limited_stock: false
+stock: 0
+---
+
+body
+`;
+  const next = admin.applyFlags(soldOut, { out_of_stock: true, limited_stock: false, hide: false, stock: 3 });
+  const product = admin.parseProduct('fox', next);
+  assert.equal(product.stock, 3);
+  assert.equal(product.out_of_stock, false);
+});
+
 test('authenticated save updates stock quantity', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-admin-'));
   fs.mkdirSync(path.join(root, '_store'));

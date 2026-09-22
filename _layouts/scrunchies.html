@@ -45,16 +45,32 @@ layout: default
 <div class="container animate">
   <section class="scrunchies-stockists">
     <h2 class="scrunchies-stockists__title">{{ page.stockists_title | default: 'איפה אפשר למצוא את הסקראנצ׳י שלי?' }}</h2>
+    {% if page.stockists_subtitle %}
+    <p class="scrunchies-stockists__subtitle">{{ page.stockists_subtitle }}</p>
+    {% endif %}
     <div class="scrunchies-stockists__grid">
       {% for stockist in page.stockists %}
-      <article class="scrunchies-stockists__city">
-        <h3>{{ stockist.city }}</h3>
-        <ul>
-          {% for location in stockist.locations %}
-          <li>{{ location.name }}</li>
-          {% endfor %}
-        </ul>
-      </article>
+      {% for location in stockist.locations %}
+      {% if location.url %}
+      <a class="scrunchies-stockist" href="{{ location.url }}" target="_blank" rel="noopener">
+      {% else %}
+      <div class="scrunchies-stockist">
+      {% endif %}
+        <div class="scrunchies-stockist__logo">
+          {% if location.logo %}
+          <img class="lazy" data-src="{{ location.logo | relative_url }}" alt="{{ location.name }}">
+          {% else %}
+          <span class="scrunchies-stockist__monogram">{{ location.name | slice: 0 }}</span>
+          {% endif %}
+        </div>
+        <h3 class="scrunchies-stockist__name">{{ location.name }}</h3>
+        <p class="scrunchies-stockist__city">{{ stockist.city }}</p>
+      {% if location.url %}
+      </a>
+      {% else %}
+      </div>
+      {% endif %}
+      {% endfor %}
       {% endfor %}
     </div>
   </section>

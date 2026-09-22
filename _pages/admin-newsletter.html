@@ -1,0 +1,119 @@
+---
+layout: admin
+admin_script: admin-newsletter.js
+title: ניהול ניוזלטר
+description: כתיבה, שמירה ושליחה של גיליונות הניוזלטר
+permalink: /admin/newsletter/
+sitemap: false
+noindex: true
+---
+
+<div class="admin-shell">
+  <header class="admin-top">
+    <a class="admin-top__brand" href="{{ '/' | relative_url }}">בינושקה</a>
+    <h1 class="admin-top__title">ניהול ניוזלטר</h1>
+    <button type="button" class="admin-top__logout" id="admin-logout" hidden>יציאה</button>
+  </header>
+
+  <p class="admin-lead">
+    כאן כותבים גיליון, שומרים אותו כטיוטה ושולחים לרשימת התפוצה.
+    כל גיליון נשמר כקובץ באתר, ואחרי שמירה הוא מופיע בארכיון ובטיזר בעמוד הבית.
+    <a href="{{ '/admin/' | relative_url }}">למעבר לניהול החנות</a>
+  </p>
+
+  <form class="admin-login" id="admin-login">
+    <label class="form__label" for="admin-password">סיסמה</label>
+    <input class="form__input" type="password" id="admin-password" name="password" autocomplete="current-password" required>
+    <button type="submit" class="button button--primary">כניסה</button>
+    <p class="admin-message" id="admin-login-message" hidden></p>
+  </form>
+
+  <div class="admin-board" id="admin-board" hidden>
+    <div id="admin-list-view">
+      <div class="admin-toolbar">
+        <p class="admin-message" id="admin-board-message" hidden></p>
+        <div class="admin-toolbar__actions">
+          <button type="button" class="button button--primary" id="admin-new">גיליון חדש</button>
+        </div>
+      </div>
+
+      <p class="admin-hint" id="admin-stats"></p>
+      <ul class="admin-list" id="admin-list"></ul>
+    </div>
+
+    <form class="admin-editor" id="admin-editor" hidden>
+      <div class="admin-editor__top">
+        <h2 class="admin-editor__title" id="admin-editor-title">גיליון חדש</h2>
+        <p class="admin-message" id="admin-editor-message" hidden></p>
+      </div>
+
+      <div class="admin-editor__split">
+        <div class="admin-editor__fields">
+          <fieldset class="admin-fieldset">
+            <legend>תוכן הגיליון</legend>
+
+            <div class="form__group">
+              <label class="form__label" for="issue-title">כותרת</label>
+              <input class="form__input" type="text" id="issue-title" required>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="issue-subtitle">תת כותרת</label>
+              <input class="form__input" type="text" id="issue-subtitle">
+              <p class="admin-hint">מופיעה מתחת לכותרת במייל ובכרטיס הטיזר.</p>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="issue-thumbnail">תמונה ראשית</label>
+              <input class="form__input" type="text" id="issue-thumbnail" placeholder="/images/gallery/fox.png">
+              <p class="admin-hint">נתיב לתמונה שכבר קיימת באתר. אפשר להשאיר ריק.</p>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="issue-body">גוף הגיליון (Markdown)</label>
+              <textarea class="form__input admin-markdown" id="issue-body" rows="18"
+                        placeholder="## כותרת משנה&#10;&#10;פסקה רגילה.&#10;&#10;- פריט&#10;- עוד פריט&#10;&#10;[טקסט הקישור](https://example.com)"></textarea>
+              <p class="admin-hint">
+                <code>##</code> כותרת · <code>**מודגש**</code> · <code>- </code> רשימה ·
+                <code>[טקסט](כתובת)</code> קישור · <code>![](/images/x.png)</code> תמונה
+              </p>
+            </div>
+
+            <label class="admin-check">
+              <input type="checkbox" id="issue-promotional" checked>
+              גיליון פרסומי — יתווסף "פרסומת:" לנושא המייל, כנדרש בחוק
+            </label>
+          </fieldset>
+
+          <fieldset class="admin-fieldset">
+            <legend>שליחה</legend>
+
+            <p class="admin-hint" id="issue-send-state"></p>
+
+            <div class="form__group">
+              <label class="form__label" for="issue-test-to">שליחת בדיקה לכתובת אחת</label>
+              <div class="newsletter-signup__field">
+                <input class="form__input" type="email" id="issue-test-to" placeholder="you@example.com">
+                <button type="button" class="button" id="issue-send-test">שליחת בדיקה</button>
+              </div>
+              <p class="admin-hint">לא משנה את סטטוס הגיליון ולא נשלח לאף אחד אחר.</p>
+            </div>
+
+            <button type="button" class="button button--primary" id="issue-send">שליחה לכל הרשימה</button>
+          </fieldset>
+        </div>
+
+        <aside class="admin-preview">
+          <p class="admin-preview__label">תצוגה מקדימה</p>
+          <div class="admin-preview__page admin-preview__email" id="issue-preview"></div>
+        </aside>
+      </div>
+
+      <div class="admin-editor__actions">
+        <button type="submit" class="button button--primary" id="issue-save">שמירה</button>
+        <button type="button" class="button" id="admin-editor-cancel">חזרה</button>
+        <button type="button" class="admin-delete" id="admin-editor-delete" hidden>מחיקת הטיוטה</button>
+      </div>
+    </form>
+  </div>
+</div>

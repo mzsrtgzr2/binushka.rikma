@@ -410,6 +410,21 @@
     return p.price_display || '';
   }
 
+  function productCardImage(p) {
+    if (p && p.image) return p.image;
+    var variants = (p && p.variants) || [];
+    for (var i = 0; i < variants.length; i++) {
+      var row = variants[i];
+      if (!row) continue;
+      if (row.image) return typeof row.image === 'string' ? row.image : row.image.path || row.image.preview || '';
+      if (row.images && row.images.length) {
+        var first = row.images[0];
+        return typeof first === 'string' ? first : (first && (first.path || first.preview)) || '';
+      }
+    }
+    return '';
+  }
+
   function savedMessage(data, fallback) {
     if (data && data.target === 'local') {
       return fallback || 'נשמר. רענון החנות יופיע אחרי שהאתר נבנה מחדש.';
@@ -420,8 +435,9 @@
   function render() {
     listEl.innerHTML = products
       .map(function (p) {
-        var img = p.image
-          ? '<img class="admin-card__thumb" src="' + escapeHtml(p.image) + '" alt="">'
+        var thumb = productCardImage(p);
+        var img = thumb
+          ? '<img class="admin-card__thumb" src="' + escapeHtml(thumb) + '" alt="">'
           : '<span class="admin-card__thumb admin-card__thumb--empty"></span>';
         var price = priceLabel(p);
         return (
@@ -1283,7 +1299,7 @@
         return item.preview || item.path || '';
       })
       .filter(Boolean);
-    data.image = photos[0] || '';
+    data.image = photos[0] || productCardImage(data) || '';
     data.gallery = photos.slice(1);
     data.price = displayPriceFor(data);
     return data;

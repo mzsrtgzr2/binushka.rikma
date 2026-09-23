@@ -2,6 +2,7 @@
 title: חישוקי רקמה מעץ אשוח במגוון גדלים
 date: 2026-09-23 12:50:00 +0000
 subtitle: של חברת VOG
+image: /images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg
 price: ₪35
 out_of_stock: false
 limited_stock: false

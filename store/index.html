@@ -54,6 +54,14 @@ layout: default
       {% endif %}
       {% assign slug = item.slug | default: item.basename %}
       {% assign cart_meta = site.data.catalog[slug] %}
+      {% assign card_image = item.image %}
+      {% if card_image == blank and item.variants %}
+        {% for variant_pair in item.variants %}
+          {% if card_image == blank and variant_pair[1].image and variant_pair[1].image != blank %}
+            {% assign card_image = variant_pair[1].image %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
       {% assign sort_price = 0 %}
       {% if cart_meta.variable and cart_meta.min_price %}
         {% assign sort_price = cart_meta.min_price %}
@@ -91,7 +99,9 @@ layout: default
       >
         <div class="store-item__content">
           <a href="{{item.url}}" class="store-item__image">
-            <img class="lazy" data-src="{{ item.image }}" alt="{{ item.title }}">
+            {% if card_image and card_image != blank %}
+            <img class="lazy" data-src="{{ card_image }}" alt="{{ item.title }}">
+            {% endif %}
             {% if sold_out %}
               <div class="out-of-stock">אזל מהמלאי</div>
             {% elsif item.limited_stock %}

@@ -902,6 +902,49 @@ test('upsert writes uploaded variant images into the catalog', async () => {
   const md = fs.readFileSync(path.join(root, '_store', 'bands.md'), 'utf8');
   assert.match(md, /variants:/);
   assert.match(md, /price: 30/);
+  const product = admin.parseProduct('bands', md);
+  assert.equal(product.image, catalog.bands.variants.small.image);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('variant-only photos fill the product main image for the store grid', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'hoops-test',
+        title: 'חישוקים לבדיקה',
+        kind: 'variants',
+        photos: [],
+        variants: [
+          {
+            id: '13',
+            name: '13 ס״מ',
+            price: 35,
+            image: {
+              upload: {
+                filename: 'hoop.png',
+                mime: 'image/png',
+                data: `data:image/png;base64,${TINY_PNG}`,
+              },
+            },
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200, created.json.error || '');
+  const md = fs.readFileSync(path.join(root, '_store', 'hoops-test.md'), 'utf8');
+  const product = admin.parseProduct('hoops-test', md);
+  assert.match(product.image, /^\/images\/store\/hoops-test\/hoop-/);
+  assert.match(md, /^image:\s*\/images\/store\/hoops-test\/hoop-/m);
+  assert.equal(product.variants[0].image, product.image);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

@@ -578,13 +578,35 @@ function prepareVariants(raw) {
   return { fields: { variants }, files };
 }
 
+function firstVariantImage(variants) {
+  if (!Array.isArray(variants)) return '';
+  for (const row of variants) {
+    const list = variantPhotoList(row);
+    if (list[0]) return list[0];
+  }
+  return '';
+}
+
 function prepareProductMedia(raw) {
   const photos = preparePhotos(raw);
   if (photos.error) return photos;
   const variants = prepareVariants(raw);
   if (variants.error) return variants;
+  const fields = { ...photos.fields, ...variants.fields };
+  // Variant-only products often have no product-level photos; use the first
+  // variant image so the store grid / cart thumb is not blank.
+  const hasMain =
+    Boolean(fields.image) || (Array.isArray(fields.photos) && fields.photos.length > 0);
+  if (!hasMain) {
+    const fromVariant = firstVariantImage(fields.variants);
+    if (fromVariant) {
+      fields.image = fromVariant;
+      fields.photos = [fromVariant];
+      if (!Array.isArray(fields.gallery)) fields.gallery = [];
+    }
+  }
   return {
-    fields: { ...photos.fields, ...variants.fields },
+    fields,
     files: [...photos.files, ...variants.files],
   };
 }
@@ -699,13 +721,16 @@ function parsePage(slug, raw) {
   else if (variable) kind = 'variable';
   else if (variants.length) kind = 'variants';
   else if (cartPrice > 0) kind = 'fixed';
-  const image = String(yamlValue(yaml, 'image') || '')
+  let image = String(yamlValue(yaml, 'image') || '')
     .replace(/^['"]|['"]$/g, '')
     .trim();
   const heroImage = String(yamlValue(yaml, 'hero_image') || '')
     .replace(/^['"]|['"]$/g, '')
     .trim();
   const gallery = parseGallery(yaml);
+  if (!image) {
+    image = firstVariantImage(variants);
+  }
   const stock = yamlStock(yaml);
   const perVariant = kind === 'variants' && variantsTrackStock(variants);
   const variantStocks = perVariant
@@ -764,12 +789,19 @@ function applyPage(raw, input, { isNew } = {}) {
   let yaml = parts.yaml;
   yaml = setYamlScalar(yaml, 'title', input.title);
   yaml = setYamlScalar(yaml, 'subtitle', input.subtitle);
+  let photos = uniquePhotos(
+    Array.isArray(input.photos) ? input.photos : [input.image, ...(input.gallery || [])]
+  );
+  if (!photos.length && input.kind === 'variants') {
+    const fromVariant = firstVariantImage(input.variants);
+    if (fromVariant) photos = [fromVariant];
+  }
   const hasPhotoInput =
-    Array.isArray(input.photos) || input.image || (input.gallery && input.gallery.length);
+    Array.isArray(input.photos) ||
+    input.image ||
+    (input.gallery && input.gallery.length) ||
+    photos.length > 0;
   if (hasPhotoInput) {
-    const photos = uniquePhotos(
-      Array.isArray(input.photos) ? input.photos : [input.image, ...(input.gallery || [])]
-    );
     const main = photos[0] || '';
     yaml = setYamlScalar(yaml, 'image', main);
     if (input.slug === 'scrunchies') {
@@ -1241,6 +1273,7 @@ module.exports = {
   preparePhotos,
   prepareVariants,
   prepareProductMedia,
+  firstVariantImage,
   uniquePhotos,
   photosFromParsed,
   MAX_PHOTOS,

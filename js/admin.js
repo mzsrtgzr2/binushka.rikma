@@ -158,6 +158,12 @@
     return 'דף בלי סל';
   }
 
+  function categoryLabel(p) {
+    if (p.category === 'embroidery-supplies') return 'ציוד רקמה';
+    if (p.category === 'works-for-sale') return 'עבודות למכירה';
+    return '';
+  }
+
   function priceLabel(p) {
     if (p.kind === 'variable') {
       if (p.min_price && p.max_price) return '₪' + p.min_price + ' – ₪' + p.max_price;
@@ -208,6 +214,7 @@
           '</div>' +
           '<p class="admin-card__meta">' +
           escapeHtml(kindLabel(p)) +
+          (categoryLabel(p) ? ' · ' + escapeHtml(categoryLabel(p)) : '') +
           (price ? ' · ' + escapeHtml(price) : '') +
           '</p>' +
           '<label class="admin-stock">כמות במלאי' +
@@ -665,6 +672,7 @@
     renderPhotos();
     kindSelect.value = product.kind || 'fixed';
     kindSelect.disabled = product.slug === 'gift-card' || product.slug === 'scrunchies';
+    document.getElementById('admin-category').value = product.category || '';
     document.getElementById('admin-cart-price').value = product.cart_price > 0 ? product.cart_price : '';
     document.getElementById('admin-min-price').value = product.min_price > 0 ? product.min_price : '';
     document.getElementById('admin-max-price').value = product.max_price > 0 ? product.max_price : '';
@@ -704,6 +712,7 @@
         return { path: item.path };
       }),
       kind: kind,
+      category: document.getElementById('admin-category').value,
       cart_price: document.getElementById('admin-cart-price').value,
       min_price: document.getElementById('admin-min-price').value,
       max_price: document.getElementById('admin-max-price').value,

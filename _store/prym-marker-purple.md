@@ -7,6 +7,7 @@ price: ₪30
 out_of_stock: false
 limited_stock: false
 hide: false
+category: embroidery-supplies
 cart_price: 30
 ---
 

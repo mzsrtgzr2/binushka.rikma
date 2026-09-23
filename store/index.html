@@ -10,6 +10,14 @@ layout: default
 
 <div class="store-page container animate">
   <div class="store-toolbar">
+    <label class="store-toolbar__sort" for="store-category">
+      <span class="store-toolbar__label">קטגוריה</span>
+      <select id="store-category" class="store-toolbar__select" name="store-category">
+        <option value="" selected>הכל</option>
+        <option value="embroidery-supplies">ציוד רקמה</option>
+        <option value="works-for-sale">עבודות למכירה</option>
+      </select>
+    </label>
     <label class="store-toolbar__sort" for="store-sort">
       <span class="store-toolbar__label">מיון לפי</span>
       <select id="store-sort" class="store-toolbar__select" name="store-sort">
@@ -76,6 +84,7 @@ layout: default
       <article
         class="store-item col col-4 col-d-6 col-t-12"
         data-product-id="{{ slug }}"
+        data-category="{{ item.category }}"
         data-price="{{ sort_price }}"
         data-sold-out="{% if sold_out %}true{% else %}false{% endif %}"
         data-date="{{ item.date | date: '%s' }}"

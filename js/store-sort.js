@@ -1,6 +1,7 @@
 (function () {
   var grid = document.getElementById('store-grid');
   var select = document.getElementById('store-sort');
+  var categorySelect = document.getElementById('store-category');
   if (!grid || !select) return;
 
   function productPrice(el) {
@@ -62,6 +63,16 @@
     return productDate(a) - productDate(b);
   }
 
+  function applyCategoryFilter() {
+    var category = categorySelect ? categorySelect.value || '' : '';
+    var items = grid.querySelectorAll('.store-item');
+    items.forEach(function (el) {
+      var match = !category || el.getAttribute('data-category') === category;
+      if (match) el.removeAttribute('hidden');
+      else el.setAttribute('hidden', '');
+    });
+  }
+
   function applySort() {
     var mode = select.value || 'default';
     var items = Array.prototype.slice.call(grid.querySelectorAll('.store-item'));
@@ -75,10 +86,12 @@
 
   function refresh() {
     syncFromLiveCatalog();
+    applyCategoryFilter();
     applySort();
   }
 
   select.addEventListener('change', applySort);
+  if (categorySelect) categorySelect.addEventListener('change', applyCategoryFilter);
   window.addEventListener('binushka:stock', refresh);
   window.addEventListener('binushka:prices', refresh);
 

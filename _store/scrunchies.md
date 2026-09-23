@@ -10,6 +10,7 @@ model_image: /images/scrunchies/lifestyle-01.jpeg
 form_url: https://pay.grow.link/cfbcac8807a8d68eaaf19f4ec11024d7-MzMyNDczNQ
 price: "₪30 – ₪85"
 hide: false
+category: works-for-sale
 variants:
   regular:
     name: "סקראנצ'י גודל רגיל"

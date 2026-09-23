@@ -20,6 +20,20 @@ const LOW_STOCK_AT = 3;
 /** Workshop catalog ids are namespaced so they cannot collide with shop slugs. */
 const WORKSHOP_PREFIX = 'workshop-';
 
+/** Shop product categories (slug → Hebrew label). Empty means uncategorized. */
+const PRODUCT_CATEGORIES = {
+  'embroidery-supplies': 'ציוד רקמה',
+  'works-for-sale': 'עבודות למכירה',
+};
+
+function normalizeCategory(raw) {
+  const value = String(raw == null ? '' : raw)
+    .trim()
+    .toLowerCase();
+  if (!value) return '';
+  return Object.prototype.hasOwnProperty.call(PRODUCT_CATEGORIES, value) ? value : '';
+}
+
 function splitFrontMatter(raw) {
   const text = String(raw || '').replace(/^\uFEFF/, '');
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
@@ -657,6 +671,7 @@ function parsePage(slug, raw) {
     image,
     price_display: yamlValue(yaml, 'price') || '',
     body: parts.body.replace(/^\n/, ''),
+    category: normalizeCategory(yamlValue(yaml, 'category')),
     out_of_stock: yamlValue(yaml, 'out_of_stock') === true || stock === 0,
     limited_stock: yamlValue(yaml, 'limited_stock') === true || isLowStock(stock),
     hide: yamlValue(yaml, 'hide') === true,
@@ -714,6 +729,7 @@ function applyPage(raw, input, { isNew } = {}) {
     yaml = setYamlScalar(yaml, 'price', '');
   }
   const withFlags = applyStockFlags(input);
+  yaml = setYamlScalar(yaml, 'category', normalizeCategory(input.category));
   yaml = setYamlBool(yaml, 'out_of_stock', Boolean(withFlags.out_of_stock));
   yaml = setYamlBool(yaml, 'limited_stock', Boolean(withFlags.limited_stock));
   yaml = setYamlBool(yaml, 'hide', Boolean(withFlags.hide));
@@ -814,6 +830,12 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   const stockParsed = parseStock(raw && raw.stock);
   if (stockParsed.error) return { error: stockParsed.error };
 
+  const categoryRaw = String((raw && raw.category) || '').trim();
+  const category = normalizeCategory(categoryRaw);
+  if (categoryRaw && !category) {
+    return { error: 'קטגוריה לא מוכרת' };
+  }
+
   const input = applyStockFlags({
     slug,
     title,
@@ -822,6 +844,7 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     gallery: Array.isArray(raw && raw.gallery) ? uniquePhotos(raw.gallery) : [],
     photos: Array.isArray(raw && raw.photos) ? uniquePhotos(raw.photos) : undefined,
     body: raw && raw.body != null ? String(raw.body) : '',
+    category,
     stock: stockParsed.stock,
     out_of_stock: Boolean(raw && raw.out_of_stock),
     limited_stock: Boolean(raw && raw.limited_stock),
@@ -1068,6 +1091,8 @@ module.exports = {
   WORKSHOP_CATALOG_FILES,
   WORKSHOP_PREFIX,
   LOW_STOCK_AT,
+  PRODUCT_CATEGORIES,
+  normalizeCategory,
   splitFrontMatter,
   yamlValue,
   setYamlBool,

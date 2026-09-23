@@ -6,6 +6,13 @@
     "shipping": false,
     "stock": 0
   },
+  "workshop-bar-14-10": {
+    "name": "בוקר פינוק לאמהות — ב14.10 עם בר גרנות",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 10
+  },
   "workshop-monthly-meeting": {
     "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",
     "price": 110,

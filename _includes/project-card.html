@@ -28,9 +28,15 @@
       {% endif %}
       {% if booking_in_cart %}
       <div class="project__footer">
+        {% if workshop.variants %}
+        <div class="project__price">מ־₪{{ workshop.price }}</div>
+        {% else %}
         <div class="project__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</div>
+        {% endif %}
         {% if sold_out %}
         <span class="project__sold-out">אין מקומות פנויים</span>
+        {% elsif workshop.variants %}
+        <a href="{{ project.url }}" class="button button--primary project__add">הרשמה לסדנה</a>
         {% else %}
         <button type="button" class="button button--primary project__add" data-cart-add="{{ workshop_id }}">
           הרשמה לסדנה

@@ -916,6 +916,7 @@ function parseWorkshopPage(slug, raw) {
   const registrationFull = yamlValue(yaml, 'registration_full') === true;
   const spots = yamlStock(yaml, 'spots', 'stock');
   const stock = registrationFull ? 0 : spots;
+  const variants = workshopPacks(yaml);
   return {
     slug,
     id: workshopId(slug),
@@ -925,12 +926,33 @@ function parseWorkshopPage(slug, raw) {
     price: yamlNumber(yaml, 'cart_price'),
     spots,
     stock,
+    variants,
     registration_full: registrationFull,
     registration_not_open: yamlValue(yaml, 'registration_not_open') === true,
     hide: yamlValue(yaml, 'hide') === true,
     form_url: unquote(yamlValue(yaml, 'form_url')),
     date: String(yamlValue(yaml, 'date') || '').trim(),
   };
+}
+
+/**
+ * Optional packs on a workshop: one price for one place, another for two
+ * together, and so on. `places` is how many spots that pack uses.
+ */
+function workshopPacks(yaml) {
+  const raw = parseVariantsYaml(yaml);
+  const out = {};
+  Object.keys(raw || {}).forEach((id) => {
+    const price = Number(raw[id].price);
+    if (!(price > 0)) return;
+    const places = Number(raw[id].places);
+    out[id] = {
+      name: String(raw[id].name || id).trim() || id,
+      price,
+      places: Number.isInteger(places) && places > 0 ? places : 1,
+    };
+  });
+  return Object.keys(out).length ? out : undefined;
 }
 
 /** Two workshops often share a title, so the date subtitle goes on the invoice line. */
@@ -964,14 +986,20 @@ function decrementWorkshopPage(raw, slug, quantity) {
 
 function workshopCatalogRow(page) {
   if (!page || page.registration_not_open) return null;
-  if (!(Number(page.price) > 0)) return null;
+  const variants = page.variants && Object.keys(page.variants).length ? page.variants : null;
+  const variantPrices = variants
+    ? Object.values(variants).map((row) => Number(row.price)).filter((n) => n > 0)
+    : [];
+  const price = variantPrices.length ? Math.min(...variantPrices) : Number(page.price);
+  if (!(price > 0)) return null;
   const row = {
     name: workshopName(page),
-    price: Number(page.price),
+    price,
     kind: 'workshop',
     shipping: false,
   };
   if (page.stock != null) row.stock = page.stock;
+  if (variants) row.variants = variants;
   return row;
 }
 
@@ -1058,6 +1086,7 @@ module.exports = {
   workshopId,
   workshopName,
   parseWorkshopPage,
+  workshopPacks,
   applyWorkshopStock,
   decrementWorkshopPage,
   workshopCatalogRow,

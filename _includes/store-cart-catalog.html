@@ -64,6 +64,10 @@
         "variable": false,
         "minPrice": 0,
         "maxPrice": 0
+        {%- if wmeta.variants -%}
+        ,
+        "variants": {{ wmeta.variants | jsonify }}
+        {%- endif -%}
       }
       {%- assign first = false -%}
     {%- endif -%}

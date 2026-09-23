@@ -161,6 +161,35 @@ form_url: https://pay.grow.link/example
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test('workshop packs become catalog variants with places', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-packs-'));
+  writePage(
+    dir,
+    '2022-01-09-bar-14-10',
+    `title: בוקר פינוק לאמהות
+subtitle: ב14.10 עם בר גרנות
+cart_price: 330
+spots: 10
+variants:
+  one:
+    name: משתתפת אחת
+    price: 330
+    places: 1
+  pair:
+    name: שתי משתתפות ביחד
+    price: 600
+    places: 2
+`
+  );
+  const catalog = store.buildWorkshopCatalogFromDir(dir);
+  const row = catalog['workshop-bar-14-10'];
+  assert.equal(row.price, 330);
+  assert.equal(row.variants.one.places, 1);
+  assert.equal(row.variants.pair.price, 600);
+  assert.equal(row.variants.pair.places, 2);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test('applyWorkshopStock writes spots, full, and hide', () => {
   const raw = `---
 title: סדנת רקמה

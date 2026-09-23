@@ -130,6 +130,16 @@ function isWorkshop(product) {
   return Boolean(product) && product.kind === 'workshop';
 }
 
+/** How many participant places one cart unit of this workshop line uses. */
+function workshopPlaces(product, variantId) {
+  if (!isWorkshop(product)) return 1;
+  if (product.variants && variantId) {
+    const n = Number(product.variants[variantId] && product.variants[variantId].places);
+    return Number.isInteger(n) && n > 0 ? n : 1;
+  }
+  return 1;
+}
+
 /**
  * Stock is the number of units in the shop and the number of places in a
  * workshop, so one check covers both — it just has to say it in the right words.
@@ -177,8 +187,16 @@ function buildOrder(rawItems, shippingMethod) {
       return { error: 'כמות לא תקינה' };
     }
 
-    /* Stock is per product, so variants and repeated lines count together. */
-    const wanted = (wantedById.get(id) || 0) + quantity;
+    /* Stock is per product. Workshop packs count by places, not cart units. */
+    let places = 1;
+    if (isWorkshop(product) && product.variants) {
+      const pack = product.variants[raw.variant];
+      if (!pack || !(Number(pack.price) > 0)) {
+        return { error: 'סוג לא תקין' };
+      }
+      places = workshopPlaces(product, raw.variant);
+    }
+    const wanted = (wantedById.get(id) || 0) + places * quantity;
     wantedById.set(id, wanted);
     const inv = BUNDLED_INVENTORY[id] || {};
     const liveStock = Number.isInteger(inv.stock) ? inv.stock : product.stock;
@@ -203,6 +221,11 @@ function buildOrder(rawItems, shippingMethod) {
       }
       price = amount;
       description = `${product.name} — ₪${amount}`;
+    } else if (isWorkshop(product) && product.variants) {
+      const pack = product.variants[raw.variant];
+      price = Number(pack.price);
+      description = `${product.name} — ${pack.name}`;
+      kind = 'workshop';
     } else if (product.variants) {
       const variant = product.variants[raw.variant];
       if (!variant || !(Number(variant.price) > 0)) {
@@ -222,6 +245,7 @@ function buildOrder(rawItems, shippingMethod) {
       currency: 'ILS',
     };
     if (kind) line.kind = kind;
+    if (isWorkshop(product)) line.places = places;
     lines.push(line);
   }
 
@@ -316,6 +340,7 @@ module.exports = {
   PRODUCTS,
   SHIPPING,
   shippingPrice,
+  workshopPlaces,
   buildOrder,
   fallbackPriceBook,
   inventoryFromStoreDir,

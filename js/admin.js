@@ -238,7 +238,23 @@
           var img = w.image
             ? '<img class="admin-card__thumb" src="' + escapeHtml(w.image) + '" alt="">'
             : '<span class="admin-card__thumb admin-card__thumb--empty"></span>';
-          var price = w.price > 0 ? '₪' + w.price : '';
+          var price = '';
+          if (w.variants) {
+            var packPrices = Object.keys(w.variants)
+              .map(function (id) {
+                return Number(w.variants[id] && w.variants[id].price);
+              })
+              .filter(function (n) {
+                return n > 0;
+              });
+            if (packPrices.length) {
+              var pmin = Math.min.apply(null, packPrices);
+              var pmax = Math.max.apply(null, packPrices);
+              price = pmin === pmax ? '₪' + pmin : '₪' + pmin + ' – ₪' + pmax;
+            }
+          } else if (w.price > 0) {
+            price = '₪' + w.price;
+          }
           var meta = ['סדנה'];
           if (w.subtitle) meta.push(w.subtitle);
           if (price) meta.push(price);

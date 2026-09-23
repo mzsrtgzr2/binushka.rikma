@@ -171,6 +171,24 @@ test('gift packing appears on payment income descriptions', () => {
   );
 });
 
+test('a pair pack is one income line at the discounted price', () => {
+  const order = buildOrder([{ id: 'workshop-bar-14-10', quantity: 1, variant: 'pair' }], 'none');
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: {},
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(payload.income.length, 1);
+  assert.equal(payload.income[0].quantity, 1);
+  assert.equal(payload.income[0].price, 600);
+  assert.match(payload.income[0].description, /שתי משתתפות ביחד/);
+  assert.equal(payload.amount, 600);
+});
+
 test('workshop places become income lines without shipping', () => {
   const order = applyWorkshopNote(
     buildOrder([{ id: 'workshop-rehovot-04-12', quantity: 2 }], 'none'),

@@ -30,7 +30,11 @@ layout: default
     {% endif %}
 
     {% if booking_in_cart %}
+      {% if workshop.variants %}
+      <div class="project-price">מ־₪{{ workshop.price }} למשתתפת</div>
+      {% else %}
       <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> למשתתפת</div>
+      {% endif %}
     {% endif %}
   </div>
 
@@ -50,18 +54,40 @@ layout: default
       <div class="col-12">
         {% if booking_in_cart %}
         <div class="workshop-booking">
+          {% unless workshop.variants %}
           <div class="workshop-booking__head">
             <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>
             <span class="workshop-booking__per">למשתתפת</span>
           </div>
+          {% endunless %}
           <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil %} hidden{% endif %}>
             {%- if spots != nil -%}
               {%- if spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
             {%- endif -%}
           </p>
+          {% if workshop.variants %}
+          <div class="workshop-booking__packs">
+            {% for pack in workshop.variants %}
+            {%- assign pack_places = pack[1].places | default: 1 -%}
+            {%- assign pack_each = pack[1].price | plus: 0 -%}
+            {%- if pack_places > 1 -%}
+              {%- assign pack_full = workshop.price | times: pack_places -%}
+              {%- assign pack_save = pack_full | minus: pack_each -%}
+            {%- endif -%}
+            <button type="button" class="button button--primary workshop-booking__pack" data-cart-add="{{ workshop_id }}" data-cart-variant="{{ pack[0] }}">
+              <span class="workshop-booking__pack-name">{{ pack[1].name }}</span>
+              <span class="workshop-booking__pack-price">₪{{ pack[1].price }}</span>
+              {% if pack_places > 1 and pack_save > 0 %}
+              <span class="workshop-booking__pack-save">חוסכות ₪{{ pack_save }}</span>
+              {% endif %}
+            </button>
+            {% endfor %}
+          </div>
+          {% else %}
           <button type="button" class="button button--primary section-button" data-cart-add="{{ workshop_id }}">
             הרשמי לסדנה זו
           </button>
+          {% endif %}
           <p class="workshop-booking__note">
             ההרשמה עוברת לסל הקניות — אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.
           </p>

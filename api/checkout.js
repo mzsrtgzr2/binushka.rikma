@@ -162,7 +162,12 @@ function buildIncomeRows(lines, incomeVatType) {
 function inventoryPurchases(order) {
   return (order && order.lines ? order.lines : [])
     .filter((line) => line && line.id && Number(line.quantity) > 0)
-    .map((line) => ({ slug: line.id, quantity: Number(line.quantity) }));
+    .map((line) => {
+      const packs = Number(line.quantity);
+      const places = Number(line.places);
+      const each = Number.isInteger(places) && places > 0 ? places : 1;
+      return { slug: line.id, quantity: packs * each };
+    });
 }
 
 async function reserveInventory(env, order) {

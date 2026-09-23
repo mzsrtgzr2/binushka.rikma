@@ -64,6 +64,38 @@
     box-sizing: border-box;
   }
 
+  .workshop-booking__packs {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .workshop-booking__pack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0;
+    padding: 16px 18px;
+    line-height: 1.3;
+  }
+
+  .workshop-booking__pack-name {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .workshop-booking__pack-price {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .workshop-booking__pack-save {
+    font-size: 13px;
+    font-weight: 600;
+    color: #067647;
+  }
+
   .workshop-booking__note {
     margin: 16px 0 0;
     font-size: 14px;

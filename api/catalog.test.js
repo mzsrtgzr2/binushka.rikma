@@ -199,6 +199,52 @@ test('mothers morning with Bar is in the cart catalog at ₪330', () => {
   assert.equal(workshop.price, 330);
   assert.equal(workshop.stock, 10);
   assert.match(workshop.name, /בוקר פינוק לאמהות/);
+  assert.equal(workshop.variants.one.price, 330);
+  assert.equal(workshop.variants.one.places, 1);
+  assert.equal(workshop.variants.pair.price, 600);
+  assert.equal(workshop.variants.pair.places, 2);
+});
+
+test('a pair pack is ₪600 and uses two workshop places', () => {
+  const order = buildOrder([{ id: 'workshop-bar-14-10', quantity: 1, variant: 'pair' }], 'none');
+  assert.equal(order.error, undefined);
+  assert.equal(order.total, 600);
+  assert.equal(order.lines[0].kind, 'workshop');
+  assert.equal(order.lines[0].places, 2);
+  assert.equal(order.lines[0].price, 600);
+  assert.match(order.lines[0].description, /שתי משתתפות ביחד/);
+});
+
+test('two singles cost more than the pair pack', () => {
+  const two = buildOrder([{ id: 'workshop-bar-14-10', quantity: 2, variant: 'one' }], 'none');
+  assert.equal(two.total, 660);
+  assert.equal(two.lines[0].places, 1);
+});
+
+test('workshop packs count places, not cart units, against spots', () => {
+  const nine = buildOrder(
+    [
+      { id: 'workshop-bar-14-10', quantity: 4, variant: 'pair' },
+      { id: 'workshop-bar-14-10', quantity: 1, variant: 'one' },
+    ],
+    'none'
+  );
+  assert.equal(nine.error, undefined);
+  assert.equal(nine.total, 600 * 4 + 330);
+  assert.match(
+    buildOrder(
+      [
+        { id: 'workshop-bar-14-10', quantity: 5, variant: 'pair' },
+        { id: 'workshop-bar-14-10', quantity: 1, variant: 'one' },
+      ],
+      'none'
+    ).error,
+    /נשארו 10 מקומות/
+  );
+});
+
+test('a workshop pack without a chosen variant is rejected', () => {
+  assert.equal(buildOrder([{ id: 'workshop-bar-14-10', quantity: 1 }], 'none').error, 'סוג לא תקין');
 });
 
 test('a workshop-only order skips shipping', () => {

@@ -299,6 +299,32 @@ body
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('decrementInventory subtracts pack places from workshop spots', async () => {
+  const root = foxRoot();
+  fs.mkdirSync(path.join(root, '_projects'));
+  fs.writeFileSync(
+    path.join(root, '_projects', '2022-01-09-bar-14-10.md'),
+    `---
+title: בוקר פינוק לאמהות
+cart_price: 330
+spots: 10
+---
+
+body
+`
+  );
+  const result = await admin.decrementInventory(authEnv(root), [
+    { id: 'workshop-bar-14-10', quantity: 2 },
+  ]);
+  assert.deepEqual(result.changed, ['workshop-bar-14-10']);
+  const page = require('./admin-store').parseWorkshopPage(
+    'bar-14-10',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-09-bar-14-10.md'), 'utf8')
+  );
+  assert.equal(page.spots, 8);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('assertInventory rejects overselling tracked stock', async () => {
   const root = foxRoot();
   fs.writeFileSync(

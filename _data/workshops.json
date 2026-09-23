@@ -11,7 +11,19 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 10
+    "stock": 10,
+    "variants": {
+      "one": {
+        "name": "משתתפת אחת",
+        "price": 330,
+        "places": 1
+      },
+      "pair": {
+        "name": "שתי משתתפות ביחד",
+        "price": 600,
+        "places": 2
+      }
+    }
   },
   "workshop-monthly-meeting": {
     "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",

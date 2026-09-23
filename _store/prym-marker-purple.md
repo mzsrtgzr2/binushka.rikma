@@ -11,6 +11,7 @@ category: embroidery-supplies
 cart_price: 30
 gallery:
   - /images/store/prym-marker-purple/screenshot-2026-09-23-at-15-10-48-mue2d7ma.png
+  - /images/store/prym-marker-purple/screenshot-2026-09-23-at-23-02-36-muej5m4e.jpg
 ---
 
 בשימוש יום יומי אצלי על בדי הרקמה. מתאים לשימוש על כל הבדים - כותנה, קנבס, חולצות וכו.

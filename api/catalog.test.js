@@ -311,6 +311,36 @@ test('participant names are appended only to workshop lines', () => {
   assert.match(order.lines[1].description, /משתתפות: נועה כהן, מיכל לוי$/);
 });
 
+test('every visible workshop is in the cart at the page price', () => {
+  const store = require('./admin-store');
+  const dir = path.join(__dirname, '..', '_projects');
+  const files = fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
+  const visible = [];
+  const hidden = [];
+  files.forEach((name) => {
+    const raw = fs.readFileSync(path.join(dir, name), 'utf8');
+    const page = store.parseWorkshopPage(store.workshopSlug(name), raw);
+    if (!page) return;
+    if (page.hide) hidden.push({ page, raw });
+    else visible.push({ page, raw });
+  });
+  assert.ok(visible.length >= 9, 'expected the current open workshops to stay listed');
+  assert.ok(hidden.length >= 1);
+  visible.forEach(({ page, raw }) => {
+    const row = PRODUCTS[page.id];
+    assert.ok(row, `${page.slug} should be in the cart catalog`);
+    assert.equal(row.kind, 'workshop');
+    assert.equal(row.price, page.price);
+    assert.equal(row.stock, page.stock);
+    const bodyPrice = store.workshopBodyPrice(raw);
+    assert.ok(bodyPrice > 0, `${page.slug} should list a מחיר on the page`);
+    assert.equal(row.price, bodyPrice, `${page.slug} cart price should match the page`);
+  });
+  hidden.forEach(({ page }) => {
+    assert.equal(PRODUCTS[page.id], undefined, `${page.slug} is hidden and should stay out of the cart`);
+  });
+});
+
 test('gift packing skips workshop lines', () => {
   const order = applyGiftPacking(
     buildOrder(

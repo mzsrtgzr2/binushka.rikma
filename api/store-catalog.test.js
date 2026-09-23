@@ -5,14 +5,14 @@ const os = require('os');
 const path = require('path');
 const store = require('./admin-store');
 
-function writePage(dir, slug, yaml) {
+function writePage(dir, slug, yaml, body = 'body') {
   fs.writeFileSync(
     path.join(dir, `${slug}.md`),
     `---
 ${yaml.replace(/^\n/, '')}
 ---
 
-body
+${body}
 `
   );
 }
@@ -150,6 +150,24 @@ spots: 10
 form_url: https://pay.grow.link/example
 `
   );
+  writePage(
+    dir,
+    '2022-01-09-old-event',
+    `title: סדנה ישנה
+hide: true
+cart_price: 330
+spots: 8
+`
+  );
+  writePage(
+    dir,
+    '2022-01-09-listed-on-page',
+    `title: סדנה מהעמוד
+hide: false
+spots: 6
+`,
+    '**מחיר:** 440 ש"ח למשתתפת\n'
+  );
   const catalog = store.buildWorkshopCatalogFromDir(dir);
   assert.equal(catalog['workshop-rehovot-04-12'].price, 330);
   assert.equal(catalog['workshop-rehovot-04-12'].stock, 12);
@@ -158,6 +176,9 @@ form_url: https://pay.grow.link/example
   assert.equal(catalog['workshop-2022-11-04'].stock, 0);
   assert.equal(catalog['workshop-coming-soon'], undefined);
   assert.equal(catalog['workshop-private-workshop'], undefined);
+  assert.equal(catalog['workshop-old-event'], undefined);
+  assert.equal(catalog['workshop-listed-on-page'].price, 440);
+  assert.equal(catalog['workshop-listed-on-page'].stock, 6);
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

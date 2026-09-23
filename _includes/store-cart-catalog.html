@@ -49,7 +49,7 @@
     {%- assign wslug = project.slug | default: project.basename | remove: '.md' -%}
     {%- assign wid = 'workshop-' | append: wslug -%}
     {%- assign wmeta = workshops[wid] -%}
-    {%- if wmeta and wmeta.enabled != false -%}
+    {%- if wmeta and wmeta.enabled != false and project.hide != true -%}
       {%- unless first -%},{%- endunless -%}
       {
         "id": {{ wid | jsonify }},

@@ -903,9 +903,17 @@ function workshopId(slug) {
   return `${WORKSHOP_PREFIX}${slug}`;
 }
 
+/** First shekel amount on the workshop page (`**מחיר:** 330 …`). */
+function workshopBodyPrice(body) {
+  const match = String(body || '').match(/\*\*מחיר:\*\*\s*(\d+)/);
+  const n = match ? Number(match[1]) : 0;
+  return n > 0 ? n : 0;
+}
+
 /**
- * A workshop is bookable once it has `cart_price`. Until then the page keeps
- * its old `form_url` button.
+ * A workshop is bookable once it has a price. `cart_price` wins; a visible
+ * page can also use the **מחיר:** line so a listed workshop cannot disappear
+ * from the cart. Hidden past events stay on their old `form_url` button.
  */
 function parseWorkshopPage(slug, raw) {
   const parts = splitFrontMatter(raw);
@@ -914,22 +922,25 @@ function parseWorkshopPage(slug, raw) {
   const title = String(yamlValue(yaml, 'title') || slug).trim();
   const subtitle = String(yamlValue(yaml, 'subtitle') || '').trim();
   const registrationFull = yamlValue(yaml, 'registration_full') === true;
+  const hide = yamlValue(yaml, 'hide') === true;
   const spots = yamlStock(yaml, 'spots', 'stock');
   const stock = registrationFull ? 0 : spots;
   const variants = workshopPacks(yaml);
+  const listed = yamlNumber(yaml, 'cart_price');
+  const price = listed > 0 ? listed : hide ? 0 : workshopBodyPrice(parts.body);
   return {
     slug,
     id: workshopId(slug),
     title,
     subtitle,
     image: unquote(yamlValue(yaml, 'image')),
-    price: yamlNumber(yaml, 'cart_price'),
+    price,
     spots,
     stock,
     variants,
     registration_full: registrationFull,
     registration_not_open: yamlValue(yaml, 'registration_not_open') === true,
-    hide: yamlValue(yaml, 'hide') === true,
+    hide,
     form_url: unquote(yamlValue(yaml, 'form_url')),
     date: String(yamlValue(yaml, 'date') || '').trim(),
   };
@@ -985,7 +996,7 @@ function decrementWorkshopPage(raw, slug, quantity) {
 }
 
 function workshopCatalogRow(page) {
-  if (!page || page.registration_not_open) return null;
+  if (!page || page.hide || page.registration_not_open) return null;
   const variants = page.variants && Object.keys(page.variants).length ? page.variants : null;
   const variantPrices = variants
     ? Object.values(variants).map((row) => Number(row.price)).filter((n) => n > 0)
@@ -1086,6 +1097,7 @@ module.exports = {
   workshopId,
   workshopName,
   parseWorkshopPage,
+  workshopBodyPrice,
   workshopPacks,
   applyWorkshopStock,
   decrementWorkshopPage,

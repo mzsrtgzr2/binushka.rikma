@@ -1,5 +1,5 @@
 ---
-title: סט מקורי מבית dmc
+title: סט חוטי רקמה של dmc
 date: 2026-09-23 12:10:00 +0000
 subtitle: 30 גוונים
 image: /images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg
@@ -8,10 +8,10 @@ out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
-gallery:
-  - /images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg
 stock: 1
 cart_price: 130
+gallery:
+  - /images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg
 ---
 
-חוטי כותנה 100% של חברת dmc הצרפתית, סט גוונים שימושי ויפה לרקמת צמחים, יום יום ובגדול הכל :)
+חוטי כותנה 100% של חברת dmc הצרפתית, סט גוונים שימושי ויפה לרקמת צמחים, טבע, יום יום ובגדול הכל :)

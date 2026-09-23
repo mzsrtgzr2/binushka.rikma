@@ -41,6 +41,45 @@ layout: default
   </div>
 </div>
 
+{% if page.stockists %}
+<div class="container animate">
+  <section class="scrunchies-stockists">
+    <h2 class="scrunchies-stockists__title">{{ page.stockists_title | default: 'איפה אפשר למצוא את הסקראנצ׳י שלי?' }}</h2>
+    {% if page.stockists_subtitle %}
+    <p class="scrunchies-stockists__subtitle">{{ page.stockists_subtitle }}</p>
+    {% endif %}
+    <div class="scrunchies-stockists__grid">
+      {% for stockist in page.stockists %}
+      {% for location in stockist.locations %}
+      {% if location.url %}
+      <a class="scrunchies-stockist scrunchies-stockist--link" href="{{ location.url }}" target="_blank" rel="noopener">
+      {% else %}
+      <div class="scrunchies-stockist">
+      {% endif %}
+        <div class="scrunchies-stockist__logo">
+          {% if location.logo %}
+          <img class="lazy" data-src="{{ location.logo | relative_url }}" alt="{{ location.name }}">
+          {% else %}
+          <span class="scrunchies-stockist__monogram">{{ location.name | slice: 0 }}</span>
+          {% endif %}
+        </div>
+        <h3 class="scrunchies-stockist__name">{{ location.name }}</h3>
+        <p class="scrunchies-stockist__city">{{ stockist.city }}</p>
+        {% if location.url %}
+        <p class="scrunchies-stockist__link">{% if location.url contains 'instagram' %}לאינסטגרם{% else %}לאתר{% endif %}</p>
+        {% endif %}
+      {% if location.url %}
+      </a>
+      {% else %}
+      </div>
+      {% endif %}
+      {% endfor %}
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endif %}
+
 {% if page.gallery %}
 <div class="scrunchies-gallery animate">
   {% for img in page.gallery %}
@@ -53,7 +92,7 @@ layout: default
 
 {% assign cart_meta = site.data.catalog.scrunchies %}
 {% if site.data.store-cart.enabled and cart_meta.variants %}
-<div class="container scrunchies-variants-section animate">
+<div class="container scrunchies-variants-section animate" data-product-id="scrunchies">
   <h2 class="scrunchies-variants-section__title">בחרי סוג</h2>
   <p class="scrunchies-variants-section__subtitle">כל סקראנצ'י תפורה בעבודת יד — בצבע ובדגם שתבחרי. בקופה אפשר לרשום איזו דוגמא אהבת.</p>
   <div class="scrunchies-variants">
@@ -64,6 +103,13 @@ layout: default
       {% if v.image %}
       <div class="scrunchies-variant__photo">
         <img class="lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+      </div>
+      {% endif %}
+      {% if v.gallery %}
+      <div class="scrunchies-variant__gallery">
+        {% for gimg in v.gallery %}
+        <img class="lazy" data-src="{{ gimg | relative_url }}" alt="{{ v.name }}">
+        {% endfor %}
       </div>
       {% endif %}
       <h3 class="scrunchies-variant__name">{{ v.name }}</h3>

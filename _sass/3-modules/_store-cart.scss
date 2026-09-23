@@ -154,6 +154,14 @@
 
 .store-cart__line-actions {
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.store-cart__qty-row {
+  display: flex;
   align-items: center;
   gap: 6px;
 }
@@ -171,6 +179,15 @@
 .store-cart__qty-val {
   min-width: 20px;
   text-align: center;
+}
+
+.store-cart__stock-hint {
+  max-width: 11.5rem;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: end;
+  color: var(--text-color);
+  opacity: .72;
 }
 
 .store-cart__empty {
@@ -230,6 +247,19 @@ body.store-cart-open {
   box-shadow: 0 0 0 4px rgba(254, 200, 36, .35);
 }
 
+[data-cart-add].is-stock-limit {
+  opacity: .85;
+}
+
+.store-cart__qty:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.store-cart__line-actions.is-at-max .store-cart__qty:disabled {
+  border-color: rgba(180, 60, 60, .35);
+}
+
 @keyframes store-cart-bump {
   0% { transform: scale(1) rotate(0); }
   28% { transform: scale(1.28) rotate(-10deg); }
@@ -253,12 +283,82 @@ body.store-cart-open {
   }
 }
 
-@media only screen and (max-width: $mobile) {
+/* Mobile / compact layout: floating cart FAB stacked under the WhatsApp floater.
+   WhatsApp bottom offset lives in floater.html (inline styles load after main CSS). */
+@media only screen and (max-width: $desktop) {
+  .store-cart,
+  .store-cart.store-cart--floating {
+    position: fixed;
+    /* Same side as .floating (WhatsApp left: 40px); under it at the bottom */
+    left: 40px;
+    right: auto;
+    bottom: 40px;
+    top: auto;
+    z-index: 1205;
+  }
+
+  .store-cart__toggle {
+    width: 60px;
+    height: 60px;
+    background: var(--brand-color);
+    color: var(--dark);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+    font-size: 30px;
+
+    &:hover {
+      color: var(--dark);
+    }
+  }
+
+  .store-cart__count {
+    top: 0;
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    background: var(--white);
+    color: var(--dark);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+  }
+
   .store-cart__panel {
     position: fixed;
-    top: 88px;
+    top: auto;
+    /* Above WhatsApp + cart stack: 112 + 60 + 12 */
+    bottom: 184px;
     inset-inline-start: 12px;
     inset-inline-end: 12px;
     width: auto;
+    max-height: min(70vh, calc(100vh - 220px));
   }
+}
+
+/* Stock limit feedback: shown when the cart cannot take another unit or place */
+.store-cart-toast {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: 24px;
+  z-index: 1300;
+  margin: 0 auto;
+  max-width: 420px;
+  padding: 12px 18px;
+  border-radius: $global-radius;
+  background: var(--dark);
+  color: var(--white);
+  font-size: 16px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.button.is-sold-out,
+.button[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
 }

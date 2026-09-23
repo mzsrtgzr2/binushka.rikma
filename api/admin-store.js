@@ -1,12 +1,38 @@
 /**
- * Store product markdown helpers. `_store/*.md` front matter is the catalog.
- * JSON under `_data/` and `api/` is generated from those pages.
+ * Catalog markdown helpers.
+ *
+ * `_store/*.md` front matter is the shop catalog and `_projects/*.md` front
+ * matter is the workshop catalog. JSON under `_data/` and `api/` is generated
+ * from those pages.
+ *
+ * Stock is one number for both: units in the shop, participant places in a
+ * workshop (`spots`). Zero means sold out, a small number means "last places".
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
+
+/** A workshop with this many places left (or fewer) is shown as "last places". */
+const LOW_STOCK_AT = 3;
+
+/** Workshop catalog ids are namespaced so they cannot collide with shop slugs. */
+const WORKSHOP_PREFIX = 'workshop-';
+
+/** Shop product categories (slug → Hebrew label). Empty means uncategorized. */
+const PRODUCT_CATEGORIES = {
+  'embroidery-supplies': 'ציוד רקמה',
+  'works-for-sale': 'עבודות למכירה',
+};
+
+function normalizeCategory(raw) {
+  const value = String(raw == null ? '' : raw)
+    .trim()
+    .toLowerCase();
+  if (!value) return '';
+  return Object.prototype.hasOwnProperty.call(PRODUCT_CATEGORIES, value) ? value : '';
+}
 
 function splitFrontMatter(raw) {
   const text = String(raw || '').replace(/^\uFEFF/, '');
@@ -135,6 +161,71 @@ function yamlNumber(yaml, key) {
   return Number.isFinite(n) ? n : 0;
 }
 
+/** Stock quantity: null = not tracked; otherwise integer >= 0. */
+function parseStock(raw) {
+  if (raw === undefined || raw === null || raw === '') return { stock: null };
+  if (typeof raw === 'boolean') return { error: 'כמות מלאי לא תקינה' };
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 0 || n > 99999) return { error: 'כמות מלאי לא תקינה' };
+  return { stock: n };
+}
+
+function yamlStock(yaml, ...keys) {
+  const names = keys.length ? keys : ['stock'];
+  for (const key of names) {
+    const value = yamlValue(yaml, key);
+    if (value === undefined) continue;
+    const parsed = parseStock(value);
+    return parsed.error ? null : parsed.stock;
+  }
+  return null;
+}
+
+/** True when at least one type tracks its own quantity. */
+function variantsTrackStock(variants) {
+  if (Array.isArray(variants)) {
+    return variants.some((row) => row && row.stock != null);
+  }
+  if (!variants || typeof variants !== 'object') return false;
+  return Object.keys(variants).some((id) => variants[id] && variants[id].stock != null);
+}
+
+function tracksInventory(page) {
+  if (!page) return false;
+  if (page.kind === 'variable' || page.kind === 'content' || page.in_cart === false) return false;
+  if (variantsTrackStock(page.variants)) return true;
+  return page.stock != null;
+}
+
+function variantStockList(variants) {
+  if (Array.isArray(variants)) {
+    return variants.map((row) => (row && row.stock != null ? Number(row.stock) : null));
+  }
+  if (!variants || typeof variants !== 'object') return [];
+  return Object.keys(variants).map((id) => {
+    const row = variants[id];
+    return row && row.stock != null ? Number(row.stock) : null;
+  });
+}
+
+function applyStockFlags(input) {
+  const next = { ...input };
+  if (next.kind === 'variants' && variantsTrackStock(next.variants)) {
+    next.stock = null;
+    const stocks = variantStockList(next.variants).filter((n) => n != null);
+    if (stocks.length && stocks.every((n) => n === 0)) next.out_of_stock = true;
+    else if (stocks.some((n) => n > 0)) next.out_of_stock = false;
+    return next;
+  }
+  if (next.stock === 0) next.out_of_stock = true;
+  else if (next.stock != null && Number(next.stock) > 0) next.out_of_stock = false;
+  return next;
+}
+
+function isLowStock(stock) {
+  return stock != null && stock > 0 && stock <= LOW_STOCK_AT;
+}
+
 function stripYamlKeyBlock(yaml, key) {
   const lines = String(yaml).split(/\r?\n/);
   const out = [];
@@ -206,6 +297,7 @@ function parseVariantsYaml(yaml) {
   if (i >= lines.length) return {};
   const out = {};
   let currentId = null;
+  let inGallery = false;
   for (i += 1; i < lines.length; i += 1) {
     const line = lines[i];
     if (line.trim() === '') continue;
@@ -213,14 +305,38 @@ function parseVariantsYaml(yaml) {
     const idMatch = line.match(/^  ([a-z0-9-]+):\s*$/);
     if (idMatch) {
       currentId = idMatch[1];
-      out[currentId] = { name: currentId, price: 0, image: '', description: '' };
+      inGallery = false;
+      out[currentId] = { name: currentId, price: 0, image: '', gallery: [], description: '' };
       continue;
     }
+    if (!currentId) continue;
+    if (/^    gallery:\s*\[\]\s*$/.test(line)) {
+      inGallery = false;
+      out[currentId].gallery = [];
+      continue;
+    }
+    if (/^    gallery:\s*$/.test(line)) {
+      inGallery = true;
+      out[currentId].gallery = out[currentId].gallery || [];
+      continue;
+    }
+    if (inGallery) {
+      const item = line.match(/^      -\s+(\S.*)$/);
+      if (item) {
+        out[currentId].gallery.push(unquote(item[1]));
+        continue;
+      }
+      inGallery = false;
+    }
     const field = line.match(/^    ([a-z_]+):\s*(.*)$/);
-    if (field && currentId) {
+    if (field) {
       const key = field[1];
       const value = unquote(field[2]);
       if (key === 'price') out[currentId].price = Number(value) || 0;
+      else if (key === 'stock') {
+        const parsed = parseStock(value);
+        if (!parsed.error && parsed.stock != null) out[currentId].stock = parsed.stock;
+      } else if (key === 'gallery') out[currentId].gallery = [];
       else out[currentId][key] = value;
     }
   }
@@ -234,10 +350,20 @@ function setYamlVariants(yaml, variants) {
   const lines = ['variants:'];
   ids.forEach((id) => {
     const row = variants[id];
+    const images = uniquePhotos([row.image, ...(row.gallery || []), ...(row.images || [])]);
     lines.push(`  ${id}:`);
     lines.push(`    name: ${formatYamlScalar(row.name || id)}`);
     lines.push(`    price: ${Number(row.price) || 0}`);
-    if (row.image) lines.push(`    image: ${formatYamlScalar(row.image)}`);
+    if (row.stock != null && Number.isInteger(Number(row.stock))) {
+      lines.push(`    stock: ${Number(row.stock)}`);
+    }
+    if (images[0]) lines.push(`    image: ${formatYamlScalar(images[0])}`);
+    if (images.length > 1) {
+      lines.push('    gallery:');
+      images.slice(1).forEach((img) => {
+        lines.push(`      - ${formatYamlScalar(img)}`);
+      });
+    }
     if (row.description) lines.push(`    description: ${formatYamlScalar(row.description)}`);
   });
   return `${next}\n${lines.join('\n')}\n`;
@@ -341,20 +467,22 @@ function asPhotoItems(raw) {
 }
 
 function materializeUpload(slug, upload, nameHint) {
-  if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
+  if (!SLUG_RE.test(slug)) {
+    return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)', field: 'slug' };
+  }
   const decoded = decodeDataUrl(upload && (upload.data || upload.content));
-  if (!decoded) return { error: 'קובץ תמונה לא תקין' };
+  if (!decoded) return { error: 'קובץ תמונה לא תקין', field: 'photos' };
   const mime = String((upload && upload.mime) || decoded.mime || '').toLowerCase();
   const ext = IMAGE_EXT[mime];
-  if (!ext) return { error: 'רק jpg, png, webp או gif' };
+  if (!ext) return { error: 'רק jpg, png, webp או gif', field: 'photos' };
   let buffer;
   try {
     buffer = Buffer.from(decoded.base64, 'base64');
   } catch {
-    return { error: 'קובץ תמונה לא תקין' };
+    return { error: 'קובץ תמונה לא תקין', field: 'photos' };
   }
-  if (!buffer.length) return { error: 'קובץ תמונה ריק' };
-  if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)' };
+  if (!buffer.length) return { error: 'קובץ תמונה ריק', field: 'photos' };
+  if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)', field: 'photos' };
   const filename = safePhotoName((upload && (upload.filename || upload.name)) || nameHint || 'photo', ext);
   const repoPath = `images/store/${slug}/${filename}`;
   return {
@@ -369,7 +497,9 @@ function preparePhotos(raw) {
     .trim()
     .toLowerCase();
   const items = asPhotoItems(raw.photos);
-  if (items.length > MAX_PHOTOS) return { error: `אפשר עד ${MAX_PHOTOS} תמונות` };
+  if (items.length > MAX_PHOTOS) {
+    return { error: `אפשר עד ${MAX_PHOTOS} תמונות`, field: 'photos' };
+  }
   const files = [];
   const paths = [];
   for (const item of items) {
@@ -418,19 +548,43 @@ function prepareVariants(raw) {
       variants.push(row);
       continue;
     }
-    const idHint = String(row.id || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '') || 'variant';
-    const resolved = resolveVariantImage(slug, row.image, idHint);
-    if (resolved.error) return resolved;
-    if (resolved.file) files.push(resolved.file);
+    const idHint =
+      sanitizeVariantId(row.id) || sanitizeVariantId(row.name) || 'variant';
+    const imageItems = [];
+    if (Array.isArray(row.images) && row.images.length) {
+      imageItems.push(...row.images);
+    } else {
+      if (row.image) imageItems.push(row.image);
+      if (Array.isArray(row.gallery)) imageItems.push(...row.gallery);
+    }
+    if (imageItems.length > MAX_PHOTOS) {
+      return { error: `אפשר עד ${MAX_PHOTOS} תמונות לכל סוג`, field: 'variants' };
+    }
+    const paths = [];
+    for (const item of imageItems) {
+      const resolved = resolveVariantImage(slug, item, idHint);
+      if (resolved.error) return { ...resolved, field: resolved.field || 'variants' };
+      if (resolved.file) files.push(resolved.file);
+      if (resolved.pathName) paths.push(resolved.pathName);
+    }
+    const photos = uniquePhotos(paths);
     variants.push({
       ...row,
-      image: resolved.pathName || '',
+      image: photos[0] || '',
+      gallery: photos.slice(1),
+      images: photos,
     });
   }
   return { fields: { variants }, files };
+}
+
+function firstVariantImage(variants) {
+  if (!Array.isArray(variants)) return '';
+  for (const row of variants) {
+    const list = variantPhotoList(row);
+    if (list[0]) return list[0];
+  }
+  return '';
 }
 
 function prepareProductMedia(raw) {
@@ -438,8 +592,21 @@ function prepareProductMedia(raw) {
   if (photos.error) return photos;
   const variants = prepareVariants(raw);
   if (variants.error) return variants;
+  const fields = { ...photos.fields, ...variants.fields };
+  // Variant-only products often have no product-level photos; use the first
+  // variant image so the store grid / cart thumb is not blank.
+  const hasMain =
+    Boolean(fields.image) || (Array.isArray(fields.photos) && fields.photos.length > 0);
+  if (!hasMain) {
+    const fromVariant = firstVariantImage(fields.variants);
+    if (fromVariant) {
+      fields.image = fromVariant;
+      fields.photos = [fromVariant];
+      if (!Array.isArray(fields.gallery)) fields.gallery = [];
+    }
+  }
   return {
-    fields: { ...photos.fields, ...variants.fields },
+    fields,
     files: [...photos.files, ...variants.files],
   };
 }
@@ -454,37 +621,78 @@ function nowStamp() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:00 ${sign}${oh}${om}`;
 }
 
+function sanitizeVariantId(raw) {
+  return String(raw || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/^-+|-+$/g, '');
+}
+
+function variantPhotoList(row) {
+  if (!row || typeof row !== 'object') return [];
+  if (Array.isArray(row.images) && row.images.length) {
+    return uniquePhotos(
+      row.images.map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') return item.path || item.preview || '';
+        return '';
+      })
+    );
+  }
+  const primary =
+    row.image && typeof row.image === 'object'
+      ? publicImagePath(row.image.path || '')
+      : publicImagePath(row.image) || String(row.image || '').trim();
+  return uniquePhotos([primary, ...(row.gallery || [])]);
+}
+
 function variantsToArray(variants) {
   if (!variants || typeof variants !== 'object' || Array.isArray(variants)) return [];
-  return Object.keys(variants).map((id) => ({
-    id,
-    name: variants[id].name || id,
-    price: Number(variants[id].price) || 0,
-    image: variants[id].image || '',
-    description: variants[id].description || '',
-  }));
+  return Object.keys(variants).map((id) => {
+    const row = variants[id] || {};
+    const images = variantPhotoList(row);
+    const stockParsed = parseStock(row.stock);
+    const item = {
+      id,
+      name: row.name || id,
+      price: Number(row.price) || 0,
+      image: images[0] || '',
+      gallery: images.slice(1),
+      images,
+      description: row.description || '',
+      stock: stockParsed.error ? null : stockParsed.stock,
+    };
+    return item;
+  });
 }
 
 function variantsFromArray(rows) {
   const out = {};
-  (rows || []).forEach((row) => {
-    const id = String((row && row.id) || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '');
-    if (!id) return;
-    const price = Number(row.price);
+  const used = new Set();
+  (rows || []).forEach((row, index) => {
+    let id = sanitizeVariantId(row && row.id);
+    if (!id) id = sanitizeVariantId(row && row.name);
+    if (!id) id = `type-${index + 1}`;
+    let unique = id;
+    let n = 2;
+    while (used.has(unique)) {
+      unique = `${id}-${n}`;
+      n += 1;
+    }
+    used.add(unique);
+    const price = Number(row && row.price);
     if (!(price > 0)) return;
-    const image =
-      row.image && typeof row.image === 'object'
-        ? publicImagePath(row.image.path || '')
-        : publicImagePath(row.image) || String(row.image || '').trim();
-    out[id] = {
-      name: String(row.name || id).trim() || id,
+    const images = variantPhotoList(row);
+    const stockParsed = parseStock(row && row.stock);
+    out[unique] = {
+      name: String((row && row.name) || unique).trim() || unique,
       price,
-      image,
-      description: String(row.description || '').trim(),
+      image: images[0] || '',
+      description: String((row && row.description) || '').trim(),
     };
+    if (!stockParsed.error && stockParsed.stock != null) out[unique].stock = stockParsed.stock;
+    if (images.length > 1) out[unique].gallery = images.slice(1);
   });
   return out;
 }
@@ -513,13 +721,29 @@ function parsePage(slug, raw) {
   else if (variable) kind = 'variable';
   else if (variants.length) kind = 'variants';
   else if (cartPrice > 0) kind = 'fixed';
-  const image = String(yamlValue(yaml, 'image') || '')
+  let image = String(yamlValue(yaml, 'image') || '')
     .replace(/^['"]|['"]$/g, '')
     .trim();
   const heroImage = String(yamlValue(yaml, 'hero_image') || '')
     .replace(/^['"]|['"]$/g, '')
     .trim();
   const gallery = parseGallery(yaml);
+  if (!image) {
+    image = firstVariantImage(variants);
+  }
+  const stock = yamlStock(yaml);
+  const perVariant = kind === 'variants' && variantsTrackStock(variants);
+  const variantStocks = perVariant
+    ? variantStockList(variants).filter((n) => n != null)
+    : [];
+  const soldOut =
+    yamlValue(yaml, 'out_of_stock') === true ||
+    stock === 0 ||
+    (perVariant && variantStocks.length > 0 && variantStocks.every((n) => n === 0));
+  const limited =
+    yamlValue(yaml, 'limited_stock') === true ||
+    isLowStock(stock) ||
+    (perVariant && !soldOut && variantStocks.some((n) => isLowStock(n)));
   return {
     slug,
     title: yamlValue(yaml, 'title') || slug,
@@ -527,9 +751,11 @@ function parsePage(slug, raw) {
     image,
     price_display: yamlValue(yaml, 'price') || '',
     body: parts.body.replace(/^\n/, ''),
-    out_of_stock: yamlValue(yaml, 'out_of_stock') === true,
-    limited_stock: yamlValue(yaml, 'limited_stock') === true,
+    category: normalizeCategory(yamlValue(yaml, 'category')),
+    out_of_stock: soldOut,
+    limited_stock: limited,
     hide: yamlValue(yaml, 'hide') === true,
+    stock: perVariant ? null : stock,
     layout: yamlValue(yaml, 'layout') || '',
     hero_image: heroImage,
     gallery,
@@ -563,12 +789,19 @@ function applyPage(raw, input, { isNew } = {}) {
   let yaml = parts.yaml;
   yaml = setYamlScalar(yaml, 'title', input.title);
   yaml = setYamlScalar(yaml, 'subtitle', input.subtitle);
+  let photos = uniquePhotos(
+    Array.isArray(input.photos) ? input.photos : [input.image, ...(input.gallery || [])]
+  );
+  if (!photos.length && input.kind === 'variants') {
+    const fromVariant = firstVariantImage(input.variants);
+    if (fromVariant) photos = [fromVariant];
+  }
   const hasPhotoInput =
-    Array.isArray(input.photos) || input.image || (input.gallery && input.gallery.length);
+    Array.isArray(input.photos) ||
+    input.image ||
+    (input.gallery && input.gallery.length) ||
+    photos.length > 0;
   if (hasPhotoInput) {
-    const photos = uniquePhotos(
-      Array.isArray(input.photos) ? input.photos : [input.image, ...(input.gallery || [])]
-    );
     const main = photos[0] || '';
     yaml = setYamlScalar(yaml, 'image', main);
     if (input.slug === 'scrunchies') {
@@ -582,10 +815,17 @@ function applyPage(raw, input, { isNew } = {}) {
   } else if (input.kind !== 'content') {
     yaml = setYamlScalar(yaml, 'price', '');
   }
-  yaml = setYamlBool(yaml, 'out_of_stock', Boolean(input.out_of_stock));
-  yaml = setYamlBool(yaml, 'limited_stock', Boolean(input.limited_stock));
-  yaml = setYamlBool(yaml, 'hide', Boolean(input.hide));
-  if (input.hide) {
+  const withFlags = applyStockFlags(input);
+  yaml = setYamlScalar(yaml, 'category', normalizeCategory(input.category));
+  yaml = setYamlBool(yaml, 'out_of_stock', Boolean(withFlags.out_of_stock));
+  yaml = setYamlBool(yaml, 'limited_stock', Boolean(withFlags.limited_stock));
+  yaml = setYamlBool(yaml, 'hide', Boolean(withFlags.hide));
+  if (withFlags.stock == null) {
+    yaml = setYamlScalar(yaml, 'stock', '');
+  } else {
+    yaml = setYamlScalar(yaml, 'stock', Number(withFlags.stock));
+  }
+  if (withFlags.hide) {
     yaml = setYamlBool(yaml, 'noindex', true);
     yaml = setYamlBool(yaml, 'sitemap', false);
   } else {
@@ -652,16 +892,30 @@ function catalogRowFromInput(input) {
   };
 }
 
+function catalogErrorField(message, kind) {
+  const msg = String(message || '');
+  if (/סוג אחד עם מחיר/.test(msg)) return 'variants';
+  if (/גיפט קארד/.test(msg)) return 'min_price';
+  if (/מחיר לא תקין/.test(msg)) return kind === 'variable' ? 'min_price' : 'cart_price';
+  return null;
+}
+
 function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   const slug = String((raw && raw.slug) || '')
     .trim()
     .toLowerCase();
-  if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
-  if (isNew && existingSlugs.has(slug)) return { error: 'כבר יש מוצר עם המזהה הזה' };
-  if (!isNew && !existingSlugs.has(slug)) return { error: 'מוצר לא מוכר' };
+  if (!SLUG_RE.test(slug)) {
+    return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)', field: 'slug' };
+  }
+  if (isNew && existingSlugs.has(slug)) {
+    return { error: 'כבר יש מוצר עם המזהה הזה', field: 'slug' };
+  }
+  if (!isNew && !existingSlugs.has(slug)) {
+    return { error: 'מוצר לא מוכר', field: 'slug' };
+  }
 
   const title = String((raw && raw.title) || '').trim();
-  if (!title) return { error: 'חסר שם למוצר' };
+  if (!title) return { error: 'חסר שם למוצר', field: 'title' };
 
   let kind = raw.kind;
   if (slug === 'gift-card') kind = 'variable';
@@ -673,8 +927,31 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   if (variants && !Array.isArray(variants) && typeof variants === 'object') {
     variants = variantsToArray(variants);
   }
+  if (Array.isArray(variants)) {
+    const normalizedVariants = [];
+    for (const row of variants) {
+      if (!row || typeof row !== 'object') {
+        normalizedVariants.push(row);
+        continue;
+      }
+      const variantStock = parseStock(row.stock);
+      if (variantStock.error) return { error: variantStock.error, field: 'variants' };
+      normalizedVariants.push({ ...row, stock: variantStock.stock });
+    }
+    variants = normalizedVariants;
+  }
 
-  const input = {
+  const stockParsed = parseStock(raw && raw.stock);
+  if (stockParsed.error) return { error: stockParsed.error, field: 'stock' };
+
+  const categoryRaw = String((raw && raw.category) || '').trim();
+  const category = normalizeCategory(categoryRaw);
+  if (categoryRaw && !category) {
+    return { error: 'קטגוריה לא מוכרת', field: 'category' };
+  }
+
+  const perVariantStock = kind === 'variants' && variantsTrackStock(variants);
+  const input = applyStockFlags({
     slug,
     title,
     subtitle: String((raw && raw.subtitle) || '').trim(),
@@ -682,6 +959,8 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     gallery: Array.isArray(raw && raw.gallery) ? uniquePhotos(raw.gallery) : [],
     photos: Array.isArray(raw && raw.photos) ? uniquePhotos(raw.photos) : undefined,
     body: raw && raw.body != null ? String(raw.body) : '',
+    category,
+    stock: perVariantStock ? null : stockParsed.stock,
     out_of_stock: Boolean(raw && raw.out_of_stock),
     limited_stock: Boolean(raw && raw.limited_stock),
     hide: Boolean(raw && raw.hide),
@@ -692,15 +971,55 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     max_price: Number(raw && raw.max_price),
     presets: parsePresets(raw && raw.presets),
     variants,
-  };
+  });
 
   try {
     if (input.in_cart) catalogRowFromInput(input);
   } catch (err) {
-    return { error: err.message || 'נתוני קטלוג לא תקינים' };
+    const message = err.message || 'נתוני קטלוג לא תקינים';
+    return { error: message, field: catalogErrorField(message, kind) };
   }
 
   return { input };
+}
+
+/**
+ * Reduce tracked stock for purchased lines. Returns updated markdown or null if unchanged.
+ * Variable/content products and products without a stock field are skipped.
+ * When types track their own stock, pass `variantId` to decrement that type.
+ */
+function decrementPageStock(raw, slug, quantity, variantId) {
+  const qty = Number(quantity);
+  if (!Number.isInteger(qty) || qty < 1) return null;
+  const page = parsePage(slug, raw);
+  if (!tracksInventory(page)) return null;
+
+  if (variantsTrackStock(page.variants)) {
+    const id = String(variantId || '').trim();
+    if (!id) return null;
+    let changed = false;
+    const nextVariants = (page.variants || []).map((row) => {
+      if (!row || row.id !== id || row.stock == null) return row;
+      const nextStock = Math.max(0, Number(row.stock) - qty);
+      if (nextStock === row.stock) return row;
+      changed = true;
+      return { ...row, stock: nextStock };
+    });
+    if (!changed) return null;
+    return applyPage(raw, {
+      ...page,
+      variants: nextVariants,
+      stock: null,
+    });
+  }
+
+  const nextStock = Math.max(0, Number(page.stock) - qty);
+  if (nextStock === page.stock) return null;
+  return applyPage(raw, {
+    ...page,
+    stock: nextStock,
+    out_of_stock: nextStock === 0,
+  });
 }
 
 function catalogRowFromParsed(page) {
@@ -724,25 +1043,170 @@ function buildCatalogFromRaw(rawBySlug) {
 }
 
 function buildCatalogFromDir(dir) {
-  const rawBySlug = {};
-  if (!dir || !fs.existsSync(dir)) return {};
-  fs.readdirSync(dir)
-    .filter((name) => name.endsWith('.md'))
-    .forEach((name) => {
-      rawBySlug[name.replace(/\.md$/, '')] = fs.readFileSync(path.join(dir, name), 'utf8');
-    });
-  return buildCatalogFromRaw(rawBySlug);
+  return buildCatalogFromRaw(readMarkdownDir(dir, (name) => name.replace(/\.md$/, '')));
 }
 
 const CATALOG_FILES = ['api/catalog-data.json', '_data/catalog.json'];
+const WORKSHOP_CATALOG_FILES = ['api/workshops-data.json', '_data/workshops.json'];
+
+/**
+ * Same slug Jekyll sets on a collection document: the `YYYY-MM-DD-` prefix is
+ * dropped when it is followed by a title, matching DATE_FILENAME_MATCHER.
+ */
+function workshopSlug(filename) {
+  return String(filename || '')
+    .replace(/\.md$/, '')
+    .replace(/^\d{2,4}-\d{1,2}-\d{1,2}-/, '');
+}
+
+function workshopId(slug) {
+  return `${WORKSHOP_PREFIX}${slug}`;
+}
+
+/** First shekel amount on the workshop page (`**מחיר:** 330 …`). */
+function workshopBodyPrice(body) {
+  const match = String(body || '').match(/\*\*מחיר:\*\*\s*(\d+)/);
+  const n = match ? Number(match[1]) : 0;
+  return n > 0 ? n : 0;
+}
+
+/**
+ * A workshop is bookable once it has a price. `cart_price` wins; a visible
+ * page can also use the **מחיר:** line so a listed workshop cannot disappear
+ * from the cart. Hidden past events stay on their old `form_url` button.
+ */
+function parseWorkshopPage(slug, raw) {
+  const parts = splitFrontMatter(raw);
+  if (!parts) return null;
+  const yaml = parts.yaml;
+  const title = String(yamlValue(yaml, 'title') || slug).trim();
+  const subtitle = String(yamlValue(yaml, 'subtitle') || '').trim();
+  const registrationFull = yamlValue(yaml, 'registration_full') === true;
+  const hide = yamlValue(yaml, 'hide') === true;
+  const spots = yamlStock(yaml, 'spots', 'stock');
+  const stock = registrationFull ? 0 : spots;
+  const variants = workshopPacks(yaml);
+  const listed = yamlNumber(yaml, 'cart_price');
+  const price = listed > 0 ? listed : hide ? 0 : workshopBodyPrice(parts.body);
+  return {
+    slug,
+    id: workshopId(slug),
+    title,
+    subtitle,
+    image: unquote(yamlValue(yaml, 'image')),
+    price,
+    spots,
+    stock,
+    variants,
+    registration_full: registrationFull,
+    registration_not_open: yamlValue(yaml, 'registration_not_open') === true,
+    hide,
+    form_url: unquote(yamlValue(yaml, 'form_url')),
+    date: String(yamlValue(yaml, 'date') || '').trim(),
+  };
+}
+
+/**
+ * Optional packs on a workshop: one price for one place, another for two
+ * together, and so on. `places` is how many spots that pack uses.
+ */
+function workshopPacks(yaml) {
+  const raw = parseVariantsYaml(yaml);
+  const out = {};
+  Object.keys(raw || {}).forEach((id) => {
+    const price = Number(raw[id].price);
+    if (!(price > 0)) return;
+    const places = Number(raw[id].places);
+    out[id] = {
+      name: String(raw[id].name || id).trim() || id,
+      price,
+      places: Number.isInteger(places) && places > 0 ? places : 1,
+    };
+  });
+  return Object.keys(out).length ? out : undefined;
+}
+
+/** Two workshops often share a title, so the date subtitle goes on the invoice line. */
+function workshopName(page) {
+  if (!page) return '';
+  return page.subtitle ? `${page.title} — ${page.subtitle}` : page.title;
+}
+
+function applyWorkshopStock(raw, { spots, registration_full, hide }) {
+  const parts = splitFrontMatter(raw);
+  if (!parts) return raw;
+  let yaml = parts.yaml;
+  if (spots == null) yaml = setYamlScalar(yaml, 'spots', '');
+  else yaml = setYamlScalar(yaml, 'spots', Number(spots));
+  yaml = setYamlBool(yaml, 'registration_full', Boolean(registration_full) || spots === 0);
+  if (hide !== undefined) yaml = setYamlBool(yaml, 'hide', Boolean(hide));
+  const nl = parts.newline || '\n';
+  const bodyOut = parts.body.startsWith('\n') || parts.body.startsWith('\r') ? parts.body : `\n${parts.body}`;
+  return `---${nl}${yaml.replace(/\s+$/, '')}${nl}---${nl}${bodyOut.replace(/^\r?\n/, '\n')}`;
+}
+
+function decrementWorkshopPage(raw, slug, quantity) {
+  const qty = Number(quantity);
+  if (!Number.isInteger(qty) || qty < 1) return null;
+  const page = parseWorkshopPage(slug, raw);
+  if (!page || page.spots == null) return null;
+  const nextSpots = Math.max(0, Number(page.spots) - qty);
+  if (nextSpots === page.spots) return null;
+  return applyWorkshopStock(raw, { spots: nextSpots, registration_full: nextSpots === 0 });
+}
+
+function workshopCatalogRow(page) {
+  if (!page || page.hide || page.registration_not_open) return null;
+  const variants = page.variants && Object.keys(page.variants).length ? page.variants : null;
+  const variantPrices = variants
+    ? Object.values(variants).map((row) => Number(row.price)).filter((n) => n > 0)
+    : [];
+  const price = variantPrices.length ? Math.min(...variantPrices) : Number(page.price);
+  if (!(price > 0)) return null;
+  const row = {
+    name: workshopName(page),
+    price,
+    kind: 'workshop',
+    shipping: false,
+  };
+  if (page.stock != null) row.stock = page.stock;
+  if (variants) row.variants = variants;
+  return row;
+}
+
+function buildWorkshopCatalogFromRaw(rawBySlug) {
+  const catalog = {};
+  Object.keys(rawBySlug || {})
+    .sort()
+    .forEach((slug) => {
+      const row = workshopCatalogRow(parseWorkshopPage(slug, rawBySlug[slug]));
+      if (row) catalog[workshopId(slug)] = row;
+    });
+  return catalog;
+}
+
+function readMarkdownDir(dir, slugOf) {
+  const rawBySlug = {};
+  if (!dir || !fs.existsSync(dir)) return rawBySlug;
+  fs.readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .forEach((name) => {
+      rawBySlug[slugOf(name)] = fs.readFileSync(path.join(dir, name), 'utf8');
+    });
+  return rawBySlug;
+}
+
+function buildWorkshopCatalogFromDir(dir) {
+  return buildWorkshopCatalogFromRaw(readMarkdownDir(dir, workshopSlug));
+}
 
 function prettyCatalog(catalog) {
   return `${JSON.stringify(catalog, null, 2)}\n`;
 }
 
-function writeCatalogFiles(root, catalog) {
+function writeJsonFiles(root, files, catalog) {
   const json = prettyCatalog(catalog);
-  CATALOG_FILES.forEach((rel) => {
+  files.forEach((rel) => {
     const full = path.join(root, rel);
     fs.mkdirSync(path.dirname(full), { recursive: true });
     fs.writeFileSync(full, json);
@@ -750,9 +1214,22 @@ function writeCatalogFiles(root, catalog) {
   return json;
 }
 
+function writeCatalogFiles(root, catalog) {
+  return writeJsonFiles(root, CATALOG_FILES, catalog);
+}
+
+function writeWorkshopCatalogFiles(root, catalog) {
+  return writeJsonFiles(root, WORKSHOP_CATALOG_FILES, catalog);
+}
+
 module.exports = {
   SLUG_RE,
   CATALOG_FILES,
+  WORKSHOP_CATALOG_FILES,
+  WORKSHOP_PREFIX,
+  LOW_STOCK_AT,
+  PRODUCT_CATEGORIES,
+  normalizeCategory,
   splitFrontMatter,
   yamlValue,
   setYamlBool,
@@ -769,14 +1246,34 @@ module.exports = {
   variantsFromArray,
   parsePresets,
   parseShekelPrice,
+  parseStock,
+  yamlStock,
+  tracksInventory,
+  variantsTrackStock,
+  applyStockFlags,
+  decrementPageStock,
   prettyCatalog,
   buildCatalogFromRaw,
   buildCatalogFromDir,
   writeCatalogFiles,
+  workshopSlug,
+  workshopId,
+  workshopName,
+  parseWorkshopPage,
+  workshopBodyPrice,
+  workshopPacks,
+  applyWorkshopStock,
+  decrementWorkshopPage,
+  workshopCatalogRow,
+  buildWorkshopCatalogFromRaw,
+  buildWorkshopCatalogFromDir,
+  writeWorkshopCatalogFiles,
+  isLowStock,
   displayPriceFor,
   preparePhotos,
   prepareVariants,
   prepareProductMedia,
+  firstVariantImage,
   uniquePhotos,
   photosFromParsed,
   MAX_PHOTOS,

@@ -16,26 +16,7 @@
             {% assign sorted = site.projects | sort: 'date'  %}
             {% for project in sorted %}
               {% unless project.hide %}
-                <article class="project col col-4 col-d-6 col-t-12">
-                  <div class="project__content">
-                    <a href="{{project.url}}" class="project__image">
-                      <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
-                      {% if project.registration_not_open %}
-                        <div class="registration-full">ההרשמה תיפתח בקרוב</div>
-                      {% elsif project.registration_full %}
-                        <div class="registration-full">אין מקומות פנויים</div>
-                      {% elsif project.last_places %}
-                        <div class="registration-full">מקומות אחרונים</div>
-                      {% endif %}
-                    </a>
-                    <div class="project__info">
-                      <h3 class="project__title"><a href="{{project.url}}">{{ project.title }}</a></h3>
-                      {% if project.subtitle %}
-                        <div class="project__subtitle">{{ project.subtitle }}</div>
-                      {% endif %}
-                    </div>
-                  </div>
-                </article>
+                {% include project-card.html project=project %}
               {% endunless %}
             {% endfor %}
           </div>
@@ -52,8 +33,8 @@
     <div class="row">
       <div class="col-12">
   <div class="section__navigation">
-      <a href="https://meshulam.co.il/quick_payment?b=b47ee71e59edf5ad731bd8a16458421f" class="button button--primary section-button" target="_blank">
-      הרשמי לסדנה הקרובה
+      <a href="{{ '/projects/' | relative_url }}" class="button button--primary section-button">
+      לכל הסדנאות הקרובות
     </a>
   </div>
 </div>

@@ -17,10 +17,8 @@ menu__settings:
       url: '/projects/'
     - title: 'חנות'
       url: '/store/'
-    - title: מוצרים מומלצים
-      url: '/recommendations/'
     # - url: '/about/'
-    #   title: 'קצת עלי'
+      #   title: 'קצת עלי'
     - title: 'צרו קשר'
       url: '/contact/'
     # - title: 'Pages'
@@ -212,3 +210,10 @@ disqus-identifier: anvodstudio-demo # Add your shortname for Disqus Comment. For
 #-------------------------------
 # Google Analytics
 google-analytics: G-G3QBFMD0FQ
+
+
+#-------------------------------
+# Microsoft Clarity (session recordings + heatmaps, free)
+# Paste the project id from clarity.microsoft.com to turn it on.
+# See ANALYTICS.md
+clarity:

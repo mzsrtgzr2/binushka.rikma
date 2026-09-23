@@ -3,6 +3,50 @@
     "name": "תעודת לידה רקומה",
     "price": 450
   },
+  "dmc-etoile-set": {
+    "name": "סט חוטים מנצנצים",
+    "price": 330
+  },
+  "dmc-floss-set": {
+    "name": "מארז מקורי של dmc",
+    "price": 120
+  },
+  "dmc-floss-set-30": {
+    "name": "סט חוטי רקמה של dmc",
+    "price": 130
+  },
+  "dmc-kit-flowers": {
+    "name": "ערכת רקמה עם 2 דוגמאות",
+    "price": 100
+  },
+  "dmc-kit-pearl": {
+    "name": "ערכת רקמה עם חוטי פנינה",
+    "price": 120
+  },
+  "embroidery-books": {
+    "name": "ספרי רקמה",
+    "variants": {
+      "380": {
+        "name": "380 רקמות חתולים",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-23-at-22-28-35-muei03el.jpg",
+        "description": "הספר האחרון שקניתי והוא פשוט מטריף.\\\\nהרבה השראה ורקמות מצחיקות של חתולים בכל מיני תנוחות של חתולים.\\\\nתהנו. יש רק אחד :)\\nאת הרקמה בתמונה השנייה רקמה נעמה בחוג לרוקמות מנוסות אצלי ברחובות.",
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-23-at-22-29-44-muei03em.jpg"
+        ]
+      },
+      "paintwiththread": {
+        "name": "paint with thread",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-23-at-22-23-35-muehtzc2.jpg",
+        "description": "ספרה הראשון של אמילי פריס.\\\\\\\\nבזכותה התנסיתי והתאהבתי בתך ארוך-קצר.\\\\\\\\nנותנת הרבה במה לרקום באופן אינטואטיבי ומספרת את הסיפור שלה תוך כדי.\\\\\\\\nבסוף הספר יש את כל הדוגמאות שהיא רוקמת בדפים שניתן לתלוש ולגהץ את הדוגמא על איזה בד שרוצים!!!!! קסם.",
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-23-at-22-23-44-muehtzc2.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-23-at-22-24-01-muehtzc3.jpg"
+        ]
+      }
+    }
+  },
   "embroidery-case": {
     "name": "קלמר פשתן עם רקמת כותנה",
     "price": 160
@@ -17,7 +61,26 @@
   },
   "flower-bag": {
     "name": "תיק בד לזר פרחים",
-    "price": 240
+    "variants": {
+      "type-1": {
+        "name": "בד פרחוני תכלת אפרסק",
+        "price": 240,
+        "image": "/images/store/flower-bag/flower-bag-mucouc2e.jpg",
+        "description": "",
+        "gallery": [
+          "/images/store/flower-bag/screenshot-2026-09-21-at-21-21-45-mucouc2f.jpg"
+        ]
+      },
+      "type-2": {
+        "name": "פרחוני גווני צהוב וירוק",
+        "price": 170,
+        "image": "/images/store/flower-bag/screenshot-2026-09-22-at-14-54-13-mucouc2f.jpg",
+        "description": "יפהיפה, עם פספוס בתפירה, לכן נמכר בהנחה של 30%.\\nמושלם לשימוש :)",
+        "gallery": [
+          "/images/store/flower-bag/screenshot-2026-09-22-at-12-05-46-mucouc2g.jpg"
+        ]
+      }
+    }
   },
   "flowers-yumiko-1": {
     "name": "פרחים בהשראת הטבע ויומיקו",
@@ -41,13 +104,91 @@
       500
     ]
   },
+  "hoops": {
+    "name": "חישוקי רקמה מעץ אשוח במגוון גדלים",
+    "variants": {
+      "13": {
+        "name": "קוטר 13 ס״מ",
+        "price": 35,
+        "image": "/images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg",
+        "description": "אני הכי אוהבת את חישוק 13 ס״מ!\\\\nלא גדול מידי ולא קטן מידי.\\\\nגודל מעולה גם למי שרוצה לרקום על חולצה ולמתוח חלק קטן יותר מהבד.",
+        "gallery": [
+          "/images/store/hoops/screenshot-2026-09-23-at-15-50-13-mue3pll1.jpg"
+        ]
+      },
+      "16": {
+        "name": "קוטר 16 ס״מ",
+        "price": 35,
+        "image": "",
+        "description": ""
+      },
+      "19": {
+        "name": "קוטר 19 ס״מ",
+        "price": 35,
+        "image": "/images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg",
+        "description": ""
+      }
+    }
+  },
   "kit": {
     "name": "ערכת רקמה מפנקת",
     "price": 210
   },
+  "oval-hoop": {
+    "name": "חישוק אובאלי",
+    "variants": {
+      "16x10cm": {
+        "name": "16X10 cm",
+        "price": 35,
+        "image": "/images/store/oval-hoop/screenshot-2026-09-23-at-18-49-00-muea6x4t.jpg",
+        "description": ""
+      },
+      "21x13cm": {
+        "name": "21x13cm",
+        "price": 35,
+        "image": "/images/store/oval-hoop/screenshot-2026-09-23-at-18-49-38-muea6x4u.jpg",
+        "description": ""
+      }
+    }
+  },
+  "pencil-case": {
+    "name": "קלמר קנבס לרקמה",
+    "price": 20
+  },
   "portrait": {
     "name": "מסגרת רקומה",
     "price": 250
+  },
+  "prym-marker-purple": {
+    "name": "טוש לבדים",
+    "price": 30
+  },
+  "scissors": {
+    "name": "מספרי רקמה איכותיות",
+    "variants": {
+      "9": {
+        "name": "עגולות גודל 9 ס״מ",
+        "price": 70,
+        "image": "/images/store/scissors/screenshot-2026-09-23-at-21-50-57-mueib4k5.jpg",
+        "description": "קלאסיות יפות, תהנו."
+      },
+      "9-2": {
+        "name": "מספרי ציפור 9 ס״מ",
+        "price": 70,
+        "image": "/images/store/scissors/screenshot-2026-09-23-at-21-58-39-mueib4k6.jpg",
+        "description": "חביבות הקהל ללא ספק, זהובות יפות מדוייקות."
+      },
+      "type-3": {
+        "name": "הזוג המלכותי",
+        "price": 70,
+        "image": "/images/store/scissors/screenshot-2026-09-23-at-23-03-34-muej8ry3.jpg",
+        "description": "גיליתי אותן בצ׳כיה לפני שנה ומאז לא מצאתי כאלה בארץ! סוף סוף הצלחתי לשים ידיי על 2 זוגות.\\nגם הן בגודל 9 ס״מ.",
+        "stock": 2,
+        "gallery": [
+          "/images/store/scissors/screenshot-2026-09-23-at-22-01-39-muej8ry4.jpg"
+        ]
+      }
+    }
   },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",
@@ -72,9 +213,34 @@
       }
     }
   },
+  "stickers": {
+    "name": "מדבקות לרקמה",
+    "variants": {
+      "type-1": {
+        "name": "דף מדבקות חיות ים",
+        "price": 50,
+        "image": "/images/store/stickers/screenshot-2026-09-23-at-22-11-03-muehnd9s.jpg",
+        "description": ""
+      },
+      "type-2": {
+        "name": "דף מדבקות עציצים",
+        "price": 50,
+        "image": "/images/store/stickers/screenshot-2026-09-23-at-22-18-31-muehnd9s.jpg",
+        "description": "בתמונות, הרקמה של הילית לאחר שימוש במדבקות ושטיפתן במים.",
+        "gallery": [
+          "/images/store/stickers/screenshot-2026-09-23-at-23-10-22-muejgum3.jpg",
+          "/images/store/stickers/screenshot-2026-09-23-at-23-10-40-muejgum4.jpg"
+        ]
+      }
+    }
+  },
   "voucher-gift": {
     "name": "שובר מתנה - בוקר פינוק לאמהות",
     "price": 330
+  },
+  "water-marker": {
+    "name": "טוש לבד יורד במים",
+    "price": 30
   },
   "yam": {
     "name": "רקמת בטטה מושרשת",

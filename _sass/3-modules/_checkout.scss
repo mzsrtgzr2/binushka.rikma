@@ -361,3 +361,13 @@
     border: 1px solid #ffeeba;
   }
 }
+
+/* Shown instead of the shipping picker when the order is workshop places only */
+.checkout-shipping__none {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  border-radius: $global-radius;
+  background: var(--background-alt-color);
+  font-size: 15px;
+  line-height: 1.5;
+}

@@ -1,5 +1,6 @@
 /**
- * Store backoffice: login, list, create / update / delete products, stock flags.
+ * Store backoffice: login, list, create / update / delete products,
+ * shop stock, and workshop spots.
  */
 (function () {
   var loginForm = document.getElementById('admin-login');
@@ -8,6 +9,9 @@
   var boardMessage = document.getElementById('admin-board-message');
   var listView = document.getElementById('admin-list-view');
   var listEl = document.getElementById('admin-list');
+  var workshopsEl = document.getElementById('admin-workshops');
+  var workshopsHeading = document.getElementById('admin-workshops-heading');
+  var workshopsHint = document.getElementById('admin-workshops-hint');
   var saveBtn = document.getElementById('admin-save');
   var newBtn = document.getElementById('admin-new');
   var logoutBtn = document.getElementById('admin-logout');
@@ -29,12 +33,15 @@
   if (!loginForm || !board || !editor || !photosEl) return;
 
   var products = [];
+  var workshops = [];
   var original = {};
+  var originalWorkshops = {};
   var editingNew = false;
   var saveHint = '';
   var photoItems = [];
-  var variantUploads = new WeakMap();
+  var variantPhotos = new WeakMap();
   var previewTimer;
+  var MAX_VARIANT_PHOTOS = 8;
 
   function escapeHtml(s) {
     var d = document.createElement('div');
@@ -54,6 +61,14 @@
     el.className = 'admin-message admin-message--' + (type || 'info');
   }
 
+  function statusErrorMessage(status) {
+    if (status === 413) return 'הבקשה גדולה מדי — נסי להקטין תמונות או להעלות פחות בבת אחת';
+    if (status === 401) return 'צריך להתחבר מחדש';
+    if (status === 502 || status === 503) return 'השרת לא הצליח לשמור כרגע. נסי שוב בעוד רגע';
+    if (status >= 500) return 'שגיאת שרת בשמירה. נסי שוב בעוד רגע';
+    return 'לא הצלחנו לשמור. בדקי את השדות וניסי שוב';
+  }
+
   function api(method, body) {
     var opts = { method: method, credentials: 'same-origin', headers: {} };
     if (body) {
@@ -71,11 +86,218 @@
           }
         }
         if (!res.ok) {
-          throw new Error(data.error || 'שגיאה');
+          var err = new Error(data.error || statusErrorMessage(res.status));
+          err.field = data.field || null;
+          err.status = res.status;
+          throw err;
         }
         return data;
       });
     });
+  }
+
+  function clearFieldErrors() {
+    if (!editor) return;
+    Array.prototype.forEach.call(editor.querySelectorAll('.form__input--error'), function (el) {
+      el.classList.remove('form__input--error');
+      el.removeAttribute('aria-invalid');
+    });
+    Array.prototype.forEach.call(editor.querySelectorAll('[data-field-error]'), function (el) {
+      el.hidden = true;
+      el.textContent = '';
+    });
+  }
+
+  function setFieldError(el, message) {
+    if (!el || !message) return;
+    el.classList.add('form__input--error');
+    el.setAttribute('aria-invalid', 'true');
+    var group = el.closest('.form__group') || el.parentElement;
+    if (!group) return;
+    var msg = group.querySelector('[data-field-error]');
+    if (!msg) {
+      msg = document.createElement('p');
+      msg.className = 'admin-field-error';
+      msg.setAttribute('data-field-error', '');
+      group.appendChild(msg);
+    }
+    msg.textContent = message;
+    msg.hidden = false;
+  }
+
+  function focusField(el) {
+    if (!el) return;
+    try {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      el.scrollIntoView(true);
+    }
+    window.setTimeout(function () {
+      try {
+        el.focus({ preventScroll: true });
+      } catch (e2) {
+        try {
+          el.focus();
+        } catch (e3) {}
+      }
+    }, 80);
+  }
+
+  function fieldEl(name) {
+    if (name === 'slug') return slugInput;
+    if (name === 'title') return document.getElementById('admin-title');
+    if (name === 'cart_price') return document.getElementById('admin-cart-price');
+    if (name === 'min_price') return document.getElementById('admin-min-price');
+    if (name === 'max_price') return document.getElementById('admin-max-price');
+    if (name === 'stock') return document.getElementById('admin-stock');
+    if (name === 'category') return document.getElementById('admin-category');
+    if (name === 'photos') return photoFiles || photosEl;
+    if (name === 'variants') {
+      return (variantsEl && variantsEl.querySelector('[data-v="price"]')) || addVariantBtn || variantsEl;
+    }
+    return null;
+  }
+
+  function inferFieldFromMessage(message) {
+    var msg = String(message || '');
+    if (/מזהה מוצר|כבר יש מוצר עם המזהה|מוצר לא מוכר/.test(msg)) return 'slug';
+    if (/חסר שם/.test(msg)) return 'title';
+    if (/סוג אחד עם מחיר|תמונות לכל סוג/.test(msg)) return 'variants';
+    if (/גיפט קארד|סכום/.test(msg)) return 'min_price';
+    if (/מחיר לא תקין/.test(msg)) return 'cart_price';
+    if (/מלאי/.test(msg)) return 'stock';
+    if (/קטגוריה/.test(msg)) return 'category';
+    if (/תמונ|jpg|png|webp|gif/.test(msg)) return 'photos';
+    return null;
+  }
+
+  function showEditorError(message, field) {
+    var text = message || 'לא הצלחנו לשמור';
+    var target = fieldEl(field) || fieldEl(inferFieldFromMessage(text));
+    clearFieldErrors();
+    show(editorMessage, text, 'error');
+    if (target) {
+      setFieldError(target, text);
+      focusField(target);
+    }
+  }
+
+  function validateEditor() {
+    var errors = [];
+    var slug = slugInput.value.trim().toLowerCase();
+    if (!slug) {
+      errors.push({ el: slugInput, message: 'חסר מזהה מוצר' });
+    } else if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+      errors.push({
+        el: slugInput,
+        message: 'מזהה מוצר לא תקין (באנגלית, אותיות קטנות ומקפים)',
+      });
+    }
+
+    var titleEl = document.getElementById('admin-title');
+    if (!titleEl.value.trim()) {
+      errors.push({ el: titleEl, message: 'חסר שם למוצר' });
+    }
+
+    var kind = kindSelect.value;
+    if (kind === 'fixed') {
+      var cartPriceEl = document.getElementById('admin-cart-price');
+      if (!(Number(cartPriceEl.value) > 0)) {
+        errors.push({ el: cartPriceEl, message: 'יש להזין מחיר גדול מ-0' });
+      }
+    }
+
+    if (kind === 'variable') {
+      var minEl = document.getElementById('admin-min-price');
+      var maxEl = document.getElementById('admin-max-price');
+      var min = Number(minEl.value);
+      var max = Number(maxEl.value);
+      if (!(min > 0)) {
+        errors.push({ el: minEl, message: 'סכום מינימום חייב להיות גדול מ-0' });
+      }
+      if (!(max >= min) || !(max > 0)) {
+        errors.push({ el: maxEl, message: 'סכום מקסימום חייב להיות לפחות כמו המינימום' });
+      }
+    }
+
+    if (kind === 'variants') {
+      var rows = variantsEl.querySelectorAll('.admin-variant');
+      var pricedCount = 0;
+      Array.prototype.forEach.call(rows, function (row, index) {
+        var priceInput = row.querySelector('[data-v="price"]');
+        var nameInput = row.querySelector('[data-v="name"]');
+        var priceRaw = priceInput ? String(priceInput.value || '').trim() : '';
+        var name = nameInput ? String(nameInput.value || '').trim() : '';
+        var price = Number(priceRaw);
+        var label = 'סוג ' + (index + 1);
+        if (priceRaw !== '' && !(price > 0)) {
+          errors.push({
+            el: priceInput,
+            message: label + ': המחיר חייב להיות מספר שלם גדול מ-0',
+          });
+        } else if (price > 0) {
+          pricedCount += 1;
+        } else if (name) {
+          errors.push({
+            el: priceInput,
+            message: label + ': חסר מחיר (חייב להיות גדול מ-0)',
+          });
+        }
+        var stockInput = row.querySelector('[data-v="stock"]');
+        var stockRaw = stockInput ? String(stockInput.value || '').trim() : '';
+        if (stockRaw !== '') {
+          var stock = Number(stockRaw);
+          if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+            errors.push({
+              el: stockInput,
+              message: label + ': כמות מלאי לא תקינה (0–99999)',
+            });
+          }
+        }
+      });
+      if (!pricedCount) {
+        var firstPrice = variantsEl.querySelector('[data-v="price"]');
+        var already = errors.some(function (item) {
+          return item.el === firstPrice;
+        });
+        if (!already) {
+          errors.push({
+            el: firstPrice || addVariantBtn,
+            message: 'צריך לפחות סוג אחד עם מחיר גדול מ-0',
+          });
+        }
+      }
+    }
+
+    var stockEl = document.getElementById('admin-stock');
+    if (
+      stockEl &&
+      !stockEl.disabled &&
+      kind !== 'variants' &&
+      String(stockEl.value || '').trim() !== ''
+    ) {
+      var stock = Number(stockEl.value);
+      if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+        errors.push({ el: stockEl, message: 'כמות מלאי לא תקינה (0–99999)' });
+      }
+    }
+
+    return errors;
+  }
+
+  function applyValidationErrors(errors) {
+    clearFieldErrors();
+    if (!errors.length) return;
+    errors.forEach(function (item) {
+      setFieldError(item.el, item.message);
+    });
+    var first = errors[0];
+    var summary =
+      errors.length === 1
+        ? first.message
+        : 'יש ' + errors.length + ' בעיות לתיקון. הראשונה: ' + first.message;
+    show(editorMessage, summary, 'error');
+    focusField(first.el);
   }
 
   function snapshot(list) {
@@ -85,27 +307,74 @@
         out_of_stock: Boolean(p.out_of_stock),
         limited_stock: Boolean(p.limited_stock),
         hide: Boolean(p.hide),
+        stock: p.stock == null || p.stock === '' ? null : Number(p.stock),
+      };
+    });
+    return map;
+  }
+
+  function snapshotWorkshops(list) {
+    var map = {};
+    (list || []).forEach(function (w) {
+      map[w.slug] = {
+        registration_full: Boolean(w.registration_full),
+        hide: Boolean(w.hide),
+        spots: w.spots == null || w.spots === '' ? null : Number(w.spots),
       };
     });
     return map;
   }
 
   function isDirty() {
-    return products.some(function (p) {
+    var productsDirty = products.some(function (p) {
       var orig = original[p.slug] || {};
+      var stock = p.stock == null || p.stock === '' ? null : Number(p.stock);
+      var origStock = orig.stock == null || orig.stock === '' ? null : Number(orig.stock);
       return (
         Boolean(p.out_of_stock) !== Boolean(orig.out_of_stock) ||
         Boolean(p.limited_stock) !== Boolean(orig.limited_stock) ||
-        Boolean(p.hide) !== Boolean(orig.hide)
+        Boolean(p.hide) !== Boolean(orig.hide) ||
+        stock !== origStock
+      );
+    });
+    if (productsDirty) return true;
+    return workshops.some(function (w) {
+      var orig = originalWorkshops[w.slug] || {};
+      var spots = w.spots == null || w.spots === '' ? null : Number(w.spots);
+      var origSpots = orig.spots == null || orig.spots === '' ? null : Number(orig.spots);
+      return (
+        Boolean(w.registration_full) !== Boolean(orig.registration_full) ||
+        Boolean(w.hide) !== Boolean(orig.hide) ||
+        spots !== origSpots
       );
     });
   }
 
   function statusLabel(p) {
     if (p.hide) return 'מוסתר';
-    if (p.out_of_stock) return 'אזל';
+    if (p.out_of_stock || p.stock === 0) return 'אזל';
+    if (p.kind === 'variants' && p.variants && p.variants.length) {
+      var tracked = p.variants.filter(function (v) {
+        return v && v.stock != null && v.stock !== '';
+      });
+      if (tracked.length) {
+        var total = tracked.reduce(function (sum, v) {
+          return sum + Number(v.stock);
+        }, 0);
+        return 'מלאי: ' + total;
+      }
+    }
+    if (p.stock != null && p.stock !== '') return 'מלאי: ' + p.stock;
     if (p.limited_stock) return 'מלאי מוגבל';
     return 'במלאי';
+  }
+
+  function workshopStatusLabel(w) {
+    if (w.hide) return 'מוסתרת';
+    if (w.registration_full || w.spots === 0) return 'מלאה';
+    if (w.spots != null && w.spots !== '') return 'מקומות: ' + w.spots;
+    if (w.registration_not_open) return 'הרשמה סגורה';
+    return 'פתוחה';
   }
 
   function kindLabel(p) {
@@ -113,6 +382,12 @@
     if (p.kind === 'variants') return 'כמה סוגים';
     if (p.kind === 'fixed') return 'מחיר קבוע';
     return 'דף בלי סל';
+  }
+
+  function categoryLabel(p) {
+    if (p.category === 'embroidery-supplies') return 'ציוד רקמה';
+    if (p.category === 'works-for-sale') return 'עבודות למכירה';
+    return '';
   }
 
   function priceLabel(p) {
@@ -135,6 +410,21 @@
     return p.price_display || '';
   }
 
+  function productCardImage(p) {
+    if (p && p.image) return p.image;
+    var variants = (p && p.variants) || [];
+    for (var i = 0; i < variants.length; i++) {
+      var row = variants[i];
+      if (!row) continue;
+      if (row.image) return typeof row.image === 'string' ? row.image : row.image.path || row.image.preview || '';
+      if (row.images && row.images.length) {
+        var first = row.images[0];
+        return typeof first === 'string' ? first : (first && (first.path || first.preview)) || '';
+      }
+    }
+    return '';
+  }
+
   function savedMessage(data, fallback) {
     if (data && data.target === 'local') {
       return fallback || 'נשמר. רענון החנות יופיע אחרי שהאתר נבנה מחדש.';
@@ -145,8 +435,9 @@
   function render() {
     listEl.innerHTML = products
       .map(function (p) {
-        var img = p.image
-          ? '<img class="admin-card__thumb" src="' + escapeHtml(p.image) + '" alt="">'
+        var thumb = productCardImage(p);
+        var img = thumb
+          ? '<img class="admin-card__thumb" src="' + escapeHtml(thumb) + '" alt="">'
           : '<span class="admin-card__thumb admin-card__thumb--empty"></span>';
         var price = priceLabel(p);
         return (
@@ -165,8 +456,15 @@
           '</div>' +
           '<p class="admin-card__meta">' +
           escapeHtml(kindLabel(p)) +
+          (categoryLabel(p) ? ' · ' + escapeHtml(categoryLabel(p)) : '') +
           (price ? ' · ' + escapeHtml(price) : '') +
           '</p>' +
+          '<label class="admin-stock">כמות במלאי' +
+          '<input type="number" class="admin-stock__input" data-stock min="0" step="1" dir="ltr" ' +
+          'placeholder="—"' +
+          (p.stock != null && p.stock !== '' ? ' value="' + escapeHtml(p.stock) + '"' : '') +
+          (p.kind === 'variable' || p.kind === 'content' || p.kind === 'variants' ? ' disabled' : '') +
+          '></label>' +
           '<label class="admin-check"><input type="checkbox" data-flag="out_of_stock"' +
           (p.out_of_stock ? ' checked' : '') +
           '> אזל מהמלאי</label>' +
@@ -183,6 +481,67 @@
         );
       })
       .join('');
+    if (workshopsEl) {
+      workshopsEl.innerHTML = workshops
+        .map(function (w) {
+          var img = w.image
+            ? '<img class="admin-card__thumb" src="' + escapeHtml(w.image) + '" alt="">'
+            : '<span class="admin-card__thumb admin-card__thumb--empty"></span>';
+          var price = '';
+          if (w.variants) {
+            var packPrices = Object.keys(w.variants)
+              .map(function (id) {
+                return Number(w.variants[id] && w.variants[id].price);
+              })
+              .filter(function (n) {
+                return n > 0;
+              });
+            if (packPrices.length) {
+              var pmin = Math.min.apply(null, packPrices);
+              var pmax = Math.max.apply(null, packPrices);
+              price = pmin === pmax ? '₪' + pmin : '₪' + pmin + ' – ₪' + pmax;
+            }
+          } else if (w.price > 0) {
+            price = '₪' + w.price;
+          }
+          var meta = ['סדנה'];
+          if (w.subtitle) meta.push(w.subtitle);
+          if (price) meta.push(price);
+          return (
+            '<li class="admin-card" data-workshop-slug="' +
+            escapeHtml(w.slug) +
+            '">' +
+            img +
+            '<div class="admin-card__body">' +
+            '<div class="admin-card__head">' +
+            '<strong>' +
+            escapeHtml(w.title) +
+            '</strong>' +
+            '<span class="admin-card__badge">' +
+            workshopStatusLabel(w) +
+            '</span>' +
+            '</div>' +
+            '<p class="admin-card__meta">' +
+            escapeHtml(meta.join(' · ')) +
+            '</p>' +
+            '<label class="admin-stock">מקומות פנויים' +
+            '<input type="number" class="admin-stock__input" data-workshop-spots min="0" step="1" dir="ltr" ' +
+            'placeholder="—"' +
+            (w.spots != null && w.spots !== '' ? ' value="' + escapeHtml(w.spots) + '"' : '') +
+            '></label>' +
+            '<label class="admin-check"><input type="checkbox" data-workshop-flag="registration_full"' +
+            (w.registration_full ? ' checked' : '') +
+            '> ההרשמה מלאה</label>' +
+            '<label class="admin-check"><input type="checkbox" data-workshop-flag="hide"' +
+            (w.hide ? ' checked' : '') +
+            '> הסתר מהאתר</label>' +
+            '</div></li>'
+          );
+        })
+        .join('');
+    }
+    if (workshopsHeading) workshopsHeading.hidden = workshops.length === 0;
+    if (workshopsHint) workshopsHint.hidden = workshops.length === 0;
     saveBtn.disabled = !isDirty();
   }
 
@@ -197,6 +556,8 @@
     board.hidden = true;
     logoutBtn.hidden = true;
     products = [];
+    workshops = [];
+    originalWorkshops = {};
     closeEditor();
   }
 
@@ -228,11 +589,73 @@
     return '';
   }
 
+  function variantImagesFromRow(row) {
+    row = row || {};
+    if (row.images && row.images.length) {
+      return row.images.map(function (item) {
+        if (typeof item === 'string') return { path: item, preview: item };
+        return item;
+      });
+    }
+    var list = [];
+    if (row.image) {
+      if (typeof row.image === 'string') list.push({ path: row.image, preview: row.image });
+      else list.push(row.image);
+    }
+    (row.gallery || []).forEach(function (pathName) {
+      list.push({ path: pathName, preview: pathName });
+    });
+    return list;
+  }
+
+  function variantPhotosHtml(items) {
+    if (!items || !items.length) {
+      return '<p class="admin-hint admin-variant__photos-empty">עדיין אין תמונות לסוג הזה.</p>';
+    }
+    return (
+      '<div class="admin-variant__photos">' +
+      items
+        .map(function (item, i) {
+          var src = item.preview || item.path || '';
+          return (
+            '<article class="admin-variant__photo' +
+            (i === 0 ? ' admin-variant__photo--main' : '') +
+            '">' +
+            (src
+              ? '<img class="admin-variant__thumb" src="' + escapeHtml(src) + '" alt="">'
+              : '<span class="admin-variant__thumb admin-variant__thumb--empty" aria-hidden="true"></span>') +
+            (i === 0 ? '<span class="admin-variant__photo-badge">ראשית</span>' : '') +
+            '<div class="admin-variant__photo-actions">' +
+            (i === 0
+              ? ''
+              : '<button type="button" class="admin-variant__photo-btn" data-variant-photo-main="' +
+                i +
+                '">הפוך לראשית</button>') +
+            '<button type="button" class="admin-variant__photo-btn" data-variant-photo-up="' +
+            i +
+            '"' +
+            (i === 0 ? ' disabled' : '') +
+            '>ימינה</button>' +
+            '<button type="button" class="admin-variant__photo-btn" data-variant-photo-down="' +
+            i +
+            '"' +
+            (i === items.length - 1 ? ' disabled' : '') +
+            '>שמאלה</button>' +
+            '<button type="button" class="admin-variant__photo-btn admin-variant__photo-btn--danger" data-variant-photo-remove="' +
+            i +
+            '">הסרה</button>' +
+            '</div></article>'
+          );
+        })
+        .join('') +
+      '</div>'
+    );
+  }
+
   function variantRowHtml(row, index) {
     row = row || {};
-    var imagePath = typeof row.image === 'string' ? row.image : row.image && row.image.path ? row.image.path : '';
-    var imgSrc = variantImageSrc(row.image) || imagePath;
     var n = (index == null ? 0 : index) + 1;
+    var images = variantImagesFromRow(row);
     return (
       '<div class="admin-variant">' +
       '<div class="admin-variant__heading">' +
@@ -255,11 +678,18 @@
       '">' +
       '</div>' +
       '<div class="form__group">' +
+      '<label class="form__label">מלאי</label>' +
+      '<input class="form__input" data-v="stock" type="number" min="0" step="1" dir="ltr" placeholder="ריק = בלי מעקב" value="' +
+      (row.stock != null && row.stock !== '' ? escapeHtml(row.stock) : '') +
+      '">' +
+      '<p class="admin-hint">כמות מהסוג הזה שאפשר לקנות.</p>' +
+      '</div>' +
+      '<div class="form__group">' +
       '<label class="form__label">מזהה פנימי</label>' +
       '<input class="form__input" data-v="id" dir="ltr" placeholder="regular" value="' +
       escapeHtml(row.id || '') +
       '">' +
-      '<p class="admin-hint">באנגלית בלבד, לשימוש פנימי בקטלוג.</p>' +
+      '<p class="admin-hint">אופציונלי. באנגלית בלבד — אם ריק נייצר אוטומטית.</p>' +
       '</div>' +
       '</div>' +
       '<div class="form__group">' +
@@ -269,25 +699,48 @@
       '</textarea>' +
       '</div>' +
       '<div class="form__group admin-variant__image-group">' +
-      '<label class="form__label">תמונה</label>' +
-      '<p class="admin-hint">העלאה מהמחשב, כמו בתמונות הראשיות של המוצר. אין צורך להזין נתיב.</p>' +
-      '<div class="admin-variant__image">' +
-      (imgSrc
-        ? '<img class="admin-variant__thumb" src="' + escapeHtml(imgSrc) + '" alt="">'
-        : '<span class="admin-variant__thumb admin-variant__thumb--empty" aria-hidden="true"></span>') +
-      '<input type="hidden" data-v="image" value="' +
-      escapeHtml(imagePath) +
-      '">' +
+      '<label class="form__label">תמונות</label>' +
+      '<p class="admin-hint">אפשר כמה תמונות לכל סוג. הראשונה היא הראשית בסל ובכרטיס — אפשר לשנות סדר, להפוך לראשית או להסיר.</p>' +
+      '<div class="admin-variant__image" data-variant-photos>' +
+      variantPhotosHtml(images) +
       '<div class="admin-variant__image-actions">' +
       '<label class="button admin-upload-btn">' +
-      (imgSrc ? 'החלפת תמונה' : 'העלאת תמונה') +
-      '<input type="file" data-v-image-file accept="image/jpeg,image/png,image/webp,image/gif">' +
+      'העלאת תמונות' +
+      '<input type="file" data-v-image-file accept="image/jpeg,image/png,image/webp,image/gif" multiple>' +
       '</label>' +
-      (imgSrc
-        ? '<button type="button" class="admin-variant__clear-image" data-clear-variant-image>הסרת תמונה</button>'
-        : '') +
       '</div></div></div></div>'
     );
+  }
+
+  function getVariantPhotoItems(row) {
+    if (!variantPhotos.has(row)) variantPhotos.set(row, []);
+    return variantPhotos.get(row);
+  }
+
+  function moveVariantPhoto(row, from, to) {
+    var items = getVariantPhotoItems(row);
+    if (to < 0 || to >= items.length) return;
+    var item = items.splice(from, 1)[0];
+    items.splice(to, 0, item);
+    renderVariantPhotos(row);
+    schedulePreview();
+  }
+
+  function renderVariantPhotos(row) {
+    var box = row.querySelector('[data-variant-photos]');
+    if (!box) return;
+    var actions = box.querySelector('.admin-variant__image-actions');
+    var listHtml = variantPhotosHtml(getVariantPhotoItems(row));
+    var tmp = document.createElement('div');
+    tmp.innerHTML = listHtml;
+    Array.prototype.slice
+      .call(box.querySelectorAll('.admin-variant__photos, .admin-variant__photos-empty'))
+      .forEach(function (el) {
+        el.remove();
+      });
+    while (tmp.firstChild) {
+      box.insertBefore(tmp.firstChild, actions);
+    }
   }
 
   function renderVariants(rows) {
@@ -297,6 +750,9 @@
         return variantRowHtml(row, index);
       })
       .join('');
+    Array.prototype.forEach.call(variantsEl.querySelectorAll('.admin-variant'), function (el, index) {
+      variantPhotos.set(el, variantImagesFromRow(list[index] || {}));
+    });
   }
 
   function renumberVariants() {
@@ -306,67 +762,28 @@
     });
   }
 
-  function readVariantImage(row) {
-    var upload = variantUploads.get(row);
-    if (upload) return { upload: upload };
-    var pathValue = ((row.querySelector('[data-v="image"]') || {}).value || '').trim();
-    return pathValue;
+  function readVariantImages(row) {
+    return getVariantPhotoItems(row).map(function (item) {
+      if (item.upload) return { upload: item.upload };
+      return { path: item.path };
+    });
   }
 
   function readVariants() {
     return Array.prototype.map.call(variantsEl.querySelectorAll('.admin-variant'), function (row) {
+      var images = readVariantImages(row);
+      var stockRaw = ((row.querySelector('[data-v="stock"]') || {}).value || '').trim();
       return {
         id: (row.querySelector('[data-v="id"]') || {}).value,
         name: (row.querySelector('[data-v="name"]') || {}).value,
         price: (row.querySelector('[data-v="price"]') || {}).value,
-        image: readVariantImage(row),
+        stock: stockRaw === '' ? null : stockRaw,
+        images: images,
+        image: images[0] || '',
+        gallery: images.slice(1),
         description: (row.querySelector('[data-v="description"]') || {}).value,
       };
     });
-  }
-
-  function setVariantImagePreview(row, src, pathValue) {
-    var box = row.querySelector('.admin-variant__image');
-    if (!box) return;
-    var thumb = box.querySelector('.admin-variant__thumb');
-    if (src) {
-      if (!thumb || thumb.tagName !== 'IMG') {
-        var img = document.createElement('img');
-        img.className = 'admin-variant__thumb';
-        img.alt = '';
-        if (thumb) box.replaceChild(img, thumb);
-        else box.insertBefore(img, box.firstChild);
-        thumb = img;
-      }
-      thumb.src = src;
-    } else if (thumb) {
-      var empty = document.createElement('span');
-      empty.className = 'admin-variant__thumb admin-variant__thumb--empty';
-      empty.setAttribute('aria-hidden', 'true');
-      box.replaceChild(empty, thumb);
-    }
-    var pathInput = box.querySelector('[data-v="image"]');
-    if (pathInput) pathInput.value = pathValue || '';
-    var actions = box.querySelector('.admin-variant__image-actions');
-    if (actions) {
-      var label = actions.querySelector('.admin-upload-btn');
-      if (label) {
-        var fileInput = label.querySelector('input[type="file"]');
-        label.textContent = src ? 'החלפת תמונה' : 'העלאת תמונה';
-        if (fileInput) label.appendChild(fileInput);
-      }
-      var clearBtn = actions.querySelector('[data-clear-variant-image]');
-      if (src && !clearBtn) {
-        clearBtn = document.createElement('button');
-        clearBtn.type = 'button';
-        clearBtn.className = 'admin-variant__clear-image';
-        clearBtn.setAttribute('data-clear-variant-image', '');
-        clearBtn.textContent = 'הסרת תמונה';
-        actions.appendChild(clearBtn);
-      } else if (!src && clearBtn) {
-        clearBtn.remove();
-      }
-    }
   }
 
   function parsePresets(raw) {
@@ -501,6 +918,24 @@
       el.hidden = el.getAttribute('data-kind-fields') !== kind;
     });
     editor.classList.toggle('admin-editor--variants', kind === 'variants');
+    var stockInput = document.getElementById('admin-stock');
+    var stockGroup = stockInput && stockInput.closest('.form__group');
+    if (stockInput) {
+      stockInput.disabled =
+        kind === 'variable' || kind === 'content' || kind === 'variants' || slugInput.value === 'gift-card';
+    }
+    if (stockGroup) {
+      stockGroup.hidden = kind === 'variants';
+    }
+  }
+
+  /** Quantity drives «אזל מהמלאי»: 0 → on, >0 → off; empty/untracked leaves the flag alone. */
+  function syncEditorOutOfStock(stock, fallback) {
+    var box = document.getElementById('admin-out-of-stock');
+    if (!box) return;
+    if (stock === 0 || stock === '0') box.checked = true;
+    else if (stock != null && stock !== '' && Number(stock) > 0) box.checked = false;
+    else if (fallback != null) box.checked = Boolean(fallback);
   }
 
   function fillEditor(product, isNew) {
@@ -518,23 +953,73 @@
     renderPhotos();
     kindSelect.value = product.kind || 'fixed';
     kindSelect.disabled = product.slug === 'gift-card' || product.slug === 'scrunchies';
+    document.getElementById('admin-category').value = product.category || '';
     document.getElementById('admin-cart-price').value = product.cart_price > 0 ? product.cart_price : '';
     document.getElementById('admin-min-price').value = product.min_price > 0 ? product.min_price : '';
     document.getElementById('admin-max-price').value = product.max_price > 0 ? product.max_price : '';
     document.getElementById('admin-presets').value = (product.presets || []).join(', ');
     document.getElementById('admin-body').value = product.body || '';
-    document.getElementById('admin-out-of-stock').checked = Boolean(product.out_of_stock);
+    document.getElementById('admin-stock').value =
+      product.stock != null && product.stock !== '' ? product.stock : '';
+    document.getElementById('admin-stock').disabled =
+      product.kind === 'variable' ||
+      product.kind === 'content' ||
+      product.kind === 'variants' ||
+      product.slug === 'gift-card';
+    syncEditorOutOfStock(product.stock, Boolean(product.out_of_stock));
     document.getElementById('admin-limited-stock').checked = Boolean(product.limited_stock);
     document.getElementById('admin-hide').checked = Boolean(product.hide);
     renderVariants(product.variants);
     editorDelete.hidden = isNew;
     syncKindFields();
+    clearFieldErrors();
     show(editorMessage, '', '');
     show(photosMessage, '', '');
     updatePreview();
   }
 
+  function variantsHaveStock(rows) {
+    return (rows || []).some(function (row) {
+      return row && row.stock != null && String(row.stock).trim() !== '';
+    });
+  }
+
   function readEditor() {
+    var kind = kindSelect.value;
+    var variants = readVariants();
+    var stockRaw = document.getElementById('admin-stock').value;
+    var stock =
+      kind === 'variable' ||
+      kind === 'content' ||
+      kind === 'variants' ||
+      slugInput.value.trim().toLowerCase() === 'gift-card'
+        ? null
+        : stockRaw;
+    if (kind === 'variants' && !variantsHaveStock(variants) && String(stockRaw || '').trim() !== '') {
+      stock = stockRaw;
+    }
+    var outOfStock = document.getElementById('admin-out-of-stock').checked;
+    if (stock === 0 || stock === '0') outOfStock = true;
+    else if (stock != null && stock !== '' && Number(stock) > 0) outOfStock = false;
+    if (kind === 'variants' && variantsHaveStock(variants)) {
+      var stocks = variants
+        .map(function (row) {
+          if (row.stock == null || String(row.stock).trim() === '') return null;
+          return Number(row.stock);
+        })
+        .filter(function (n) {
+          return n != null && Number.isInteger(n);
+        });
+      if (stocks.length && stocks.every(function (n) {
+        return n === 0;
+      })) {
+        outOfStock = true;
+      } else if (stocks.some(function (n) {
+        return n > 0;
+      })) {
+        outOfStock = false;
+      }
+    }
     return {
       slug: slugInput.value.trim().toLowerCase(),
       title: document.getElementById('admin-title').value,
@@ -543,14 +1028,16 @@
         if (item.upload) return { upload: item.upload };
         return { path: item.path };
       }),
-      kind: kindSelect.value,
+      kind: kind,
+      category: document.getElementById('admin-category').value,
       cart_price: document.getElementById('admin-cart-price').value,
       min_price: document.getElementById('admin-min-price').value,
       max_price: document.getElementById('admin-max-price').value,
       presets: parsePresets(document.getElementById('admin-presets').value),
-      variants: readVariants(),
+      variants: variants,
       body: document.getElementById('admin-body').value,
-      out_of_stock: document.getElementById('admin-out-of-stock').checked,
+      stock: stock,
+      out_of_stock: outOfStock,
       limited_stock: document.getElementById('admin-limited-stock').checked,
       hide: document.getElementById('admin-hide').checked,
     };
@@ -625,13 +1112,13 @@
   }
 
   function stockOverlay(p) {
-    if (p.out_of_stock) return '<div class="out-of-stock">אזל מהמלאי</div>';
+    if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock">אזל מהמלאי</div>';
     if (p.limited_stock) return '<div class="limited-stock">מלאי מוגבל</div>';
     return '';
   }
 
   function stockText(p) {
-    if (p.out_of_stock) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
+    if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
     if (p.limited_stock) return '<div class="limited-stock-text">מלאי מוגבל</div>';
     return '';
   }
@@ -647,7 +1134,7 @@
   }
 
   function storeCardCta(p) {
-    if (p.out_of_stock || p.kind === 'content') return '';
+    if (p.out_of_stock || p.stock === 0 || p.kind === 'content') return '';
     if (p.kind === 'variable') return fakeButton('בחרי סכום', 'store-item__add');
     if (p.kind === 'variants') return fakeButton('בחרי סוג', 'store-item__add');
     return fakeButton('הוסיפי לסל', 'store-item__add');
@@ -660,14 +1147,47 @@
       })
       .map(function (v) {
         var name = v.name || v.id || '';
-        var imgSrc = variantImageSrc(v.image);
-        var img = imgSrc
-          ? scrunchie
-            ? '<div class="scrunchies-variant__photo"><img src="' +
-              escapeHtml(imgSrc) +
-              '" alt=""></div>'
-            : '<img class="store-variant__photo" src="' + escapeHtml(imgSrc) + '" alt="">'
-          : '';
+        var sources = [];
+        if (v.images && v.images.length) {
+          v.images.forEach(function (item) {
+            var src = variantImageSrc(item);
+            if (src) sources.push(src);
+          });
+        } else {
+          var main = variantImageSrc(v.image);
+          if (main) sources.push(main);
+          (v.gallery || []).forEach(function (pathName) {
+            if (pathName) sources.push(pathName);
+          });
+        }
+        var img = '';
+        if (sources.length) {
+          if (scrunchie) {
+            img =
+              '<div class="scrunchies-variant__photo"><img src="' +
+              escapeHtml(sources[0]) +
+              '" alt=""></div>' +
+              (sources.length > 1
+                ? '<div class="scrunchies-variant__gallery">' +
+                  sources
+                    .slice(1)
+                    .map(function (src) {
+                      return '<img src="' + escapeHtml(src) + '" alt="">';
+                    })
+                    .join('') +
+                  '</div>'
+                : '');
+          } else {
+            img =
+              '<div class="store-variant__photos">' +
+              sources
+                .map(function (src) {
+                  return '<img class="store-variant__photo" src="' + escapeHtml(src) + '" alt="">';
+                })
+                .join('') +
+              '</div>';
+          }
+        }
         if (scrunchie) {
           return (
             '<article class="scrunchies-variant">' +
@@ -701,7 +1221,7 @@
   }
 
   function productCartHtml(p) {
-    if (p.out_of_stock || p.kind === 'content') return '';
+    if (p.out_of_stock || p.stock === 0 || p.kind === 'content') return '';
     if (p.kind === 'variable') {
       var chips = (p.presets || [])
         .map(function (n) {
@@ -779,7 +1299,7 @@
         return item.preview || item.path || '';
       })
       .filter(Boolean);
-    data.image = photos[0] || '';
+    data.image = photos[0] || productCardImage(data) || '';
     data.gallery = photos.slice(1);
     data.price = displayPriceFor(data);
     return data;
@@ -891,7 +1411,9 @@
   function loadBoard() {
     return api('GET').then(function (data) {
       products = data.products || [];
+      workshops = data.workshops || [];
       original = snapshot(products);
+      originalWorkshops = snapshotWorkshops(workshops);
       showBoard();
       showList();
       render();
@@ -907,8 +1429,9 @@
   function saveStock() {
     saveBtn.disabled = true;
     show(boardMessage, 'שומרת…', 'info');
-    return api('POST', { action: 'save', products: products }).then(function (data) {
+    return api('POST', { action: 'save', products: products, workshops: workshops }).then(function (data) {
       original = snapshot(products);
+      originalWorkshops = snapshotWorkshops(workshops);
       render();
       var n = (data.changed || []).length;
       var msg =
@@ -949,6 +1472,29 @@
   });
 
   listEl.addEventListener('change', function (event) {
+    var stockInput = event.target.closest('input[data-stock]');
+    if (stockInput) {
+      var stockCard = stockInput.closest('[data-slug]');
+      var stockProduct = products.find(function (p) {
+        return p.slug === stockCard.getAttribute('data-slug');
+      });
+      if (!stockProduct) return;
+      var raw = stockInput.value.trim();
+      if (raw === '') {
+        stockProduct.stock = null;
+      } else {
+        var n = Number(raw);
+        if (!Number.isInteger(n) || n < 0) {
+          stockInput.value = stockProduct.stock != null ? stockProduct.stock : '';
+          return;
+        }
+        stockProduct.stock = n;
+        if (n === 0) stockProduct.out_of_stock = true;
+        else if (n > 0) stockProduct.out_of_stock = false;
+      }
+      render();
+      return;
+    }
     var input = event.target.closest('input[data-flag]');
     if (!input) return;
     var card = input.closest('[data-slug]');
@@ -969,6 +1515,45 @@
     if (product) openEditor(false, product);
   });
 
+  function findWorkshop(card) {
+    if (!card) return null;
+    var slug = card.getAttribute('data-workshop-slug');
+    return workshops.find(function (w) {
+      return w.slug === slug;
+    });
+  }
+
+  if (workshopsEl) {
+    workshopsEl.addEventListener('change', function (event) {
+      var spotsInput = event.target.closest('input[data-workshop-spots]');
+      if (spotsInput) {
+        var workshop = findWorkshop(spotsInput.closest('[data-workshop-slug]'));
+        if (!workshop) return;
+        var raw = spotsInput.value.trim();
+        if (raw === '') {
+          workshop.spots = null;
+        } else {
+          var n = Number(raw);
+          if (!Number.isInteger(n) || n < 0) {
+            spotsInput.value = workshop.spots != null ? workshop.spots : '';
+            return;
+          }
+          workshop.spots = n;
+          if (n === 0) workshop.registration_full = true;
+          else if (n > 0) workshop.registration_full = false;
+        }
+        render();
+        return;
+      }
+      var flagInput = event.target.closest('input[data-workshop-flag]');
+      if (!flagInput) return;
+      var flagged = findWorkshop(flagInput.closest('[data-workshop-slug]'));
+      if (!flagged) return;
+      flagged[flagInput.getAttribute('data-workshop-flag')] = flagInput.checked;
+      render();
+    });
+  }
+
   saveBtn.addEventListener('click', function () {
     saveStock().catch(function (err) {
       show(boardMessage, err.message || 'לא הצלחנו לשמור', 'error');
@@ -985,6 +1570,13 @@
     schedulePreview();
   });
 
+  document.getElementById('admin-stock').addEventListener('input', function () {
+    syncEditorOutOfStock(this.value);
+  });
+  document.getElementById('admin-stock').addEventListener('change', function () {
+    syncEditorOutOfStock(this.value);
+  });
+
   slugInput.addEventListener('input', function () {
     if (slugInput.readOnly) return;
     slugInput.value = slugInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
@@ -997,14 +1589,30 @@
   });
 
   variantsEl.addEventListener('click', function (event) {
-    var clearBtn = event.target.closest('[data-clear-variant-image]');
-    if (clearBtn) {
-      var clearRow = clearBtn.closest('.admin-variant');
-      if (clearRow) {
-        variantUploads.delete(clearRow);
-        setVariantImagePreview(clearRow, '', '');
-        schedulePreview();
+    var mainPhoto = event.target.closest('[data-variant-photo-main]');
+    var upPhoto = event.target.closest('[data-variant-photo-up]');
+    var downPhoto = event.target.closest('[data-variant-photo-down]');
+    var removePhoto = event.target.closest('[data-variant-photo-remove]');
+    if (mainPhoto || upPhoto || downPhoto || removePhoto) {
+      var photoRow = (mainPhoto || upPhoto || downPhoto || removePhoto).closest('.admin-variant');
+      if (!photoRow) return;
+      if (mainPhoto) {
+        moveVariantPhoto(photoRow, Number(mainPhoto.getAttribute('data-variant-photo-main')), 0);
+        return;
       }
+      if (upPhoto) {
+        var fromUp = Number(upPhoto.getAttribute('data-variant-photo-up'));
+        moveVariantPhoto(photoRow, fromUp, fromUp - 1);
+        return;
+      }
+      if (downPhoto) {
+        var fromDown = Number(downPhoto.getAttribute('data-variant-photo-down'));
+        moveVariantPhoto(photoRow, fromDown, fromDown + 1);
+        return;
+      }
+      getVariantPhotoItems(photoRow).splice(Number(removePhoto.getAttribute('data-variant-photo-remove')), 1);
+      renderVariantPhotos(photoRow);
+      schedulePreview();
       return;
     }
     var btn = event.target.closest('[data-remove-variant]');
@@ -1023,14 +1631,21 @@
     var fileInput = event.target.closest('[data-v-image-file]');
     if (!fileInput) return;
     var row = fileInput.closest('.admin-variant');
-    var file = (fileInput.files || [])[0];
+    var files = Array.prototype.slice.call(fileInput.files || []);
     fileInput.value = '';
-    if (!row || !file) return;
-    show(editorMessage, 'טוענת תמונה…', 'info');
-    readFileAsPhoto(file)
-      .then(function (item) {
-        variantUploads.set(row, item.upload);
-        setVariantImagePreview(row, item.preview, '');
+    if (!row || !files.length) return;
+    var items = getVariantPhotoItems(row);
+    var room = MAX_VARIANT_PHOTOS - items.length;
+    if (room <= 0) {
+      show(editorMessage, 'אפשר עד ' + MAX_VARIANT_PHOTOS + ' תמונות לכל סוג', 'error');
+      return;
+    }
+    files = files.slice(0, room);
+    show(editorMessage, 'טוענת תמונות…', 'info');
+    Promise.all(files.map(readFileAsPhoto))
+      .then(function (added) {
+        variantPhotos.set(row, items.concat(added));
+        renderVariantPhotos(row);
         show(editorMessage, '', '');
         schedulePreview();
       })
@@ -1092,12 +1707,31 @@
       });
   });
 
-  editor.addEventListener('input', schedulePreview);
-  editor.addEventListener('change', schedulePreview);
+  editor.addEventListener('input', function () {
+    clearFieldErrors();
+    if (editorMessage && !editorMessage.hidden && /admin-message--error/.test(editorMessage.className)) {
+      show(editorMessage, '', '');
+    }
+    schedulePreview();
+  });
+  editor.addEventListener('change', function () {
+    clearFieldErrors();
+    if (editorMessage && !editorMessage.hidden && /admin-message--error/.test(editorMessage.className)) {
+      show(editorMessage, '', '');
+    }
+    schedulePreview();
+  });
 
   editor.addEventListener('submit', function (event) {
     event.preventDefault();
+    var validationErrors = validateEditor();
+    if (validationErrors.length) {
+      applyValidationErrors(validationErrors);
+      editorSave.disabled = false;
+      return;
+    }
     editorSave.disabled = true;
+    clearFieldErrors();
     show(editorMessage, 'שומרת…', 'info');
     api('POST', { action: 'upsert', isNew: editingNew, product: readEditor() })
       .then(function (data) {
@@ -1110,7 +1744,7 @@
         return loadBoard();
       })
       .catch(function (err) {
-        show(editorMessage, err.message || 'לא הצלחנו לשמור', 'error');
+        showEditorError(err.message || 'לא הצלחנו לשמור', err.field || null);
       })
       .finally(function () {
         editorSave.disabled = false;

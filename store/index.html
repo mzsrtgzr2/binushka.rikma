@@ -9,56 +9,138 @@ layout: default
 </div>
 
 <div class="store-page container animate">
-  <div class="row">
-    
+  <div class="store-toolbar">
+    <label class="store-toolbar__sort" for="store-category">
+      <span class="store-toolbar__label">קטגוריה</span>
+      <select id="store-category" class="store-toolbar__select" name="store-category">
+        <option value="" selected>הכל</option>
+        <option value="embroidery-supplies">ציוד רקמה</option>
+        <option value="works-for-sale">עבודות למכירה</option>
+      </select>
+    </label>
+    <label class="store-toolbar__sort" for="store-sort">
+      <span class="store-toolbar__label">מיון לפי</span>
+      <select id="store-sort" class="store-toolbar__select" name="store-sort">
+        <option value="default" selected>ברירת מחדל</option>
+        <option value="price-asc">מחיר: מהנמוך לגבוה</option>
+        <option value="price-desc">מחיר: מהגבוה לנמוך</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="row" id="store-grid">
     {% assign sorted = site.store | sort: 'date' %}
+    {% assign store_available = '' | split: '' %}
+    {% assign store_gift_card = '' | split: '' %}
+    {% assign store_sold_out = '' | split: '' %}
     {% for item in sorted %}
       {% unless item.hide %}
-        <article class="store-item col col-4 col-d-6 col-t-12">
-          <div class="store-item__content">
-            <a href="{{item.url}}" class="store-item__image">
-              <img class="lazy" data-src="{{ item.image }}" alt="{{ item.title }}">
-              {% if item.out_of_stock %}
-                <div class="out-of-stock">אזל מהמלאי</div>
-              {% elsif item.limited_stock %}
-                <div class="limited-stock">מלאי מוגבל</div>
-              {% endif %}
-            </a>
-            <div class="store-item__info">
-              <h3 class="store-item__title"><a href="{{item.url}}">{{ item.title }}</a></h3>
-              {% if item.subtitle %}
-              <div class="store-item__subtitle">{{ item.subtitle }}</div>
-              {% endif %}
-              {% assign slug = item.slug | default: item.basename %}
-              {% assign cart_meta = site.data.catalog[slug] %}
-              <div class="store-item__footer">
-              {% if item.price %}
-              <div class="store-item__price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ item.price }}</div>
-              {% endif %}
-              {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false and item.out_of_stock != true %}
-                {% if cart_meta.variable %}
-              <a href="{{ item.url }}" class="button button--primary store-item__add">
-                בחרי סכום
-              </a>
-                {% elsif cart_meta.variants %}
-              <a href="{{ item.url }}" class="button button--primary store-item__add">
-                בחרי סוג
-              </a>
-                {% else %}
-              <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}">
-                הוסיפי לסל
-              </button>
-                {% endif %}
-              {% elsif item.form_url and item.out_of_stock != true %}
-              <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener">
-                הזמיני עכשיו
-              </a>
-              {% endif %}
-              </div>
-            </div>
-          </div>
-        </article>
+        {% assign item_slug = item.slug | default: item.basename %}
+        {% if item.out_of_stock or item.stock == 0 %}
+          {% assign store_sold_out = store_sold_out | push: item %}
+        {% elsif item_slug == 'gift-card' %}
+          {% assign store_gift_card = store_gift_card | push: item %}
+        {% else %}
+          {% assign store_available = store_available | push: item %}
+        {% endif %}
       {% endunless %}
     {% endfor %}
+    {% assign store_display = store_available | concat: store_gift_card | concat: store_sold_out %}
+
+    {% for item in store_display %}
+      {% assign sold_out = false %}
+      {% if item.out_of_stock or item.stock == 0 %}
+        {% assign sold_out = true %}
+      {% endif %}
+      {% assign slug = item.slug | default: item.basename %}
+      {% assign cart_meta = site.data.catalog[slug] %}
+      {% assign card_image = item.image %}
+      {% if card_image == blank and item.variants %}
+        {% for variant_pair in item.variants %}
+          {% if card_image == blank and variant_pair[1].image and variant_pair[1].image != blank %}
+            {% assign card_image = variant_pair[1].image %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      {% assign sort_price = 0 %}
+      {% if cart_meta.variable and cart_meta.min_price %}
+        {% assign sort_price = cart_meta.min_price %}
+      {% elsif cart_meta.variants %}
+        {% assign sort_price = 999999 %}
+        {% for variant_pair in cart_meta.variants %}
+          {% assign variant_price = variant_pair[1].price | plus: 0 %}
+          {% if variant_price < sort_price %}
+            {% assign sort_price = variant_price %}
+          {% endif %}
+        {% endfor %}
+      {% elsif cart_meta.price %}
+        {% assign sort_price = cart_meta.price | plus: 0 %}
+      {% elsif item.min_price %}
+        {% assign sort_price = item.min_price | plus: 0 %}
+      {% elsif item.variants %}
+        {% assign sort_price = 999999 %}
+        {% for variant_pair in item.variants %}
+          {% assign variant_price = variant_pair[1].price | plus: 0 %}
+          {% if variant_price < sort_price %}
+            {% assign sort_price = variant_price %}
+          {% endif %}
+        {% endfor %}
+      {% elsif item.price %}
+        {% assign price_token = item.price | replace: '₪', '' | replace: ',', '' | split: '–' | first | split: '-' | first | strip %}
+        {% assign sort_price = price_token | plus: 0 %}
+      {% endif %}
+      <article
+        class="store-item col col-4 col-d-6 col-t-12"
+        data-product-id="{{ slug }}"
+        data-category="{{ item.category }}"
+        data-price="{{ sort_price }}"
+        data-sold-out="{% if sold_out %}true{% else %}false{% endif %}"
+        data-date="{{ item.date | date: '%s' }}"
+      >
+        <div class="store-item__content">
+          <a href="{{item.url}}" class="store-item__image">
+            {% if card_image and card_image != blank %}
+            <img class="lazy" data-src="{{ card_image }}" alt="{{ item.title }}">
+            {% endif %}
+            {% if sold_out %}
+              <div class="out-of-stock">אזל מהמלאי</div>
+            {% elsif item.limited_stock %}
+              <div class="limited-stock">מלאי מוגבל</div>
+            {% endif %}
+          </a>
+          <div class="store-item__info">
+            <h3 class="store-item__title"><a href="{{item.url}}">{{ item.title }}</a></h3>
+            {% if item.subtitle %}
+            <div class="store-item__subtitle">{{ item.subtitle }}</div>
+            {% endif %}
+            <div class="store-item__footer">
+            {% if item.price %}
+            <div class="store-item__price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ item.price }}</div>
+            {% endif %}
+            {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false and sold_out != true %}
+              {% if cart_meta.variable %}
+            <a href="{{ item.url }}" class="button button--primary store-item__add">
+              בחרי סכום
+            </a>
+              {% elsif cart_meta.variants %}
+            <a href="{{ item.url }}" class="button button--primary store-item__add">
+              בחרי סוג
+            </a>
+              {% else %}
+            <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}">
+              הוסיפי לסל
+            </button>
+              {% endif %}
+            {% elsif item.form_url and sold_out != true %}
+            <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener">
+              הזמיני עכשיו
+            </a>
+            {% endif %}
+            </div>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
   </div>
-</div> 
+</div>
+<script src="{{ site.baseurl }}/js/store-sort.js" defer></script>

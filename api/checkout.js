@@ -6,8 +6,14 @@
  * POST /api/v1/payments/form  (get payment form)
  */
 
-const { buildOrder, applyVariantNote, applyGiftPacking } = require('./catalog');
+const {
+  buildOrder,
+  applyVariantNote,
+  applyWorkshopNote,
+  applyGiftPacking,
+} = require('./catalog');
 const { resolveMorningEnv, morningHosts, getMorningToken } = require('./morning');
+const admin = require('./admin');
 
 const VAT_RATE = 0.18;
 const GROW_PRODUCTION_PLUGIN_ID = '453df580-760d-439d-a848-4fe7dc1fb9b3';
@@ -153,6 +159,32 @@ function buildIncomeRows(lines, incomeVatType) {
     }));
 }
 
+function inventoryPurchases(order) {
+  return (order && order.lines ? order.lines : [])
+    .filter((line) => line && line.id && Number(line.quantity) > 0)
+    .map((line) => {
+      const packs = Number(line.quantity);
+      const places = Number(line.places);
+      const each = Number.isInteger(places) && places > 0 ? places : 1;
+      const row = { slug: line.id, quantity: packs * each };
+      if (line.variant) row.variant = line.variant;
+      return row;
+    });
+}
+
+async function reserveInventory(env, order) {
+  const purchases = inventoryPurchases(order);
+  if (!purchases.length) return { ok: true, changed: [] };
+  try {
+    const result = await admin.decrementInventory(env, purchases);
+    if (result && result.error) return result;
+    return { ok: true, ...(result || {}) };
+  } catch (err) {
+    console.error('inventory decrement failed', err);
+    return { error: 'לא הצלחנו לעדכן מלאי. נסי שוב בעוד רגע.' };
+  }
+}
+
 function buildPaymentFormPayload({ order, customer, env, envVars, successUrl, failureUrl }) {
   const vars = envVars || {};
   const incomeVatType = Number(vars.MORNING_VAT_TYPE || 1);
@@ -227,7 +259,10 @@ async function handler(req, res) {
 
   const body = req.body || {};
   const order = applyGiftPacking(
-    applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
+    applyWorkshopNote(
+      applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
+      body.participantsNote
+    ),
     body
   );
   if (order.error) {
@@ -237,6 +272,11 @@ async function handler(req, res) {
   const customerResult = readCustomer(body);
   if (customerResult.error) {
     return res.status(400).json({ error: customerResult.error });
+  }
+
+  const stockCheck = await admin.assertInventory(process.env, inventoryPurchases(order));
+  if (stockCheck.error) {
+    return res.status(409).json({ error: stockCheck.error });
   }
 
   const origin = siteOrigin(req);
@@ -259,6 +299,10 @@ async function handler(req, res) {
       successUrl,
       failureUrl,
     });
+    const reserved = await reserveInventory(process.env, order);
+    if (reserved.error) {
+      return res.status(409).json({ error: reserved.error });
+    }
     return res.status(200).json({ url: successUrl, skipped: true, amount: skipPayload.amount });
   }
 
@@ -327,6 +371,12 @@ async function handler(req, res) {
       error: message || 'לא הצלחנו לפתוח תשלום. נסי שוב.',
       errorCode: morningJson.errorCode,
     });
+  }
+
+  const reserved = await reserveInventory(process.env, pricedOrder);
+  if (reserved.error) {
+    console.error('inventory reserve failed after payment form', reserved.error);
+    return res.status(409).json({ error: reserved.error });
   }
 
   return res.status(200).json({ url });

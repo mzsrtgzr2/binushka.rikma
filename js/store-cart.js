@@ -12,10 +12,32 @@
 
   var byId = {};
   catalog.forEach(function (p) {
+    if (p.stock === 0) p.outOfStock = true;
     byId[p.id] = p;
   });
 
   var STORAGE_KEY = 'binushka-store-cart-v1';
+
+  function track(method, a, b, c) {
+    if (!window.Analytics || typeof Analytics[method] !== 'function') return;
+    Analytics[method](a, b, c);
+  }
+
+  /* Describes one cart line for analytics, independent of what is in the cart. */
+  function lineForAnalytics(id, extra, quantity) {
+    var p = byId[id];
+    if (!p) return null;
+    var variant = p.variants && extra ? p.variants[extra] : null;
+    return {
+      id: id,
+      name: variant && p.kind === 'workshop' ? p.name + ' — ' + variant.name : variant ? variant.name : p.name,
+      price: linePrice(p, extra),
+      quantity: quantity || 1,
+      variant: p.variants ? extra : undefined,
+      amount: p.variable ? extra : undefined,
+      kind: p.kind || 'product',
+    };
+  }
 
   function loadCart() {
     try {
@@ -100,12 +122,15 @@
           id: parsed.id,
           key: key,
           quantity: cart[key],
-          name: variant ? variant.name : p.name,
+          name: variant && p.kind === 'workshop' ? p.name + ' — ' + variant.name : variant ? variant.name : p.name,
           price: price,
           amount: p.variable ? parsed.amount : undefined,
           variant: parsed.variant || undefined,
+          places: variantPlaces(p, parsed.variant),
           url: p.url,
           image: (variant && variant.image) || p.image || '',
+          kind: p.kind || 'product',
+          requiresShipping: p.requiresShipping !== false,
         };
       })
       .filter(Boolean);
@@ -117,23 +142,261 @@
     return d.innerHTML;
   }
 
+  function hasPerVariantStock(p) {
+    if (!p || !p.variants || p.kind === 'workshop') return false;
+    return Object.keys(p.variants).some(function (id) {
+      return typeof p.variants[id].stock === 'number';
+    });
+  }
+
+  function availableStock(p, variantId) {
+    if (!p) return 0;
+    if (hasPerVariantStock(p)) {
+      if (!variantId || !p.variants[variantId]) return 0;
+      var row = p.variants[variantId];
+      if (typeof row.stock === 'number') return row.stock;
+      return Infinity;
+    }
+    if (p.outOfStock || p.stock === 0) return 0;
+    if (typeof p.stock === 'number') return p.stock;
+    return Infinity;
+  }
+
+  function variantPlaces(p, variantId) {
+    if (!p || p.kind !== 'workshop') return 1;
+    var row = p.variants && variantId ? p.variants[variantId] : null;
+    var n = Number(row && row.places);
+    return n > 0 && Number.isInteger(n) ? n : 1;
+  }
+
+  function linePlaces(p, parsed, qty) {
+    return variantPlaces(p, parsed && parsed.variant) * (qty || 0);
+  }
+
+  function productQtyInCart(cart, id) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      if (parsed.id !== id) return sum;
+      return sum + (cart[key] || 0);
+    }, 0);
+  }
+
+  function productPlacesInCart(cart, id, variantId) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      if (parsed.id !== id) return sum;
+      if (variantId && hasPerVariantStock(byId[id]) && parsed.variant !== variantId) return sum;
+      return sum + linePlaces(byId[parsed.id], parsed, cart[key] || 0);
+    }, 0);
+  }
+
+  /* Reports why an add failed, so lost demand shows up next to add_to_cart. */
+  function blocked(id, extra, reason) {
+    var line = lineForAnalytics(id, extra, 1);
+    if (line) track('track', 'add_to_cart_blocked', {
+      item_id: line.id,
+      item_name: line.name,
+      item_variant: line.variant || (line.amount ? '₪' + line.amount : undefined),
+      reason: reason,
+    });
+    return false;
+  }
+
   function addToCart(id, delta, extra) {
     var p = byId[id];
-    if (!p || p.outOfStock) return false;
-    if (p.variable && !validGiftAmount(p, extra)) return false;
-    if (p.variants && !validVariant(p, extra)) return false;
+    if (!p) return false;
+    if (!hasPerVariantStock(p) && (p.outOfStock || p.stock === 0)) return blocked(id, extra, 'out_of_stock');
+    if (p.variable && !validGiftAmount(p, extra)) return blocked(id, extra, 'invalid_amount');
+    if (p.variants && !validVariant(p, extra)) return blocked(id, extra, 'no_variant_selected');
+    if (hasPerVariantStock(p) && availableStock(p, extra) <= 0) return blocked(id, extra, 'out_of_stock');
     var key = lineKey(id, extra);
     var cart = loadCart();
     var next = (cart[key] || 0) + delta;
     if (next < 1) delete cart[key];
-    else cart[key] = next;
+    else {
+      var max = availableStock(p, extra);
+      var each = variantPlaces(p, extra);
+      var others = productPlacesInCart(cart, id, hasPerVariantStock(p) ? extra : null) - (cart[key] || 0) * each;
+      if (Number.isFinite(max) && others + next * each > max) return blocked(id, extra, 'stock_limit');
+      cart[key] = next;
+    }
     saveCart(cart);
     renderWidget();
+    var line = lineForAnalytics(id, extra, Math.abs(delta));
+    if (line) track(delta > 0 ? 'addToCart' : 'removeFromCart', line);
     return true;
+  }
+
+  function clampCartToStock() {
+    var cart = loadCart();
+    var changed = false;
+    Object.keys(cart).forEach(function (key) {
+      var parsed = parseCartKey(key);
+      var p = byId[parsed.id];
+      if (!p) return;
+      var max = availableStock(p, parsed.variant);
+      var each = variantPlaces(p, parsed.variant);
+      if (max <= 0) {
+        delete cart[key];
+        changed = true;
+        return;
+      }
+      if (Number.isFinite(max)) {
+        var maxPkgs = Math.floor(max / each);
+        if (maxPkgs <= 0) {
+          delete cart[key];
+          changed = true;
+        } else if (cart[key] > maxPkgs) {
+          cart[key] = maxPkgs;
+          changed = true;
+        }
+      }
+    });
+    // Second pass: shared stock across variant lines for the same product
+    // (skipped when each type tracks its own quantity)
+    var byProduct = {};
+    Object.keys(cart).forEach(function (key) {
+      var parsed = parseCartKey(key);
+      if (!byProduct[parsed.id]) byProduct[parsed.id] = [];
+      byProduct[parsed.id].push(key);
+    });
+    Object.keys(byProduct).forEach(function (id) {
+      var p = byId[id];
+      if (hasPerVariantStock(p)) return;
+      var max = availableStock(p);
+      if (!Number.isFinite(max)) return;
+      var keys = byProduct[id];
+      var total = keys.reduce(function (sum, key) {
+        return sum + linePlaces(p, parseCartKey(key), cart[key] || 0);
+      }, 0);
+      if (total <= max) return;
+      var remaining = max;
+      keys.forEach(function (key) {
+        var parsed = parseCartKey(key);
+        var each = variantPlaces(p, parsed.variant);
+        if (remaining < each) {
+          delete cart[key];
+          changed = true;
+          return;
+        }
+        var maxPkgs = Math.floor(remaining / each);
+        if (cart[key] > maxPkgs) {
+          cart[key] = maxPkgs;
+          changed = true;
+        }
+        remaining -= (cart[key] || 0) * each;
+      });
+    });
+    if (changed) saveCart(cart);
+    return changed;
+  }
+
+  function ensureOverlay(container, className, text) {
+    if (!container) return;
+    var existing = container.querySelector('.out-of-stock, .limited-stock');
+    if (existing) existing.parentNode.removeChild(existing);
+    if (!text) return;
+    var el = document.createElement('div');
+    el.className = className;
+    el.textContent = text;
+    container.appendChild(el);
+  }
+
+  function ensureStockText(host, soldOut, limited) {
+    if (!host) return;
+    var existing = host.querySelector('.out-of-stock-text, .limited-stock-text');
+    if (existing) existing.parentNode.removeChild(existing);
+    if (!soldOut && !limited) return;
+    var el = document.createElement('div');
+    el.className = soldOut ? 'out-of-stock-text' : 'limited-stock-text';
+    el.textContent = soldOut
+      ? host && host.closest('[data-product-kind="workshop"]')
+        ? 'אין מקומות פנויים'
+        : 'אזל מהמלאי'
+      : host && host.closest('[data-product-kind="workshop"]')
+        ? 'מקומות אחרונים'
+        : 'מלאי מוגבל';
+    var price = host.querySelector('.store-item-price, [data-product-price]');
+    if (price && price.parentNode === host) host.insertBefore(el, price);
+    else host.appendChild(el);
+  }
+
+  function updateStockUi() {
+    Object.keys(byId).forEach(function (id) {
+      var p = byId[id];
+      var perVariant = hasPerVariantStock(p);
+      var soldOut = perVariant
+        ? Object.keys(p.variants).every(function (vid) {
+            return typeof p.variants[vid].stock === 'number' && p.variants[vid].stock <= 0;
+          })
+        : Boolean(p.outOfStock) || p.stock === 0;
+      var limited = Boolean(p.limitedStock) && !soldOut;
+      if (perVariant && !soldOut) {
+        limited = Object.keys(p.variants).some(function (vid) {
+          var s = p.variants[vid].stock;
+          return typeof s === 'number' && s > 0 && s <= 3;
+        });
+      }
+      var workshop = p.kind === 'workshop';
+      var overlayLabel = soldOut
+        ? workshop
+          ? 'אין מקומות פנויים'
+          : 'אזל מהמלאי'
+        : limited
+          ? workshop
+            ? 'מקומות אחרונים'
+            : 'מלאי מוגבל'
+          : '';
+      var overlayClass = soldOut ? 'out-of-stock' : 'limited-stock';
+
+      document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
+        root.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
+        ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
+        if (root.querySelector('.page-head')) {
+          ensureStockText(root.querySelector('.page-head'), soldOut, limited);
+          var pageActions = root.querySelector('.store-item__cart-actions');
+          if (pageActions) pageActions.hidden = soldOut;
+        }
+      });
+
+      document.querySelectorAll('[data-cart-add="' + id + '"]').forEach(function (btn) {
+        if (id === 'gift-card') return;
+        var variantId = btn.getAttribute('data-cart-variant');
+        var need = variantPlaces(p, variantId);
+        var max = availableStock(p, variantId);
+        var disabled = perVariant
+          ? !Number.isFinite(max)
+            ? false
+            : max < need
+          : soldOut || (typeof p.stock === 'number' && p.stock < need);
+        btn.disabled = disabled;
+        if (disabled) btn.setAttribute('aria-disabled', 'true');
+        else btn.removeAttribute('aria-disabled');
+      });
+    });
+  }
+
+  function flashStockLimit(triggerEl) {
+    if (!triggerEl || !triggerEl.classList) return;
+    var prev = triggerEl.getAttribute('data-label-orig') || triggerEl.textContent;
+    triggerEl.setAttribute('data-label-orig', prev);
+    var product = byId[triggerEl.getAttribute('data-cart-add')];
+    triggerEl.textContent =
+      product && product.kind === 'workshop' ? 'אין מספיק מקומות' : 'אין מספיק מלאי';
+    triggerEl.classList.add('is-stock-limit');
+    window.setTimeout(function () {
+      triggerEl.textContent = triggerEl.getAttribute('data-label-orig') || prev;
+      triggerEl.classList.remove('is-stock-limit');
+    }, 1600);
   }
 
   function prefersReducedMotion() {
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /* Matches $desktop in _sass/1-tools/_grid.scss — floating cart FAB layout */
+  function isFloatingCartLayout() {
+    return window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
   }
 
   function imageUrlFromEl(img) {
@@ -282,13 +545,38 @@
     checkout: document.getElementById('store-cart-checkout'),
   };
 
+  var headerHost = els.root && els.root.parentElement;
+  var headerNextSibling = els.root && els.root.nextSibling;
+
+  function syncCartPlacement() {
+    if (!els.root || !headerHost) return;
+    if (isFloatingCartLayout()) {
+      if (els.root.parentElement !== document.body) {
+        document.body.appendChild(els.root);
+      }
+      els.root.classList.add('store-cart--floating');
+    } else {
+      if (els.root.parentElement !== headerHost) {
+        if (headerNextSibling && headerNextSibling.parentElement === headerHost) {
+          headerHost.insertBefore(els.root, headerNextSibling);
+        } else {
+          headerHost.appendChild(els.root);
+        }
+      }
+      els.root.classList.remove('store-cart--floating');
+    }
+  }
+
   function openPanel() {
     if (!els.panel) return;
+    var cart = loadCart();
+    track('viewCart', cartItems(cart), cartTotal(cart));
     els.panel.hidden = false;
     els.backdrop.hidden = false;
     els.toggle.setAttribute('aria-expanded', 'true');
     document.body.classList.add('store-cart-open');
-    if (els.toggle && els.toggle.scrollIntoView) {
+    /* Header cart can be off-screen; floating FAB is always in view */
+    if (!isFloatingCartLayout() && els.toggle && els.toggle.scrollIntoView) {
       els.toggle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }
@@ -322,6 +610,19 @@
     cartItems(cart).forEach(function (item) {
       var li = document.createElement('li');
       li.className = 'store-cart__line';
+      var p = byId[item.id];
+      var max = availableStock(p, item.variant);
+      var each = variantPlaces(p, item.variant);
+      var atMax =
+        Number.isFinite(max) &&
+        productPlacesInCart(cart, item.id, hasPerVariantStock(p) ? item.variant : null) + each > max;
+      var stockHintText = atMax
+        ? item.kind === 'workshop'
+          ? max === 1
+            ? 'נשאר מקום אחד לסדנה הזו'
+            : 'נשארו רק ' + max + ' מקומות לסדנה הזו'
+          : 'יש רק ' + max + ' במלאי — אי אפשר להוסיף עוד'
+        : '';
       var thumb = item.image
         ? '<img class="store-cart__thumb" src="' + escapeHtml(item.image) + '" alt="">'
         : '<span class="store-cart__thumb store-cart__thumb--empty" aria-hidden="true"></span>';
@@ -331,11 +632,18 @@
         '<a href="' + item.url + '">' + escapeHtml(item.name) + '</a>' +
         '<span class="store-cart__line-price">₪' + item.price * item.quantity + '</span>' +
         '</div>' +
-        '<div class="store-cart__line-actions">' +
+        '<div class="store-cart__line-actions' + (atMax ? ' is-at-max' : '') + '">' +
+        '<div class="store-cart__qty-row">' +
         '<button type="button" class="store-cart__qty" data-action="dec" data-id="' + escapeHtml(item.key) + '" aria-label="הפחתה">−</button>' +
         '<span class="store-cart__qty-val">' + item.quantity + '</span>' +
-        '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + escapeHtml(item.key) + '" aria-label="הוספה">+</button>' +
+        '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + escapeHtml(item.key) + '"' +
+        (atMax ? ' disabled title="' + escapeHtml(stockHintText) + '"' : '') +
+        ' aria-label="' + (atMax ? escapeHtml(stockHintText) : 'הוספה') + '">+</button>' +
         '<button type="button" class="store-cart__remove" data-action="remove" data-id="' + escapeHtml(item.key) + '" aria-label="הסרה">×</button>' +
+        '</div>' +
+        (atMax
+          ? '<span class="store-cart__stock-hint">' + escapeHtml(stockHintText) + '</span>'
+          : '') +
         '</div>';
       els.lines.appendChild(li);
     });
@@ -354,7 +662,10 @@
       if (p && p.variants && (extra == null || extra === '')) {
         extra = triggerEl && triggerEl.getAttribute ? triggerEl.getAttribute('data-cart-variant') : '';
       }
-      if (!addToCart(id, 1, extra)) return;
+      if (!addToCart(id, 1, extra)) {
+        flashStockLimit(triggerEl);
+        return;
+      }
       if (triggerEl && triggerEl.classList) {
         triggerEl.classList.add('is-added');
         window.setTimeout(function () {
@@ -395,9 +706,11 @@
       if (action === 'dec') addToCart(parsed.id, -1, cartExtra(parsed));
       if (action === 'remove') {
         var cart = loadCart();
+        var removed = lineForAnalytics(parsed.id, cartExtra(parsed), cart[key] || 1);
         delete cart[key];
         saveCart(cart);
         renderWidget();
+        if (removed) track('removeFromCart', removed);
       }
     });
   }
@@ -412,7 +725,17 @@
   if (els.backdrop) els.backdrop.addEventListener('click', closePanel);
   if (els.checkout) {
     els.checkout.addEventListener('click', function (e) {
-      if (cartCount(loadCart()) === 0) e.preventDefault();
+      var cart = loadCart();
+      if (cartCount(cart) === 0) {
+        e.preventDefault();
+        return;
+      }
+      /* Paired with begin_checkout on /checkout/ to expose the drop between them. */
+      track('track', 'cart_checkout_click', {
+        currency: 'ILS',
+        value: cartTotal(cart),
+        items_count: cartCount(cart),
+      });
     });
   }
 
@@ -446,6 +769,17 @@
   }
 
   renderWidget();
+  updateStockUi();
+  window.dispatchEvent(new Event('binushka:stock'));
+  syncCartPlacement();
+  if (window.matchMedia) {
+    var floatingMq = window.matchMedia('(max-width: 1024px)');
+    if (floatingMq.addEventListener) {
+      floatingMq.addEventListener('change', syncCartPlacement);
+    } else if (floatingMq.addListener) {
+      floatingMq.addListener(syncCartPlacement);
+    }
+  }
 
   fetch('/api/prices/')
     .then(function (res) {
@@ -456,15 +790,34 @@
       if (!products) return;
       Object.keys(products).forEach(function (id) {
         var live = products[id];
-        if (!byId[id] || byId[id].variable || byId[id].variants || !live || !(Number(live.price) > 0)) return;
-        byId[id].price = Number(live.price);
+        if (!byId[id] || !live) return;
+        if (!byId[id].variable && !byId[id].variants && Number(live.price) > 0) {
+          byId[id].price = Number(live.price);
+        }
         if (live.name) byId[id].name = live.name;
+        if (typeof live.stock === 'number') byId[id].stock = live.stock;
+        else if (live.stock === null) delete byId[id].stock;
+        if (typeof live.outOfStock === 'boolean') byId[id].outOfStock = live.outOfStock;
+        if (typeof live.limitedStock === 'boolean') byId[id].limitedStock = live.limitedStock;
+        if (live.variants && byId[id].variants) {
+          Object.keys(live.variants).forEach(function (vid) {
+            if (!byId[id].variants[vid]) return;
+            var vLive = live.variants[vid];
+            if (!vLive) return;
+            if (typeof vLive.stock === 'number') byId[id].variants[vid].stock = vLive.stock;
+            else if (vLive.stock === null) delete byId[id].variants[vid].stock;
+          });
+        }
+        if (byId[id].stock === 0) byId[id].outOfStock = true;
       });
       document.querySelectorAll('[data-product-price]').forEach(function (el) {
         var id = el.getAttribute('data-product-price');
         if (byId[id] && !byId[id].variable && !byId[id].variants) el.textContent = '₪' + byId[id].price;
       });
+      clampCartToStock();
+      updateStockUi();
       renderWidget();
+      window.dispatchEvent(new Event('binushka:stock'));
       window.dispatchEvent(new Event('binushka:prices'));
     })
     .catch(function () {

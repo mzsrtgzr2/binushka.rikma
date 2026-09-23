@@ -7,11 +7,71 @@
   }
 }
 
+.store-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 20px 28px;
+  margin-bottom: 28px;
+
+  @media only screen and (max-width: $mobile) {
+    margin-bottom: 20px;
+    gap: 14px 20px;
+  }
+}
+
+.store-toolbar__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading-font-color);
+
+  @media only screen and (max-width: $mobile) {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.store-toolbar__label {
+  white-space: nowrap;
+}
+
+.store-toolbar__select {
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--background-alt-color);
+  color: var(--heading-font-color);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+
+  @media only screen and (max-width: $mobile) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &:focus {
+    outline: 2px solid var(--brand-color);
+    outline-offset: 2px;
+  }
+}
+
 .store-item {
   display: flex;
   flex-direction: column;
   margin-bottom: 32px;
   transition: transform .2s ease-in-out;
+
+  &[hidden] {
+    display: none !important;
+  }
 
   &:hover {
     transform: translateY(-4px);
@@ -185,6 +245,11 @@
   margin-top: 16px;
 }
 
+.store-item__stock {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
 .store-item-image-container {
   display: inline-block;
 }
@@ -272,12 +337,19 @@
 
 .store-variant {
   display: grid;
-  grid-template-columns: 88px 1fr auto;
+  grid-template-columns: auto 1fr auto;
   gap: 16px;
   align-items: center;
   background: var(--background-alt-color);
   border-radius: 16px;
   padding: 12px;
+}
+
+.store-variant__photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 190px;
 }
 
 .store-variant__photo {
@@ -309,7 +381,16 @@
 
 @media only screen and (max-width: $mobile) {
   .store-variant {
-    grid-template-columns: 64px 1fr;
+    grid-template-columns: auto 1fr;
+  }
+
+  .store-variant__photos {
+    max-width: 140px;
+  }
+
+  .store-variant__photo {
+    width: 64px;
+    height: 64px;
   }
 
   .store-variant .button {

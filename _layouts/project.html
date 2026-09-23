@@ -2,20 +2,43 @@
 layout: default
 ---
 
-<div class="container">
+{%- assign workshop_slug = page.slug | default: page.basename | remove: '.md' -%}
+{%- assign workshop_id = 'workshop-' | append: workshop_slug -%}
+{%- assign workshop = site.data.workshops[workshop_id] -%}
+{%- assign spots = workshop.stock -%}
+{%- assign sold_out = page.registration_full -%}
+{%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
+{%- assign last_places = page.last_places -%}
+{%- unless page.price_per == 'workshop' -%}
+{%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
+{%- endunless -%}
+{%- assign booking_in_cart = false -%}
+{%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
+{%- assign price_unit = 'למשתתפת' -%}
+{%- if page.price_per == 'workshop' %}{% assign price_unit = 'לסדנה' %}{% endif -%}
+
+<div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop">
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
     {% if page.registration_not_open %}
       <div class="registration-full-text">ההרשמה תיפתח בקרוב</div>
-    {% elsif page.registration_full %}
+    {% elsif sold_out %}
       <div class="registration-full-text">אין מקומות פנויים</div>
-    {% elsif page.last_places %}
+    {% elsif last_places %}
       <div class="registration-full-text">מקומות אחרונים</div>
     {% endif %}
 
     {% if page.subtitle %}
       <p class="project-subtitle">{{ page.subtitle }}</p>
+    {% endif %}
+
+    {% if booking_in_cart %}
+      {% if workshop.variants %}
+      <div class="project-price">מ־₪{{ workshop.price }} {{ price_unit }}</div>
+      {% else %}
+      <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}</div>
+      {% endif %}
     {% endif %}
   </div>
 
@@ -28,16 +51,58 @@ layout: default
     {% endif %}
   </div>
 
-  {% unless page.registration_full or page.registration_not_open %}
+  {% unless sold_out or page.registration_not_open %}
   <div class="project-content animate">
   <div class="container">
     <div class="row">
       <div class="col-12">
+        {% if booking_in_cart %}
+        <div class="workshop-booking">
+          {% unless workshop.variants %}
+          <div class="workshop-booking__head">
+            <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>
+            <span class="workshop-booking__per">{{ price_unit }}</span>
+          </div>
+          {% endunless %}
+          <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' %} hidden{% endif %}>
+            {%- if spots != nil and page.price_per != 'workshop' -%}
+              {%- if spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
+            {%- endif -%}
+          </p>
+          {% if workshop.variants %}
+          <div class="workshop-booking__packs">
+            {% for pack in workshop.variants %}
+            {%- assign pack_places = pack[1].places | default: 1 -%}
+            {%- assign pack_each = pack[1].price | plus: 0 -%}
+            {%- if pack_places > 1 -%}
+              {%- assign pack_full = workshop.price | times: pack_places -%}
+              {%- assign pack_save = pack_full | minus: pack_each -%}
+            {%- endif -%}
+            <button type="button" class="button button--primary workshop-booking__pack" data-cart-add="{{ workshop_id }}" data-cart-variant="{{ pack[0] }}">
+              <span class="workshop-booking__pack-name">{{ pack[1].name }}</span>
+              <span class="workshop-booking__pack-price">₪{{ pack[1].price }}</span>
+              {% if pack_places > 1 and pack_save > 0 %}
+              <span class="workshop-booking__pack-save">חוסכות ₪{{ pack_save }}</span>
+              {% endif %}
+            </button>
+            {% endfor %}
+          </div>
+          {% else %}
+          <button type="button" class="button button--primary section-button" data-cart-add="{{ workshop_id }}">
+            {% if page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
+          </button>
+          {% endif %}
+          <p class="workshop-booking__note">
+            ההרשמה עוברת לסל הקניות — אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.
+          </p>
+        </div>
+        {% elsif page.form_url %}
         <div class="section__navigation">
             <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank">
             הרשמי לסדנה זו
           </a>
         </div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -55,9 +120,9 @@ layout: default
           <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
           {% if page.registration_not_open %}
             <div class="registration-full">ההרשמה תיפתח בקרוב</div>
-          {% elsif page.registration_full %}
+          {% elsif sold_out %}
             <div class="registration-full">אין מקומות פנויים</div>
-          {% elsif page.last_places %}
+          {% elsif last_places %}
             <div class="registration-full">מקומות אחרונים</div>
           {% endif %}
         </div>

@@ -3,6 +3,7 @@
  */
 (function () {
   var LAST_ORDER_KEY = 'binushka-last-order-v1';
+  var TRACKED_KEY = 'binushka-purchase-tracked-v1';
   var SHIPPING_LABELS = {
     pickup: 'איסוף עצמי מרחובות',
     registered: 'דואר רשום',
@@ -24,6 +25,19 @@
     } catch (e) {
       return null;
     }
+  }
+
+  /* A reload of /thanks/ must not report the purchase twice. */
+  function trackPurchaseOnce(order) {
+    if (!window.Analytics) return;
+    var ref = order.orderRef || '';
+    try {
+      if (ref && localStorage.getItem(TRACKED_KEY) === ref) return;
+      if (ref) localStorage.setItem(TRACKED_KEY, ref);
+    } catch (e) {
+      /* private mode: accept the small risk of a duplicate */
+    }
+    Analytics.purchase(order);
   }
 
   function itemImage(item) {
@@ -68,7 +82,12 @@
     if (!orderEl || !linesEl) return;
 
     var order = loadOrder();
-    if (!order || !order.items.length) return;
+    if (!order || !order.items.length) {
+      if (window.Analytics) Analytics.track('purchase_untracked', { reason: 'no_order_in_session' });
+      return;
+    }
+
+    trackPurchaseOnce(order);
 
     orderEl.hidden = false;
     linesEl.innerHTML = order.items.map(lineHtml).join('');
@@ -93,10 +112,14 @@
     }
 
     if (shippingEl) {
-      var label = SHIPPING_LABELS[order.shipping] || order.shipping || 'משלוח';
-      var shipCost = Number(order.shippingCost) || 0;
-      shippingEl.hidden = false;
-      shippingEl.textContent = label + ': ₪' + shipCost;
+      if (order.shipping === 'none') {
+        shippingEl.hidden = true;
+      } else {
+        var label = SHIPPING_LABELS[order.shipping] || order.shipping || 'משלוח';
+        var shipCost = Number(order.shippingCost) || 0;
+        shippingEl.hidden = false;
+        shippingEl.textContent = label + ': ₪' + shipCost;
+      }
     }
     if (totalEl) totalEl.textContent = '₪' + (Number(order.total) || 0);
 

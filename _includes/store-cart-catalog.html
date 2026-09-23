@@ -8,14 +8,28 @@
     {%- assign slug = item.slug | default: item.basename -%}
     {%- assign meta = catalog[slug] -%}
     {%- if meta and meta.enabled != false -%}
+      {%- assign cart_image = item.image -%}
+      {%- if cart_image == blank and meta.variants -%}
+        {%- for variant in meta.variants -%}
+          {%- if cart_image == blank and variant[1].image and variant[1].image != blank -%}
+            {%- assign cart_image = variant[1].image -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
       {%- unless first -%},{%- endunless -%}
       {
         "id": {{ slug | jsonify }},
         "name": {{ item.title | jsonify }},
         "price": {{ meta.price | default: 0 }},
-        "image": {{ item.image | relative_url | jsonify }},
+        "image": {{ cart_image | relative_url | jsonify }},
         "url": {{ item.url | relative_url | jsonify }},
-        "outOfStock": {% if item.out_of_stock %}true{% else %}false{% endif %},
+        "kind": "product",
+        "requiresShipping": true,
+        "outOfStock": {% if item.out_of_stock or item.stock == 0 %}true{% else %}false{% endif %},
+        {%- if item.stock != nil and item.stock != "" -%}
+        "stock": {{ item.stock }},
+        {%- endif -%}
+        "limitedStock": {% if item.limited_stock %}true{% else %}false{% endif %},
         "variable": {% if meta.variable %}true{% else %}false{% endif %},
         "minPrice": {{ meta.min_price | default: 0 }},
         "maxPrice": {{ meta.max_price | default: 0 }}
@@ -33,6 +47,34 @@
             {%- assign vfirst = false -%}
           {%- endfor -%}
         }
+        {%- endif -%}
+      }
+      {%- assign first = false -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- assign workshops = site.data.workshops -%}
+{%- for project in site.projects -%}
+    {%- assign wslug = project.slug | default: project.basename | remove: '.md' -%}
+    {%- assign wid = 'workshop-' | append: wslug -%}
+    {%- assign wmeta = workshops[wid] -%}
+    {%- if wmeta and wmeta.enabled != false and project.hide != true -%}
+      {%- unless first -%},{%- endunless -%}
+      {
+        "id": {{ wid | jsonify }},
+        "name": {{ wmeta.name | jsonify }},
+        "price": {{ wmeta.price | default: 0 }},
+        "image": {{ project.image | relative_url | jsonify }},
+        "url": {{ project.url | relative_url | jsonify }},
+        "kind": "workshop",
+        "requiresShipping": false,
+        "stock": {% if wmeta.stock != nil %}{{ wmeta.stock }}{% else %}null{% endif %},
+        "outOfStock": {% if project.registration_full or wmeta.stock == 0 %}true{% else %}false{% endif %},
+        "variable": false,
+        "minPrice": 0,
+        "maxPrice": 0
+        {%- if wmeta.variants -%}
+        ,
+        "variants": {{ wmeta.variants | jsonify }}
         {%- endif -%}
       }
       {%- assign first = false -%}

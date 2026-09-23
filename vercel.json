@@ -8,7 +8,7 @@
   "trailingSlash": true,
   "functions": {
     "api/*.js": {
-      "includeFiles": "_store/**"
+      "includeFiles": "{_store,_projects}/**"
     }
   },
   "rewrites": [

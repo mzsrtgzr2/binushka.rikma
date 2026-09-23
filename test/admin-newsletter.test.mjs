@@ -14,9 +14,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 
-import handler from '../api/admin-newsletter.mjs';
+import handler, { delivery } from '../api/admin-newsletter.mjs';
 import * as repo from '../lib/admin/repo.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
+import { applyOmit, recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
+
+const realSendIssue = delivery.sendIssue;
 
 const PASSWORD = 'test-password';
 
@@ -76,12 +79,16 @@ test.beforeEach(() => {
   delete process.env.GMAIL_APP_PASSWORD;
   delete process.env.VERCEL_ENV;
   delete process.env.NEWSLETTER_ALLOW_PREVIEW_SEND;
+  delete process.env.NEWSLETTER_RECIPIENT_OVERRIDE;
+  delete process.env.NEWSLETTER_SECRET;
+  delivery.sendIssue = realSendIssue;
 });
 
 test.afterEach(() => {
   fs.rmSync(root, { recursive: true, force: true });
   delete process.env.ADMIN_PASSWORD;
   delete process.env.ADMIN_LOCAL_ROOT;
+  delivery.sendIssue = realSendIssue;
 });
 
 function issueFile(slug) {
@@ -356,6 +363,196 @@ test('a preview refuses to send to the whole list', async () => {
   // Mail cannot be recalled, and a preview shares the production list.
   assert.equal(res.statusCode, 403);
   assert.equal(res.body.code, 'preview_send_blocked');
+});
+
+function draftIssue(slug) {
+  fs.mkdirSync(path.join(root, issues.DIR), { recursive: true });
+  fs.writeFileSync(
+    issueFile(slug),
+    issues.serialize({ title: 'טיוטה', slug, date: '2026-09-01', body: 'שלום' })
+  );
+}
+
+function enableMailer() {
+  process.env.GMAIL_USER = 'sender@example.test';
+  process.env.GMAIL_APP_PASSWORD = 'app-password';
+  process.env.NEWSLETTER_SECRET = 'secret';
+}
+
+test('the override keeps only usable, unique addresses', () => {
+  const emails = recipientOverride({
+    VERCEL_ENV: 'preview',
+    NEWSLETTER_RECIPIENT_OVERRIDE: ' Me@Example.Test, me@example.test\nalso@example.test; nope',
+  });
+
+  assert.deepEqual(emails, ['me@example.test', 'also@example.test']);
+});
+
+test('production does not apply the override, even when the variable is set', () => {
+  assert.equal(
+    recipientOverride({ VERCEL_ENV: 'production', NEWSLETTER_RECIPIENT_OVERRIDE: 'me@example.test' }),
+    null
+  );
+  assert.equal(recipientOverride({ NEWSLETTER_RECIPIENT_OVERRIDE: 'me@example.test' }), null);
+  assert.equal(recipientOverrideIgnored({ VERCEL_ENV: 'production', NEWSLETTER_RECIPIENT_OVERRIDE: 'me@example.test' }), true);
+  assert.equal(recipientOverrideIgnored({ VERCEL_ENV: 'preview', NEWSLETTER_RECIPIENT_OVERRIDE: 'me@example.test' }), false);
+});
+
+test('removing an address only drops people already on the list', () => {
+  const chosen = applyOmit(
+    ['a@example.test', 'b@example.test'],
+    ['B@example.test', 'stranger@example.test', 'not-an-email']
+  );
+
+  assert.deepEqual(chosen.recipients, ['a@example.test']);
+  assert.deepEqual(chosen.omitted, ['b@example.test']);
+});
+
+test('a preview with an override sends only to those addresses and leaves the issue a draft', async () => {
+  draftIssue('טיוטה-עם-עקיפה');
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'Me@Example.Test, other@example.test';
+  enableMailer();
+
+  let seen = null;
+  delivery.sendIssue = async ({ recipients }) => {
+    seen = recipients.slice();
+    return {
+      sent: [recipients[0]],
+      failed: [{ email: recipients[1], message: 'mailbox full' }],
+      remaining: [],
+    };
+  };
+
+  const res = await call({ body: { action: 'send', slug: 'טיוטה-עם-עקיפה' } });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.override, true);
+  assert.equal(res.body.sent, 1);
+  assert.deepEqual(res.body.sentTo, ['me@example.test']);
+  assert.deepEqual(res.body.failed, [{ email: 'other@example.test', message: 'mailbox full' }]);
+  assert.deepEqual(seen, ['me@example.test', 'other@example.test']);
+
+  const saved = issues.parse('טיוטה-עם-עקיפה', fs.readFileSync(issueFile('טיוטה-עם-עקיפה'), 'utf8'));
+  assert.equal(saved.status, 'draft');
+  assert.equal(saved.sent_at, '');
+});
+
+test('a send can leave some addresses out without removing them from the list', async () => {
+  draftIssue('טיוטה-בלי-חלק');
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'a@example.test, b@example.test, c@example.test';
+  enableMailer();
+
+  let seen = null;
+  delivery.sendIssue = async ({ recipients }) => {
+    seen = recipients.slice();
+    return { sent: recipients.slice(), failed: [], remaining: [] };
+  };
+
+  const res = await call({
+    body: {
+      action: 'send',
+      slug: 'טיוטה-בלי-חלק',
+      omit: ['B@example.test', 'stranger@example.test'],
+    },
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(seen, ['a@example.test', 'c@example.test']);
+  assert.deepEqual(res.body.sentTo, ['a@example.test', 'c@example.test']);
+  assert.deepEqual(res.body.omitted, ['b@example.test']);
+});
+
+test('leaving everyone out refuses the send', async () => {
+  draftIssue('טיוטה-בלי-אף-אחת');
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'a@example.test';
+  enableMailer();
+
+  let called = false;
+  delivery.sendIssue = async () => {
+    called = true;
+    return { sent: [], failed: [], remaining: [] };
+  };
+
+  const res = await call({
+    body: { action: 'send', slug: 'טיוטה-בלי-אף-אחת', omit: ['a@example.test'] },
+  });
+
+  assert.equal(res.statusCode, 422);
+  assert.equal(res.body.code, 'no_recipients');
+  assert.equal(called, false);
+});
+
+test('the backoffice lists the addresses a send would use', async () => {
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'a@example.test, b@example.test';
+  enableMailer();
+
+  const res = await call({ body: { action: 'recipients' } });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.override, true);
+  assert.deepEqual(res.body.recipients, ['a@example.test', 'b@example.test']);
+});
+
+test('a blocked preview does not reveal the subscriber list', async () => {
+  process.env.VERCEL_ENV = 'preview';
+  enableMailer();
+
+  const res = await call({ body: { action: 'recipients' } });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.blocked, true);
+  assert.deepEqual(res.body.recipients, []);
+});
+
+test('an override that contains no address does not fall through to the real list', async () => {
+  draftIssue('טיוטה-עקיפה-ריקה');
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'not-an-email, @@';
+  process.env.NEWSLETTER_ALLOW_PREVIEW_SEND = '1';
+  enableMailer();
+
+  let called = false;
+  delivery.sendIssue = async () => {
+    called = true;
+    return { sent: [], failed: [], remaining: [] };
+  };
+
+  const res = await call({ body: { action: 'send', slug: 'טיוטה-עקיפה-ריקה' } });
+
+  assert.equal(res.statusCode, 422);
+  assert.equal(res.body.code, 'no_recipients');
+  assert.equal(called, false);
+});
+
+test('production still reads the real list when the override variable is set', async () => {
+  draftIssue('טיוטה-פרודקשן');
+  process.env.VERCEL_ENV = 'production';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'only-me@example.test';
+  enableMailer();
+
+  const res = await call({ body: { action: 'send', slug: 'טיוטה-פרודקשן' } });
+
+  // No blob token, so the real list is unavailable. Using the override would
+  // have skipped that check.
+  assert.equal(res.statusCode, 503);
+  assert.equal(res.body.code, 'not_configured');
+});
+
+test('the backoffice reports the override that a preview will send to', async () => {
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'a@example.test, b@example.test';
+  enableMailer();
+
+  const res = await call({ method: 'GET' });
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.recipientOverride, ['a@example.test', 'b@example.test']);
+  assert.equal(res.body.recipientOverrideIgnored, false);
+  assert.equal(res.body.canSend, true);
 });
 
 test('a preview may still send a test to one address', async () => {

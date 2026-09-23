@@ -232,6 +232,62 @@
 
 .admin-fieldset .admin-message {
   margin-top: 12px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.admin-recipients {
+  margin: 12px 0;
+}
+
+.admin-recipients__list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid var(--border-color, #ececf0);
+  border-radius: 8px;
+}
+
+.admin-recipients__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-color, #ececf0);
+  font-size: 14px;
+}
+
+.admin-recipients__item:last-child {
+  border-bottom: 0;
+}
+
+.admin-recipients__email {
+  direction: ltr;
+  unicode-bidi: isolate;
+  overflow-wrap: anywhere;
+}
+
+.admin-recipients__list--removed {
+  margin-top: 8px;
+}
+
+.admin-recipients__list--removed .admin-recipients__email {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.admin-recipients__item button {
+  border: 0;
+  background: none;
+  color: var(--heading-font-color);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  white-space: nowrap;
 }
 
 .admin-field-error {

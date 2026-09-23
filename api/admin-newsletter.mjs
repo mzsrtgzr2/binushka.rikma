@@ -13,6 +13,7 @@ import { readJsonBody, sendJson } from '../lib/newsletter/http.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
 import * as mailer from '../lib/newsletter/mailer.mjs';
 import { MediaError, prepareUpload } from '../lib/newsletter/media.mjs';
+import { applyOmit, recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
 import * as store from '../lib/newsletter/subscribers.mjs';
 import * as tokens from '../lib/newsletter/tokens.mjs';
 import { issueUrl, siteUrl, unsubscribeUrl } from '../lib/newsletter/urls.mjs';
@@ -92,11 +93,58 @@ async function handleDelete(req, res, env, body) {
   return sendJson(res, 200, { ok: true, slug });
 }
 
+// Tests replace sendIssue so a send can be asserted without opening SMTP.
+export const delivery = {
+  sendIssue: (options) => mailer.sendIssue(options),
+};
+
+/**
+ * Who a "send to the list" would reach right now.
+ *
+ * The same answer is shown in the backoffice and used when the send actually
+ * runs, so removing an address there cannot drift from what goes out.
+ */
+async function recipientsForSend(env) {
+  const overridden = recipientOverride(env);
+  if (overridden) return { override: true, blocked: false, recipients: overridden };
+
+  if (env.VERCEL_ENV === 'preview' && env.NEWSLETTER_ALLOW_PREVIEW_SEND !== '1') {
+    return { override: false, blocked: true, recipients: null };
+  }
+
+  if (!store.isConfigured()) return { override: false, blocked: false, recipients: null };
+
+  const records = await store.all();
+  return {
+    override: false,
+    blocked: false,
+    recipients: records.map((record) => record.email),
+  };
+}
+
+async function handleRecipients(req, res, env) {
+  const listed = await recipientsForSend(env);
+  if (listed.blocked) {
+    return sendJson(res, 200, { ok: true, blocked: true, recipients: [] });
+  }
+  if (!listed.recipients) return sendJson(res, 503, { ok: false, code: 'not_configured' });
+
+  return sendJson(res, 200, {
+    ok: true,
+    recipients: listed.recipients,
+    ...(listed.override ? { override: true } : {}),
+  });
+}
+
 /**
  * Sends to everyone on the list, then records the result on the issue.
  *
  * A test send goes to one address and changes nothing, so the layout can be
  * checked in a real inbox before the list ever sees it.
+ *
+ * On a preview, `NEWSLETTER_RECIPIENT_OVERRIDE` replaces the list. That send
+ * is not recorded as sent: the issue has to stay a draft so production can
+ * still mail the real subscribers later.
  */
 async function handleSend(req, res, env, body) {
   const slug = String(body.slug || '').trim();
@@ -112,24 +160,30 @@ async function handleSend(req, res, env, body) {
   }
 
   let recipients;
+  let override = false;
+  let omitted = [];
   if (testTo) {
     recipients = [testTo];
   } else {
-    // A preview usually points at the same blob store as production, so its
-    // list is the real one. Mail cannot be recalled, so a full send from a
-    // preview has to be asked for deliberately; a test send stays open.
-    if (env.VERCEL_ENV === 'preview' && env.NEWSLETTER_ALLOW_PREVIEW_SEND !== '1') {
+    const listed = await recipientsForSend(env);
+    if (listed.blocked) {
+      // A preview usually points at the same blob store as production, so its
+      // list is the real one. Mail cannot be recalled, so a full send from a
+      // preview has to be asked for deliberately; a test send stays open.
       return sendJson(res, 403, { ok: false, code: 'preview_send_blocked' });
     }
+    if (!listed.recipients) return sendJson(res, 503, { ok: false, code: 'not_configured' });
 
-    if (!store.isConfigured()) return sendJson(res, 503, { ok: false, code: 'not_configured' });
-    recipients = (await store.all()).map((record) => record.email);
+    override = listed.override;
+    const chosen = applyOmit(listed.recipients, body.omit);
+    recipients = chosen.recipients;
+    omitted = chosen.omitted;
   }
 
   if (!recipients.length) return sendJson(res, 422, { ok: false, code: 'no_recipients' });
 
   const base = siteUrl(req);
-  const result = await mailer.sendIssue({
+  const result = await delivery.sendIssue({
     issue,
     settings: { email: emailCopy },
     recipients,
@@ -138,18 +192,20 @@ async function handleSend(req, res, env, body) {
     baseUrl: base,
   });
 
+  const report = {
+    sent: result.sent.length,
+    sentTo: result.sent,
+    failed: result.failed,
+  };
+
   if (testTo) {
-    return sendJson(res, 200, {
-      ok: result.failed.length === 0,
-      test: true,
-      sent: result.sent.length,
-      failed: result.failed,
-    });
+    return sendJson(res, 200, { ok: result.failed.length === 0, test: true, ...report });
   }
 
   // Only mark it sent once at least one message actually went out, so a total
-  // failure leaves the issue re-sendable instead of silently burnt.
-  if (result.sent.length > 0) {
+  // failure leaves the issue re-sendable instead of silently burnt. An
+  // override send never counts: it did not go to the subscriber list.
+  if (!override && result.sent.length > 0) {
     await repo.commitFiles(
       env,
       [
@@ -169,11 +225,12 @@ async function handleSend(req, res, env, body) {
 
   return sendJson(res, 200, {
     ok: true,
-    sent: result.sent.length,
-    failed: result.failed,
+    ...report,
     // Non-empty when the daily cap or the function time budget cut the run
     // short; clicking send again picks up where it stopped.
     remaining: result.remaining.length,
+    ...(override ? { override: true } : {}),
+    ...(omitted.length ? { omitted } : {}),
   });
 }
 
@@ -193,14 +250,24 @@ export default async function handler(req, res) {
       subscribers = await store.count().catch(() => null);
     }
 
+    const override = recipientOverride(env);
+
     return sendJson(res, 200, {
       ok: true,
       target,
       issues: await loadIssues(env),
       subscribers,
-      canSend: mailer.isConfigured() && tokens.isConfigured() && store.isConfigured(),
+      // An override list is enough to send from a preview; the blob store is
+      // what production sends to, and what a preview sends to when no override
+      // is set.
+      canSend:
+        mailer.isConfigured() &&
+        tokens.isConfigured() &&
+        (Boolean(override && override.length) || store.isConfigured()),
       sender: mailer.senderAddress(),
       dailyCap: mailer.dailyCap(),
+      recipientOverride: override,
+      recipientOverrideIgnored: recipientOverrideIgnored(env),
     });
   }
 
@@ -223,6 +290,7 @@ export default async function handler(req, res) {
     if (body.action === 'upload') return await handleUpload(req, res, env, body);
     if (body.action === 'delete') return await handleDelete(req, res, env, body);
     if (body.action === 'send') return await handleSend(req, res, env, body);
+    if (body.action === 'recipients') return await handleRecipients(req, res, env);
   } catch (error) {
     console.error('newsletter admin failed', error);
     return sendJson(res, 502, { ok: false, code: 'failed', error: error?.message || 'failed' });

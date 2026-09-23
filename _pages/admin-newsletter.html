@@ -117,6 +117,13 @@ noindex: true
               <p class="admin-hint">לא משנה את סטטוס הגיליון ולא נשלח לאף אחד אחר.</p>
             </div>
 
+            <div class="admin-recipients" id="issue-recipients" hidden>
+              <p class="admin-hint" id="issue-recipients-summary"></p>
+              <input class="form__input admin-input--ltr" type="search" id="issue-recipients-filter" dir="ltr" placeholder="סינון כתובת" hidden>
+              <ul class="admin-recipients__list" id="issue-recipients-list"></ul>
+              <ul class="admin-recipients__list admin-recipients__list--removed" id="issue-recipients-removed" hidden></ul>
+            </div>
+
             <button type="button" class="button button--primary" id="issue-send">שליחה לכל הרשימה</button>
             <p class="admin-message" id="issue-send-message" hidden></p>
           </fieldset>

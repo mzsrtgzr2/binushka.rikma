@@ -182,6 +182,30 @@ spots: 6
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test('a priced workshop with no spots has no inventory', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-private-'));
+  writePage(
+    dir,
+    '2022-01-05-private-workshop',
+    `title: סדנה פרטית
+subtitle: בזמן שמתאים לכם
+cart_price: 2800
+price_per: workshop
+`
+  );
+  const catalog = store.buildWorkshopCatalogFromDir(dir);
+  const row = catalog['workshop-private-workshop'];
+  assert.equal(row.price, 2800);
+  assert.equal(row.stock, undefined);
+  const page = store.parseWorkshopPage(
+    'private-workshop',
+    fs.readFileSync(path.join(dir, '2022-01-05-private-workshop.md'), 'utf8')
+  );
+  assert.equal(page.spots, null);
+  assert.equal(store.decrementWorkshopPage(fs.readFileSync(path.join(dir, '2022-01-05-private-workshop.md'), 'utf8'), 'private-workshop', 1), null);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test('workshop packs become catalog variants with places', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-packs-'));
   writePage(

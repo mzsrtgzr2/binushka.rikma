@@ -8,7 +8,6 @@ form_url: https://pay.grow.link/5994080e6dac0eaf4b84f20b39568868-MjYyODg5NQ
 registration_full: false
 hide: false
 cart_price: 2800
-spots: 1
 price_per: workshop
 ---
 

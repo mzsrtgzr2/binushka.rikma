@@ -195,6 +195,8 @@
 
 .admin-fieldset .admin-message {
   margin-top: 12px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 #admin-photos-message {

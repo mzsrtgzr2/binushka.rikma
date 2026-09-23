@@ -107,7 +107,7 @@
       no_recipients: 'אין אף נמען ברשימה',
       already_sent: 'הגיליון הזה כבר נשלח',
       preview_send_blocked:
-        'זו סביבת preview שמחוברת לרשימת הנמענים האמיתית. אפשר לשלוח מכאן בדיקה לכתובת אחת; שליחה לכל הרשימה רק מהאתר עצמו',
+        'זו סביבת preview שמחוברת לרשימת הנמענים האמיתית. כדי לשלוח מכאן, הגדירי NEWSLETTER_RECIPIENT_OVERRIDE עם הכתובות לבדיקה. בלי זה אפשר רק בדיקה לכתובת אחת',
       slug_taken: 'כבר קיים גיליון עם הכתובת הזאת',
       title_required: 'צריך כותרת'
     };
@@ -433,11 +433,25 @@
     }
   }
 
+  function overrideEmails() {
+    return Array.isArray(state.recipientOverride) ? state.recipientOverride : null;
+  }
+
   function renderStats() {
     if (!statsEl) return;
 
     var parts = [];
-    if (typeof state.subscribers === 'number') parts.push(state.subscribers + ' נמענים ברשימה');
+    var emails = overrideEmails();
+    if (emails && emails.length) {
+      parts.push('preview: שליחה רק אל ' + emails.join(', '));
+    } else if (emails) {
+      parts.push('preview: NEWSLETTER_RECIPIENT_OVERRIDE בלי כתובת תקינה');
+    } else if (typeof state.subscribers === 'number') {
+      parts.push(state.subscribers + ' נמענים ברשימה');
+    }
+    if (state.recipientOverrideIgnored) {
+      parts.push('NEWSLETTER_RECIPIENT_OVERRIDE מוגדר ולא חל כאן — השליחה יוצאת לכל הרשימה');
+    }
     if (state.sender) parts.push('נשלח מ־' + state.sender);
     if (!state.canSend) parts.push('שליחה מושבתת — חסרות הגדרות');
 
@@ -493,8 +507,11 @@
     // people's inboxes are not coming back either way.
     linkBox.hidden = true;
     editorDelete.hidden = !issue || sent;
-    sendBtn.disabled = sent || !state.canSend;
+    var emails = overrideEmails();
+    sendBtn.disabled = sent || !state.canSend || Boolean(emails && !emails.length);
     sendTestBtn.disabled = !issue || !state.canSend;
+    if (!sendBtn.getAttribute('data-label')) sendBtn.setAttribute('data-label', sendBtn.textContent);
+    sendBtn.textContent = emails && emails.length ? 'שליחה לכתובות הבדיקה' : sendBtn.getAttribute('data-label');
 
     if (sent) {
       sendStateEl.textContent = 'נשלח ב־' + formatDate(issue.sent_at) +
@@ -502,8 +519,13 @@
         '. עריכה כאן מתקנת את הארכיון באתר בלבד — הגיליון לא נשלח שוב.';
     } else if (!issue) {
       sendStateEl.textContent = 'צריך לשמור את הגיליון לפני שאפשר לשלוח אותו.';
+    } else if (emails && !emails.length) {
+      sendStateEl.textContent = 'NEWSLETTER_RECIPIENT_OVERRIDE מוגדר בלי כתובת תקינה, אז אין לאן לשלוח.';
     } else if (!state.canSend) {
       sendStateEl.textContent = 'שליחה מושבתת עד שיוגדרו פרטי השליחה.';
+    } else if (emails) {
+      sendStateEl.textContent = 'סביבת preview. השליחה תצא רק אל: ' + emails.join(', ') +
+        '. הרשימה הרשומה לא תקבל את המייל, והגיליון יישאר טיוטה.';
     } else {
       sendStateEl.textContent = 'טיוטה. שליחה תצא אל ' + (state.subscribers || 0) + ' נמענים.';
     }
@@ -718,6 +740,31 @@
     show(sendMessageEl, text, type);
   }
 
+  // Names every address the send actually reached, and every one it did not.
+  function sendReport(data, lead) {
+    var lines = [];
+    if (lead) lines.push(lead);
+
+    var sentTo = data.sentTo || [];
+    if (sentTo.length) {
+      lines.push('נשלח אל:');
+      sentTo.forEach(function (email) { lines.push(email); });
+    }
+
+    var failed = data.failed || [];
+    if (failed.length) {
+      lines.push('נכשל:');
+      failed.forEach(function (item) {
+        lines.push((item.email || 'נמען') + (item.message ? ' — ' + item.message : ''));
+      });
+    }
+
+    if (!sentTo.length && !failed.length) lines.push('לא נשלח לאף כתובת.');
+    if (data.remaining) lines.push('נשארו ' + data.remaining + ' — אפשר ללחוץ שוב כדי להמשיך.');
+    if (data.override) lines.push('הרשימה הרשומה לא קיבלה את המייל. הגיליון נשאר טיוטה.');
+    return lines.join('\n');
+  }
+
   function holdButton(button, label) {
     var restore = button.textContent;
     button.disabled = true;
@@ -741,11 +788,8 @@
 
     api('POST', { action: 'send', slug: current.slug, testTo: testTo })
       .then(function (data) {
-        if (data.failed && data.failed.length) {
-          reportSend('השליחה נכשלה: ' + data.failed[0].message, 'error');
-          return;
-        }
-        reportSend('נשלחה בדיקה אל ' + testTo + '.', 'ok');
+        var failed = data.failed && data.failed.length;
+        reportSend(sendReport(data, failed && !(data.sentTo && data.sentTo.length) ? 'השליחה נכשלה.' : 'נשלחה בדיקה.'), failed ? 'error' : 'ok');
       })
       .catch(function (error) {
         reportSend(error.message, 'error');
@@ -759,23 +803,35 @@
   sendBtn.addEventListener('click', function () {
     if (!current) return;
 
+    var emails = overrideEmails();
+    if (emails && !emails.length) {
+      reportSend('אין כתובת תקינה ב-NEWSLETTER_RECIPIENT_OVERRIDE.', 'error');
+      return;
+    }
+
     var total = state.subscribers || 0;
-    if (!window.confirm('לשלוח את "' + current.title + '" אל ' + total + ' נמענים? אי אפשר לבטל.')) return;
+    var question = emails
+      ? 'לשלוח את "' + current.title + '" רק אל:\n' + emails.join('\n') + '\n\nהרשימה הרשומה לא תקבל את המייל, והגיליון יישאר טיוטה.'
+      : 'לשלוח את "' + current.title + '" אל ' + total + ' נמענים? אי אפשר לבטל.';
+    if (!window.confirm(question)) return;
 
     var release = holdButton(sendBtn, 'שולחת...');
-    reportSend('שולחת אל ' + total + ' נמענים. זה יכול לקחת כמה דקות.', 'info');
+    reportSend(
+      emails ? 'שולחת אל: ' + emails.join(', ') : 'שולחת אל ' + total + ' נמענים. זה יכול לקחת כמה דקות.',
+      'info'
+    );
 
     api('POST', { action: 'send', slug: current.slug })
       .then(function (data) {
-        var message = 'נשלח אל ' + data.sent + ' נמענים.';
-        if (data.remaining) message += ' נשארו ' + data.remaining + ' — אפשר ללחוץ שוב כדי להמשיך.';
-        if (data.failed && data.failed.length) message += ' ' + data.failed.length + ' נכשלו.';
         var failed = data.failed && data.failed.length;
+        var lead = data.override
+          ? 'נשלח אל ' + (data.sent || 0) + ' כתובות בדיקה.'
+          : 'נשלח אל ' + (data.sent || 0) + ' נמענים.';
 
         return load().then(function () {
           var saved = issues.filter(function (item) { return item.slug === current.slug; })[0];
           openEditor(saved || null);
-          reportSend(message, failed ? 'error' : 'ok');
+          reportSend(sendReport(data, lead), failed ? 'error' : 'ok');
         });
       })
       .catch(function (error) {

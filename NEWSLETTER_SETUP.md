@@ -227,15 +227,42 @@ even when that variable names the production branch for every environment at
 once. Saving an issue on a preview therefore rebuilds that same preview, and
 cannot touch what the public site is built from.
 
-A full send from a preview is refused with `preview_send_blocked`. The blob
+A full send from a preview is refused with `preview_send_blocked` unless
+`NEWSLETTER_RECIPIENT_OVERRIDE` is set for the Preview environment. The blob
 store is normally shared with production, which means the subscriber list on a
-preview is the real one, and mail cannot be recalled. Test sends to a single
-address always work, and that is what the layout should be checked with.
+preview is the real one, and mail cannot be recalled.
+
+Set the variable to the addresses that should receive preview mail, separated
+by commas:
+
+```bash
+NEWSLETTER_RECIPIENT_OVERRIDE=you@example.com, editor@example.com
+```
+
+"Send to the list" on that preview then goes only to those addresses. It does
+not read the blob store, and it does not mark the issue as sent, so the same
+draft can still be sent for real from production. The backoffice says so before
+the confirm dialog, and names the override instead of the subscriber count.
+Invalid entries are dropped. If the variable is set but nothing in it is a
+usable address, the send is refused rather than falling through to the real
+list.
+
+Production ignores the variable. Copying it onto every Vercel environment does
+not change who a production send reaches; the backoffice says that the variable
+is set and is not applied.
+
+After any send, test or full, the panel lists the addresses that accepted the
+message and the addresses that failed, with the reason.
+
+Test sends to a single address always work, including on a preview that has no
+override. `NEWSLETTER_ALLOW_PREVIEW_SEND=1` is the escape hatch that mails the
+real list from a preview. Leave it unset. An override, when set, wins over it.
 
 For the preview's API to work at all, the newsletter variables have to be
 enabled for the Preview environment in Vercel, not only for Production:
 `BLOB_READ_WRITE_TOKEN`, `NEWSLETTER_SECRET`, `GMAIL_USER`,
-`GMAIL_APP_PASSWORD`, `ADMIN_PASSWORD` and `GITHUB_TOKEN`.
+`GMAIL_APP_PASSWORD`, `ADMIN_PASSWORD` and `GITHUB_TOKEN`. Add
+`NEWSLETTER_RECIPIENT_OVERRIDE` there too, and only there.
 
 Leave `SITE_URL` unset for Preview. Links inside a mail then point at the
 preview's own host, so an unsubscribe link from a test send exercises the

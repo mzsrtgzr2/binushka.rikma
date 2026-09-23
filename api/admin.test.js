@@ -960,6 +960,75 @@ test('upsert stores multiple images per variant', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('reordering variant images changes which image is main', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'ribbons',
+        title: 'סרטים',
+        kind: 'variants',
+        variants: [
+          {
+            id: 'silk',
+            name: 'משי',
+            price: 40,
+            images: ['/images/scrunchies/04.jpeg', '/images/gallery/fox.png'],
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200, created.json.error || '');
+  let catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.ribbons.variants.silk.image, '/images/scrunchies/04.jpeg');
+  assert.deepEqual(catalog.ribbons.variants.silk.gallery, ['/images/gallery/fox.png']);
+
+  const reordered = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: false,
+      product: {
+        slug: 'ribbons',
+        title: 'סרטים',
+        kind: 'variants',
+        variants: [
+          {
+            id: 'silk',
+            name: 'משי',
+            price: 40,
+            images: ['/images/gallery/fox.png', '/images/scrunchies/04.jpeg'],
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(reordered.status, 200, reordered.json.error || '');
+  catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.ribbons.variants.silk.image, '/images/gallery/fox.png');
+  assert.deepEqual(catalog.ribbons.variants.silk.gallery, ['/images/scrunchies/04.jpeg']);
+  const product = admin.parseProduct(
+    'ribbons',
+    fs.readFileSync(path.join(root, '_store', 'ribbons.md'), 'utf8')
+  );
+  assert.equal(product.variants[0].image, '/images/gallery/fox.png');
+  assert.deepEqual(product.variants[0].gallery, ['/images/scrunchies/04.jpeg']);
+  assert.deepEqual(product.variants[0].images, [
+    '/images/gallery/fox.png',
+    '/images/scrunchies/04.jpeg',
+  ]);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('saving one product rebuilds the catalog from every store markdown file', async () => {
   const root = foxRoot();
   fs.writeFileSync(

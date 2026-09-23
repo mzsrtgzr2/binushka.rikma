@@ -748,12 +748,15 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   min-width: 0;
+  background: var(--background-color);
+  border-radius: 12px;
+  overflow: hidden;
+  padding-bottom: 8px;
 }
 
-.admin-variant__photo--main .admin-variant__thumb {
-  box-shadow: 0 0 0 2px var(--brand-color);
+.admin-variant__photo--main {
+  outline: 2px solid var(--brand-color);
 }
 
 .admin-variant__photo-badge {
@@ -768,14 +771,30 @@
   border-radius: 999px;
 }
 
-.admin-variant__photo-remove {
+.admin-variant__photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+}
+
+.admin-variant__photo-btn {
   border: 0;
-  background: none;
-  color: #b42318;
+  background: var(--background-alt-color);
+  color: var(--heading-font-color);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
   cursor: pointer;
-  font-size: 13px;
-  padding: 0;
-  align-self: flex-start;
+}
+
+.admin-variant__photo-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.admin-variant__photo-btn--danger {
+  color: #b42318;
 }
 
 .admin-variant__thumb {
@@ -783,7 +802,6 @@
   width: 100%;
   height: 140px;
   object-fit: cover;
-  border-radius: 12px;
   background: var(--background-color);
 }
 

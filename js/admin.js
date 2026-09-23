@@ -609,10 +609,26 @@
               ? '<img class="admin-variant__thumb" src="' + escapeHtml(src) + '" alt="">'
               : '<span class="admin-variant__thumb admin-variant__thumb--empty" aria-hidden="true"></span>') +
             (i === 0 ? '<span class="admin-variant__photo-badge">ראשית</span>' : '') +
-            '<button type="button" class="admin-variant__photo-remove" data-variant-photo-remove="' +
+            '<div class="admin-variant__photo-actions">' +
+            (i === 0
+              ? ''
+              : '<button type="button" class="admin-variant__photo-btn" data-variant-photo-main="' +
+                i +
+                '">הפוך לראשית</button>') +
+            '<button type="button" class="admin-variant__photo-btn" data-variant-photo-up="' +
+            i +
+            '"' +
+            (i === 0 ? ' disabled' : '') +
+            '>ימינה</button>' +
+            '<button type="button" class="admin-variant__photo-btn" data-variant-photo-down="' +
+            i +
+            '"' +
+            (i === items.length - 1 ? ' disabled' : '') +
+            '>שמאלה</button>' +
+            '<button type="button" class="admin-variant__photo-btn admin-variant__photo-btn--danger" data-variant-photo-remove="' +
             i +
             '">הסרה</button>' +
-            '</article>'
+            '</div></article>'
           );
         })
         .join('') +
@@ -668,7 +684,7 @@
       '</div>' +
       '<div class="form__group admin-variant__image-group">' +
       '<label class="form__label">תמונות</label>' +
-      '<p class="admin-hint">אפשר כמה תמונות לכל סוג. הראשונה מוצגת כראשית בסל ובכרטיס.</p>' +
+      '<p class="admin-hint">אפשר כמה תמונות לכל סוג. הראשונה היא הראשית בסל ובכרטיס — אפשר לשנות סדר, להפוך לראשית או להסיר.</p>' +
       '<div class="admin-variant__image" data-variant-photos>' +
       variantPhotosHtml(images) +
       '<div class="admin-variant__image-actions">' +
@@ -683,6 +699,15 @@
   function getVariantPhotoItems(row) {
     if (!variantPhotos.has(row)) variantPhotos.set(row, []);
     return variantPhotos.get(row);
+  }
+
+  function moveVariantPhoto(row, from, to) {
+    var items = getVariantPhotoItems(row);
+    if (to < 0 || to >= items.length) return;
+    var item = items.splice(from, 1)[0];
+    items.splice(to, 0, item);
+    renderVariantPhotos(row);
+    schedulePreview();
   }
 
   function renderVariantPhotos(row) {
@@ -1548,15 +1573,30 @@
   });
 
   variantsEl.addEventListener('click', function (event) {
+    var mainPhoto = event.target.closest('[data-variant-photo-main]');
+    var upPhoto = event.target.closest('[data-variant-photo-up]');
+    var downPhoto = event.target.closest('[data-variant-photo-down]');
     var removePhoto = event.target.closest('[data-variant-photo-remove]');
-    if (removePhoto) {
-      var photoRow = removePhoto.closest('.admin-variant');
-      if (photoRow) {
-        var items = getVariantPhotoItems(photoRow);
-        items.splice(Number(removePhoto.getAttribute('data-variant-photo-remove')), 1);
-        renderVariantPhotos(photoRow);
-        schedulePreview();
+    if (mainPhoto || upPhoto || downPhoto || removePhoto) {
+      var photoRow = (mainPhoto || upPhoto || downPhoto || removePhoto).closest('.admin-variant');
+      if (!photoRow) return;
+      if (mainPhoto) {
+        moveVariantPhoto(photoRow, Number(mainPhoto.getAttribute('data-variant-photo-main')), 0);
+        return;
       }
+      if (upPhoto) {
+        var fromUp = Number(upPhoto.getAttribute('data-variant-photo-up'));
+        moveVariantPhoto(photoRow, fromUp, fromUp - 1);
+        return;
+      }
+      if (downPhoto) {
+        var fromDown = Number(downPhoto.getAttribute('data-variant-photo-down'));
+        moveVariantPhoto(photoRow, fromDown, fromDown + 1);
+        return;
+      }
+      getVariantPhotoItems(photoRow).splice(Number(removePhoto.getAttribute('data-variant-photo-remove')), 1);
+      renderVariantPhotos(photoRow);
+      schedulePreview();
       return;
     }
     var btn = event.target.closest('[data-remove-variant]');

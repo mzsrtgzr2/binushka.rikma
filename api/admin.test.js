@@ -960,6 +960,75 @@ test('upsert stores multiple images per variant', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('reordering variant images changes which image is main', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'ribbons',
+        title: 'סרטים',
+        kind: 'variants',
+        variants: [
+          {
+            id: 'silk',
+            name: 'משי',
+            price: 40,
+            images: ['/images/scrunchies/04.jpeg', '/images/gallery/fox.png'],
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200, created.json.error || '');
+  let catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.ribbons.variants.silk.image, '/images/scrunchies/04.jpeg');
+  assert.deepEqual(catalog.ribbons.variants.silk.gallery, ['/images/gallery/fox.png']);
+
+  const reordered = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: false,
+      product: {
+        slug: 'ribbons',
+        title: 'סרטים',
+        kind: 'variants',
+        variants: [
+          {
+            id: 'silk',
+            name: 'משי',
+            price: 40,
+            images: ['/images/gallery/fox.png', '/images/scrunchies/04.jpeg'],
+          },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(reordered.status, 200, reordered.json.error || '');
+  catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.ribbons.variants.silk.image, '/images/gallery/fox.png');
+  assert.deepEqual(catalog.ribbons.variants.silk.gallery, ['/images/scrunchies/04.jpeg']);
+  const product = admin.parseProduct(
+    'ribbons',
+    fs.readFileSync(path.join(root, '_store', 'ribbons.md'), 'utf8')
+  );
+  assert.equal(product.variants[0].image, '/images/gallery/fox.png');
+  assert.deepEqual(product.variants[0].gallery, ['/images/scrunchies/04.jpeg']);
+  assert.deepEqual(product.variants[0].images, [
+    '/images/gallery/fox.png',
+    '/images/scrunchies/04.jpeg',
+  ]);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('saving one product rebuilds the catalog from every store markdown file', async () => {
   const root = foxRoot();
   fs.writeFileSync(
@@ -993,5 +1062,96 @@ hide: false
   assert.equal(catalog.fox.price, 220);
   assert.equal(catalog['flower-bag'].price, 240);
   assert.equal(catalog['flower-bag'].name, 'תיק בד לזר פרחים');
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('variants product stores stock per type', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'hoops',
+        title: 'חישוקים',
+        kind: 'variants',
+        variants: [
+          { id: 'small', name: 'קטן', price: 35, stock: 2 },
+          { id: 'large', name: 'גדול', price: 45, stock: 0 },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const md = fs.readFileSync(path.join(root, '_store', 'hoops.md'), 'utf8');
+  assert.match(md, /small:[\s\S]*stock: 2/);
+  assert.match(md, /large:[\s\S]*stock: 0/);
+  assert.doesNotMatch(md, /^stock:/m);
+  const page = require('./admin-store').parsePage('hoops', md);
+  assert.equal(page.variants[0].stock, 2);
+  assert.equal(page.variants[1].stock, 0);
+  assert.equal(page.out_of_stock, false);
+  assert.equal(page.stock, null);
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.hoops.variants.small.stock, 2);
+  assert.equal(catalog.hoops.variants.large.stock, 0);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('decrementInventory and assertInventory honor per-type stock', async () => {
+  const root = foxRoot();
+  const store = require('./admin-store');
+  fs.writeFileSync(
+    path.join(root, '_store', 'hoops.md'),
+    `---
+title: חישוקים
+price: ₪35
+out_of_stock: false
+limited_stock: false
+hide: false
+variants:
+  small:
+    name: קטן
+    price: 35
+    stock: 2
+  large:
+    name: גדול
+    price: 45
+    stock: 1
+---
+
+body
+`
+  );
+  const oversell = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'small', quantity: 3 },
+  ]);
+  assert.match(oversell.error, /מלאי/);
+
+  const ok = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'small', quantity: 1 },
+    { id: 'hoops', variant: 'large', quantity: 1 },
+  ]);
+  assert.equal(ok.ok, true);
+
+  const result = await admin.decrementInventory(authEnv(root), [
+    { slug: 'hoops', variant: 'small', quantity: 1 },
+  ]);
+  assert.deepEqual(result.changed, ['hoops']);
+  const page = store.parsePage(
+    'hoops',
+    fs.readFileSync(path.join(root, '_store', 'hoops.md'), 'utf8')
+  );
+  assert.equal(page.variants.find((v) => v.id === 'small').stock, 1);
+  assert.equal(page.variants.find((v) => v.id === 'large').stock, 1);
+
+  const book = await admin.publicInventory(authEnv(root));
+  assert.equal(book.products.hoops.variants.small.stock, 1);
+  assert.equal(book.products.hoops.variants.large.stock, 1);
+  assert.equal(book.products.hoops.stock, null);
   fs.rmSync(root, { recursive: true, force: true });
 });

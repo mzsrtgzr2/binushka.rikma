@@ -166,7 +166,9 @@ function inventoryPurchases(order) {
       const packs = Number(line.quantity);
       const places = Number(line.places);
       const each = Number.isInteger(places) && places > 0 ? places : 1;
-      return { slug: line.id, quantity: packs * each };
+      const row = { slug: line.id, quantity: packs * each };
+      if (line.variant) row.variant = line.variant;
+      return row;
     });
 }
 

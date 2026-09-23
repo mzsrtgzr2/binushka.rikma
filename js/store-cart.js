@@ -121,8 +121,21 @@
     return d.innerHTML;
   }
 
-  function availableStock(p) {
+  function hasPerVariantStock(p) {
+    if (!p || !p.variants || p.kind === 'workshop') return false;
+    return Object.keys(p.variants).some(function (id) {
+      return typeof p.variants[id].stock === 'number';
+    });
+  }
+
+  function availableStock(p, variantId) {
     if (!p) return 0;
+    if (hasPerVariantStock(p)) {
+      if (!variantId || !p.variants[variantId]) return 0;
+      var row = p.variants[variantId];
+      if (typeof row.stock === 'number') return row.stock;
+      return Infinity;
+    }
     if (p.outOfStock || p.stock === 0) return 0;
     if (typeof p.stock === 'number') return p.stock;
     return Infinity;
@@ -147,27 +160,30 @@
     }, 0);
   }
 
-  function productPlacesInCart(cart, id) {
+  function productPlacesInCart(cart, id, variantId) {
     return Object.keys(cart).reduce(function (sum, key) {
       var parsed = parseCartKey(key);
       if (parsed.id !== id) return sum;
+      if (variantId && hasPerVariantStock(byId[id]) && parsed.variant !== variantId) return sum;
       return sum + linePlaces(byId[parsed.id], parsed, cart[key] || 0);
     }, 0);
   }
 
   function addToCart(id, delta, extra) {
     var p = byId[id];
-    if (!p || p.outOfStock || p.stock === 0) return false;
+    if (!p) return false;
+    if (!hasPerVariantStock(p) && (p.outOfStock || p.stock === 0)) return false;
     if (p.variable && !validGiftAmount(p, extra)) return false;
     if (p.variants && !validVariant(p, extra)) return false;
+    if (hasPerVariantStock(p) && availableStock(p, extra) <= 0) return false;
     var key = lineKey(id, extra);
     var cart = loadCart();
     var next = (cart[key] || 0) + delta;
     if (next < 1) delete cart[key];
     else {
-      var max = availableStock(p);
+      var max = availableStock(p, extra);
       var each = variantPlaces(p, extra);
-      var others = productPlacesInCart(cart, id) - (cart[key] || 0) * each;
+      var others = productPlacesInCart(cart, id, hasPerVariantStock(p) ? extra : null) - (cart[key] || 0) * each;
       if (Number.isFinite(max) && others + next * each > max) return false;
       cart[key] = next;
     }
@@ -183,7 +199,7 @@
       var parsed = parseCartKey(key);
       var p = byId[parsed.id];
       if (!p) return;
-      var max = availableStock(p);
+      var max = availableStock(p, parsed.variant);
       var each = variantPlaces(p, parsed.variant);
       if (max <= 0) {
         delete cart[key];
@@ -202,6 +218,7 @@
       }
     });
     // Second pass: shared stock across variant lines for the same product
+    // (skipped when each type tracks its own quantity)
     var byProduct = {};
     Object.keys(cart).forEach(function (key) {
       var parsed = parseCartKey(key);
@@ -210,6 +227,7 @@
     });
     Object.keys(byProduct).forEach(function (id) {
       var p = byId[id];
+      if (hasPerVariantStock(p)) return;
       var max = availableStock(p);
       if (!Number.isFinite(max)) return;
       var keys = byProduct[id];
@@ -271,8 +289,19 @@
   function updateStockUi() {
     Object.keys(byId).forEach(function (id) {
       var p = byId[id];
-      var soldOut = Boolean(p.outOfStock) || p.stock === 0;
+      var perVariant = hasPerVariantStock(p);
+      var soldOut = perVariant
+        ? Object.keys(p.variants).every(function (vid) {
+            return typeof p.variants[vid].stock === 'number' && p.variants[vid].stock <= 0;
+          })
+        : Boolean(p.outOfStock) || p.stock === 0;
       var limited = Boolean(p.limitedStock) && !soldOut;
+      if (perVariant && !soldOut) {
+        limited = Object.keys(p.variants).some(function (vid) {
+          var s = p.variants[vid].stock;
+          return typeof s === 'number' && s > 0 && s <= 3;
+        });
+      }
       var workshop = p.kind === 'workshop';
       var overlayLabel = soldOut
         ? workshop
@@ -297,8 +326,14 @@
 
       document.querySelectorAll('[data-cart-add="' + id + '"]').forEach(function (btn) {
         if (id === 'gift-card') return;
-        var need = variantPlaces(p, btn.getAttribute('data-cart-variant'));
-        var disabled = soldOut || (typeof p.stock === 'number' && p.stock < need);
+        var variantId = btn.getAttribute('data-cart-variant');
+        var need = variantPlaces(p, variantId);
+        var max = availableStock(p, variantId);
+        var disabled = perVariant
+          ? !Number.isFinite(max)
+            ? false
+            : max < need
+          : soldOut || (typeof p.stock === 'number' && p.stock < need);
         btn.disabled = disabled;
         if (disabled) btn.setAttribute('aria-disabled', 'true');
         else btn.removeAttribute('aria-disabled');
@@ -539,9 +574,11 @@
       var li = document.createElement('li');
       li.className = 'store-cart__line';
       var p = byId[item.id];
-      var max = availableStock(p);
+      var max = availableStock(p, item.variant);
       var each = variantPlaces(p, item.variant);
-      var atMax = Number.isFinite(max) && productPlacesInCart(cart, item.id) + each > max;
+      var atMax =
+        Number.isFinite(max) &&
+        productPlacesInCart(cart, item.id, hasPerVariantStock(p) ? item.variant : null) + each > max;
       var stockHintText = atMax
         ? item.kind === 'workshop'
           ? max === 1
@@ -713,6 +750,15 @@
         else if (live.stock === null) delete byId[id].stock;
         if (typeof live.outOfStock === 'boolean') byId[id].outOfStock = live.outOfStock;
         if (typeof live.limitedStock === 'boolean') byId[id].limitedStock = live.limitedStock;
+        if (live.variants && byId[id].variants) {
+          Object.keys(live.variants).forEach(function (vid) {
+            if (!byId[id].variants[vid]) return;
+            var vLive = live.variants[vid];
+            if (!vLive) return;
+            if (typeof vLive.stock === 'number') byId[id].variants[vid].stock = vLive.stock;
+            else if (vLive.stock === null) delete byId[id].variants[vid].stock;
+          });
+        }
         if (byId[id].stock === 0) byId[id].outOfStock = true;
       });
       document.querySelectorAll('[data-product-price]').forEach(function (el) {

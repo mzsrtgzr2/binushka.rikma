@@ -76,11 +76,22 @@ function inventoryFromStoreDir(dir) {
           const page = store.parsePage(slug, fs.readFileSync(path.join(root, name), 'utf8'));
           if (!page || page.in_cart === false) return;
           const soldOut = Boolean(page.out_of_stock) || page.stock === 0;
-          out[slug] = {
+          const row = {
             stock: page.stock == null ? null : Number(page.stock),
             outOfStock: soldOut,
             limitedStock: Boolean(page.limited_stock),
           };
+          if (store.variantsTrackStock(page.variants)) {
+            row.variants = {};
+            (page.variants || []).forEach((item) => {
+              if (!item || !item.id) return;
+              row.variants[item.id] = {
+                stock: item.stock == null ? null : Number(item.stock),
+              };
+            });
+            row.stock = null;
+          }
+          out[slug] = row;
         });
     }
   } catch (err) {
@@ -160,6 +171,19 @@ function stockError(product, wanted) {
   return null;
 }
 
+function variantStockOf(product, variantId, inv) {
+  const live = inv && inv.variants && inv.variants[variantId];
+  if (live && Number.isInteger(live.stock)) return live.stock;
+  const row = product && product.variants && product.variants[variantId];
+  if (row && Number.isInteger(row.stock)) return row.stock;
+  return null;
+}
+
+function productTracksVariantStock(product, inv) {
+  if (store.variantsTrackStock(product && product.variants)) return true;
+  return Boolean(inv && inv.variants && store.variantsTrackStock(inv.variants));
+}
+
 function shippingPrice(method) {
   const ship = SHIPPING[method];
   if (!ship) return null;
@@ -187,7 +211,8 @@ function buildOrder(rawItems, shippingMethod) {
       return { error: 'כמות לא תקינה' };
     }
 
-    /* Stock is per product. Workshop packs count by places, not cart units. */
+    /* Stock is per product, or per type when types track their own quantity.
+       Workshop packs count by places, not cart units. */
     let places = 1;
     if (isWorkshop(product) && product.variants) {
       const pack = product.variants[raw.variant];
@@ -196,14 +221,28 @@ function buildOrder(rawItems, shippingMethod) {
       }
       places = workshopPlaces(product, raw.variant);
     }
-    const wanted = (wantedById.get(id) || 0) + places * quantity;
-    wantedById.set(id, wanted);
     const inv = BUNDLED_INVENTORY[id] || {};
-    const liveStock = Number.isInteger(inv.stock) ? inv.stock : product.stock;
+    const perVariant = !isWorkshop(product) && product.variants && productTracksVariantStock(product, inv);
+    const stockKey = perVariant ? `${id}::${raw.variant || ''}` : id;
+    const wanted = (wantedById.get(stockKey) || 0) + places * quantity;
+    wantedById.set(stockKey, wanted);
+
+    let liveStock;
+    let liveName = product.name;
+    if (perVariant) {
+      liveStock = variantStockOf(product, raw.variant, inv);
+      const variant = product.variants[raw.variant];
+      if (variant && variant.name) liveName = variant.name;
+    } else {
+      liveStock = Number.isInteger(inv.stock) ? inv.stock : product.stock;
+    }
     const liveProduct = {
       ...product,
+      name: liveName,
       stock: liveStock,
-      outOfStock: Boolean(inv.outOfStock) || liveStock === 0,
+      outOfStock: perVariant
+        ? liveStock === 0
+        : Boolean(inv.outOfStock) || liveStock === 0,
     };
     const soldOut = stockError(liveProduct, wanted);
     if (soldOut) {
@@ -245,6 +284,7 @@ function buildOrder(rawItems, shippingMethod) {
       currency: 'ILS',
     };
     if (kind) line.kind = kind;
+    if (kind === 'variant' && raw.variant) line.variant = raw.variant;
     if (isWorkshop(product)) line.places = places;
     lines.push(line);
   }

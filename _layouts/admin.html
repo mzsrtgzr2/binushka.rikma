@@ -3,8 +3,24 @@
 {% include head.html %}
 <body class="admin-body">
   <main class="admin" id="admin-app">
-    {{ content }}
+    <div class="admin-shell">
+      <header class="admin-top">
+        <a class="admin-top__brand" href="{{ '/' | relative_url }}">בינושקה</a>
+        <h1 class="admin-top__title">{{ page.title }}</h1>
+        <button type="button" class="admin-top__logout" id="admin-logout" hidden>יציאה</button>
+      </header>
+
+      <nav class="admin-nav" aria-label="ניווט בניהול">
+        {% for section in site.data.admin-nav %}
+          <a class="admin-nav__tab{% if section.id == page.admin_section %} is-active{% endif %}"
+             href="{{ section.url | relative_url }}"
+             {% if section.id == page.admin_section %}aria-current="page"{% endif %}>{{ section.label }}</a>
+        {% endfor %}
+      </nav>
+
+      {{ content }}
+    </div>
   </main>
-  <script src="{{ site.baseurl }}/js/admin.js?v=admin-field-errors" defer></script>
+  <script src="{{ site.baseurl }}/js/{{ page.admin_script | default: 'admin.js?v=admin-field-errors' }}" defer></script>
 </body>
 </html>

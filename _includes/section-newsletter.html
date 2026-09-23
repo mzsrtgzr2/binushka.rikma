@@ -1,0 +1,27 @@
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+{% assign sent_issues = site.newsletter | where: 'status', 'sent' | sort: 'date' | reverse %}
+<section class="container newsletter-section">
+  <div class="text-center animate">
+    <h3 class="hero__title">{{ newsletter.section.title }}</h3>
+    {% if newsletter.section.description %}
+      <p class="hero__description">{{ newsletter.section.description }}</p>
+    {% endif %}
+  </div>
+
+  <div class="newsletter-section__inner animate">
+    {% if sent_issues.size > 0 %}
+      <div class="newsletter-teaser">
+        <p class="newsletter-teaser__eyebrow">{{ newsletter.section.teaser_label }}</p>
+        <div class="newsletter-teaser__grid">
+          {% include newsletter-teaser-card.html issue=sent_issues.first %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="newsletter-section__signup">
+      {% include newsletter-signup.html source="home" hide_heading=true %}
+    </div>
+  </div>
+</section>
+{% endif %}

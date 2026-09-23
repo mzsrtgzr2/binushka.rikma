@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "jekyll",
-  "installCommand": "bundle install",
+  "installCommand": "npm install --omit=dev && bundle install",
   "buildCommand": "node scripts/build-catalog.js && JEKYLL_ENV=production bundle exec jekyll build",
   "outputDirectory": "_site",
   "cleanUrls": true,
@@ -13,6 +13,10 @@
   },
   "rewrites": [
     { "source": "/api/:path*/", "destination": "/api/:path*" }
+  ],
+  "redirects": [
+    { "source": "/admin", "destination": "/admin/store/", "permanent": false },
+    { "source": "/admin/", "destination": "/admin/store/", "permanent": false }
   ],
   "headers": [
     {

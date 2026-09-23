@@ -1,5 +1,12 @@
 _site
 vendor
+node_modules
 .jekyll-cache
 .jekyll-metadata
 .sass-cache
+
+# Vercel turns every uploaded file under api/ into a Serverless Function, and
+# Hobby deployments cap out at 12. These are node:test files that export no
+# handler, so they only ever deployed as broken endpoints and consumed slots.
+# `node --test` reads the repo, not the deployment, so it is unaffected.
+api/*.test.js

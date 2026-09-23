@@ -6,12 +6,20 @@ layout: default
   <div class="row">
 
     <div class="col col-12">
+      {% assign hide_newsletter_page = false %}
+      {% if site.data.settings.newsletter.enabled == false %}
+        {% if page.url == '/newsletter' or page.url == '/newsletter/' or page.url == '/newsletter/index.html' %}
+          {% assign hide_newsletter_page = true %}
+        {% endif %}
+      {% endif %}
+      {% unless hide_newsletter_page %}
       <div class="page-head">
         <h1 class="page-title">{{ page.title | escape }}</h1>
         {% if page.description %}
           <p class="page-description">{{ page.description }}</p>
         {% endif %}
       </div>
+      {% endunless %}
     </div>
 
     {%if page.image %}

@@ -1,18 +1,12 @@
 ---
 layout: admin
+admin_section: store
 title: ניהול חנות וסדנאות
 description: יצירה, עריכה ומחיקה של מוצרי החנות, ומלאי מקומות בסדנאות
-permalink: /admin/
+permalink: /admin/store/
 sitemap: false
 noindex: true
 ---
-
-<div class="admin-shell">
-  <header class="admin-top">
-    <a class="admin-top__brand" href="{{ '/' | relative_url }}">בינושקה</a>
-    <h1 class="admin-top__title">ניהול חנות וסדנאות</h1>
-    <button type="button" class="admin-top__logout" id="admin-logout" hidden>יציאה</button>
-  </header>
 
   <p class="admin-lead">
     כאן מנהלים מוצרים וסדנאות: מלאי, מקומות, הסתרה ומחיר בקופה.
@@ -20,12 +14,7 @@ noindex: true
     אחרי שמירה האתר מתעדכן לבד (בילד ב-Vercel).
   </p>
 
-  <form class="admin-login" id="admin-login">
-    <label class="form__label" for="admin-password">סיסמה</label>
-    <input class="form__input" type="password" id="admin-password" name="password" autocomplete="current-password" required>
-    <button type="submit" class="button button--primary">כניסה</button>
-    <p class="admin-message" id="admin-login-message" hidden></p>
-  </form>
+  {% include admin-login.html %}
 
   <div class="admin-board" id="admin-board" hidden>
     <div id="admin-list-view">
@@ -170,4 +159,3 @@ noindex: true
       </div>
     </form>
   </div>
-</div>

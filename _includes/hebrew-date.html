@@ -1,0 +1,8 @@
+{%- comment -%}
+  Jekyll's `date` filter only speaks English month names, so map them. Matches
+  the format the site used when dates were formatted in the browser with Intl.
+  Expects `include.date`.
+{%- endcomment -%}
+{%- assign hebrew_months = 'בינואר,בפברואר,במרץ,באפריל,במאי,ביוני,ביולי,באוגוסט,בספטמבר,באוקטובר,בנובמבר,בדצמבר' | split: ',' -%}
+{%- assign month_index = include.date | date: '%-m' | minus: 1 -%}
+{{- include.date | date: '%-d' }} {{ hebrew_months[month_index] }} {{ include.date | date: '%Y' -}}

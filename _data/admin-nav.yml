@@ -1,0 +1,9 @@
+# Sections of the backoffice, in the order their tabs appear. `id` has to match
+# the `admin_section` in a page's front matter for its tab to show as current.
+- id: store
+  label: החנות
+  url: /admin/store/
+
+- id: newsletter
+  label: הניוזלטר
+  url: /admin/newsletter/

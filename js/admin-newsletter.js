@@ -40,6 +40,7 @@
   var testToInput = document.getElementById('issue-test-to');
   var sendTestBtn = document.getElementById('issue-send-test');
   var sendBtn = document.getElementById('issue-send');
+  var sendMessageEl = document.getElementById('issue-send-message');
   if (!loginForm || !board || !editor) return;
 
   var issues = [];
@@ -508,6 +509,7 @@
     }
 
     show(editorMessage, '');
+    show(sendMessageEl, '');
     listView.hidden = true;
     editor.hidden = false;
     updatePreview();
@@ -710,27 +712,47 @@
       });
   });
 
+  // The form is long, and the message under the title is off screen by the time
+  // someone reaches these buttons. The result has to sit next to the click.
+  function reportSend(text, type) {
+    show(sendMessageEl, text, type);
+  }
+
+  function holdButton(button, label) {
+    var restore = button.textContent;
+    button.disabled = true;
+    button.textContent = label;
+    return function () {
+      button.textContent = restore;
+    };
+  }
+
   sendTestBtn.addEventListener('click', function () {
     if (!current) return;
 
     var testTo = testToInput.value.trim();
     if (!testTo) {
-      show(editorMessage, 'צריך כתובת לשליחת הבדיקה', 'error');
+      reportSend('צריך כתובת לשליחת הבדיקה', 'error');
       return;
     }
 
-    show(editorMessage, 'שולחת בדיקה...', 'info');
+    var release = holdButton(sendTestBtn, 'שולחת...');
+    reportSend('שולחת בדיקה אל ' + testTo + '...', 'info');
 
     api('POST', { action: 'send', slug: current.slug, testTo: testTo })
       .then(function (data) {
         if (data.failed && data.failed.length) {
-          show(editorMessage, 'השליחה נכשלה: ' + data.failed[0].message, 'error');
+          reportSend('השליחה נכשלה: ' + data.failed[0].message, 'error');
           return;
         }
-        show(editorMessage, 'נשלחה בדיקה אל ' + testTo, 'ok');
+        reportSend('נשלחה בדיקה אל ' + testTo + '.', 'ok');
       })
       .catch(function (error) {
-        show(editorMessage, error.message, 'error');
+        reportSend(error.message, 'error');
+      })
+      .then(function () {
+        release();
+        sendTestBtn.disabled = !current || !state.canSend;
       });
   });
 
@@ -740,24 +762,30 @@
     var total = state.subscribers || 0;
     if (!window.confirm('לשלוח את "' + current.title + '" אל ' + total + ' נמענים? אי אפשר לבטל.')) return;
 
-    show(editorMessage, 'שולחת... זה יכול לקחת כמה דקות.', 'info');
-    sendBtn.disabled = true;
+    var release = holdButton(sendBtn, 'שולחת...');
+    reportSend('שולחת אל ' + total + ' נמענים. זה יכול לקחת כמה דקות.', 'info');
 
     api('POST', { action: 'send', slug: current.slug })
       .then(function (data) {
         var message = 'נשלח אל ' + data.sent + ' נמענים.';
         if (data.remaining) message += ' נשארו ' + data.remaining + ' — אפשר ללחוץ שוב כדי להמשיך.';
         if (data.failed && data.failed.length) message += ' ' + data.failed.length + ' נכשלו.';
+        var failed = data.failed && data.failed.length;
 
         return load().then(function () {
           var saved = issues.filter(function (item) { return item.slug === current.slug; })[0];
           openEditor(saved || null);
-          show(editorMessage, message, data.failed && data.failed.length ? 'error' : 'ok');
+          reportSend(message, failed ? 'error' : 'ok');
         });
       })
       .catch(function (error) {
-        sendBtn.disabled = false;
-        show(editorMessage, error.message, 'error');
+        reportSend(error.message, 'error');
+      })
+      .then(function () {
+        release();
+        // A successful send reloads the issue as sent and leaves the button off.
+        // A failure has to hand it back, since holdButton disabled it.
+        if (current && current.status !== 'sent' && state.canSend) sendBtn.disabled = false;
       });
   });
 

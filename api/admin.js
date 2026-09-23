@@ -814,7 +814,9 @@ async function handler(req, res) {
       const existing = new Set(listed.products.map((p) => p.slug));
       const isNew = Boolean(body.isNew);
       const prepared = store.prepareProductMedia(body.product || {});
-      if (prepared.error) return json(res, 400, { error: prepared.error });
+      if (prepared.error) {
+        return json(res, 400, { error: prepared.error, field: prepared.field || null });
+      }
       const normalized = store.normalizeProductInput(
         { ...(body.product || {}), ...prepared.fields },
         {
@@ -823,7 +825,9 @@ async function handler(req, res) {
           catalog: listed.catalog,
         }
       );
-      if (normalized.error) return json(res, 400, { error: normalized.error });
+      if (normalized.error) {
+        return json(res, 400, { error: normalized.error, field: normalized.field || null });
+      }
       const saved = await upsertProduct(env, normalized.input, {
         isNew,
         files: prepared.files,

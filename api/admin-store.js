@@ -433,20 +433,22 @@ function asPhotoItems(raw) {
 }
 
 function materializeUpload(slug, upload, nameHint) {
-  if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
+  if (!SLUG_RE.test(slug)) {
+    return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)', field: 'slug' };
+  }
   const decoded = decodeDataUrl(upload && (upload.data || upload.content));
-  if (!decoded) return { error: 'קובץ תמונה לא תקין' };
+  if (!decoded) return { error: 'קובץ תמונה לא תקין', field: 'photos' };
   const mime = String((upload && upload.mime) || decoded.mime || '').toLowerCase();
   const ext = IMAGE_EXT[mime];
-  if (!ext) return { error: 'רק jpg, png, webp או gif' };
+  if (!ext) return { error: 'רק jpg, png, webp או gif', field: 'photos' };
   let buffer;
   try {
     buffer = Buffer.from(decoded.base64, 'base64');
   } catch {
-    return { error: 'קובץ תמונה לא תקין' };
+    return { error: 'קובץ תמונה לא תקין', field: 'photos' };
   }
-  if (!buffer.length) return { error: 'קובץ תמונה ריק' };
-  if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)' };
+  if (!buffer.length) return { error: 'קובץ תמונה ריק', field: 'photos' };
+  if (buffer.length > MAX_PHOTO_BYTES) return { error: 'תמונה גדולה מדי (עד 2.5MB)', field: 'photos' };
   const filename = safePhotoName((upload && (upload.filename || upload.name)) || nameHint || 'photo', ext);
   const repoPath = `images/store/${slug}/${filename}`;
   return {
@@ -461,7 +463,9 @@ function preparePhotos(raw) {
     .trim()
     .toLowerCase();
   const items = asPhotoItems(raw.photos);
-  if (items.length > MAX_PHOTOS) return { error: `אפשר עד ${MAX_PHOTOS} תמונות` };
+  if (items.length > MAX_PHOTOS) {
+    return { error: `אפשר עד ${MAX_PHOTOS} תמונות`, field: 'photos' };
+  }
   const files = [];
   const paths = [];
   for (const item of items) {
@@ -520,12 +524,12 @@ function prepareVariants(raw) {
       if (Array.isArray(row.gallery)) imageItems.push(...row.gallery);
     }
     if (imageItems.length > MAX_PHOTOS) {
-      return { error: `אפשר עד ${MAX_PHOTOS} תמונות לכל סוג` };
+      return { error: `אפשר עד ${MAX_PHOTOS} תמונות לכל סוג`, field: 'variants' };
     }
     const paths = [];
     for (const item of imageItems) {
       const resolved = resolveVariantImage(slug, item, idHint);
-      if (resolved.error) return resolved;
+      if (resolved.error) return { ...resolved, field: resolved.field || 'variants' };
       if (resolved.file) files.push(resolved.file);
       if (resolved.pathName) paths.push(resolved.pathName);
     }
@@ -805,16 +809,30 @@ function catalogRowFromInput(input) {
   };
 }
 
+function catalogErrorField(message, kind) {
+  const msg = String(message || '');
+  if (/סוג אחד עם מחיר/.test(msg)) return 'variants';
+  if (/גיפט קארד/.test(msg)) return 'min_price';
+  if (/מחיר לא תקין/.test(msg)) return kind === 'variable' ? 'min_price' : 'cart_price';
+  return null;
+}
+
 function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   const slug = String((raw && raw.slug) || '')
     .trim()
     .toLowerCase();
-  if (!SLUG_RE.test(slug)) return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)' };
-  if (isNew && existingSlugs.has(slug)) return { error: 'כבר יש מוצר עם המזהה הזה' };
-  if (!isNew && !existingSlugs.has(slug)) return { error: 'מוצר לא מוכר' };
+  if (!SLUG_RE.test(slug)) {
+    return { error: 'מזהה מוצר לא תקין (באנגלית, אותיות ומקפים)', field: 'slug' };
+  }
+  if (isNew && existingSlugs.has(slug)) {
+    return { error: 'כבר יש מוצר עם המזהה הזה', field: 'slug' };
+  }
+  if (!isNew && !existingSlugs.has(slug)) {
+    return { error: 'מוצר לא מוכר', field: 'slug' };
+  }
 
   const title = String((raw && raw.title) || '').trim();
-  if (!title) return { error: 'חסר שם למוצר' };
+  if (!title) return { error: 'חסר שם למוצר', field: 'title' };
 
   let kind = raw.kind;
   if (slug === 'gift-card') kind = 'variable';
@@ -828,12 +846,12 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   }
 
   const stockParsed = parseStock(raw && raw.stock);
-  if (stockParsed.error) return { error: stockParsed.error };
+  if (stockParsed.error) return { error: stockParsed.error, field: 'stock' };
 
   const categoryRaw = String((raw && raw.category) || '').trim();
   const category = normalizeCategory(categoryRaw);
   if (categoryRaw && !category) {
-    return { error: 'קטגוריה לא מוכרת' };
+    return { error: 'קטגוריה לא מוכרת', field: 'category' };
   }
 
   const input = applyStockFlags({
@@ -861,7 +879,8 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   try {
     if (input.in_cart) catalogRowFromInput(input);
   } catch (err) {
-    return { error: err.message || 'נתוני קטלוג לא תקינים' };
+    const message = err.message || 'נתוני קטלוג לא תקינים';
+    return { error: message, field: catalogErrorField(message, kind) };
   }
 
   return { input };

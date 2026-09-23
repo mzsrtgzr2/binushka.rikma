@@ -203,6 +203,18 @@
   color: #067647;
 }
 
+.admin-field-error {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #b42318;
+}
+
+.form__input--error {
+  border-color: #b42318;
+  box-shadow: 0 0 0 1px rgba(180, 35, 24, 0.25);
+}
+
 #admin-photos-message {
   margin-top: 10px;
 }

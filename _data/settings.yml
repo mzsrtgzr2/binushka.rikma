@@ -17,10 +17,8 @@ menu__settings:
       url: '/projects/'
     - title: 'חנות'
       url: '/store/'
-    - title: מוצרים מומלצים
-      url: '/recommendations/'
     # - url: '/about/'
-    #   title: 'קצת עלי'
+      #   title: 'קצת עלי'
     - title: 'צרו קשר'
       url: '/contact/'
     # - title: 'Pages'

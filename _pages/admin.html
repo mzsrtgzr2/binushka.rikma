@@ -1,16 +1,16 @@
 ---
 layout: admin
 admin_section: store
-title: ניהול חנות
-description: יצירה, עריכה ומחיקה של כל מוצרי החנות
+title: ניהול חנות וסדנאות
+description: יצירה, עריכה ומחיקה של מוצרי החנות, ומלאי מקומות בסדנאות
 permalink: /admin/store/
 sitemap: false
 noindex: true
 ---
 
   <p class="admin-lead">
-    כאן מנהלים את כל המוצרים: יצירה, עריכה, מחיקה, מחיר בקופה ומלאי.
-    המחיר שנשמר כאן הוא המחיר שנגבה בקופה — גם למוצרים הרגילים.
+    כאן מנהלים מוצרים וסדנאות: מלאי, מקומות, הסתרה ומחיר בקופה.
+    בסדנה המלאי הוא מספר המקומות הפנויים.
     אחרי שמירה האתר מתעדכן לבד (בילד ב-Vercel).
   </p>
 
@@ -25,10 +25,14 @@ noindex: true
           <button type="button" class="button button--primary" id="admin-save" disabled>שמירת מלאי</button>
         </div>
       </div>
+      <h2 class="admin-section-title">מוצרים</h2>
       <ul class="admin-list" id="admin-list"></ul>
+      <h2 class="admin-section-title" id="admin-workshops-heading" hidden>סדנאות</h2>
+      <p class="admin-hint admin-section-hint" id="admin-workshops-hint" hidden>מקומות פנויים בסדנה הם המלאי. 0 = ההרשמה מלאה. אחרי שמירה האתר מתעדכן בבילד.</p>
+      <ul class="admin-list" id="admin-workshops"></ul>
     </div>
 
-    <form class="admin-editor" id="admin-editor" hidden>
+    <form class="admin-editor" id="admin-editor" hidden novalidate>
       <div class="admin-editor__top">
         <h2 class="admin-editor__title" id="admin-editor-title">מוצר חדש</h2>
         <p class="admin-message" id="admin-editor-message" hidden></p>
@@ -64,14 +68,25 @@ noindex: true
         <p class="admin-message" id="admin-photos-message" hidden></p>
       </fieldset>
 
-      <div class="form__group">
-        <label class="form__label" for="admin-kind">איך המוצר נמכר</label>
-        <select class="form__input" id="admin-kind" name="kind">
-          <option value="fixed">מוצר רגיל — מחיר קבוע בסל</option>
-          <option value="variable">גיפט קארד — הלקוחה בוחרת סכום</option>
-          <option value="variants">כמה סוגים — כמו סקראנצ'י</option>
-          <option value="content">דף בלי סל (רק תצוגה באתר)</option>
-        </select>
+      <div class="admin-grid">
+        <div class="form__group">
+          <label class="form__label" for="admin-kind">איך המוצר נמכר</label>
+          <select class="form__input" id="admin-kind" name="kind">
+            <option value="fixed">מוצר רגיל — מחיר קבוע בסל</option>
+            <option value="variable">גיפט קארד — הלקוחה בוחרת סכום</option>
+            <option value="variants">כמה סוגים — כמו סקראנצ'י</option>
+            <option value="content">דף בלי סל (רק תצוגה באתר)</option>
+          </select>
+        </div>
+        <div class="form__group">
+          <label class="form__label" for="admin-category">קטגוריה בחנות</label>
+          <select class="form__input" id="admin-category" name="category">
+            <option value="">ללא קטגוריה</option>
+            <option value="embroidery-supplies">ציוד רקמה</option>
+            <option value="works-for-sale">עבודות למכירה</option>
+          </select>
+          <p class="admin-hint">לפי הקטגוריה הלקוחות יכולות לסנן בחנות.</p>
+        </div>
       </div>
 
       <fieldset class="admin-fieldset" data-kind-fields="fixed">
@@ -103,7 +118,7 @@ noindex: true
 
       <fieldset class="admin-fieldset" data-kind-fields="variants" hidden>
         <legend>סוגים ומחירים</legend>
-        <p class="admin-hint">כל סוג הוא טופס רגיל כמו שאר השדות למעלה: שם, מחיר ומזהה, תיאור ארוך נוח לעריכה, והעלאת תמונה מהמחשב כמו בתמונות הראשיות.</p>
+        <p class="admin-hint">כל סוג הוא טופס רגיל כמו שאר השדות למעלה: שם, מחיר, מלאי ומזהה, תיאור ארוך נוח לעריכה, והעלאת תמונה מהמחשב כמו בתמונות הראשיות.</p>
         <div class="admin-variants" id="admin-variants"></div>
         <button type="button" class="button" id="admin-add-variant">הוסיפי סוג</button>
       </fieldset>
@@ -114,11 +129,18 @@ noindex: true
         <p class="admin-hint">Markdown, כמו בקבצי המוצר הקיימים.</p>
       </div>
 
+      <div class="form__group">
+        <label class="form__label" for="admin-stock">מלאי (כמות)</label>
+        <input class="form__input" id="admin-stock" name="stock" type="number" min="0" step="1" dir="ltr" placeholder="ריק = בלי מעקב">
+        <p class="admin-hint">מספר הפריטים שאפשר לקנות. 0 = אזל, 1–3 = מלאי מוגבל. ריק משאיר את הסימונים הידניים למטה. במוצר מסוג ״כמה סוגים״ המלאי מוגדר לכל סוג בנפרד.</p>
+      </div>
+
       <div class="admin-flags">
         <label class="admin-check"><input type="checkbox" id="admin-out-of-stock"> אזל מהמלאי</label>
         <label class="admin-check"><input type="checkbox" id="admin-limited-stock"> מלאי מוגבל</label>
         <label class="admin-check"><input type="checkbox" id="admin-hide"> הסתר מהחנות</label>
       </div>
+      <p class="admin-hint">כמות במלאי יורדת אוטומטית כשלקוחה עוברת לתשלום. כשמתאפסת — המוצר מסומן כאזל. השאירי ריק למוצרים בלי מעקב מלאי (למשל גיפט קארד).</p>
       <p class="admin-hint">הסתרה מורידה את המוצר מרשימת החנות ומגוגל. הדף נשאר בכתובת /store/המזהה/ ואפשר לקנות משם — מתאים לבדיקת תשלום.</p>
 
       <div class="admin-editor__actions">

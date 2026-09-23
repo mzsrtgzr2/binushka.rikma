@@ -1,6 +1,6 @@
 /**
  * Password-protected store backoffice.
- * Create / update / delete products and stock flags.
+ * Create / update / delete products and stock flags, plus workshop spots.
  * Production writes go to GitHub so Vercel rebuilds the site.
  */
 
@@ -256,6 +256,64 @@ async function readStoreMap(env) {
   return { target, rawBySlug };
 }
 
+function listProjectFilesLocal(env) {
+  const dir = path.join(localRoot(env), '_projects');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
+}
+
+/**
+ * Workshop pages are keyed by Jekyll slug (`rehovot-04-12`), with the dated
+ * filename kept so a decrement can write the same `_projects` file back.
+ */
+async function readProjectsMap(env) {
+  const target = writeTarget(env);
+  if (!target) return { error: 'חסר GITHUB_TOKEN. צריך להגדיר אותו ב-Vercel כדי לנהל את החנות.' };
+  const rawBySlug = {};
+  const fileBySlug = {};
+  const add = (name, raw) => {
+    const slug = store.workshopSlug(name);
+    rawBySlug[slug] = raw;
+    fileBySlug[slug] = name;
+  };
+  if (target === 'local') {
+    listProjectFilesLocal(env).forEach((name) => {
+      add(name, fs.readFileSync(path.join(localRoot(env), '_projects', name), 'utf8'));
+    });
+  } else {
+    const branch = gitBranch(env);
+    const entries = await githubJson(env, `/contents/_projects?ref=${encodeURIComponent(branch)}`);
+    const names = (Array.isArray(entries) ? entries : [])
+      .filter((entry) => entry.name && entry.name.endsWith('.md'))
+      .map((entry) => entry.name);
+    for (const name of names) {
+      add(name, await githubRead(env, `_projects/${name}`));
+    }
+  }
+  return { target, rawBySlug, fileBySlug };
+}
+
+function bundledProjectsRaw() {
+  const dir = path.join(__dirname, '..', '_projects');
+  if (!fs.existsSync(dir)) return { rawBySlug: {}, fileBySlug: {} };
+  const rawBySlug = {};
+  const fileBySlug = {};
+  fs.readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .forEach((name) => {
+      const slug = store.workshopSlug(name);
+      rawBySlug[slug] = fs.readFileSync(path.join(dir, name), 'utf8');
+      fileBySlug[slug] = name;
+    });
+  return { rawBySlug, fileBySlug };
+}
+
+function workshopSlugFromId(id) {
+  const prefix = store.WORKSHOP_PREFIX;
+  const value = String(id || '');
+  return value.startsWith(prefix) ? value.slice(prefix.length) : '';
+}
+
 async function listProducts(env) {
   const loaded = await readStoreMap(env);
   if (loaded.error) return loaded;
@@ -265,6 +323,35 @@ async function listProducts(env) {
     .filter(Boolean)
     .sort((a, b) => String(a.title).localeCompare(String(b.title), 'he'));
   return { target: loaded.target, products, catalog, rawBySlug: loaded.rawBySlug };
+}
+
+function workshopDateValue(page) {
+  const raw = String((page && page.date) || '');
+  const stamp = Date.parse(raw);
+  return Number.isFinite(stamp) ? stamp : 0;
+}
+
+async function listWorkshops(env) {
+  try {
+    const loaded = await readProjectsMap(env);
+    if (loaded.error) return { target: loaded.target, workshops: [] };
+    const workshops = Object.keys(loaded.rawBySlug)
+      .map((slug) => store.parseWorkshopPage(slug, loaded.rawBySlug[slug]))
+      .filter(Boolean)
+      .sort((a, b) => {
+        if (Boolean(a.hide) !== Boolean(b.hide)) return a.hide ? 1 : -1;
+        return workshopDateValue(b) - workshopDateValue(a) || String(a.title).localeCompare(String(b.title), 'he');
+      });
+    return {
+      target: loaded.target,
+      workshops,
+      rawBySlug: loaded.rawBySlug,
+      fileBySlug: loaded.fileBySlug,
+    };
+  } catch (err) {
+    console.error('admin workshops list failed', err);
+    return { target: writeTarget(env), workshops: [] };
+  }
 }
 
 function catalogFilesFrom(catalog) {
@@ -339,14 +426,46 @@ function normalizeFlags(rawProducts, allowedSlugs) {
     if (!store.SLUG_RE.test(String(slug || '')) || !allowedSlugs.has(slug)) {
       return { error: 'מוצר לא מוכר' };
     }
-    updates.push({
+    const stockParsed = store.parseStock(row.stock);
+    if (stockParsed.error) return { error: stockParsed.error };
+    const flags = store.applyStockFlags({
       slug,
       out_of_stock: Boolean(row.out_of_stock),
       limited_stock: Boolean(row.limited_stock),
       hide: Boolean(row.hide),
+      stock: stockParsed.stock,
+    });
+    updates.push(flags);
+  }
+  return { updates };
+}
+
+function normalizeWorkshopFlags(rawWorkshops, allowedSlugs) {
+  if (rawWorkshops == null) return { updates: [] };
+  if (!Array.isArray(rawWorkshops)) return { error: 'אין רשימת סדנאות' };
+  const updates = [];
+  for (const row of rawWorkshops) {
+    const slug = row && row.slug;
+    if (!store.SLUG_RE.test(String(slug || '')) || !allowedSlugs.has(slug)) {
+      return { error: 'סדנה לא מוכרת' };
+    }
+    const stockParsed = store.parseStock(row.spots != null ? row.spots : row.stock);
+    if (stockParsed.error) return { error: stockParsed.error };
+    const spots = stockParsed.stock;
+    updates.push({
+      slug,
+      spots,
+      registration_full: Boolean(row.registration_full) || spots === 0,
+      hide: Boolean(row.hide),
     });
   }
   return { updates };
+}
+
+function stockEqual(a, b) {
+  const left = a == null ? null : Number(a);
+  const right = b == null ? null : Number(b);
+  return left === right;
 }
 
 async function saveFlags(env, updates) {
@@ -360,7 +479,8 @@ async function saveFlags(env, updates) {
     if (
       Boolean(current.out_of_stock) === flags.out_of_stock &&
       Boolean(current.limited_stock) === flags.limited_stock &&
-      Boolean(current.hide) === flags.hide
+      Boolean(current.hide) === flags.hide &&
+      stockEqual(current.stock, flags.stock)
     ) {
       continue;
     }
@@ -379,6 +499,273 @@ async function saveFlags(env, updates) {
     await commitFiles(env, files, 'Update store stock from admin');
   }
   return { target: listed.target, changed };
+}
+
+async function saveWorkshopFlags(env, updates) {
+  if (!updates.length) return { target: writeTarget(env), changed: [] };
+  const loaded = await readProjectsMap(env);
+  if (loaded.error) return loaded;
+  const files = [];
+  const changed = [];
+  for (const flags of updates) {
+    const raw = loaded.rawBySlug[flags.slug];
+    const filename = loaded.fileBySlug[flags.slug];
+    if (!raw || !filename) continue;
+    const current = store.parseWorkshopPage(flags.slug, raw);
+    if (!current) continue;
+    if (
+      stockEqual(current.spots, flags.spots) &&
+      Boolean(current.registration_full) === Boolean(flags.registration_full) &&
+      Boolean(current.hide) === Boolean(flags.hide)
+    ) {
+      continue;
+    }
+    const next = store.applyWorkshopStock(raw, flags);
+    if (loaded.target === 'local') {
+      fs.writeFileSync(path.join(localRoot(env), '_projects', filename), next);
+    } else {
+      files.push({ path: `_projects/${filename}`, content: next });
+    }
+    changed.push(store.workshopId(flags.slug));
+  }
+  if (loaded.target === 'github' && files.length) {
+    await commitFiles(env, files, 'Update workshop spots from admin');
+  }
+  return { target: loaded.target, changed };
+}
+
+/**
+ * After a paid checkout starts successfully, reduce tracked stock quantities.
+ * purchases: [{ slug|id, quantity, variant? }]
+ */
+async function decrementInventory(env, purchases) {
+  const target = writeTarget(env);
+  if (!target) return { skipped: true, reason: 'no-write-target' };
+
+  const storeTotals = new Map();
+  const workshopTotals = new Map();
+  for (const row of purchases || []) {
+    const slug = String((row && (row.slug || row.id)) || '').trim();
+    const quantity = Number(row && row.quantity);
+    const variant = String((row && row.variant) || '').trim();
+    if (!store.SLUG_RE.test(slug) || !Number.isInteger(quantity) || quantity < 1) continue;
+    const workshopSlug = workshopSlugFromId(slug);
+    if (workshopSlug) workshopTotals.set(workshopSlug, (workshopTotals.get(workshopSlug) || 0) + quantity);
+    else {
+      const key = variant ? `${slug}::${variant}` : slug;
+      const prev = storeTotals.get(key) || { slug, variant: variant || '', quantity: 0 };
+      prev.quantity += quantity;
+      storeTotals.set(key, prev);
+    }
+  }
+  if (!storeTotals.size && !workshopTotals.size) return { target, changed: [] };
+
+  const files = [];
+  const changed = [];
+  const storeRaw = new Map();
+
+  if (storeTotals.size) {
+    const loaded = await readStoreMap(env);
+    if (loaded.error) return loaded;
+    for (const { slug, variant, quantity } of storeTotals.values()) {
+      const raw = storeRaw.get(slug) || loaded.rawBySlug[slug];
+      if (!raw) continue;
+      const updated = store.decrementPageStock(raw, slug, quantity, variant || undefined);
+      if (!updated) continue;
+      storeRaw.set(slug, updated);
+      if (!changed.includes(slug)) changed.push(slug);
+    }
+    for (const [slug, updated] of storeRaw) {
+      if (target === 'local') {
+        fs.writeFileSync(path.join(localRoot(env), '_store', `${slug}.md`), updated);
+      } else {
+        files.push({ path: `_store/${slug}.md`, content: updated });
+      }
+    }
+  }
+
+  if (workshopTotals.size) {
+    const loaded = await readProjectsMap(env);
+    if (loaded.error) return loaded;
+    for (const [slug, quantity] of workshopTotals) {
+      const raw = loaded.rawBySlug[slug];
+      const filename = loaded.fileBySlug[slug];
+      if (!raw || !filename) continue;
+      const updated = store.decrementWorkshopPage(raw, slug, quantity);
+      if (!updated) continue;
+      changed.push(store.workshopId(slug));
+      if (target === 'local') {
+        fs.writeFileSync(path.join(localRoot(env), '_projects', filename), updated);
+      } else {
+        files.push({ path: `_projects/${filename}`, content: updated });
+      }
+    }
+  }
+
+  if (!changed.length) return { target, changed: [] };
+
+  if (target === 'local') {
+    return { target, changed };
+  }
+  await commitFiles(env, files, 'Decrement store stock after purchase');
+  return { target, changed };
+}
+
+/**
+ * Live stock check against GitHub/local markdown (not the cold-started catalog bundle).
+ * Falls back to the bundled `_store` snapshot when writes are not configured.
+ */
+async function assertInventory(env, items) {
+  let rawBySlug = null;
+  const target = writeTarget(env);
+  if (target) {
+    const loaded = await readStoreMap(env);
+    if (loaded.error) return { error: loaded.error };
+    rawBySlug = loaded.rawBySlug;
+  } else {
+    rawBySlug = bundledStoreRaw();
+  }
+  if (!rawBySlug) return { ok: true, skipped: true };
+
+  const needed = new Map();
+  const workshopNeeded = new Map();
+  for (const row of items || []) {
+    const slug = String((row && (row.id || row.slug)) || '').trim();
+    const quantity = Number(row && row.quantity);
+    const variant = String((row && row.variant) || '').trim();
+    if (!store.SLUG_RE.test(slug) || !Number.isInteger(quantity) || quantity < 1) continue;
+    const workshopSlug = workshopSlugFromId(slug);
+    if (workshopSlug) workshopNeeded.set(workshopSlug, (workshopNeeded.get(workshopSlug) || 0) + quantity);
+    else {
+      const key = variant ? `${slug}::${variant}` : slug;
+      const prev = needed.get(key) || { slug, variant, quantity: 0 };
+      prev.quantity += quantity;
+      needed.set(key, prev);
+    }
+  }
+
+  for (const { slug, variant, quantity } of needed.values()) {
+    const raw = rawBySlug[slug];
+    if (!raw) continue;
+    const page = store.parsePage(slug, raw);
+    if (!store.tracksInventory(page)) continue;
+    if (store.variantsTrackStock(page.variants)) {
+      const row = (page.variants || []).find((item) => item && item.id === variant);
+      if (!row || row.stock == null) continue;
+      if (row.stock < quantity) {
+        return { error: `אין מספיק מלאי עבור ${row.name || page.title || slug}` };
+      }
+      continue;
+    }
+    if (page.out_of_stock || page.stock < quantity) {
+      return { error: `אין מספיק מלאי עבור ${page.title || slug}` };
+    }
+  }
+
+  if (workshopNeeded.size) {
+    let projects;
+    if (target) {
+      const loaded = await readProjectsMap(env);
+      if (loaded.error) return { error: loaded.error };
+      projects = loaded.rawBySlug;
+    } else {
+      projects = bundledProjectsRaw().rawBySlug;
+    }
+    for (const [slug, quantity] of workshopNeeded) {
+      const raw = projects[slug];
+      if (!raw) continue;
+      const page = store.parseWorkshopPage(slug, raw);
+      if (!page || page.spots == null) continue;
+      if (page.registration_full || page.stock < quantity) {
+        return { error: `אין מקומות פנויים ל${store.workshopName(page) || slug}` };
+      }
+    }
+  }
+  return { ok: true };
+}
+
+function bundledStoreRaw() {
+  const dir = path.join(__dirname, '..', '_store');
+  if (!fs.existsSync(dir)) return null;
+  const rawBySlug = {};
+  fs.readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .forEach((name) => {
+      rawBySlug[name.replace(/\.md$/, '')] = fs.readFileSync(path.join(dir, name), 'utf8');
+    });
+  return rawBySlug;
+}
+
+/**
+ * Public inventory for the storefront cart (no auth).
+ * Prefers live GitHub/local admin target; falls back to bundled markdown.
+ */
+async function publicInventory(env) {
+  const products = {};
+  let source = 'bundled';
+  let rawBySlug = null;
+
+  const target = writeTarget(env);
+  if (target) {
+    try {
+      const loaded = await readStoreMap(env);
+      if (!loaded.error) {
+        rawBySlug = loaded.rawBySlug;
+        source = target;
+      }
+    } catch (err) {
+      console.error('publicInventory live read failed', err);
+    }
+  }
+  if (!rawBySlug) rawBySlug = bundledStoreRaw() || {};
+
+  for (const [slug, raw] of Object.entries(rawBySlug)) {
+    const page = store.parsePage(slug, raw);
+    if (!page || page.in_cart === false) continue;
+    const soldOut = Boolean(page.out_of_stock) || page.stock === 0;
+    const row = {
+      stock: page.stock == null ? null : Number(page.stock),
+      outOfStock: soldOut,
+      limitedStock: Boolean(page.limited_stock),
+    };
+    if (page.title) row.name = page.title;
+    const price = Number(page.cart_price);
+    if (price > 0) row.price = price;
+    if (store.variantsTrackStock(page.variants)) {
+      row.variants = {};
+      (page.variants || []).forEach((item) => {
+        if (!item || !item.id) return;
+        row.variants[item.id] = {
+          stock: item.stock == null ? null : Number(item.stock),
+        };
+      });
+      row.stock = null;
+    }
+    products[slug] = row;
+  }
+
+  let projects = bundledProjectsRaw();
+  if (target) {
+    try {
+      const loaded = await readProjectsMap(env);
+      if (!loaded.error) projects = loaded;
+    } catch (err) {
+      console.error('publicInventory workshops read failed', err);
+    }
+  }
+  Object.entries(projects.rawBySlug || {}).forEach(([slug, raw]) => {
+    const page = store.parseWorkshopPage(slug, raw);
+    const catalog = store.workshopCatalogRow(page);
+    if (!catalog) return;
+    products[store.workshopId(slug)] = {
+      name: catalog.name,
+      price: catalog.price,
+      stock: page.stock == null ? null : Number(page.stock),
+      outOfStock: Boolean(page.registration_full) || page.stock === 0,
+      limitedStock: store.isLowStock(page.stock),
+    };
+  });
+  return { source, products };
 }
 
 async function handler(req, res) {
@@ -424,7 +811,12 @@ async function handler(req, res) {
     try {
       const listed = await listProducts(env);
       if (listed.error) return json(res, 503, { error: listed.error });
-      return json(res, 200, { products: listed.products, target: listed.target });
+      const workshopsListed = await listWorkshops(env);
+      return json(res, 200, {
+        products: listed.products,
+        workshops: workshopsListed.workshops || [],
+        target: listed.target,
+      });
     } catch (err) {
       console.error('admin list failed', err);
       return json(res, 502, { error: 'לא הצלחנו לקרוא את המוצרים מ-GitHub' });
@@ -442,9 +834,19 @@ async function handler(req, res) {
       const allowed = new Set(listed.products.map((product) => product.slug));
       const normalized = normalizeFlags(body.products, allowed);
       if (normalized.error) return json(res, 400, { error: normalized.error });
+      const workshopsListed = await listWorkshops(env);
+      const allowedWorkshops = new Set((workshopsListed.workshops || []).map((workshop) => workshop.slug));
+      const normalizedWorkshops = normalizeWorkshopFlags(body.workshops, allowedWorkshops);
+      if (normalizedWorkshops.error) return json(res, 400, { error: normalizedWorkshops.error });
       const saved = await saveFlags(env, normalized.updates);
       if (saved.error) return json(res, 503, { error: saved.error });
-      return json(res, 200, { ok: true, changed: saved.changed, target: saved.target });
+      const savedWorkshops = await saveWorkshopFlags(env, normalizedWorkshops.updates);
+      if (savedWorkshops.error) return json(res, 503, { error: savedWorkshops.error });
+      return json(res, 200, {
+        ok: true,
+        changed: [...saved.changed, ...savedWorkshops.changed],
+        target: saved.target,
+      });
     }
 
     if (body.action === 'upsert') {
@@ -453,7 +855,9 @@ async function handler(req, res) {
       const existing = new Set(listed.products.map((p) => p.slug));
       const isNew = Boolean(body.isNew);
       const prepared = store.prepareProductMedia(body.product || {});
-      if (prepared.error) return json(res, 400, { error: prepared.error });
+      if (prepared.error) {
+        return json(res, 400, { error: prepared.error, field: prepared.field || null });
+      }
       const normalized = store.normalizeProductInput(
         { ...(body.product || {}), ...prepared.fields },
         {
@@ -462,7 +866,9 @@ async function handler(req, res) {
           catalog: listed.catalog,
         }
       );
-      if (normalized.error) return json(res, 400, { error: normalized.error });
+      if (normalized.error) {
+        return json(res, 400, { error: normalized.error, field: normalized.field || null });
+      }
       const saved = await upsertProduct(env, normalized.input, {
         isNew,
         files: prepared.files,
@@ -499,5 +905,10 @@ handler.setYamlBool = store.setYamlBool;
 handler.parseProduct = (slug, raw) => store.parsePage(slug, raw);
 handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('x', raw), ...flags });
 handler.normalizeUpdates = normalizeFlags;
+handler.normalizeWorkshopUpdates = normalizeWorkshopFlags;
+handler.decrementInventory = decrementInventory;
+handler.assertInventory = assertInventory;
+handler.publicInventory = publicInventory;
+handler.parseStock = store.parseStock;
 
 module.exports = handler;

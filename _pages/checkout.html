@@ -163,7 +163,24 @@ permalink: /checkout/
           <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם הזמנת כמה, אפשר לרשום כאן איזו דוגמא לכל אחת.</p>
         </div>
 
-        <fieldset class="checkout-shipping">
+        <div class="form__group" id="checkout-participants-group" hidden>
+          <label class="form__label" for="checkout-participants">שמות המשתתפות בסדנה</label>
+          <textarea
+            id="checkout-participants"
+            name="participantsNote"
+            class="form__input checkout-variant-note"
+            maxlength="200"
+            rows="2"
+            placeholder="למשל: נועה כהן, מיכל לוי"
+          ></textarea>
+          <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם נרשמת ליותר ממקום אחד, אפשר לרשום כאן מי מגיעה.</p>
+        </div>
+
+        <p class="checkout-shipping__none" id="checkout-no-shipping" hidden>
+          ההזמנה כוללת הרשמה לסדנאות בלבד — אין מה לשלוח, אז אין דמי משלוח.
+        </p>
+
+        <fieldset class="checkout-shipping" id="checkout-shipping">
           <legend>משלוח *</legend>
           <label class="checkout-shipping__option">
             <input type="radio" name="shipping" value="pickup" required>

@@ -2,11 +2,16 @@
 layout: default
 ---
 
-<div class="container">
+{% assign sold_out = false %}
+{% if page.out_of_stock or page.stock == 0 %}
+  {% assign sold_out = true %}
+{% endif %}
+
+<div class="container" data-product-id="{{ page.slug | default: page.basename }}">
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
-    {% if page.out_of_stock %}
+    {% if sold_out %}
       <div class="out-of-stock-text">אזל מהמלאי</div>
     {% elsif page.limited_stock %}
       <div class="limited-stock-text">מלאי מוגבל</div>
@@ -27,7 +32,7 @@ layout: default
     {{ content }}
   </div>
 
-  {% unless page.out_of_stock %}
+  {% unless sold_out %}
   <div class="store-item-content animate">
   <div class="container">
     <div class="row">
@@ -70,8 +75,17 @@ layout: default
               {% assign vid = variant[0] %}
               {% assign v = variant[1] %}
               <article class="store-variant">
-                {% if v.image %}
-                <img class="store-variant__photo lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+                {% if v.image or v.gallery %}
+                <div class="store-variant__photos">
+                  {% if v.image %}
+                  <img class="store-variant__photo lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+                  {% endif %}
+                  {% if v.gallery %}
+                  {% for gimg in v.gallery %}
+                  <img class="store-variant__photo lazy" data-src="{{ gimg | relative_url }}" alt="{{ v.name }}">
+                  {% endfor %}
+                  {% endif %}
+                </div>
                 {% endif %}
                 <div class="store-variant__info">
                   <h3 class="store-variant__name">{{ v.name }}</h3>
@@ -103,15 +117,24 @@ layout: default
   </div>
   {% endunless %}
 
-  {% if page.image %}
+  {% assign page_image = page.image %}
+  {% if page_image == blank and page.variants %}
+    {% for variant_pair in page.variants %}
+      {% if page_image == blank and variant_pair[1].image and variant_pair[1].image != blank %}
+        {% assign page_image = variant_pair[1].image %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {% if page_image %}
   <div class="store-item-content animate">
   <div class="container">
   <div class="row">
     <div class="col col-12 text-center">
       <div class="page-image animate">
         <div class="store-item-image-container">
-          <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
-          {% if page.out_of_stock %}
+          <img class="lazy" data-src="{{site.baseurl}}{{page_image}}" alt="{{page.title}}">
+          {% if sold_out %}
             <div class="out-of-stock">אזל מהמלאי</div>
           {% elsif page.limited_stock %}
             <div class="limited-stock">מלאי מוגבל</div>

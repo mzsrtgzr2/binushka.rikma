@@ -3,6 +3,7 @@ layout: default
 ---
 
 {% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
 
 <div class="post-head">
   <div class="container">
@@ -53,3 +54,4 @@ layout: default
     </div>
   </article>
 </div>
+{% endif %}

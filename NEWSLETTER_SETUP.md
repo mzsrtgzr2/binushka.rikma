@@ -4,6 +4,18 @@ The newsletter is self-hosted. Issues are files in this repository, the
 subscriber list lives in Vercel Blob, and mail goes out through the studio's own
 Gmail account. There is no newsletter provider and no monthly bill.
 
+## Hiding it
+
+`newsletter.enabled` in `_data/settings.yml` is the public switch. Set it to
+`false` and the next build removes the newsletter from the site: the home
+section, the footer form, the footer link, `/newsletter/`, and every issue
+page. Those addresses redirect home and stay out of the sitemap.
+
+The backoffice at `/admin/newsletter/` is unchanged, and so are signup and
+unsubscribe. A mail that already went out keeps a working removal link, and an
+issue can be prepared while the public pages are hidden. Set it back to `true`
+to show everything again.
+
 ## Why there is no provider
 
 The obvious choice was beehiiv, and it was built that way first. It cannot work:

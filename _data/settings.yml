@@ -59,6 +59,11 @@ hero:
 #-------------------------------
 # Newsletter - on-site copy only. The strings used inside the mails we send
 # live in lib/newsletter/email-copy.mjs. See NEWSLETTER_SETUP.md.
+#
+# enabled is the public switch. false removes the newsletter from the site:
+# the home section, the footer form, the footer link, /newsletter/, and every
+# issue page. The backoffice at /admin/newsletter/ stays, and so do signup and
+# unsubscribe, so mail that already went out still has a working removal link.
 newsletter:
   enabled: true
   locale: he-IL

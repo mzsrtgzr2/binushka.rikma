@@ -58,9 +58,11 @@
                   {% endif %}
                   <ul class="footer__nav-list list-reset">
                     {% for item in site.data.settings.footer_legal__settings.menu__items %}
+                    {% unless item.url == '/newsletter/' and site.data.settings.newsletter.enabled == false %}
                     <li class="footer__nav-item">
                       <a href="{{ item.url | relative_url }}" class="footer__nav-link">{{ item.title }}</a>
                     </li>
+                    {% endunless %}
                     {% endfor %}
                   </ul>
                 </nav>
@@ -86,9 +88,11 @@
               <nav class="footer__legal" aria-label="מסמכי האתר">
                 <ul class="footer__legal-list list-reset">
                   {% for item in site.data.settings.footer_legal__settings.menu__items %}
+                  {% unless item.url == '/newsletter/' and site.data.settings.newsletter.enabled == false %}
                   <li class="footer__legal-item">
                     <a href="{{ item.url | relative_url }}" class="footer__legal-link">{{ item.title }}</a>
                   </li>
+                  {% endunless %}
                   {% endfor %}
                 </ul>
               </nav>

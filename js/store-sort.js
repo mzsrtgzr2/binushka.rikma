@@ -90,8 +90,21 @@
     applySort();
   }
 
-  select.addEventListener('change', applySort);
-  if (categorySelect) categorySelect.addEventListener('change', applyCategoryFilter);
+  function track(name, params) {
+    if (window.Analytics) Analytics.track(name, params);
+  }
+
+  select.addEventListener('change', function () {
+    applySort();
+    track('store_sort', { sort_by: select.value || 'default' });
+  });
+  if (categorySelect) {
+    categorySelect.addEventListener('change', function () {
+      applyCategoryFilter();
+      var visible = grid.querySelectorAll('.store-item:not([hidden])').length;
+      track('store_filter', { category: categorySelect.value || 'all', results: visible });
+    });
+  }
   window.addEventListener('binushka:stock', refresh);
   window.addEventListener('binushka:prices', refresh);
 

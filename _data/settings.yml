@@ -182,3 +182,10 @@ disqus-identifier: anvodstudio-demo # Add your shortname for Disqus Comment. For
 #-------------------------------
 # Google Analytics
 google-analytics: G-G3QBFMD0FQ
+
+
+#-------------------------------
+# Microsoft Clarity (session recordings + heatmaps, free)
+# Paste the project id from clarity.microsoft.com to turn it on.
+# See ANALYTICS.md
+clarity:

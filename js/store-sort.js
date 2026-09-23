@@ -20,6 +20,10 @@
     return Boolean(el.querySelector('.out-of-stock'));
   }
 
+  function isGiftCard(el) {
+    return el.getAttribute('data-product-id') === 'gift-card';
+  }
+
   function syncFromLiveCatalog() {
     if (!window.StoreCart || !StoreCart.catalog) return;
     var items = grid.querySelectorAll('.store-item[data-product-id]');
@@ -39,6 +43,13 @@
     var aOut = isSoldOut(a);
     var bOut = isSoldOut(b);
     if (aOut !== bOut) return aOut ? 1 : -1;
+
+    // Gift card stays last among available products, before sold-out.
+    if (!aOut && !bOut) {
+      var aGift = isGiftCard(a);
+      var bGift = isGiftCard(b);
+      if (aGift !== bGift) return aGift ? 1 : -1;
+    }
 
     if (mode === 'price-asc') {
       var asc = productPrice(a) - productPrice(b);

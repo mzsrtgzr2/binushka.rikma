@@ -23,17 +23,21 @@ layout: default
   <div class="row" id="store-grid">
     {% assign sorted = site.store | sort: 'date' %}
     {% assign store_available = '' | split: '' %}
+    {% assign store_gift_card = '' | split: '' %}
     {% assign store_sold_out = '' | split: '' %}
     {% for item in sorted %}
       {% unless item.hide %}
+        {% assign item_slug = item.slug | default: item.basename %}
         {% if item.out_of_stock or item.stock == 0 %}
           {% assign store_sold_out = store_sold_out | push: item %}
+        {% elsif item_slug == 'gift-card' %}
+          {% assign store_gift_card = store_gift_card | push: item %}
         {% else %}
           {% assign store_available = store_available | push: item %}
         {% endif %}
       {% endunless %}
     {% endfor %}
-    {% assign store_display = store_available | concat: store_sold_out %}
+    {% assign store_display = store_available | concat: store_gift_card | concat: store_sold_out %}
 
     {% for item in store_display %}
       {% assign sold_out = false %}

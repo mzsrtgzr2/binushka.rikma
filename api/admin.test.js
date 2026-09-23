@@ -742,6 +742,7 @@ test('variants product requires at least one priced type', async () => {
   });
   assert.equal(created.status, 400);
   assert.equal(created.json.error, 'צריך לפחות סוג אחד עם מחיר');
+  assert.equal(created.json.field, 'variants');
   fs.rmSync(root, { recursive: true, force: true });
 });
 

@@ -61,6 +61,14 @@
     el.className = 'admin-message admin-message--' + (type || 'info');
   }
 
+  function statusErrorMessage(status) {
+    if (status === 413) return 'הבקשה גדולה מדי — נסי להקטין תמונות או להעלות פחות בבת אחת';
+    if (status === 401) return 'צריך להתחבר מחדש';
+    if (status === 502 || status === 503) return 'השרת לא הצליח לשמור כרגע. נסי שוב בעוד רגע';
+    if (status >= 500) return 'שגיאת שרת בשמירה. נסי שוב בעוד רגע';
+    return 'לא הצלחנו לשמור. בדקי את השדות וניסי שוב';
+  }
+
   function api(method, body) {
     var opts = { method: method, credentials: 'same-origin', headers: {} };
     if (body) {
@@ -78,11 +86,206 @@
           }
         }
         if (!res.ok) {
-          throw new Error(data.error || 'שגיאה');
+          var err = new Error(data.error || statusErrorMessage(res.status));
+          err.field = data.field || null;
+          err.status = res.status;
+          throw err;
         }
         return data;
       });
     });
+  }
+
+  function clearFieldErrors() {
+    if (!editor) return;
+    Array.prototype.forEach.call(editor.querySelectorAll('.form__input--error'), function (el) {
+      el.classList.remove('form__input--error');
+      el.removeAttribute('aria-invalid');
+    });
+    Array.prototype.forEach.call(editor.querySelectorAll('[data-field-error]'), function (el) {
+      el.hidden = true;
+      el.textContent = '';
+    });
+  }
+
+  function setFieldError(el, message) {
+    if (!el || !message) return;
+    el.classList.add('form__input--error');
+    el.setAttribute('aria-invalid', 'true');
+    var group = el.closest('.form__group') || el.parentElement;
+    if (!group) return;
+    var msg = group.querySelector('[data-field-error]');
+    if (!msg) {
+      msg = document.createElement('p');
+      msg.className = 'admin-field-error';
+      msg.setAttribute('data-field-error', '');
+      group.appendChild(msg);
+    }
+    msg.textContent = message;
+    msg.hidden = false;
+  }
+
+  function focusField(el) {
+    if (!el) return;
+    try {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      el.scrollIntoView(true);
+    }
+    window.setTimeout(function () {
+      try {
+        el.focus({ preventScroll: true });
+      } catch (e2) {
+        try {
+          el.focus();
+        } catch (e3) {}
+      }
+    }, 80);
+  }
+
+  function fieldEl(name) {
+    if (name === 'slug') return slugInput;
+    if (name === 'title') return document.getElementById('admin-title');
+    if (name === 'cart_price') return document.getElementById('admin-cart-price');
+    if (name === 'min_price') return document.getElementById('admin-min-price');
+    if (name === 'max_price') return document.getElementById('admin-max-price');
+    if (name === 'stock') return document.getElementById('admin-stock');
+    if (name === 'category') return document.getElementById('admin-category');
+    if (name === 'photos') return photoFiles || photosEl;
+    if (name === 'variants') {
+      return (variantsEl && variantsEl.querySelector('[data-v="price"]')) || addVariantBtn || variantsEl;
+    }
+    return null;
+  }
+
+  function inferFieldFromMessage(message) {
+    var msg = String(message || '');
+    if (/מזהה מוצר|כבר יש מוצר עם המזהה|מוצר לא מוכר/.test(msg)) return 'slug';
+    if (/חסר שם/.test(msg)) return 'title';
+    if (/סוג אחד עם מחיר|תמונות לכל סוג/.test(msg)) return 'variants';
+    if (/גיפט קארד|סכום/.test(msg)) return 'min_price';
+    if (/מחיר לא תקין/.test(msg)) return 'cart_price';
+    if (/מלאי/.test(msg)) return 'stock';
+    if (/קטגוריה/.test(msg)) return 'category';
+    if (/תמונ|jpg|png|webp|gif/.test(msg)) return 'photos';
+    return null;
+  }
+
+  function showEditorError(message, field) {
+    var text = message || 'לא הצלחנו לשמור';
+    var target = fieldEl(field) || fieldEl(inferFieldFromMessage(text));
+    clearFieldErrors();
+    show(editorMessage, text, 'error');
+    if (target) {
+      setFieldError(target, text);
+      focusField(target);
+    }
+  }
+
+  function validateEditor() {
+    var errors = [];
+    var slug = slugInput.value.trim().toLowerCase();
+    if (!slug) {
+      errors.push({ el: slugInput, message: 'חסר מזהה מוצר' });
+    } else if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+      errors.push({
+        el: slugInput,
+        message: 'מזהה מוצר לא תקין (באנגלית, אותיות קטנות ומקפים)',
+      });
+    }
+
+    var titleEl = document.getElementById('admin-title');
+    if (!titleEl.value.trim()) {
+      errors.push({ el: titleEl, message: 'חסר שם למוצר' });
+    }
+
+    var kind = kindSelect.value;
+    if (kind === 'fixed') {
+      var cartPriceEl = document.getElementById('admin-cart-price');
+      if (!(Number(cartPriceEl.value) > 0)) {
+        errors.push({ el: cartPriceEl, message: 'יש להזין מחיר גדול מ-0' });
+      }
+    }
+
+    if (kind === 'variable') {
+      var minEl = document.getElementById('admin-min-price');
+      var maxEl = document.getElementById('admin-max-price');
+      var min = Number(minEl.value);
+      var max = Number(maxEl.value);
+      if (!(min > 0)) {
+        errors.push({ el: minEl, message: 'סכום מינימום חייב להיות גדול מ-0' });
+      }
+      if (!(max >= min) || !(max > 0)) {
+        errors.push({ el: maxEl, message: 'סכום מקסימום חייב להיות לפחות כמו המינימום' });
+      }
+    }
+
+    if (kind === 'variants') {
+      var rows = variantsEl.querySelectorAll('.admin-variant');
+      var pricedCount = 0;
+      Array.prototype.forEach.call(rows, function (row, index) {
+        var priceInput = row.querySelector('[data-v="price"]');
+        var nameInput = row.querySelector('[data-v="name"]');
+        var priceRaw = priceInput ? String(priceInput.value || '').trim() : '';
+        var name = nameInput ? String(nameInput.value || '').trim() : '';
+        var price = Number(priceRaw);
+        var label = 'סוג ' + (index + 1);
+        if (priceRaw !== '' && !(price > 0)) {
+          errors.push({
+            el: priceInput,
+            message: label + ': המחיר חייב להיות מספר שלם גדול מ-0',
+          });
+        } else if (price > 0) {
+          pricedCount += 1;
+        } else if (name) {
+          errors.push({
+            el: priceInput,
+            message: label + ': חסר מחיר (חייב להיות גדול מ-0)',
+          });
+        }
+      });
+      if (!pricedCount) {
+        var firstPrice = variantsEl.querySelector('[data-v="price"]');
+        var already = errors.some(function (item) {
+          return item.el === firstPrice;
+        });
+        if (!already) {
+          errors.push({
+            el: firstPrice || addVariantBtn,
+            message: 'צריך לפחות סוג אחד עם מחיר גדול מ-0',
+          });
+        }
+      }
+    }
+
+    var stockEl = document.getElementById('admin-stock');
+    if (
+      stockEl &&
+      !stockEl.disabled &&
+      String(stockEl.value || '').trim() !== ''
+    ) {
+      var stock = Number(stockEl.value);
+      if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+        errors.push({ el: stockEl, message: 'כמות מלאי לא תקינה (0–99999)' });
+      }
+    }
+
+    return errors;
+  }
+
+  function applyValidationErrors(errors) {
+    clearFieldErrors();
+    if (!errors.length) return;
+    errors.forEach(function (item) {
+      setFieldError(item.el, item.message);
+    });
+    var first = errors[0];
+    var summary =
+      errors.length === 1
+        ? first.message
+        : 'יש ' + errors.length + ' בעיות לתיקון. הראשונה: ' + first.message;
+    show(editorMessage, summary, 'error');
+    focusField(first.el);
   }
 
   function snapshot(list) {
@@ -688,6 +891,7 @@
     renderVariants(product.variants);
     editorDelete.hidden = isNew;
     syncKindFields();
+    clearFieldErrors();
     show(editorMessage, '', '');
     show(photosMessage, '', '');
     updatePreview();
@@ -1375,12 +1579,31 @@
       });
   });
 
-  editor.addEventListener('input', schedulePreview);
-  editor.addEventListener('change', schedulePreview);
+  editor.addEventListener('input', function () {
+    clearFieldErrors();
+    if (editorMessage && !editorMessage.hidden && /admin-message--error/.test(editorMessage.className)) {
+      show(editorMessage, '', '');
+    }
+    schedulePreview();
+  });
+  editor.addEventListener('change', function () {
+    clearFieldErrors();
+    if (editorMessage && !editorMessage.hidden && /admin-message--error/.test(editorMessage.className)) {
+      show(editorMessage, '', '');
+    }
+    schedulePreview();
+  });
 
   editor.addEventListener('submit', function (event) {
     event.preventDefault();
+    var validationErrors = validateEditor();
+    if (validationErrors.length) {
+      applyValidationErrors(validationErrors);
+      editorSave.disabled = false;
+      return;
+    }
     editorSave.disabled = true;
+    clearFieldErrors();
     show(editorMessage, 'שומרת…', 'info');
     api('POST', { action: 'upsert', isNew: editingNew, product: readEditor() })
       .then(function (data) {
@@ -1393,7 +1616,7 @@
         return loadBoard();
       })
       .catch(function (err) {
-        show(editorMessage, err.message || 'לא הצלחנו לשמור', 'error');
+        showEditorError(err.message || 'לא הצלחנו לשמור', err.field || null);
       })
       .finally(function () {
         editorSave.disabled = false;

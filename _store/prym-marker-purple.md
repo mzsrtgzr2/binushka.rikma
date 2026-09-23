@@ -9,7 +9,10 @@ limited_stock: false
 hide: false
 category: embroidery-supplies
 cart_price: 30
+gallery:
+  - /images/store/prym-marker-purple/screenshot-2026-09-23-at-22-03-45-mueh62us.jpg
 ---
 
 בשימוש יום יומי אצלי על בדי הרקמה. מתאים לשימוש על כל הבדים - כותנה, קנבס, חולצות וכו.
 נוח גם לשימוש לתופרות.
+בתמונה השנייה ניתן לראות שימוש בטוש על גבי בד דריל כותנה, פרוייקט של שירן מאמהות רוקמות.

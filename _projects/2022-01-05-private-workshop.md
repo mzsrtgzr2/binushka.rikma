@@ -5,6 +5,9 @@ subtitle: בזמן שמתאים לכם
 image: '/images/gallery/6A0F9AB8-9045-4401-BF34-5DA77DA4C596_1_105_c.jpeg'
 permalink: /projects/private-workshop/
 form_url: https://pay.grow.link/5994080e6dac0eaf4b84f20b39568868-MjYyODg5NQ
+cart_price: 2800
+spots: 1
+price_per: workshop
 ---
 
 ## סדנא פרטית חד פעמית לחברים ומשפחה

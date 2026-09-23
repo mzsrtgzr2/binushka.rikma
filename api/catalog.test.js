@@ -193,6 +193,15 @@ test('bookable workshops from markdown are in the checkout catalog', () => {
   assert.match(workshop.name, /סדנת רקמה של שישי בבוקר/);
 });
 
+test('private workshop is one ₪2800 booking in the cart', () => {
+  const workshop = PRODUCTS['workshop-private-workshop'];
+  assert.equal(workshop.kind, 'workshop');
+  assert.equal(workshop.price, 2800);
+  assert.equal(workshop.stock, 1);
+  assert.equal(workshop.requiresShipping, false);
+  assert.match(workshop.name, /סדנת רקמה פרטית/);
+});
+
 test('mothers morning with Bar is in the cart catalog at ₪330', () => {
   const workshop = PRODUCTS['workshop-bar-14-10'];
   assert.equal(workshop.kind, 'workshop');

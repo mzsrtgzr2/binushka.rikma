@@ -46,6 +46,13 @@
     "shipping": false,
     "stock": 3
   },
+  "workshop-private-workshop": {
+    "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",
+    "price": 2800,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 1
+  },
   "workshop-rehovot-04-12": {
     "name": "סדנת רקמה של שישי בבוקר — ב4.12 ברחובות",
     "price": 330,

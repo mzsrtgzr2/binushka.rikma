@@ -9,9 +9,13 @@ layout: default
 {%- assign sold_out = page.registration_full -%}
 {%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
 {%- assign last_places = page.last_places -%}
+{%- unless page.price_per == 'workshop' -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
+{%- endunless -%}
 {%- assign booking_in_cart = false -%}
 {%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
+{%- assign price_unit = 'למשתתפת' -%}
+{%- if page.price_per == 'workshop' %}{% assign price_unit = 'לסדנה' %}{% endif -%}
 
 <div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop">
 
@@ -31,9 +35,9 @@ layout: default
 
     {% if booking_in_cart %}
       {% if workshop.variants %}
-      <div class="project-price">מ־₪{{ workshop.price }} למשתתפת</div>
+      <div class="project-price">מ־₪{{ workshop.price }} {{ price_unit }}</div>
       {% else %}
-      <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> למשתתפת</div>
+      <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}</div>
       {% endif %}
     {% endif %}
   </div>
@@ -57,11 +61,11 @@ layout: default
           {% unless workshop.variants %}
           <div class="workshop-booking__head">
             <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>
-            <span class="workshop-booking__per">למשתתפת</span>
+            <span class="workshop-booking__per">{{ price_unit }}</span>
           </div>
           {% endunless %}
-          <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil %} hidden{% endif %}>
-            {%- if spots != nil -%}
+          <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' %} hidden{% endif %}>
+            {%- if spots != nil and page.price_per != 'workshop' -%}
               {%- if spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
             {%- endif -%}
           </p>
@@ -85,7 +89,7 @@ layout: default
           </div>
           {% else %}
           <button type="button" class="button button--primary section-button" data-cart-add="{{ workshop_id }}">
-            הרשמי לסדנה זו
+            {% if page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
           </button>
           {% endif %}
           <p class="workshop-booking__note">

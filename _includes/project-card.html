@@ -6,7 +6,9 @@
 {%- assign sold_out = project.registration_full -%}
 {%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
 {%- assign last_places = project.last_places -%}
+{%- unless project.price_per == 'workshop' -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
+{%- endunless -%}
 {%- assign booking_in_cart = false -%}
 {%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
 <article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop">
@@ -39,7 +41,7 @@
         <a href="{{ project.url }}" class="button button--primary project__add">הרשמה לסדנה</a>
         {% else %}
         <button type="button" class="button button--primary project__add" data-cart-add="{{ workshop_id }}">
-          הרשמה לסדנה
+          {% if project.price_per == 'workshop' %}הזמנת סדנה{% else %}הרשמה לסדנה{% endif %}
         </button>
         {% endif %}
       </div>

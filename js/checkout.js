@@ -25,6 +25,56 @@
     }
   }
 
+  function track(method, a, b, c) {
+    if (!window.Analytics || typeof Analytics[method] !== 'function') return;
+    Analytics[method](a, b, c);
+  }
+
+  /* Hebrew labels make the GA4 drop-off reports readable without a lookup. */
+  var FIELD_LABELS = {
+    firstName: 'שם פרטי',
+    lastName: 'שם משפחה',
+    phone: 'טלפון',
+    email: 'אימייל',
+    address: 'כתובת',
+    city: 'עיר',
+    zip: 'מיקוד',
+    country: 'מדינה',
+    shipping: 'משלוח',
+    acceptTerms: 'אישור תקנון',
+  };
+
+  function fieldLabel(name) {
+    return FIELD_LABELS[name] || name;
+  }
+
+  function invalidFields() {
+    var seen = {};
+    var names = [];
+    Array.prototype.forEach.call(form.elements, function (el) {
+      if (!el.name || el.willValidate === false || el.validity.valid || seen[el.name]) return;
+      seen[el.name] = true;
+      names.push(fieldLabel(el.name));
+    });
+    return names;
+  }
+
+  function filledCount() {
+    var seen = {};
+    var filled = 0;
+    Array.prototype.forEach.call(form.elements, function (el) {
+      if (!el.name || seen[el.name]) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (!el.checked) return;
+      } else if (!String(el.value || '').trim()) {
+        return;
+      }
+      seen[el.name] = true;
+      filled += 1;
+    });
+    return filled;
+  }
+
   function showMessage(text, type) {
     if (!messageEl) return;
     messageEl.textContent = text;
@@ -228,23 +278,81 @@
 
   restoreCustomer();
   syncGiftMessageVisibility();
-  form.addEventListener('input', saveCustomer);
-  form.addEventListener('change', function () {
+
+  /* Drop-off state: what the visitor reached before leaving the page. */
+  var formStarted = false;
+  var lastField = '';
+  var submitted = false;
+  var shippingReported = '';
+
+  function noteField(el) {
+    if (!el || !el.name || el.name === 'shipping') return;
+    lastField = fieldLabel(el.name);
+  }
+
+  form.addEventListener('focusin', function (event) {
+    noteField(event.target);
+    if (formStarted) return;
+    formStarted = true;
+    track('track', 'checkout_form_start', {
+      items_count: window.StoreCart ? StoreCart.items().length : 0,
+    });
+  });
+
+  form.addEventListener('input', function (event) {
+    noteField(event.target);
+    saveCustomer();
+  });
+  form.addEventListener('change', function (event) {
+    noteField(event.target);
     syncGiftMessageVisibility();
     saveCustomer();
-    renderSummary();
+    var items = renderSummary();
+    if (event.target && event.target.name === 'shipping') {
+      reportShipping(items, event.target.value);
+    }
   });
+
+  /* "Courier" is pre-selected, so a submit without a change still reports it. */
+  function reportShipping(items, tier) {
+    if (!tier || tier === shippingReported) return;
+    shippingReported = tier;
+    track('addShippingInfo', items, window.StoreCart ? StoreCart.subtotal() : 0, tier);
+  }
   window.addEventListener('binushka:prices', renderSummary);
+
+  /* Fires when someone leaves checkout without reaching the payment page. */
+  window.addEventListener('pagehide', function () {
+    if (submitted) return;
+    var items = window.StoreCart ? StoreCart.items() : [];
+    if (!items.length) return;
+    track('track', 'checkout_abandoned', {
+      currency: 'ILS',
+      value: window.StoreCart ? StoreCart.subtotal() : 0,
+      items_count: items.length,
+      form_started: formStarted,
+      fields_filled: filledCount(),
+      last_field: lastField || 'none',
+    });
+  });
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
     var items = renderSummary();
     if (!items.length) {
       showMessage('הסל ריק', 'error');
+      track('track', 'checkout_error', { stage: 'validation', reason: 'empty_cart' });
       return;
     }
     if (!form.checkValidity()) {
       form.reportValidity();
+      var missing = invalidFields();
+      track('track', 'checkout_error', {
+        stage: 'validation',
+        reason: 'invalid_fields',
+        invalid_fields: missing.join(', '),
+        first_invalid_field: missing[0] || '',
+      });
       return;
     }
 
@@ -277,6 +385,12 @@
       if (data.giftMessage) payload.giftMessage = String(data.giftMessage).trim().slice(0, 200);
     }
     saveCustomer();
+    submitted = true;
+    reportShipping(items, shipping ? data.shipping : 'none');
+    /* GA4 dedupes purchases by transaction_id, so the order needs a stable ref. */
+    var orderRef =
+      'BNK-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    track('addPaymentInfo', items, subtotal + ship, 'grow');
 
     var submitBtn = form.querySelector('[type="submit"]');
     if (submitBtn) {
@@ -313,6 +427,7 @@
             'binushka-last-order-v1',
             JSON.stringify({
               items: items,
+              orderRef: orderRef,
               shipping: data.shipping,
               shippingCost: ship,
               subtotal: subtotal,
@@ -330,7 +445,15 @@
         window.location.href = body.url;
       })
       .catch(function (err) {
+        submitted = false;
         showMessage(err.message || 'לא הצלחנו לפתוח תשלום. נסי שוב.', 'error');
+        track('track', 'checkout_error', {
+          stage: 'payment',
+          reason: 'payment_form_failed',
+          error_message: String((err && err.message) || 'unknown').slice(0, 100),
+          currency: 'ILS',
+          value: subtotal + ship,
+        });
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'המשך לתשלום מאובטח';
@@ -338,7 +461,12 @@
       });
   });
 
-    renderSummary();
+    var initialItems = renderSummary();
+    if (initialItems.length) {
+      track('beginCheckout', initialItems, window.StoreCart ? StoreCart.subtotal() : 0);
+    } else {
+      track('track', 'checkout_error', { stage: 'arrival', reason: 'empty_cart' });
+    }
   }
 
   if (document.readyState === 'loading') {

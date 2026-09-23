@@ -8,6 +8,9 @@
   {% if site.data.settings.google-analytics %}
     {% include google-analytics.html %}
   {% endif %}
+  {% if site.data.settings.clarity %}
+    {% include clarity.html %}
+  {% endif %}
 
   {% include header.html %}
 
@@ -27,6 +30,7 @@
 
   <script src="{{ site.baseurl }}/js/scripts.js"></script>
   <script src="{{ site.baseurl }}/js/common.js"></script>
+  <script src="{{ site.baseurl }}/js/analytics.js" defer></script>
 </body>
 
 </html>

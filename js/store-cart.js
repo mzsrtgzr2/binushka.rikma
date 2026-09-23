@@ -18,6 +18,27 @@
 
   var STORAGE_KEY = 'binushka-store-cart-v1';
 
+  function track(method, a, b, c) {
+    if (!window.Analytics || typeof Analytics[method] !== 'function') return;
+    Analytics[method](a, b, c);
+  }
+
+  /* Describes one cart line for analytics, independent of what is in the cart. */
+  function lineForAnalytics(id, extra, quantity) {
+    var p = byId[id];
+    if (!p) return null;
+    var variant = p.variants && extra ? p.variants[extra] : null;
+    return {
+      id: id,
+      name: variant && p.kind === 'workshop' ? p.name + ' — ' + variant.name : variant ? variant.name : p.name,
+      price: linePrice(p, extra),
+      quantity: quantity || 1,
+      variant: p.variants ? extra : undefined,
+      amount: p.variable ? extra : undefined,
+      kind: p.kind || 'product',
+    };
+  }
+
   function loadCart() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
@@ -169,13 +190,25 @@
     }, 0);
   }
 
+  /* Reports why an add failed, so lost demand shows up next to add_to_cart. */
+  function blocked(id, extra, reason) {
+    var line = lineForAnalytics(id, extra, 1);
+    if (line) track('track', 'add_to_cart_blocked', {
+      item_id: line.id,
+      item_name: line.name,
+      item_variant: line.variant || (line.amount ? '₪' + line.amount : undefined),
+      reason: reason,
+    });
+    return false;
+  }
+
   function addToCart(id, delta, extra) {
     var p = byId[id];
     if (!p) return false;
-    if (!hasPerVariantStock(p) && (p.outOfStock || p.stock === 0)) return false;
-    if (p.variable && !validGiftAmount(p, extra)) return false;
-    if (p.variants && !validVariant(p, extra)) return false;
-    if (hasPerVariantStock(p) && availableStock(p, extra) <= 0) return false;
+    if (!hasPerVariantStock(p) && (p.outOfStock || p.stock === 0)) return blocked(id, extra, 'out_of_stock');
+    if (p.variable && !validGiftAmount(p, extra)) return blocked(id, extra, 'invalid_amount');
+    if (p.variants && !validVariant(p, extra)) return blocked(id, extra, 'no_variant_selected');
+    if (hasPerVariantStock(p) && availableStock(p, extra) <= 0) return blocked(id, extra, 'out_of_stock');
     var key = lineKey(id, extra);
     var cart = loadCart();
     var next = (cart[key] || 0) + delta;
@@ -184,11 +217,13 @@
       var max = availableStock(p, extra);
       var each = variantPlaces(p, extra);
       var others = productPlacesInCart(cart, id, hasPerVariantStock(p) ? extra : null) - (cart[key] || 0) * each;
-      if (Number.isFinite(max) && others + next * each > max) return false;
+      if (Number.isFinite(max) && others + next * each > max) return blocked(id, extra, 'stock_limit');
       cart[key] = next;
     }
     saveCart(cart);
     renderWidget();
+    var line = lineForAnalytics(id, extra, Math.abs(delta));
+    if (line) track(delta > 0 ? 'addToCart' : 'removeFromCart', line);
     return true;
   }
 
@@ -534,6 +569,8 @@
 
   function openPanel() {
     if (!els.panel) return;
+    var cart = loadCart();
+    track('viewCart', cartItems(cart), cartTotal(cart));
     els.panel.hidden = false;
     els.backdrop.hidden = false;
     els.toggle.setAttribute('aria-expanded', 'true');
@@ -669,9 +706,11 @@
       if (action === 'dec') addToCart(parsed.id, -1, cartExtra(parsed));
       if (action === 'remove') {
         var cart = loadCart();
+        var removed = lineForAnalytics(parsed.id, cartExtra(parsed), cart[key] || 1);
         delete cart[key];
         saveCart(cart);
         renderWidget();
+        if (removed) track('removeFromCart', removed);
       }
     });
   }
@@ -686,7 +725,17 @@
   if (els.backdrop) els.backdrop.addEventListener('click', closePanel);
   if (els.checkout) {
     els.checkout.addEventListener('click', function (e) {
-      if (cartCount(loadCart()) === 0) e.preventDefault();
+      var cart = loadCart();
+      if (cartCount(cart) === 0) {
+        e.preventDefault();
+        return;
+      }
+      /* Paired with begin_checkout on /checkout/ to expose the drop between them. */
+      track('track', 'cart_checkout_click', {
+        currency: 'ILS',
+        value: cartTotal(cart),
+        items_count: cartCount(cart),
+      });
     });
   }
 

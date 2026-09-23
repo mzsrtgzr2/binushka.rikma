@@ -193,10 +193,11 @@
       if (!cards.length) return;
       Analytics.viewItemList(cards.map(cardData).filter(Boolean), list.name);
 
+      /* Cards link to the product from both the image and the title. */
       cards.forEach(function (card) {
-        var link = card.querySelector('a[href]');
-        if (!link) return;
-        link.addEventListener('click', function () {
+        card.addEventListener('click', function (e) {
+          var link = e.target.closest && e.target.closest('a[href]');
+          if (!link || !card.contains(link)) return;
           Analytics.selectItem(cardData(card), list.name);
         });
       });

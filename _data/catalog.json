@@ -94,6 +94,23 @@
     "name": "ערכת רקמה מפנקת",
     "price": 210
   },
+  "oval-hoop": {
+    "name": "חישוק אובאלי",
+    "variants": {
+      "16x10cm": {
+        "name": "16X10 cm",
+        "price": 35,
+        "image": "/images/store/oval-hoop/screenshot-2026-09-23-at-18-49-00-muea6x4t.jpg",
+        "description": ""
+      },
+      "21x13cm": {
+        "name": "21x13cm",
+        "price": 35,
+        "image": "/images/store/oval-hoop/screenshot-2026-09-23-at-18-49-38-muea6x4u.jpg",
+        "description": ""
+      }
+    }
+  },
   "portrait": {
     "name": "מסגרת רקומה",
     "price": 250

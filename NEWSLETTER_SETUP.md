@@ -30,10 +30,12 @@ the list and mails everyone, then commits the result back onto the issue.
 
 ### 1. Subscriber storage
 
-In the Vercel dashboard open **Storage → Create → Blob**, and connect the store
-to this project. Vercel adds `BLOB_READ_WRITE_TOKEN` to the environment itself.
-Hobby includes 1 GB and 2,000 writes a month, which is far more than a mailing
-list of this size consumes.
+In the Vercel dashboard open **Storage → Create → Blob**, choose **Private**,
+and connect the store to this project. A private store does not serve files
+from their URL, which is what you want for a list of addresses. Vercel adds
+`BLOB_READ_WRITE_TOKEN` and `BLOB_STORE_ID` itself. The webhook key it also
+adds is unused. Hobby includes 1 GB and 2,000 writes a month, which is far
+more than a mailing list of this size consumes.
 
 ### 2. Signing secret
 

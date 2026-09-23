@@ -9,5 +9,7 @@ limited_stock: false
 hide: false
 category: embroidery-supplies
 cart_price: 30
+gallery:
+  - /images/store/water-marker/screenshot-2026-09-23-at-23-08-59-muejds6g.jpg
 ---
 

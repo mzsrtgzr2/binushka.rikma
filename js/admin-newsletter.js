@@ -41,12 +41,22 @@
   var sendTestBtn = document.getElementById('issue-send-test');
   var sendBtn = document.getElementById('issue-send');
   var sendMessageEl = document.getElementById('issue-send-message');
+  var recipientsEl = document.getElementById('issue-recipients');
+  var recipientsSummaryEl = document.getElementById('issue-recipients-summary');
+  var recipientsFilterEl = document.getElementById('issue-recipients-filter');
+  var recipientsListEl = document.getElementById('issue-recipients-list');
+  var recipientsRemovedEl = document.getElementById('issue-recipients-removed');
   if (!loginForm || !board || !editor) return;
 
   var issues = [];
   var current = null;
   var state = {};
   var previewTimer;
+  // Addresses dropped from the send that is about to go out. They stay on the
+  // subscriber list; the next issue starts with everyone again.
+  var omitted = {};
+  var recipientFilter = '';
+  var recipientsLoading = false;
 
   /* Committed path -> the data URL the browser already has. An image is only
      served from /images/... after the next site build, so until then the
@@ -492,6 +502,13 @@
   /* ------------------------------------------------------------------ editor */
 
   function openEditor(issue) {
+    var nextSlug = issue && issue.slug;
+    var prevSlug = current && current.slug;
+    if (nextSlug !== prevSlug) {
+      omitted = {};
+      recipientFilter = '';
+      if (recipientsFilterEl) recipientsFilterEl.value = '';
+    }
     current = issue;
 
     var sent = issue && issue.status === 'sent';
@@ -508,10 +525,8 @@
     linkBox.hidden = true;
     editorDelete.hidden = !issue || sent;
     var emails = overrideEmails();
-    sendBtn.disabled = sent || !state.canSend || Boolean(emails && !emails.length);
     sendTestBtn.disabled = !issue || !state.canSend;
-    if (!sendBtn.getAttribute('data-label')) sendBtn.setAttribute('data-label', sendBtn.textContent);
-    sendBtn.textContent = emails && emails.length ? 'שליחה לכתובות הבדיקה' : sendBtn.getAttribute('data-label');
+    syncSendButton();
 
     if (sent) {
       sendStateEl.textContent = 'נשלח ב־' + formatDate(issue.sent_at) +
@@ -535,10 +550,137 @@
     listView.hidden = true;
     editor.hidden = false;
     updatePreview();
+    loadRecipients(nextSlug);
+  }
+
+  function fullRecipients() {
+    return Array.isArray(state.recipients) ? state.recipients : null;
+  }
+
+  function selectedRecipients() {
+    var all = fullRecipients();
+    if (!all) return null;
+    return all.filter(function (email) { return !omitted[email]; });
+  }
+
+  function syncSendButton() {
+    if (!sendBtn) return;
+    var sent = current && current.status === 'sent';
+    var emails = overrideEmails();
+    var selected = selectedRecipients();
+    var all = fullRecipients();
+    var noneLeft = Array.isArray(selected) && selected.length === 0;
+    sendBtn.disabled = !current || sent || !state.canSend || Boolean(emails && !emails.length) || recipientsLoading || noneLeft;
+
+    if (!sendBtn.getAttribute('data-label')) sendBtn.setAttribute('data-label', sendBtn.textContent);
+    var trimmed = all && selected && selected.length !== all.length;
+    if (trimmed) sendBtn.textContent = 'שליחה אל ' + selected.length;
+    else if (emails && emails.length) sendBtn.textContent = 'שליחה לכתובות הבדיקה';
+    else sendBtn.textContent = sendBtn.getAttribute('data-label');
+  }
+
+  function recipientRow(email, restore) {
+    return (
+      '<li class="admin-recipients__item">' +
+      '<span class="admin-recipients__email">' + escapeHtml(email) + '</span>' +
+      '<button type="button" ' + (restore ? 'data-restore' : 'data-omit') + '="' + escapeHtml(email) + '">' +
+      (restore ? 'החזרה' : 'הסרה') +
+      '</button></li>'
+    );
+  }
+
+  function renderRecipients() {
+    if (!recipientsEl) return;
+    var all = fullRecipients();
+    if (!all) {
+      if (!recipientsLoading) recipientsEl.hidden = true;
+      return;
+    }
+
+    recipientsEl.hidden = false;
+    var selected = selectedRecipients();
+    var removed = all.filter(function (email) { return omitted[email]; });
+    var query = recipientFilter;
+    var visible = selected.filter(function (email) { return !query || email.indexOf(query) !== -1; });
+
+    if (recipientsLoading) {
+      recipientsSummaryEl.textContent = 'טוענת את הרשימה...';
+    } else if (!all.length) {
+      recipientsSummaryEl.textContent = 'אין כתובות ברשימה.';
+    } else if (!selected.length) {
+      recipientsSummaryEl.textContent = 'כולן הוסרו מהשליחה הזו. הן נשארות ברשימה לפעם הבאה.';
+    } else if (removed.length) {
+      recipientsSummaryEl.textContent = 'יישלח אל ' + selected.length + ' מתוך ' + all.length +
+        '. הסרה כאן חלה רק על השליחה הזו — הכתובת נשארת ברשימה.';
+    } else {
+      recipientsSummaryEl.textContent = 'יישלח אל ' + selected.length +
+        (selected.length === 1 ? ' כתובת.' : ' כתובות.') +
+        ' אפשר להסיר כתובת מהשליחה הזו בלי להוריד אותה מהרשימה.';
+    }
+
+    recipientsFilterEl.hidden = all.length < 6;
+    recipientsListEl.innerHTML = visible.map(function (email) { return recipientRow(email, false); }).join('');
+    if (query && !visible.length && selected.length) {
+      recipientsListEl.innerHTML = '<li class="admin-recipients__item"><span class="admin-hint">אין כתובת שמתאימה לסינון.</span></li>';
+    }
+    recipientsRemovedEl.hidden = !removed.length;
+    recipientsRemovedEl.innerHTML = removed.map(function (email) { return recipientRow(email, true); }).join('');
+  }
+
+  function loadRecipients(slug) {
+    var sent = current && current.status === 'sent';
+    var emails = overrideEmails();
+    var canEdit = Boolean(current && current.slug && !sent && state.canSend && !(emails && !emails.length));
+    if (!canEdit) {
+      recipientsLoading = false;
+      state.recipients = null;
+      if (recipientsEl) recipientsEl.hidden = true;
+      syncSendButton();
+      return;
+    }
+
+    recipientsLoading = true;
+    state.recipients = null;
+    recipientsEl.hidden = false;
+    recipientsSummaryEl.textContent = 'טוענת את הרשימה...';
+    recipientsListEl.innerHTML = '';
+    recipientsRemovedEl.hidden = true;
+    recipientsFilterEl.hidden = true;
+    syncSendButton();
+
+    api('POST', { action: 'recipients' })
+      .then(function (data) {
+        if (!current || current.slug !== slug) return;
+        recipientsLoading = false;
+        if (data.blocked) {
+          state.recipients = null;
+          recipientsEl.hidden = true;
+        } else {
+          state.recipients = data.recipients || [];
+          var known = {};
+          state.recipients.forEach(function (email) { known[email] = true; });
+          Object.keys(omitted).forEach(function (email) { if (!known[email]) delete omitted[email]; });
+          renderRecipients();
+        }
+        syncSendButton();
+      })
+      .catch(function () {
+        if (!current || current.slug !== slug) return;
+        recipientsLoading = false;
+        state.recipients = null;
+        recipientsEl.hidden = false;
+        recipientsSummaryEl.textContent = 'לא הצלחנו לטעון את הכתובות. השליחה תצא לכל הרשימה.';
+        recipientsListEl.innerHTML = '';
+        recipientsRemovedEl.hidden = true;
+        syncSendButton();
+      });
   }
 
   function closeEditor() {
     current = null;
+    omitted = {};
+    recipientFilter = '';
+    recipientsLoading = false;
     editor.hidden = true;
     listView.hidden = false;
     show(editorMessage, '');
@@ -760,6 +902,12 @@
     }
 
     if (!sentTo.length && !failed.length) lines.push('לא נשלח לאף כתובת.');
+    var skipped = data.omitted || [];
+    if (skipped.length) {
+      lines.push('לא נשלח הפעם:');
+      skipped.forEach(function (email) { lines.push(email); });
+      lines.push('הכתובות האלה נשארו ברשימה.');
+    }
     if (data.remaining) lines.push('נשארו ' + data.remaining + ' — אפשר ללחוץ שוב כדי להמשיך.');
     if (data.override) lines.push('הרשימה הרשומה לא קיבלה את המייל. הגיליון נשאר טיוטה.');
     return lines.join('\n');
@@ -800,6 +948,30 @@
       });
   });
 
+  if (recipientsEl) {
+    recipientsEl.addEventListener('click', function (event) {
+      var button = event.target.closest('button');
+      if (!button) return;
+      var drop = button.getAttribute('data-omit');
+      var restore = button.getAttribute('data-restore');
+      if (drop) omitted[drop] = true;
+      else if (restore) delete omitted[restore];
+      else return;
+      renderRecipients();
+      syncSendButton();
+    });
+  }
+
+  if (recipientsFilterEl) {
+    recipientsFilterEl.addEventListener('input', function () {
+      recipientFilter = recipientsFilterEl.value.trim().toLowerCase();
+      renderRecipients();
+    });
+    recipientsFilterEl.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') event.preventDefault();
+    });
+  }
+
   sendBtn.addEventListener('click', function () {
     if (!current) return;
 
@@ -809,19 +981,48 @@
       return;
     }
 
-    var total = state.subscribers || 0;
-    var question = emails
-      ? 'לשלוח את "' + current.title + '" רק אל:\n' + emails.join('\n') + '\n\nהרשימה הרשומה לא תקבל את המייל, והגיליון יישאר טיוטה.'
-      : 'לשלוח את "' + current.title + '" אל ' + total + ' נמענים? אי אפשר לבטל.';
+    var selected = selectedRecipients();
+    var all = fullRecipients();
+    if (selected && !selected.length) {
+      reportSend('אין כתובת בשליחה הזו.', 'error');
+      return;
+    }
+
+    var removedCount = all && selected ? all.length - selected.length : 0;
+    var question;
+    if (selected) {
+      var lines = ['לשלוח את "' + current.title + '" אל:'];
+      if (selected.length <= 12) selected.forEach(function (email) { lines.push(email); });
+      else lines.push(selected.length + ' נמענים');
+      if (removedCount) {
+        lines.push('');
+        lines.push(removedCount === 1
+          ? 'כתובת אחת הוסרה מהשליחה הזו ונשארה ברשימה.'
+          : removedCount + ' כתובות הוסרו מהשליחה הזו ונשארו ברשימה.');
+      }
+      lines.push('');
+      lines.push(emails
+        ? 'הרשימה הרשומה לא תקבל את המייל, והגיליון יישאר טיוטה.'
+        : 'אי אפשר לבטל.');
+      question = lines.join('\n');
+    } else {
+      var total = state.subscribers || 0;
+      question = 'לשלוח את "' + current.title + '" אל ' + total + ' נמענים? אי אפשר לבטל.';
+    }
     if (!window.confirm(question)) return;
+
+    var omit = [];
+    if (all) all.forEach(function (email) { if (omitted[email]) omit.push(email); });
 
     var release = holdButton(sendBtn, 'שולחת...');
     reportSend(
-      emails ? 'שולחת אל: ' + emails.join(', ') : 'שולחת אל ' + total + ' נמענים. זה יכול לקחת כמה דקות.',
+      selected
+        ? (selected.length <= 12 ? 'שולחת אל: ' + selected.join(', ') : 'שולחת אל ' + selected.length + ' נמענים.')
+        : 'שולחת אל ' + (state.subscribers || 0) + ' נמענים. זה יכול לקחת כמה דקות.',
       'info'
     );
 
-    api('POST', { action: 'send', slug: current.slug })
+    api('POST', { action: 'send', slug: current.slug, omit: omit })
       .then(function (data) {
         var failed = data.failed && data.failed.length;
         var count = data.sent || 0;
@@ -829,6 +1030,7 @@
           ? 'נשלח אל ' + count + (count === 1 ? ' כתובת בדיקה.' : ' כתובות בדיקה.')
           : 'נשלח אל ' + count + (count === 1 ? ' נמען.' : ' נמענים.');
 
+        omitted = {};
         return load().then(function () {
           var saved = issues.filter(function (item) { return item.slug === current.slug; })[0];
           openEditor(saved || null);
@@ -842,7 +1044,7 @@
         release();
         // A successful send reloads the issue as sent and leaves the button off.
         // A failure has to hand it back, since holdButton disabled it.
-        if (current && current.status !== 'sent' && state.canSend) sendBtn.disabled = false;
+        syncSendButton();
       });
   });
 

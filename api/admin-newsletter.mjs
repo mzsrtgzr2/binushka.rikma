@@ -13,7 +13,7 @@ import { readJsonBody, sendJson } from '../lib/newsletter/http.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
 import * as mailer from '../lib/newsletter/mailer.mjs';
 import { MediaError, prepareUpload } from '../lib/newsletter/media.mjs';
-import { recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
+import { applyOmit, recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
 import * as store from '../lib/newsletter/subscribers.mjs';
 import * as tokens from '../lib/newsletter/tokens.mjs';
 import { issueUrl, siteUrl, unsubscribeUrl } from '../lib/newsletter/urls.mjs';
@@ -99,6 +99,44 @@ export const delivery = {
 };
 
 /**
+ * Who a "send to the list" would reach right now.
+ *
+ * The same answer is shown in the backoffice and used when the send actually
+ * runs, so removing an address there cannot drift from what goes out.
+ */
+async function recipientsForSend(env) {
+  const overridden = recipientOverride(env);
+  if (overridden) return { override: true, blocked: false, recipients: overridden };
+
+  if (env.VERCEL_ENV === 'preview' && env.NEWSLETTER_ALLOW_PREVIEW_SEND !== '1') {
+    return { override: false, blocked: true, recipients: null };
+  }
+
+  if (!store.isConfigured()) return { override: false, blocked: false, recipients: null };
+
+  const records = await store.all();
+  return {
+    override: false,
+    blocked: false,
+    recipients: records.map((record) => record.email),
+  };
+}
+
+async function handleRecipients(req, res, env) {
+  const listed = await recipientsForSend(env);
+  if (listed.blocked) {
+    return sendJson(res, 200, { ok: true, blocked: true, recipients: [] });
+  }
+  if (!listed.recipients) return sendJson(res, 503, { ok: false, code: 'not_configured' });
+
+  return sendJson(res, 200, {
+    ok: true,
+    recipients: listed.recipients,
+    ...(listed.override ? { override: true } : {}),
+  });
+}
+
+/**
  * Sends to everyone on the list, then records the result on the issue.
  *
  * A test send goes to one address and changes nothing, so the layout can be
@@ -123,24 +161,23 @@ async function handleSend(req, res, env, body) {
 
   let recipients;
   let override = false;
+  let omitted = [];
   if (testTo) {
     recipients = [testTo];
   } else {
-    const overridden = recipientOverride(env);
-    if (overridden) {
-      // Set, even when it parsed to nothing. An empty override must not fall
-      // through to the real subscribers.
-      override = true;
-      recipients = overridden;
-    } else if (env.VERCEL_ENV === 'preview' && env.NEWSLETTER_ALLOW_PREVIEW_SEND !== '1') {
+    const listed = await recipientsForSend(env);
+    if (listed.blocked) {
       // A preview usually points at the same blob store as production, so its
       // list is the real one. Mail cannot be recalled, so a full send from a
       // preview has to be asked for deliberately; a test send stays open.
       return sendJson(res, 403, { ok: false, code: 'preview_send_blocked' });
-    } else {
-      if (!store.isConfigured()) return sendJson(res, 503, { ok: false, code: 'not_configured' });
-      recipients = (await store.all()).map((record) => record.email);
     }
+    if (!listed.recipients) return sendJson(res, 503, { ok: false, code: 'not_configured' });
+
+    override = listed.override;
+    const chosen = applyOmit(listed.recipients, body.omit);
+    recipients = chosen.recipients;
+    omitted = chosen.omitted;
   }
 
   if (!recipients.length) return sendJson(res, 422, { ok: false, code: 'no_recipients' });
@@ -193,6 +230,7 @@ async function handleSend(req, res, env, body) {
     // short; clicking send again picks up where it stopped.
     remaining: result.remaining.length,
     ...(override ? { override: true } : {}),
+    ...(omitted.length ? { omitted } : {}),
   });
 }
 
@@ -252,6 +290,7 @@ export default async function handler(req, res) {
     if (body.action === 'upload') return await handleUpload(req, res, env, body);
     if (body.action === 'delete') return await handleDelete(req, res, env, body);
     if (body.action === 'send') return await handleSend(req, res, env, body);
+    if (body.action === 'recipients') return await handleRecipients(req, res, env);
   } catch (error) {
     console.error('newsletter admin failed', error);
     return sendJson(res, 502, { ok: false, code: 'failed', error: error?.message || 'failed' });

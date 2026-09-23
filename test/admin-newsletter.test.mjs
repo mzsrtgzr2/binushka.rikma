@@ -17,7 +17,7 @@ import { Readable } from 'node:stream';
 import handler, { delivery } from '../api/admin-newsletter.mjs';
 import * as repo from '../lib/admin/repo.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
-import { recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
+import { applyOmit, recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
 
 const realSendIssue = delivery.sendIssue;
 
@@ -398,6 +398,16 @@ test('production does not apply the override, even when the variable is set', ()
   assert.equal(recipientOverrideIgnored({ VERCEL_ENV: 'preview', NEWSLETTER_RECIPIENT_OVERRIDE: 'me@example.test' }), false);
 });
 
+test('removing an address only drops people already on the list', () => {
+  const chosen = applyOmit(
+    ['a@example.test', 'b@example.test'],
+    ['B@example.test', 'stranger@example.test', 'not-an-email']
+  );
+
+  assert.deepEqual(chosen.recipients, ['a@example.test']);
+  assert.deepEqual(chosen.omitted, ['b@example.test']);
+});
+
 test('a preview with an override sends only to those addresses and leaves the issue a draft', async () => {
   draftIssue('טיוטה-עם-עקיפה');
   process.env.VERCEL_ENV = 'preview';
@@ -426,6 +436,76 @@ test('a preview with an override sends only to those addresses and leaves the is
   const saved = issues.parse('טיוטה-עם-עקיפה', fs.readFileSync(issueFile('טיוטה-עם-עקיפה'), 'utf8'));
   assert.equal(saved.status, 'draft');
   assert.equal(saved.sent_at, '');
+});
+
+test('a send can leave some addresses out without removing them from the list', async () => {
+  draftIssue('טיוטה-בלי-חלק');
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'a@example.test, b@example.test, c@example.test';
+  enableMailer();
+
+  let seen = null;
+  delivery.sendIssue = async ({ recipients }) => {
+    seen = recipients.slice();
+    return { sent: recipients.slice(), failed: [], remaining: [] };
+  };
+
+  const res = await call({
+    body: {
+      action: 'send',
+      slug: 'טיוטה-בלי-חלק',
+      omit: ['B@example.test', 'stranger@example.test'],
+    },
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(seen, ['a@example.test', 'c@example.test']);
+  assert.deepEqual(res.body.sentTo, ['a@example.test', 'c@example.test']);
+  assert.deepEqual(res.body.omitted, ['b@example.test']);
+});
+
+test('leaving everyone out refuses the send', async () => {
+  draftIssue('טיוטה-בלי-אף-אחת');
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'a@example.test';
+  enableMailer();
+
+  let called = false;
+  delivery.sendIssue = async () => {
+    called = true;
+    return { sent: [], failed: [], remaining: [] };
+  };
+
+  const res = await call({
+    body: { action: 'send', slug: 'טיוטה-בלי-אף-אחת', omit: ['a@example.test'] },
+  });
+
+  assert.equal(res.statusCode, 422);
+  assert.equal(res.body.code, 'no_recipients');
+  assert.equal(called, false);
+});
+
+test('the backoffice lists the addresses a send would use', async () => {
+  process.env.VERCEL_ENV = 'preview';
+  process.env.NEWSLETTER_RECIPIENT_OVERRIDE = 'a@example.test, b@example.test';
+  enableMailer();
+
+  const res = await call({ body: { action: 'recipients' } });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.override, true);
+  assert.deepEqual(res.body.recipients, ['a@example.test', 'b@example.test']);
+});
+
+test('a blocked preview does not reveal the subscriber list', async () => {
+  process.env.VERCEL_ENV = 'preview';
+  enableMailer();
+
+  const res = await call({ body: { action: 'recipients' } });
+
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.blocked, true);
+  assert.deepEqual(res.body.recipients, []);
 });
 
 test('an override that contains no address does not fall through to the real list', async () => {

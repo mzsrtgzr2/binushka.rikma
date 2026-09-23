@@ -254,6 +254,11 @@ is set and is not applied.
 After any send, test or full, the panel lists the addresses that accepted the
 message and the addresses that failed, with the reason.
 
+Before a send to the list, the same panel lists every address that would
+receive it. Removing one skips it for this issue only. The address stays
+subscribed, and the next issue starts with the full list again. The request
+cannot add an address that is not already on that list.
+
 Test sends to a single address always work, including on a preview that has no
 override. `NEWSLETTER_ALLOW_PREVIEW_SEND=1` is the escape hatch that mails the
 real list from a preview. Leave it unset. An override, when set, wins over it.

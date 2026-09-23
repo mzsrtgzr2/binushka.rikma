@@ -78,7 +78,7 @@
       submitEmail(options.url, payload)
         .then(function (result) {
           if (result.body && result.body.ok) {
-            setStatus(status, options.successMessage(result.body), 'success');
+            setStatus(status, options.successMessage(result.body, email), 'success');
             form.reset();
             return;
           }
@@ -118,20 +118,36 @@
       bindForm(form, {
         url: endpoints.unsubscribe,
         busyLabel: text.sending,
-        successMessage: function () { return text.unsubscribed; }
+        successMessage: function (body, submitted) {
+          return removedMessage((body && body.email) || submitted);
+        }
       });
     });
   }
 
+  /* {email} is filled with the address that was just removed. A missing or
+     odd value falls back to the generic wording, so a crafted query string
+     cannot put arbitrary text in the banner. */
+  function removedMessage(email) {
+    var template = text.unsubscribed || '';
+    var address = typeof email === 'string' ? email.trim() : '';
+    if (!/^[^\s@]+@[^\s@.]+\.[^\s@]+$/.test(address) || address.length > 254) {
+      address = 'הכתובת שלך';
+    }
+    return template.replace('{email}', address);
+  }
+
   /* Someone who clicked the link in an issue footer is already removed by the
-     time they land here; the redirect just needs to say so. */
+     time they land here; the redirect carries the address so the banner can
+     name it. */
   function initUnsubscribeNotice() {
-    if (window.location.search.indexOf('unsubscribed=1') === -1) return;
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('unsubscribed') !== '1') return;
 
     var form = document.querySelector('[data-newsletter-unsubscribe-form]');
     if (!form) return;
 
-    setStatus(form.querySelector('[data-newsletter-status]'), text.unsubscribed, 'success');
+    setStatus(form.querySelector('[data-newsletter-status]'), removedMessage(params.get('email')), 'success');
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 

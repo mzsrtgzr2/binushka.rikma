@@ -4,7 +4,9 @@ import { readToken } from '../../lib/newsletter/tokens.mjs';
 
 const isRateLimited = createRateLimiter({ windowMs: 60_000, max: 5 });
 
-const DONE_PATH = '/newsletter/?unsubscribed=1';
+function donePath(email) {
+  return `/newsletter/?unsubscribed=1&email=${encodeURIComponent(email)}`;
+}
 
 function tokenFrom(req) {
   const url = new URL(req.url || '/', 'http://localhost');
@@ -42,7 +44,7 @@ export default async function handler(req, res) {
     if (email) await drop(email);
 
     res.statusCode = 302;
-    res.setHeader('Location', email ? DONE_PATH : '/newsletter/');
+    res.setHeader('Location', email ? donePath(email) : '/newsletter/');
     res.setHeader('Cache-Control', 'no-store');
     return res.end();
   }
@@ -78,5 +80,5 @@ export default async function handler(req, res) {
 
   // Answers the same whether or not the address was on the list, so this
   // cannot be used to find out who subscribed.
-  return sendJson(res, 200, { ok: true });
+  return sendJson(res, 200, { ok: true, email });
 }

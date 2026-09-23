@@ -995,3 +995,94 @@ hide: false
   assert.equal(catalog['flower-bag'].name, 'תיק בד לזר פרחים');
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+test('variants product stores stock per type', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'hoops',
+        title: 'חישוקים',
+        kind: 'variants',
+        variants: [
+          { id: 'small', name: 'קטן', price: 35, stock: 2 },
+          { id: 'large', name: 'גדול', price: 45, stock: 0 },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const md = fs.readFileSync(path.join(root, '_store', 'hoops.md'), 'utf8');
+  assert.match(md, /small:[\s\S]*stock: 2/);
+  assert.match(md, /large:[\s\S]*stock: 0/);
+  assert.doesNotMatch(md, /^stock:/m);
+  const page = require('./admin-store').parsePage('hoops', md);
+  assert.equal(page.variants[0].stock, 2);
+  assert.equal(page.variants[1].stock, 0);
+  assert.equal(page.out_of_stock, false);
+  assert.equal(page.stock, null);
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.hoops.variants.small.stock, 2);
+  assert.equal(catalog.hoops.variants.large.stock, 0);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('decrementInventory and assertInventory honor per-type stock', async () => {
+  const root = foxRoot();
+  const store = require('./admin-store');
+  fs.writeFileSync(
+    path.join(root, '_store', 'hoops.md'),
+    `---
+title: חישוקים
+price: ₪35
+out_of_stock: false
+limited_stock: false
+hide: false
+variants:
+  small:
+    name: קטן
+    price: 35
+    stock: 2
+  large:
+    name: גדול
+    price: 45
+    stock: 1
+---
+
+body
+`
+  );
+  const oversell = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'small', quantity: 3 },
+  ]);
+  assert.match(oversell.error, /מלאי/);
+
+  const ok = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'small', quantity: 1 },
+    { id: 'hoops', variant: 'large', quantity: 1 },
+  ]);
+  assert.equal(ok.ok, true);
+
+  const result = await admin.decrementInventory(authEnv(root), [
+    { slug: 'hoops', variant: 'small', quantity: 1 },
+  ]);
+  assert.deepEqual(result.changed, ['hoops']);
+  const page = store.parsePage(
+    'hoops',
+    fs.readFileSync(path.join(root, '_store', 'hoops.md'), 'utf8')
+  );
+  assert.equal(page.variants.find((v) => v.id === 'small').stock, 1);
+  assert.equal(page.variants.find((v) => v.id === 'large').stock, 1);
+
+  const book = await admin.publicInventory(authEnv(root));
+  assert.equal(book.products.hoops.variants.small.stock, 1);
+  assert.equal(book.products.hoops.variants.large.stock, 1);
+  assert.equal(book.products.hoops.stock, null);
+  fs.rmSync(root, { recursive: true, force: true });
+});

@@ -529,7 +529,7 @@ async function saveWorkshopFlags(env, updates) {
 
 /**
  * After a paid checkout starts successfully, reduce tracked stock quantities.
- * purchases: [{ slug|id, quantity }]
+ * purchases: [{ slug|id, quantity, variant? }]
  */
 async function decrementInventory(env, purchases) {
   const target = writeTarget(env);
@@ -540,25 +540,35 @@ async function decrementInventory(env, purchases) {
   for (const row of purchases || []) {
     const slug = String((row && (row.slug || row.id)) || '').trim();
     const quantity = Number(row && row.quantity);
+    const variant = String((row && row.variant) || '').trim();
     if (!store.SLUG_RE.test(slug) || !Number.isInteger(quantity) || quantity < 1) continue;
     const workshopSlug = workshopSlugFromId(slug);
     if (workshopSlug) workshopTotals.set(workshopSlug, (workshopTotals.get(workshopSlug) || 0) + quantity);
-    else storeTotals.set(slug, (storeTotals.get(slug) || 0) + quantity);
+    else {
+      const key = variant ? `${slug}::${variant}` : slug;
+      const prev = storeTotals.get(key) || { slug, variant: variant || '', quantity: 0 };
+      prev.quantity += quantity;
+      storeTotals.set(key, prev);
+    }
   }
   if (!storeTotals.size && !workshopTotals.size) return { target, changed: [] };
 
   const files = [];
   const changed = [];
+  const storeRaw = new Map();
 
   if (storeTotals.size) {
     const loaded = await readStoreMap(env);
     if (loaded.error) return loaded;
-    for (const [slug, quantity] of storeTotals) {
-      const raw = loaded.rawBySlug[slug];
+    for (const { slug, variant, quantity } of storeTotals.values()) {
+      const raw = storeRaw.get(slug) || loaded.rawBySlug[slug];
       if (!raw) continue;
-      const updated = store.decrementPageStock(raw, slug, quantity);
+      const updated = store.decrementPageStock(raw, slug, quantity, variant || undefined);
       if (!updated) continue;
-      changed.push(slug);
+      storeRaw.set(slug, updated);
+      if (!changed.includes(slug)) changed.push(slug);
+    }
+    for (const [slug, updated] of storeRaw) {
       if (target === 'local') {
         fs.writeFileSync(path.join(localRoot(env), '_store', `${slug}.md`), updated);
       } else {
@@ -615,17 +625,31 @@ async function assertInventory(env, items) {
   for (const row of items || []) {
     const slug = String((row && (row.id || row.slug)) || '').trim();
     const quantity = Number(row && row.quantity);
+    const variant = String((row && row.variant) || '').trim();
     if (!store.SLUG_RE.test(slug) || !Number.isInteger(quantity) || quantity < 1) continue;
     const workshopSlug = workshopSlugFromId(slug);
     if (workshopSlug) workshopNeeded.set(workshopSlug, (workshopNeeded.get(workshopSlug) || 0) + quantity);
-    else needed.set(slug, (needed.get(slug) || 0) + quantity);
+    else {
+      const key = variant ? `${slug}::${variant}` : slug;
+      const prev = needed.get(key) || { slug, variant, quantity: 0 };
+      prev.quantity += quantity;
+      needed.set(key, prev);
+    }
   }
 
-  for (const [slug, quantity] of needed) {
+  for (const { slug, variant, quantity } of needed.values()) {
     const raw = rawBySlug[slug];
     if (!raw) continue;
     const page = store.parsePage(slug, raw);
     if (!store.tracksInventory(page)) continue;
+    if (store.variantsTrackStock(page.variants)) {
+      const row = (page.variants || []).find((item) => item && item.id === variant);
+      if (!row || row.stock == null) continue;
+      if (row.stock < quantity) {
+        return { error: `אין מספיק מלאי עבור ${row.name || page.title || slug}` };
+      }
+      continue;
+    }
     if (page.out_of_stock || page.stock < quantity) {
       return { error: `אין מספיק מלאי עבור ${page.title || slug}` };
     }
@@ -700,6 +724,16 @@ async function publicInventory(env) {
     if (page.title) row.name = page.title;
     const price = Number(page.cart_price);
     if (price > 0) row.price = price;
+    if (store.variantsTrackStock(page.variants)) {
+      row.variants = {};
+      (page.variants || []).forEach((item) => {
+        if (!item || !item.id) return;
+        row.variants[item.id] = {
+          stock: item.stock == null ? null : Number(item.stock),
+        };
+      });
+      row.stock = null;
+    }
     products[slug] = row;
   }
 

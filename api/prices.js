@@ -29,6 +29,13 @@ function mergeInventory(book, inventory) {
     }
     if (typeof live.outOfStock === 'boolean') row.outOfStock = live.outOfStock;
     if (typeof live.limitedStock === 'boolean') row.limitedStock = live.limitedStock;
+    if (live.variants && typeof live.variants === 'object') {
+      row.variants = { ...(row.variants || {}) };
+      Object.keys(live.variants).forEach((vid) => {
+        const src = live.variants[vid] || {};
+        row.variants[vid] = { ...(row.variants[vid] || {}), ...src };
+      });
+    }
     products[id] = row;
   });
   return products;

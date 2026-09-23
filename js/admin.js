@@ -243,6 +243,17 @@
             message: label + ': חסר מחיר (חייב להיות גדול מ-0)',
           });
         }
+        var stockInput = row.querySelector('[data-v="stock"]');
+        var stockRaw = stockInput ? String(stockInput.value || '').trim() : '';
+        if (stockRaw !== '') {
+          var stock = Number(stockRaw);
+          if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+            errors.push({
+              el: stockInput,
+              message: label + ': כמות מלאי לא תקינה (0–99999)',
+            });
+          }
+        }
       });
       if (!pricedCount) {
         var firstPrice = variantsEl.querySelector('[data-v="price"]');
@@ -262,6 +273,7 @@
     if (
       stockEl &&
       !stockEl.disabled &&
+      kind !== 'variants' &&
       String(stockEl.value || '').trim() !== ''
     ) {
       var stock = Number(stockEl.value);
@@ -341,6 +353,17 @@
   function statusLabel(p) {
     if (p.hide) return 'מוסתר';
     if (p.out_of_stock || p.stock === 0) return 'אזל';
+    if (p.kind === 'variants' && p.variants && p.variants.length) {
+      var tracked = p.variants.filter(function (v) {
+        return v && v.stock != null && v.stock !== '';
+      });
+      if (tracked.length) {
+        var total = tracked.reduce(function (sum, v) {
+          return sum + Number(v.stock);
+        }, 0);
+        return 'מלאי: ' + total;
+      }
+    }
     if (p.stock != null && p.stock !== '') return 'מלאי: ' + p.stock;
     if (p.limited_stock) return 'מלאי מוגבל';
     return 'במלאי';
@@ -424,7 +447,7 @@
           '<input type="number" class="admin-stock__input" data-stock min="0" step="1" dir="ltr" ' +
           'placeholder="—"' +
           (p.stock != null && p.stock !== '' ? ' value="' + escapeHtml(p.stock) + '"' : '') +
-          (p.kind === 'variable' || p.kind === 'content' ? ' disabled' : '') +
+          (p.kind === 'variable' || p.kind === 'content' || p.kind === 'variants' ? ' disabled' : '') +
           '></label>' +
           '<label class="admin-check"><input type="checkbox" data-flag="out_of_stock"' +
           (p.out_of_stock ? ' checked' : '') +
@@ -623,6 +646,13 @@
       '">' +
       '</div>' +
       '<div class="form__group">' +
+      '<label class="form__label">מלאי</label>' +
+      '<input class="form__input" data-v="stock" type="number" min="0" step="1" dir="ltr" placeholder="ריק = בלי מעקב" value="' +
+      (row.stock != null && row.stock !== '' ? escapeHtml(row.stock) : '') +
+      '">' +
+      '<p class="admin-hint">כמות מהסוג הזה שאפשר לקנות.</p>' +
+      '</div>' +
+      '<div class="form__group">' +
       '<label class="form__label">מזהה פנימי</label>' +
       '<input class="form__input" data-v="id" dir="ltr" placeholder="regular" value="' +
       escapeHtml(row.id || '') +
@@ -701,10 +731,12 @@
   function readVariants() {
     return Array.prototype.map.call(variantsEl.querySelectorAll('.admin-variant'), function (row) {
       var images = readVariantImages(row);
+      var stockRaw = ((row.querySelector('[data-v="stock"]') || {}).value || '').trim();
       return {
         id: (row.querySelector('[data-v="id"]') || {}).value,
         name: (row.querySelector('[data-v="name"]') || {}).value,
         price: (row.querySelector('[data-v="price"]') || {}).value,
+        stock: stockRaw === '' ? null : stockRaw,
         images: images,
         image: images[0] || '',
         gallery: images.slice(1),
@@ -846,8 +878,13 @@
     });
     editor.classList.toggle('admin-editor--variants', kind === 'variants');
     var stockInput = document.getElementById('admin-stock');
+    var stockGroup = stockInput && stockInput.closest('.form__group');
     if (stockInput) {
-      stockInput.disabled = kind === 'variable' || kind === 'content' || slugInput.value === 'gift-card';
+      stockInput.disabled =
+        kind === 'variable' || kind === 'content' || kind === 'variants' || slugInput.value === 'gift-card';
+    }
+    if (stockGroup) {
+      stockGroup.hidden = kind === 'variants';
     }
   }
 
@@ -884,7 +921,10 @@
     document.getElementById('admin-stock').value =
       product.stock != null && product.stock !== '' ? product.stock : '';
     document.getElementById('admin-stock').disabled =
-      product.kind === 'variable' || product.kind === 'content' || product.slug === 'gift-card';
+      product.kind === 'variable' ||
+      product.kind === 'content' ||
+      product.kind === 'variants' ||
+      product.slug === 'gift-card';
     syncEditorOutOfStock(product.stock, Boolean(product.out_of_stock));
     document.getElementById('admin-limited-stock').checked = Boolean(product.limited_stock);
     document.getElementById('admin-hide').checked = Boolean(product.hide);
@@ -897,16 +937,48 @@
     updatePreview();
   }
 
+  function variantsHaveStock(rows) {
+    return (rows || []).some(function (row) {
+      return row && row.stock != null && String(row.stock).trim() !== '';
+    });
+  }
+
   function readEditor() {
     var kind = kindSelect.value;
+    var variants = readVariants();
     var stockRaw = document.getElementById('admin-stock').value;
     var stock =
-      kind === 'variable' || kind === 'content' || slugInput.value.trim().toLowerCase() === 'gift-card'
+      kind === 'variable' ||
+      kind === 'content' ||
+      kind === 'variants' ||
+      slugInput.value.trim().toLowerCase() === 'gift-card'
         ? null
         : stockRaw;
+    if (kind === 'variants' && !variantsHaveStock(variants) && String(stockRaw || '').trim() !== '') {
+      stock = stockRaw;
+    }
     var outOfStock = document.getElementById('admin-out-of-stock').checked;
     if (stock === 0 || stock === '0') outOfStock = true;
     else if (stock != null && stock !== '' && Number(stock) > 0) outOfStock = false;
+    if (kind === 'variants' && variantsHaveStock(variants)) {
+      var stocks = variants
+        .map(function (row) {
+          if (row.stock == null || String(row.stock).trim() === '') return null;
+          return Number(row.stock);
+        })
+        .filter(function (n) {
+          return n != null && Number.isInteger(n);
+        });
+      if (stocks.length && stocks.every(function (n) {
+        return n === 0;
+      })) {
+        outOfStock = true;
+      } else if (stocks.some(function (n) {
+        return n > 0;
+      })) {
+        outOfStock = false;
+      }
+    }
     return {
       slug: slugInput.value.trim().toLowerCase(),
       title: document.getElementById('admin-title').value,
@@ -921,7 +993,7 @@
       min_price: document.getElementById('admin-min-price').value,
       max_price: document.getElementById('admin-max-price').value,
       presets: parsePresets(document.getElementById('admin-presets').value),
-      variants: readVariants(),
+      variants: variants,
       body: document.getElementById('admin-body').value,
       stock: stock,
       out_of_stock: outOfStock,

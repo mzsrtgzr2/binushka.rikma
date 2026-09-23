@@ -181,14 +181,42 @@ function yamlStock(yaml, ...keys) {
   return null;
 }
 
+/** True when at least one type tracks its own quantity. */
+function variantsTrackStock(variants) {
+  if (Array.isArray(variants)) {
+    return variants.some((row) => row && row.stock != null);
+  }
+  if (!variants || typeof variants !== 'object') return false;
+  return Object.keys(variants).some((id) => variants[id] && variants[id].stock != null);
+}
+
 function tracksInventory(page) {
   if (!page) return false;
   if (page.kind === 'variable' || page.kind === 'content' || page.in_cart === false) return false;
+  if (variantsTrackStock(page.variants)) return true;
   return page.stock != null;
+}
+
+function variantStockList(variants) {
+  if (Array.isArray(variants)) {
+    return variants.map((row) => (row && row.stock != null ? Number(row.stock) : null));
+  }
+  if (!variants || typeof variants !== 'object') return [];
+  return Object.keys(variants).map((id) => {
+    const row = variants[id];
+    return row && row.stock != null ? Number(row.stock) : null;
+  });
 }
 
 function applyStockFlags(input) {
   const next = { ...input };
+  if (next.kind === 'variants' && variantsTrackStock(next.variants)) {
+    next.stock = null;
+    const stocks = variantStockList(next.variants).filter((n) => n != null);
+    if (stocks.length && stocks.every((n) => n === 0)) next.out_of_stock = true;
+    else if (stocks.some((n) => n > 0)) next.out_of_stock = false;
+    return next;
+  }
   if (next.stock === 0) next.out_of_stock = true;
   else if (next.stock != null && Number(next.stock) > 0) next.out_of_stock = false;
   return next;
@@ -305,7 +333,10 @@ function parseVariantsYaml(yaml) {
       const key = field[1];
       const value = unquote(field[2]);
       if (key === 'price') out[currentId].price = Number(value) || 0;
-      else if (key === 'gallery') out[currentId].gallery = [];
+      else if (key === 'stock') {
+        const parsed = parseStock(value);
+        if (!parsed.error && parsed.stock != null) out[currentId].stock = parsed.stock;
+      } else if (key === 'gallery') out[currentId].gallery = [];
       else out[currentId][key] = value;
     }
   }
@@ -323,6 +354,9 @@ function setYamlVariants(yaml, variants) {
     lines.push(`  ${id}:`);
     lines.push(`    name: ${formatYamlScalar(row.name || id)}`);
     lines.push(`    price: ${Number(row.price) || 0}`);
+    if (row.stock != null && Number.isInteger(Number(row.stock))) {
+      lines.push(`    stock: ${Number(row.stock)}`);
+    }
     if (images[0]) lines.push(`    image: ${formatYamlScalar(images[0])}`);
     if (images.length > 1) {
       lines.push('    gallery:');
@@ -596,7 +630,8 @@ function variantsToArray(variants) {
   return Object.keys(variants).map((id) => {
     const row = variants[id] || {};
     const images = variantPhotoList(row);
-    return {
+    const stockParsed = parseStock(row.stock);
+    const item = {
       id,
       name: row.name || id,
       price: Number(row.price) || 0,
@@ -604,7 +639,9 @@ function variantsToArray(variants) {
       gallery: images.slice(1),
       images,
       description: row.description || '',
+      stock: stockParsed.error ? null : stockParsed.stock,
     };
+    return item;
   });
 }
 
@@ -625,12 +662,14 @@ function variantsFromArray(rows) {
     const price = Number(row && row.price);
     if (!(price > 0)) return;
     const images = variantPhotoList(row);
+    const stockParsed = parseStock(row && row.stock);
     out[unique] = {
       name: String((row && row.name) || unique).trim() || unique,
       price,
       image: images[0] || '',
       description: String((row && row.description) || '').trim(),
     };
+    if (!stockParsed.error && stockParsed.stock != null) out[unique].stock = stockParsed.stock;
     if (images.length > 1) out[unique].gallery = images.slice(1);
   });
   return out;
@@ -668,6 +707,18 @@ function parsePage(slug, raw) {
     .trim();
   const gallery = parseGallery(yaml);
   const stock = yamlStock(yaml);
+  const perVariant = kind === 'variants' && variantsTrackStock(variants);
+  const variantStocks = perVariant
+    ? variantStockList(variants).filter((n) => n != null)
+    : [];
+  const soldOut =
+    yamlValue(yaml, 'out_of_stock') === true ||
+    stock === 0 ||
+    (perVariant && variantStocks.length > 0 && variantStocks.every((n) => n === 0));
+  const limited =
+    yamlValue(yaml, 'limited_stock') === true ||
+    isLowStock(stock) ||
+    (perVariant && !soldOut && variantStocks.some((n) => isLowStock(n)));
   return {
     slug,
     title: yamlValue(yaml, 'title') || slug,
@@ -676,10 +727,10 @@ function parsePage(slug, raw) {
     price_display: yamlValue(yaml, 'price') || '',
     body: parts.body.replace(/^\n/, ''),
     category: normalizeCategory(yamlValue(yaml, 'category')),
-    out_of_stock: yamlValue(yaml, 'out_of_stock') === true || stock === 0,
-    limited_stock: yamlValue(yaml, 'limited_stock') === true || isLowStock(stock),
+    out_of_stock: soldOut,
+    limited_stock: limited,
     hide: yamlValue(yaml, 'hide') === true,
-    stock,
+    stock: perVariant ? null : stock,
     layout: yamlValue(yaml, 'layout') || '',
     hero_image: heroImage,
     gallery,
@@ -844,6 +895,19 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
   if (variants && !Array.isArray(variants) && typeof variants === 'object') {
     variants = variantsToArray(variants);
   }
+  if (Array.isArray(variants)) {
+    const normalizedVariants = [];
+    for (const row of variants) {
+      if (!row || typeof row !== 'object') {
+        normalizedVariants.push(row);
+        continue;
+      }
+      const variantStock = parseStock(row.stock);
+      if (variantStock.error) return { error: variantStock.error, field: 'variants' };
+      normalizedVariants.push({ ...row, stock: variantStock.stock });
+    }
+    variants = normalizedVariants;
+  }
 
   const stockParsed = parseStock(raw && raw.stock);
   if (stockParsed.error) return { error: stockParsed.error, field: 'stock' };
@@ -854,6 +918,7 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     return { error: 'קטגוריה לא מוכרת', field: 'category' };
   }
 
+  const perVariantStock = kind === 'variants' && variantsTrackStock(variants);
   const input = applyStockFlags({
     slug,
     title,
@@ -863,7 +928,7 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     photos: Array.isArray(raw && raw.photos) ? uniquePhotos(raw.photos) : undefined,
     body: raw && raw.body != null ? String(raw.body) : '',
     category,
-    stock: stockParsed.stock,
+    stock: perVariantStock ? null : stockParsed.stock,
     out_of_stock: Boolean(raw && raw.out_of_stock),
     limited_stock: Boolean(raw && raw.limited_stock),
     hide: Boolean(raw && raw.hide),
@@ -889,12 +954,33 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
 /**
  * Reduce tracked stock for purchased lines. Returns updated markdown or null if unchanged.
  * Variable/content products and products without a stock field are skipped.
+ * When types track their own stock, pass `variantId` to decrement that type.
  */
-function decrementPageStock(raw, slug, quantity) {
+function decrementPageStock(raw, slug, quantity, variantId) {
   const qty = Number(quantity);
   if (!Number.isInteger(qty) || qty < 1) return null;
   const page = parsePage(slug, raw);
   if (!tracksInventory(page)) return null;
+
+  if (variantsTrackStock(page.variants)) {
+    const id = String(variantId || '').trim();
+    if (!id) return null;
+    let changed = false;
+    const nextVariants = (page.variants || []).map((row) => {
+      if (!row || row.id !== id || row.stock == null) return row;
+      const nextStock = Math.max(0, Number(row.stock) - qty);
+      if (nextStock === row.stock) return row;
+      changed = true;
+      return { ...row, stock: nextStock };
+    });
+    if (!changed) return null;
+    return applyPage(raw, {
+      ...page,
+      variants: nextVariants,
+      stock: null,
+    });
+  }
+
   const nextStock = Math.max(0, Number(page.stock) - qty);
   if (nextStock === page.stock) return null;
   return applyPage(raw, {
@@ -1131,6 +1217,7 @@ module.exports = {
   parseStock,
   yamlStock,
   tracksInventory,
+  variantsTrackStock,
   applyStockFlags,
   decrementPageStock,
   prettyCatalog,

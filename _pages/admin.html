@@ -129,7 +129,7 @@ noindex: true
 
       <fieldset class="admin-fieldset" data-kind-fields="variants" hidden>
         <legend>סוגים ומחירים</legend>
-        <p class="admin-hint">כל סוג הוא טופס רגיל כמו שאר השדות למעלה: שם, מחיר ומזהה, תיאור ארוך נוח לעריכה, והעלאת תמונה מהמחשב כמו בתמונות הראשיות.</p>
+        <p class="admin-hint">כל סוג הוא טופס רגיל כמו שאר השדות למעלה: שם, מחיר, מלאי ומזהה, תיאור ארוך נוח לעריכה, והעלאת תמונה מהמחשב כמו בתמונות הראשיות.</p>
         <div class="admin-variants" id="admin-variants"></div>
         <button type="button" class="button" id="admin-add-variant">הוסיפי סוג</button>
       </fieldset>
@@ -143,7 +143,7 @@ noindex: true
       <div class="form__group">
         <label class="form__label" for="admin-stock">מלאי (כמות)</label>
         <input class="form__input" id="admin-stock" name="stock" type="number" min="0" step="1" dir="ltr" placeholder="ריק = בלי מעקב">
-        <p class="admin-hint">מספר הפריטים שאפשר לקנות. 0 = אזל, 1–3 = מלאי מוגבל. ריק משאיר את הסימונים הידניים למטה.</p>
+        <p class="admin-hint">מספר הפריטים שאפשר לקנות. 0 = אזל, 1–3 = מלאי מוגבל. ריק משאיר את הסימונים הידניים למטה. במוצר מסוג ״כמה סוגים״ המלאי מוגדר לכל סוג בנפרד.</p>
       </div>
 
       <div class="admin-flags">

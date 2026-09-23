@@ -824,9 +824,10 @@
     api('POST', { action: 'send', slug: current.slug })
       .then(function (data) {
         var failed = data.failed && data.failed.length;
+        var count = data.sent || 0;
         var lead = data.override
-          ? 'נשלח אל ' + (data.sent || 0) + ' כתובות בדיקה.'
-          : 'נשלח אל ' + (data.sent || 0) + ' נמענים.';
+          ? 'נשלח אל ' + count + (count === 1 ? ' כתובת בדיקה.' : ' כתובות בדיקה.')
+          : 'נשלח אל ' + count + (count === 1 ? ' נמען.' : ' נמענים.');
 
         return load().then(function () {
           var saved = issues.filter(function (item) { return item.slug === current.slug; })[0];

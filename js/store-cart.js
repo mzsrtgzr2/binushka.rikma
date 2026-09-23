@@ -101,12 +101,15 @@
           id: parsed.id,
           key: key,
           quantity: cart[key],
-          name: variant ? variant.name : p.name,
+          name: variant && p.kind === 'workshop' ? p.name + ' — ' + variant.name : variant ? variant.name : p.name,
           price: price,
           amount: p.variable ? parsed.amount : undefined,
           variant: parsed.variant || undefined,
+          places: variantPlaces(p, parsed.variant),
           url: p.url,
           image: (variant && variant.image) || p.image || '',
+          kind: p.kind || 'product',
+          requiresShipping: p.requiresShipping !== false,
         };
       })
       .filter(Boolean);
@@ -125,11 +128,30 @@
     return Infinity;
   }
 
+  function variantPlaces(p, variantId) {
+    if (!p || p.kind !== 'workshop') return 1;
+    var row = p.variants && variantId ? p.variants[variantId] : null;
+    var n = Number(row && row.places);
+    return n > 0 && Number.isInteger(n) ? n : 1;
+  }
+
+  function linePlaces(p, parsed, qty) {
+    return variantPlaces(p, parsed && parsed.variant) * (qty || 0);
+  }
+
   function productQtyInCart(cart, id) {
     return Object.keys(cart).reduce(function (sum, key) {
       var parsed = parseCartKey(key);
       if (parsed.id !== id) return sum;
       return sum + (cart[key] || 0);
+    }, 0);
+  }
+
+  function productPlacesInCart(cart, id) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      if (parsed.id !== id) return sum;
+      return sum + linePlaces(byId[parsed.id], parsed, cart[key] || 0);
     }, 0);
   }
 
@@ -144,8 +166,9 @@
     if (next < 1) delete cart[key];
     else {
       var max = availableStock(p);
-      var others = productQtyInCart(cart, id) - (cart[key] || 0);
-      if (Number.isFinite(max) && others + next > max) return false;
+      var each = variantPlaces(p, extra);
+      var others = productPlacesInCart(cart, id) - (cart[key] || 0) * each;
+      if (Number.isFinite(max) && others + next * each > max) return false;
       cart[key] = next;
     }
     saveCart(cart);
@@ -161,14 +184,21 @@
       var p = byId[parsed.id];
       if (!p) return;
       var max = availableStock(p);
+      var each = variantPlaces(p, parsed.variant);
       if (max <= 0) {
         delete cart[key];
         changed = true;
         return;
       }
-      if (Number.isFinite(max) && cart[key] > max) {
-        cart[key] = max;
-        changed = true;
+      if (Number.isFinite(max)) {
+        var maxPkgs = Math.floor(max / each);
+        if (maxPkgs <= 0) {
+          delete cart[key];
+          changed = true;
+        } else if (cart[key] > maxPkgs) {
+          cart[key] = maxPkgs;
+          changed = true;
+        }
       }
     });
     // Second pass: shared stock across variant lines for the same product
@@ -184,21 +214,24 @@
       if (!Number.isFinite(max)) return;
       var keys = byProduct[id];
       var total = keys.reduce(function (sum, key) {
-        return sum + (cart[key] || 0);
+        return sum + linePlaces(p, parseCartKey(key), cart[key] || 0);
       }, 0);
       if (total <= max) return;
       var remaining = max;
       keys.forEach(function (key) {
-        if (remaining <= 0) {
+        var parsed = parseCartKey(key);
+        var each = variantPlaces(p, parsed.variant);
+        if (remaining < each) {
           delete cart[key];
           changed = true;
           return;
         }
-        if (cart[key] > remaining) {
-          cart[key] = remaining;
+        var maxPkgs = Math.floor(remaining / each);
+        if (cart[key] > maxPkgs) {
+          cart[key] = maxPkgs;
           changed = true;
         }
-        remaining -= cart[key];
+        remaining -= (cart[key] || 0) * each;
       });
     });
     if (changed) saveCart(cart);
@@ -223,7 +256,13 @@
     if (!soldOut && !limited) return;
     var el = document.createElement('div');
     el.className = soldOut ? 'out-of-stock-text' : 'limited-stock-text';
-    el.textContent = soldOut ? 'אזל מהמלאי' : 'מלאי מוגבל';
+    el.textContent = soldOut
+      ? host && host.closest('[data-product-kind="workshop"]')
+        ? 'אין מקומות פנויים'
+        : 'אזל מהמלאי'
+      : host && host.closest('[data-product-kind="workshop"]')
+        ? 'מקומות אחרונים'
+        : 'מלאי מוגבל';
     var price = host.querySelector('.store-item-price, [data-product-price]');
     if (price && price.parentNode === host) host.insertBefore(el, price);
     else host.appendChild(el);
@@ -234,7 +273,16 @@
       var p = byId[id];
       var soldOut = Boolean(p.outOfStock) || p.stock === 0;
       var limited = Boolean(p.limitedStock) && !soldOut;
-      var overlayLabel = soldOut ? 'אזל מהמלאי' : limited ? 'מלאי מוגבל' : '';
+      var workshop = p.kind === 'workshop';
+      var overlayLabel = soldOut
+        ? workshop
+          ? 'אין מקומות פנויים'
+          : 'אזל מהמלאי'
+        : limited
+          ? workshop
+            ? 'מקומות אחרונים'
+            : 'מלאי מוגבל'
+          : '';
       var overlayClass = soldOut ? 'out-of-stock' : 'limited-stock';
 
       document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
@@ -249,8 +297,10 @@
 
       document.querySelectorAll('[data-cart-add="' + id + '"]').forEach(function (btn) {
         if (id === 'gift-card') return;
-        btn.disabled = soldOut;
-        if (soldOut) btn.setAttribute('aria-disabled', 'true');
+        var need = variantPlaces(p, btn.getAttribute('data-cart-variant'));
+        var disabled = soldOut || (typeof p.stock === 'number' && p.stock < need);
+        btn.disabled = disabled;
+        if (disabled) btn.setAttribute('aria-disabled', 'true');
         else btn.removeAttribute('aria-disabled');
       });
     });
@@ -260,7 +310,9 @@
     if (!triggerEl || !triggerEl.classList) return;
     var prev = triggerEl.getAttribute('data-label-orig') || triggerEl.textContent;
     triggerEl.setAttribute('data-label-orig', prev);
-    triggerEl.textContent = 'אין מספיק מלאי';
+    var product = byId[triggerEl.getAttribute('data-cart-add')];
+    triggerEl.textContent =
+      product && product.kind === 'workshop' ? 'אין מספיק מקומות' : 'אין מספיק מלאי';
     triggerEl.classList.add('is-stock-limit');
     window.setTimeout(function () {
       triggerEl.textContent = triggerEl.getAttribute('data-label-orig') || prev;
@@ -488,9 +540,14 @@
       li.className = 'store-cart__line';
       var p = byId[item.id];
       var max = availableStock(p);
-      var atMax = Number.isFinite(max) && productQtyInCart(cart, item.id) >= max;
+      var each = variantPlaces(p, item.variant);
+      var atMax = Number.isFinite(max) && productPlacesInCart(cart, item.id) + each > max;
       var stockHintText = atMax
-        ? 'יש רק ' + max + ' במלאי — אי אפשר להוסיף עוד'
+        ? item.kind === 'workshop'
+          ? max === 1
+            ? 'נשאר מקום אחד לסדנה הזו'
+            : 'נשארו רק ' + max + ' מקומות לסדנה הזו'
+          : 'יש רק ' + max + ' במלאי — אי אפשר להוסיף עוד'
         : '';
       var thumb = item.image
         ? '<img class="store-cart__thumb" src="' + escapeHtml(item.image) + '" alt="">'

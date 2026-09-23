@@ -6,7 +6,12 @@
  * POST /api/v1/payments/form  (get payment form)
  */
 
-const { buildOrder, applyVariantNote, applyGiftPacking } = require('./catalog');
+const {
+  buildOrder,
+  applyVariantNote,
+  applyWorkshopNote,
+  applyGiftPacking,
+} = require('./catalog');
 const { resolveMorningEnv, morningHosts, getMorningToken } = require('./morning');
 const admin = require('./admin');
 
@@ -157,7 +162,12 @@ function buildIncomeRows(lines, incomeVatType) {
 function inventoryPurchases(order) {
   return (order && order.lines ? order.lines : [])
     .filter((line) => line && line.id && Number(line.quantity) > 0)
-    .map((line) => ({ slug: line.id, quantity: Number(line.quantity) }));
+    .map((line) => {
+      const packs = Number(line.quantity);
+      const places = Number(line.places);
+      const each = Number.isInteger(places) && places > 0 ? places : 1;
+      return { slug: line.id, quantity: packs * each };
+    });
 }
 
 async function reserveInventory(env, order) {
@@ -247,7 +257,10 @@ async function handler(req, res) {
 
   const body = req.body || {};
   const order = applyGiftPacking(
-    applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
+    applyWorkshopNote(
+      applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
+      body.participantsNote
+    ),
     body
   );
   if (order.error) {

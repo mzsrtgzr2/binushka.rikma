@@ -93,10 +93,14 @@
     }
 
     if (shippingEl) {
-      var label = SHIPPING_LABELS[order.shipping] || order.shipping || 'משלוח';
-      var shipCost = Number(order.shippingCost) || 0;
-      shippingEl.hidden = false;
-      shippingEl.textContent = label + ': ₪' + shipCost;
+      if (order.shipping === 'none') {
+        shippingEl.hidden = true;
+      } else {
+        var label = SHIPPING_LABELS[order.shipping] || order.shipping || 'משלוח';
+        var shipCost = Number(order.shippingCost) || 0;
+        shippingEl.hidden = false;
+        shippingEl.textContent = label + ': ₪' + shipCost;
+      }
     }
     if (totalEl) totalEl.textContent = '₪' + (Number(order.total) || 0);
 

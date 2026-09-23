@@ -78,6 +78,30 @@
     letter-spacing: 1.6px;
     text-transform: uppercase;
   }
+
+  .project__footer {
+    margin-top: 16px;
+  }
+
+  .project__price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--brand-color);
+  }
+
+  .project__add {
+    margin-top: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .project__sold-out {
+    display: inline-block;
+    margin-top: 12px;
+    color: #ff0000;
+    font-weight: 700;
+  }
 }
 
 .menu-border{

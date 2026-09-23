@@ -15,6 +15,8 @@
         "price": {{ meta.price | default: 0 }},
         "image": {{ item.image | relative_url | jsonify }},
         "url": {{ item.url | relative_url | jsonify }},
+        "kind": "product",
+        "requiresShipping": true,
         "outOfStock": {% if item.out_of_stock or item.stock == 0 %}true{% else %}false{% endif %},
         {%- if item.stock != nil and item.stock != "" -%}
         "stock": {{ item.stock }},
@@ -37,6 +39,34 @@
             {%- assign vfirst = false -%}
           {%- endfor -%}
         }
+        {%- endif -%}
+      }
+      {%- assign first = false -%}
+    {%- endif -%}
+{%- endfor -%}
+{%- assign workshops = site.data.workshops -%}
+{%- for project in site.projects -%}
+    {%- assign wslug = project.slug | default: project.basename | remove: '.md' -%}
+    {%- assign wid = 'workshop-' | append: wslug -%}
+    {%- assign wmeta = workshops[wid] -%}
+    {%- if wmeta and wmeta.enabled != false and project.hide != true -%}
+      {%- unless first -%},{%- endunless -%}
+      {
+        "id": {{ wid | jsonify }},
+        "name": {{ wmeta.name | jsonify }},
+        "price": {{ wmeta.price | default: 0 }},
+        "image": {{ project.image | relative_url | jsonify }},
+        "url": {{ project.url | relative_url | jsonify }},
+        "kind": "workshop",
+        "requiresShipping": false,
+        "stock": {% if wmeta.stock != nil %}{{ wmeta.stock }}{% else %}null{% endif %},
+        "outOfStock": {% if project.registration_full or wmeta.stock == 0 %}true{% else %}false{% endif %},
+        "variable": false,
+        "minPrice": 0,
+        "maxPrice": 0
+        {%- if wmeta.variants -%}
+        ,
+        "variants": {{ wmeta.variants | jsonify }}
         {%- endif -%}
       }
       {%- assign first = false -%}

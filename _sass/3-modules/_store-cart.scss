@@ -330,3 +330,35 @@ body.store-cart-open {
     max-height: min(70vh, calc(100vh - 220px));
   }
 }
+
+/* Stock limit feedback: shown when the cart cannot take another unit or place */
+.store-cart-toast {
+  position: fixed;
+  inset-inline: 16px;
+  bottom: 24px;
+  z-index: 1300;
+  margin: 0 auto;
+  max-width: 420px;
+  padding: 12px 18px;
+  border-radius: $global-radius;
+  background: var(--dark);
+  color: var(--white);
+  font-size: 16px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.button.is-sold-out,
+.button[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}

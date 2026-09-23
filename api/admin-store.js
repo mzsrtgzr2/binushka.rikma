@@ -1,12 +1,24 @@
 /**
- * Store product markdown helpers. `_store/*.md` front matter is the catalog.
- * JSON under `_data/` and `api/` is generated from those pages.
+ * Catalog markdown helpers.
+ *
+ * `_store/*.md` front matter is the shop catalog and `_projects/*.md` front
+ * matter is the workshop catalog. JSON under `_data/` and `api/` is generated
+ * from those pages.
+ *
+ * Stock is one number for both: units in the shop, participant places in a
+ * workshop (`spots`). Zero means sold out, a small number means "last places".
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
+
+/** A workshop with this many places left (or fewer) is shown as "last places". */
+const LOW_STOCK_AT = 3;
+
+/** Workshop catalog ids are namespaced so they cannot collide with shop slugs. */
+const WORKSHOP_PREFIX = 'workshop-';
 
 function splitFrontMatter(raw) {
   const text = String(raw || '').replace(/^\uFEFF/, '');
@@ -144,11 +156,15 @@ function parseStock(raw) {
   return { stock: n };
 }
 
-function yamlStock(yaml) {
-  const value = yamlValue(yaml, 'stock');
-  if (value === undefined) return null;
-  const parsed = parseStock(value);
-  return parsed.error ? null : parsed.stock;
+function yamlStock(yaml, ...keys) {
+  const names = keys.length ? keys : ['stock'];
+  for (const key of names) {
+    const value = yamlValue(yaml, key);
+    if (value === undefined) continue;
+    const parsed = parseStock(value);
+    return parsed.error ? null : parsed.stock;
+  }
+  return null;
 }
 
 function tracksInventory(page) {
@@ -162,6 +178,10 @@ function applyStockFlags(input) {
   if (next.stock === 0) next.out_of_stock = true;
   else if (next.stock != null && Number(next.stock) > 0) next.out_of_stock = false;
   return next;
+}
+
+function isLowStock(stock) {
+  return stock != null && stock > 0 && stock <= LOW_STOCK_AT;
 }
 
 function stripYamlKeyBlock(yaml, key) {
@@ -629,6 +649,7 @@ function parsePage(slug, raw) {
     .replace(/^['"]|['"]$/g, '')
     .trim();
   const gallery = parseGallery(yaml);
+  const stock = yamlStock(yaml);
   return {
     slug,
     title: yamlValue(yaml, 'title') || slug,
@@ -636,10 +657,10 @@ function parsePage(slug, raw) {
     image,
     price_display: yamlValue(yaml, 'price') || '',
     body: parts.body.replace(/^\n/, ''),
-    out_of_stock: yamlValue(yaml, 'out_of_stock') === true,
-    limited_stock: yamlValue(yaml, 'limited_stock') === true,
+    out_of_stock: yamlValue(yaml, 'out_of_stock') === true || stock === 0,
+    limited_stock: yamlValue(yaml, 'limited_stock') === true || isLowStock(stock),
     hide: yamlValue(yaml, 'hide') === true,
-    stock: yamlStock(yaml),
+    stock,
     layout: yamlValue(yaml, 'layout') || '',
     hero_image: heroImage,
     gallery,
@@ -801,10 +822,10 @@ function normalizeProductInput(raw, { isNew, existingSlugs, catalog }) {
     gallery: Array.isArray(raw && raw.gallery) ? uniquePhotos(raw.gallery) : [],
     photos: Array.isArray(raw && raw.photos) ? uniquePhotos(raw.photos) : undefined,
     body: raw && raw.body != null ? String(raw.body) : '',
+    stock: stockParsed.stock,
     out_of_stock: Boolean(raw && raw.out_of_stock),
     limited_stock: Boolean(raw && raw.limited_stock),
     hide: Boolean(raw && raw.hide),
-    stock: stockParsed.stock,
     kind,
     in_cart: kind !== 'content',
     cart_price: Number(raw && raw.cart_price),
@@ -862,25 +883,170 @@ function buildCatalogFromRaw(rawBySlug) {
 }
 
 function buildCatalogFromDir(dir) {
-  const rawBySlug = {};
-  if (!dir || !fs.existsSync(dir)) return {};
-  fs.readdirSync(dir)
-    .filter((name) => name.endsWith('.md'))
-    .forEach((name) => {
-      rawBySlug[name.replace(/\.md$/, '')] = fs.readFileSync(path.join(dir, name), 'utf8');
-    });
-  return buildCatalogFromRaw(rawBySlug);
+  return buildCatalogFromRaw(readMarkdownDir(dir, (name) => name.replace(/\.md$/, '')));
 }
 
 const CATALOG_FILES = ['api/catalog-data.json', '_data/catalog.json'];
+const WORKSHOP_CATALOG_FILES = ['api/workshops-data.json', '_data/workshops.json'];
+
+/**
+ * Same slug Jekyll sets on a collection document: the `YYYY-MM-DD-` prefix is
+ * dropped when it is followed by a title, matching DATE_FILENAME_MATCHER.
+ */
+function workshopSlug(filename) {
+  return String(filename || '')
+    .replace(/\.md$/, '')
+    .replace(/^\d{2,4}-\d{1,2}-\d{1,2}-/, '');
+}
+
+function workshopId(slug) {
+  return `${WORKSHOP_PREFIX}${slug}`;
+}
+
+/** First shekel amount on the workshop page (`**מחיר:** 330 …`). */
+function workshopBodyPrice(body) {
+  const match = String(body || '').match(/\*\*מחיר:\*\*\s*(\d+)/);
+  const n = match ? Number(match[1]) : 0;
+  return n > 0 ? n : 0;
+}
+
+/**
+ * A workshop is bookable once it has a price. `cart_price` wins; a visible
+ * page can also use the **מחיר:** line so a listed workshop cannot disappear
+ * from the cart. Hidden past events stay on their old `form_url` button.
+ */
+function parseWorkshopPage(slug, raw) {
+  const parts = splitFrontMatter(raw);
+  if (!parts) return null;
+  const yaml = parts.yaml;
+  const title = String(yamlValue(yaml, 'title') || slug).trim();
+  const subtitle = String(yamlValue(yaml, 'subtitle') || '').trim();
+  const registrationFull = yamlValue(yaml, 'registration_full') === true;
+  const hide = yamlValue(yaml, 'hide') === true;
+  const spots = yamlStock(yaml, 'spots', 'stock');
+  const stock = registrationFull ? 0 : spots;
+  const variants = workshopPacks(yaml);
+  const listed = yamlNumber(yaml, 'cart_price');
+  const price = listed > 0 ? listed : hide ? 0 : workshopBodyPrice(parts.body);
+  return {
+    slug,
+    id: workshopId(slug),
+    title,
+    subtitle,
+    image: unquote(yamlValue(yaml, 'image')),
+    price,
+    spots,
+    stock,
+    variants,
+    registration_full: registrationFull,
+    registration_not_open: yamlValue(yaml, 'registration_not_open') === true,
+    hide,
+    form_url: unquote(yamlValue(yaml, 'form_url')),
+    date: String(yamlValue(yaml, 'date') || '').trim(),
+  };
+}
+
+/**
+ * Optional packs on a workshop: one price for one place, another for two
+ * together, and so on. `places` is how many spots that pack uses.
+ */
+function workshopPacks(yaml) {
+  const raw = parseVariantsYaml(yaml);
+  const out = {};
+  Object.keys(raw || {}).forEach((id) => {
+    const price = Number(raw[id].price);
+    if (!(price > 0)) return;
+    const places = Number(raw[id].places);
+    out[id] = {
+      name: String(raw[id].name || id).trim() || id,
+      price,
+      places: Number.isInteger(places) && places > 0 ? places : 1,
+    };
+  });
+  return Object.keys(out).length ? out : undefined;
+}
+
+/** Two workshops often share a title, so the date subtitle goes on the invoice line. */
+function workshopName(page) {
+  if (!page) return '';
+  return page.subtitle ? `${page.title} — ${page.subtitle}` : page.title;
+}
+
+function applyWorkshopStock(raw, { spots, registration_full, hide }) {
+  const parts = splitFrontMatter(raw);
+  if (!parts) return raw;
+  let yaml = parts.yaml;
+  if (spots == null) yaml = setYamlScalar(yaml, 'spots', '');
+  else yaml = setYamlScalar(yaml, 'spots', Number(spots));
+  yaml = setYamlBool(yaml, 'registration_full', Boolean(registration_full) || spots === 0);
+  if (hide !== undefined) yaml = setYamlBool(yaml, 'hide', Boolean(hide));
+  const nl = parts.newline || '\n';
+  const bodyOut = parts.body.startsWith('\n') || parts.body.startsWith('\r') ? parts.body : `\n${parts.body}`;
+  return `---${nl}${yaml.replace(/\s+$/, '')}${nl}---${nl}${bodyOut.replace(/^\r?\n/, '\n')}`;
+}
+
+function decrementWorkshopPage(raw, slug, quantity) {
+  const qty = Number(quantity);
+  if (!Number.isInteger(qty) || qty < 1) return null;
+  const page = parseWorkshopPage(slug, raw);
+  if (!page || page.spots == null) return null;
+  const nextSpots = Math.max(0, Number(page.spots) - qty);
+  if (nextSpots === page.spots) return null;
+  return applyWorkshopStock(raw, { spots: nextSpots, registration_full: nextSpots === 0 });
+}
+
+function workshopCatalogRow(page) {
+  if (!page || page.hide || page.registration_not_open) return null;
+  const variants = page.variants && Object.keys(page.variants).length ? page.variants : null;
+  const variantPrices = variants
+    ? Object.values(variants).map((row) => Number(row.price)).filter((n) => n > 0)
+    : [];
+  const price = variantPrices.length ? Math.min(...variantPrices) : Number(page.price);
+  if (!(price > 0)) return null;
+  const row = {
+    name: workshopName(page),
+    price,
+    kind: 'workshop',
+    shipping: false,
+  };
+  if (page.stock != null) row.stock = page.stock;
+  if (variants) row.variants = variants;
+  return row;
+}
+
+function buildWorkshopCatalogFromRaw(rawBySlug) {
+  const catalog = {};
+  Object.keys(rawBySlug || {})
+    .sort()
+    .forEach((slug) => {
+      const row = workshopCatalogRow(parseWorkshopPage(slug, rawBySlug[slug]));
+      if (row) catalog[workshopId(slug)] = row;
+    });
+  return catalog;
+}
+
+function readMarkdownDir(dir, slugOf) {
+  const rawBySlug = {};
+  if (!dir || !fs.existsSync(dir)) return rawBySlug;
+  fs.readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .forEach((name) => {
+      rawBySlug[slugOf(name)] = fs.readFileSync(path.join(dir, name), 'utf8');
+    });
+  return rawBySlug;
+}
+
+function buildWorkshopCatalogFromDir(dir) {
+  return buildWorkshopCatalogFromRaw(readMarkdownDir(dir, workshopSlug));
+}
 
 function prettyCatalog(catalog) {
   return `${JSON.stringify(catalog, null, 2)}\n`;
 }
 
-function writeCatalogFiles(root, catalog) {
+function writeJsonFiles(root, files, catalog) {
   const json = prettyCatalog(catalog);
-  CATALOG_FILES.forEach((rel) => {
+  files.forEach((rel) => {
     const full = path.join(root, rel);
     fs.mkdirSync(path.dirname(full), { recursive: true });
     fs.writeFileSync(full, json);
@@ -888,9 +1054,20 @@ function writeCatalogFiles(root, catalog) {
   return json;
 }
 
+function writeCatalogFiles(root, catalog) {
+  return writeJsonFiles(root, CATALOG_FILES, catalog);
+}
+
+function writeWorkshopCatalogFiles(root, catalog) {
+  return writeJsonFiles(root, WORKSHOP_CATALOG_FILES, catalog);
+}
+
 module.exports = {
   SLUG_RE,
   CATALOG_FILES,
+  WORKSHOP_CATALOG_FILES,
+  WORKSHOP_PREFIX,
+  LOW_STOCK_AT,
   splitFrontMatter,
   yamlValue,
   setYamlBool,
@@ -916,6 +1093,19 @@ module.exports = {
   buildCatalogFromRaw,
   buildCatalogFromDir,
   writeCatalogFiles,
+  workshopSlug,
+  workshopId,
+  workshopName,
+  parseWorkshopPage,
+  workshopBodyPrice,
+  workshopPacks,
+  applyWorkshopStock,
+  decrementWorkshopPage,
+  workshopCatalogRow,
+  buildWorkshopCatalogFromRaw,
+  buildWorkshopCatalogFromDir,
+  writeWorkshopCatalogFiles,
+  isLowStock,
   displayPriceFor,
   preparePhotos,
   prepareVariants,

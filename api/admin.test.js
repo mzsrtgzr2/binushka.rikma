@@ -51,6 +51,12 @@ test('unknown slug is rejected', () => {
   assert.equal(result.error, 'מוצר לא מוכר');
 });
 
+test('unknown workshop slug is rejected', () => {
+  const allowed = new Set(['rehovot-04-12']);
+  const result = admin.normalizeWorkshopUpdates([{ slug: '../etc', spots: 4 }], allowed);
+  assert.equal(result.error, 'סדנה לא מוכרת');
+});
+
 function request(handler, { method, headers, body, env }) {
   const saved = { ...process.env };
   Object.keys(env || {}).forEach((key) => {
@@ -256,6 +262,69 @@ body
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('decrementInventory reduces workshop spots after booking', async () => {
+  const root = foxRoot();
+  fs.mkdirSync(path.join(root, '_projects'));
+  fs.writeFileSync(
+    path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'),
+    `---
+title: סדנת רקמה
+subtitle: שישי בבוקר
+cart_price: 330
+spots: 2
+registration_full: false
+---
+
+body
+`
+  );
+  const result = await admin.decrementInventory(authEnv(root), [
+    { id: 'workshop-rehovot-04-12', quantity: 1 },
+  ]);
+  assert.deepEqual(result.changed, ['workshop-rehovot-04-12']);
+  const page = require('./admin-store').parseWorkshopPage(
+    'rehovot-04-12',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
+  );
+  assert.equal(page.spots, 1);
+  assert.equal(page.registration_full, false);
+
+  await admin.decrementInventory(authEnv(root), [{ id: 'workshop-rehovot-04-12', quantity: 1 }]);
+  const full = require('./admin-store').parseWorkshopPage(
+    'rehovot-04-12',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
+  );
+  assert.equal(full.spots, 0);
+  assert.equal(full.registration_full, true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('decrementInventory subtracts pack places from workshop spots', async () => {
+  const root = foxRoot();
+  fs.mkdirSync(path.join(root, '_projects'));
+  fs.writeFileSync(
+    path.join(root, '_projects', '2022-01-09-bar-14-10.md'),
+    `---
+title: בוקר פינוק לאמהות
+cart_price: 330
+spots: 10
+---
+
+body
+`
+  );
+  const result = await admin.decrementInventory(authEnv(root), [
+    { id: 'workshop-bar-14-10', quantity: 2 },
+  ]);
+  assert.deepEqual(result.changed, ['workshop-bar-14-10']);
+  const page = require('./admin-store').parseWorkshopPage(
+    'bar-14-10',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-09-bar-14-10.md'), 'utf8')
+  );
+  assert.equal(page.spots, 8);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('assertInventory rejects overselling tracked stock', async () => {
   const root = foxRoot();
   fs.writeFileSync(
@@ -349,6 +418,111 @@ function foxRoot() {
   return root;
 }
 
+const WORKSHOP = `---
+title: סדנת רקמה
+subtitle: שישי בבוקר
+date: 2025-12-04 19:00:00 +0300
+cart_price: 330
+spots: 12
+registration_full: false
+hide: false
+---
+
+body
+`;
+
+function writeWorkshop(root, filename, raw) {
+  fs.mkdirSync(path.join(root, '_projects'), { recursive: true });
+  fs.writeFileSync(path.join(root, '_projects', filename), raw);
+}
+
+test('authenticated list includes workshop spots', async () => {
+  const root = foxRoot();
+  writeWorkshop(root, '2022-01-25-rehovot-04-12.md', WORKSHOP);
+  writeWorkshop(
+    root,
+    '2022-01-09-hidden.md',
+    `---
+title: סדנה ישנה
+hide: true
+spots: 0
+registration_full: true
+---
+
+body
+`
+  );
+  const cookie = await loginCookie(root);
+  const listed = await request(admin, {
+    method: 'GET',
+    headers: { cookie },
+    env: authEnv(root),
+  });
+  assert.equal(listed.status, 200);
+  assert.equal(listed.json.products[0].slug, 'fox');
+  const visible = listed.json.workshops.find((w) => w.slug === 'rehovot-04-12');
+  const hidden = listed.json.workshops.find((w) => w.slug === 'hidden');
+  assert.equal(visible.title, 'סדנת רקמה');
+  assert.equal(visible.spots, 12);
+  assert.equal(visible.registration_full, false);
+  assert.equal(visible.hide, false);
+  assert.equal(visible.price, 330);
+  assert.equal(hidden.hide, true);
+  assert.equal(listed.json.workshops[0].slug, 'rehovot-04-12');
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('authenticated save updates workshop spots and hide', async () => {
+  const root = foxRoot();
+  writeWorkshop(root, '2022-01-25-rehovot-04-12.md', WORKSHOP);
+  const cookie = await loginCookie(root);
+  const saved = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'save',
+      products: [{ slug: 'fox', out_of_stock: false, limited_stock: true, hide: false }],
+      workshops: [{ slug: 'rehovot-04-12', spots: 4, registration_full: false, hide: true }],
+    },
+    env: authEnv(root),
+  });
+  assert.equal(saved.status, 200);
+  assert.deepEqual(saved.json.changed, ['workshop-rehovot-04-12']);
+  const page = require('./admin-store').parseWorkshopPage(
+    'rehovot-04-12',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
+  );
+  assert.equal(page.spots, 4);
+  assert.equal(page.registration_full, false);
+  assert.equal(page.hide, true);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('authenticated save marks a workshop full when spots is zero', async () => {
+  const root = foxRoot();
+  writeWorkshop(root, '2022-01-25-rehovot-04-12.md', WORKSHOP);
+  const cookie = await loginCookie(root);
+  const saved = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'save',
+      products: [{ slug: 'fox', out_of_stock: false, limited_stock: true, hide: false }],
+      workshops: [{ slug: 'rehovot-04-12', spots: 0, registration_full: false, hide: false }],
+    },
+    env: authEnv(root),
+  });
+  assert.equal(saved.status, 200);
+  const page = require('./admin-store').parseWorkshopPage(
+    'rehovot-04-12',
+    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
+  );
+  assert.equal(page.spots, 0);
+  assert.equal(page.registration_full, true);
+  assert.equal(page.stock, 0);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('authenticated list includes catalog price and kind', async () => {
   const root = foxRoot();
   const cookie = await loginCookie(root);
@@ -398,6 +572,37 @@ test('upsert creates a normal product in markdown and both catalog files', async
   assert.equal(apiCatalog.napkin.price, 90);
   assert.equal(apiCatalog.napkin.name, 'מפית רקומה');
   assert.deepEqual(apiCatalog, dataCatalog);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('upsert writes numeric stock onto the product page', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const updated = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: false,
+      product: {
+        slug: 'fox',
+        title: 'רקמת שועל משמח',
+        kind: 'fixed',
+        cart_price: 220,
+        stock: 5,
+        body: 'body',
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(updated.status, 200);
+  const md = fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8');
+  assert.match(md, /stock: 5/);
+  const product = admin.parseProduct('fox', md);
+  assert.equal(product.stock, 5);
+  assert.equal(product.out_of_stock, false);
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
+  assert.equal(catalog.fox.price, 220);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

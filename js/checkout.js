@@ -50,6 +50,35 @@
     return checked ? checked.value : 'courier';
   }
 
+  /* Workshop places are not shipped, so a workshop-only order skips the picker. */
+  function needsShipping(items) {
+    return items.some(function (item) {
+      return item.requiresShipping !== false;
+    });
+  }
+
+  function syncShippingVisibility(items) {
+    var shipping = needsShipping(items);
+    var fieldset = document.getElementById('checkout-shipping');
+    var note = document.getElementById('checkout-no-shipping');
+    if (fieldset) {
+      fieldset.hidden = !shipping;
+      form.querySelectorAll('input[name="shipping"]').forEach(function (radio) {
+        radio.disabled = !shipping;
+      });
+    }
+    if (note) note.hidden = shipping;
+    return shipping;
+  }
+
+  function syncParticipantsVisibility(items) {
+    var group = document.getElementById('checkout-participants-group');
+    if (!group) return;
+    group.hidden = !items.some(function (item) {
+      return item.kind === 'workshop';
+    });
+  }
+
   function renderSummary() {
     if (!window.StoreCart) return [];
     var items = StoreCart.items();
@@ -62,6 +91,7 @@
       if (linesEl) linesEl.innerHTML = '';
       var emptyNote = document.getElementById('checkout-variant-note-group');
       if (emptyNote) emptyNote.hidden = true;
+      syncParticipantsVisibility(items);
       return [];
     }
 
@@ -101,7 +131,9 @@
       noteGroup.hidden = !hasVariant;
     }
 
-    var ship = shippingCost(selectedShipping(), subtotal);
+    syncParticipantsVisibility(items);
+    var shipping = syncShippingVisibility(items);
+    var ship = shipping ? shippingCost(selectedShipping(), subtotal) : 0;
     if (grandEl) grandEl.textContent = '₪' + (subtotal + ship);
     return items;
   }
@@ -118,6 +150,7 @@
     'country',
     'shipping',
     'variantNote',
+    'participantsNote',
     'packAsGift',
     'giftMessage',
   ];
@@ -150,7 +183,9 @@
     }
     if (value == null || value === '') return;
     if (name === 'shipping' && ['pickup', 'registered', 'courier'].indexOf(String(value)) === -1) return;
-    if (name === 'variantNote' || name === 'giftMessage') value = String(value).slice(0, 200);
+    if (name === 'variantNote' || name === 'giftMessage' || name === 'participantsNote') {
+      value = String(value).slice(0, 200);
+    }
     var el = form.elements[name];
     if (!el) return;
     if (el.length && el[0] && el[0].type === 'radio') {
@@ -215,7 +250,8 @@
 
     var data = Object.fromEntries(new FormData(form).entries());
     var subtotal = window.StoreCart ? StoreCart.subtotal() : 0;
-    var ship = shippingCost(data.shipping, subtotal);
+    var shipping = needsShipping(items);
+    var ship = shipping ? shippingCost(data.shipping, subtotal) : 0;
     var payload = {
       items: items.map(function (item) {
         var row = { id: item.id, quantity: item.quantity };
@@ -223,7 +259,7 @@
         if (item.variant) row.variant = item.variant;
         return row;
       }),
-      shipping: data.shipping,
+      shipping: shipping ? data.shipping : 'none',
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,
@@ -235,6 +271,7 @@
       successPath: '/thanks/',
     };
     if (data.variantNote) payload.variantNote = String(data.variantNote).trim();
+    if (data.participantsNote) payload.participantsNote = String(data.participantsNote).trim();
     if (data.packAsGift) {
       payload.packAsGift = true;
       if (data.giftMessage) payload.giftMessage = String(data.giftMessage).trim().slice(0, 200);

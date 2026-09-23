@@ -340,7 +340,7 @@ test('every visible workshop is in the cart at the page price', () => {
     assert.ok(row, `${page.slug} should be in the cart catalog`);
     assert.equal(row.kind, 'workshop');
     assert.equal(row.price, page.price);
-    assert.equal(row.stock, page.stock);
+    assert.equal(row.stock ?? null, page.stock ?? null);
     const bodyPrice = store.workshopBodyPrice(raw);
     assert.ok(bodyPrice > 0, `${page.slug} should list a מחיר on the page`);
     assert.equal(row.price, bodyPrice, `${page.slug} cart price should match the page`);

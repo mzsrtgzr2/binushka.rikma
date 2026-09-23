@@ -7,6 +7,7 @@ price: ₪100
 out_of_stock: false
 limited_stock: false
 hide: false
+category: embroidery-supplies
 gallery:
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg

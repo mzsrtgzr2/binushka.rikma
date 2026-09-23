@@ -258,3 +258,53 @@ body
   assert.equal(sold.registration_full, true);
   assert.equal(sold.hide, true);
 });
+
+test('parsePage and applyPage persist product category', () => {
+  const raw = `---
+title: חוטי רקמה
+price: ₪50
+hide: false
+category: embroidery-supplies
+---
+
+body
+`;
+  const page = store.parsePage('floss', raw);
+  assert.equal(page.category, 'embroidery-supplies');
+  assert.equal(store.PRODUCT_CATEGORIES[page.category], 'ציוד רקמה');
+
+  const next = store.applyPage(raw, { ...page, category: 'works-for-sale' });
+  assert.match(next, /category: works-for-sale/);
+  assert.equal(store.parsePage('floss', next).category, 'works-for-sale');
+
+  const cleared = store.applyPage(next, { ...page, category: '' });
+  assert.doesNotMatch(cleared, /category:/);
+  assert.equal(store.parsePage('floss', cleared).category, '');
+});
+
+test('normalizeProductInput rejects unknown category', () => {
+  const bad = store.normalizeProductInput(
+    {
+      slug: 'floss',
+      title: 'חוטים',
+      kind: 'fixed',
+      cart_price: 50,
+      category: 'not-a-real-category',
+    },
+    { isNew: true, existingSlugs: new Set() }
+  );
+  assert.match(bad.error, /קטגוריה/);
+
+  const ok = store.normalizeProductInput(
+    {
+      slug: 'floss',
+      title: 'חוטים',
+      kind: 'fixed',
+      cart_price: 50,
+      category: 'embroidery-supplies',
+    },
+    { isNew: true, existingSlugs: new Set() }
+  );
+  assert.equal(ok.error, undefined);
+  assert.equal(ok.input.category, 'embroidery-supplies');
+});

@@ -79,14 +79,25 @@ noindex: true
         <p class="admin-message" id="admin-photos-message" hidden></p>
       </fieldset>
 
-      <div class="form__group">
-        <label class="form__label" for="admin-kind">איך המוצר נמכר</label>
-        <select class="form__input" id="admin-kind" name="kind">
-          <option value="fixed">מוצר רגיל — מחיר קבוע בסל</option>
-          <option value="variable">גיפט קארד — הלקוחה בוחרת סכום</option>
-          <option value="variants">כמה סוגים — כמו סקראנצ'י</option>
-          <option value="content">דף בלי סל (רק תצוגה באתר)</option>
-        </select>
+      <div class="admin-grid">
+        <div class="form__group">
+          <label class="form__label" for="admin-kind">איך המוצר נמכר</label>
+          <select class="form__input" id="admin-kind" name="kind">
+            <option value="fixed">מוצר רגיל — מחיר קבוע בסל</option>
+            <option value="variable">גיפט קארד — הלקוחה בוחרת סכום</option>
+            <option value="variants">כמה סוגים — כמו סקראנצ'י</option>
+            <option value="content">דף בלי סל (רק תצוגה באתר)</option>
+          </select>
+        </div>
+        <div class="form__group">
+          <label class="form__label" for="admin-category">קטגוריה בחנות</label>
+          <select class="form__input" id="admin-category" name="category">
+            <option value="">ללא קטגוריה</option>
+            <option value="embroidery-supplies">ציוד רקמה</option>
+            <option value="works-for-sale">עבודות למכירה</option>
+          </select>
+          <p class="admin-hint">לפי הקטגוריה הלקוחות יכולות לסנן בחנות.</p>
+        </div>
       </div>
 
       <fieldset class="admin-fieldset" data-kind-fields="fixed">

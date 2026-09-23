@@ -7,6 +7,7 @@ price: ₪120
 out_of_stock: false
 limited_stock: true
 hide: false
+category: embroidery-supplies
 gallery:
   - /images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-12-mue250c9.png
 stock: 1

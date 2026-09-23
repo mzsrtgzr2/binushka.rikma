@@ -9,12 +9,15 @@
 
 .store-toolbar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-start;
   align-items: center;
+  gap: 20px 28px;
   margin-bottom: 28px;
 
   @media only screen and (max-width: $mobile) {
     margin-bottom: 20px;
+    gap: 14px 20px;
   }
 }
 
@@ -26,6 +29,11 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--heading-font-color);
+
+  @media only screen and (max-width: $mobile) {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .store-toolbar__label {
@@ -44,6 +52,11 @@
   font-weight: 700;
   cursor: pointer;
 
+  @media only screen and (max-width: $mobile) {
+    flex: 1;
+    min-width: 0;
+  }
+
   &:focus {
     outline: 2px solid var(--brand-color);
     outline-offset: 2px;
@@ -55,6 +68,10 @@
   flex-direction: column;
   margin-bottom: 32px;
   transition: transform .2s ease-in-out;
+
+  &[hidden] {
+    display: none !important;
+  }
 
   &:hover {
     transform: translateY(-4px);

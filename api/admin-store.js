@@ -929,6 +929,7 @@ function parseWorkshopPage(slug, raw) {
     registration_not_open: yamlValue(yaml, 'registration_not_open') === true,
     hide: yamlValue(yaml, 'hide') === true,
     form_url: unquote(yamlValue(yaml, 'form_url')),
+    date: String(yamlValue(yaml, 'date') || '').trim(),
   };
 }
 
@@ -938,13 +939,14 @@ function workshopName(page) {
   return page.subtitle ? `${page.title} — ${page.subtitle}` : page.title;
 }
 
-function applyWorkshopStock(raw, { spots, registration_full }) {
+function applyWorkshopStock(raw, { spots, registration_full, hide }) {
   const parts = splitFrontMatter(raw);
   if (!parts) return raw;
   let yaml = parts.yaml;
   if (spots == null) yaml = setYamlScalar(yaml, 'spots', '');
   else yaml = setYamlScalar(yaml, 'spots', Number(spots));
   yaml = setYamlBool(yaml, 'registration_full', Boolean(registration_full) || spots === 0);
+  if (hide !== undefined) yaml = setYamlBool(yaml, 'hide', Boolean(hide));
   const nl = parts.newline || '\n';
   const bodyOut = parts.body.startsWith('\n') || parts.body.startsWith('\r') ? parts.body : `\n${parts.body}`;
   return `---${nl}${yaml.replace(/\s+$/, '')}${nl}---${nl}${bodyOut.replace(/^\r?\n/, '\n')}`;

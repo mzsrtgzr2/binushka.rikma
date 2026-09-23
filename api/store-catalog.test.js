@@ -160,3 +160,27 @@ form_url: https://pay.grow.link/example
   assert.equal(catalog['workshop-private-workshop'], undefined);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('applyWorkshopStock writes spots, full, and hide', () => {
+  const raw = `---
+title: סדנת רקמה
+subtitle: שישי בבוקר
+cart_price: 330
+spots: 12
+registration_full: false
+hide: false
+---
+
+body
+`;
+  const next = store.applyWorkshopStock(raw, { spots: 2, registration_full: false, hide: true });
+  const page = store.parseWorkshopPage('rehovot-04-12', next);
+  assert.equal(page.spots, 2);
+  assert.equal(page.registration_full, false);
+  assert.equal(page.hide, true);
+  const full = store.applyWorkshopStock(next, { spots: 0, registration_full: false, hide: true });
+  const sold = store.parseWorkshopPage('rehovot-04-12', full);
+  assert.equal(sold.spots, 0);
+  assert.equal(sold.registration_full, true);
+  assert.equal(sold.hide, true);
+});

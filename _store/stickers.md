@@ -17,5 +17,9 @@ variants:
     name: דף מדבקות עציצים
     price: 50
     image: /images/store/stickers/screenshot-2026-09-23-at-22-18-31-muehnd9s.jpg
+    gallery:
+      - /images/store/stickers/screenshot-2026-09-23-at-23-10-22-muejgum3.jpg
+      - /images/store/stickers/screenshot-2026-09-23-at-23-10-40-muejgum4.jpg
+    description: "בתמונות, הרקמה של הילית לאחר שימוש במדבקות ושטיפתן במים."
 ---
 

@@ -238,6 +238,7 @@
       var overlayClass = soldOut ? 'out-of-stock' : 'limited-stock';
 
       document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
+        root.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
         ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
         if (root.querySelector('.page-head')) {
           ensureStockText(root.querySelector('.page-head'), soldOut, limited);
@@ -626,6 +627,7 @@
 
   renderWidget();
   updateStockUi();
+  window.dispatchEvent(new Event('binushka:stock'));
   syncCartPlacement();
   if (window.matchMedia) {
     var floatingMq = window.matchMedia('(max-width: 1024px)');
@@ -663,6 +665,7 @@
       clampCartToStock();
       updateStockUi();
       renderWidget();
+      window.dispatchEvent(new Event('binushka:stock'));
       window.dispatchEvent(new Event('binushka:prices'));
     })
     .catch(function () {

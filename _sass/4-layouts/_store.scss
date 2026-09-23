@@ -7,6 +7,49 @@
   }
 }
 
+.store-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 28px;
+
+  @media only screen and (max-width: $mobile) {
+    margin-bottom: 20px;
+  }
+}
+
+.store-toolbar__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading-font-color);
+}
+
+.store-toolbar__label {
+  white-space: nowrap;
+}
+
+.store-toolbar__select {
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--background-alt-color);
+  color: var(--heading-font-color);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid var(--brand-color);
+    outline-offset: 2px;
+  }
+}
+
 .store-item {
   display: flex;
   flex-direction: column;

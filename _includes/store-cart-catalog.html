@@ -8,12 +8,20 @@
     {%- assign slug = item.slug | default: item.basename -%}
     {%- assign meta = catalog[slug] -%}
     {%- if meta and meta.enabled != false -%}
+      {%- assign cart_image = item.image -%}
+      {%- if cart_image == blank and meta.variants -%}
+        {%- for variant in meta.variants -%}
+          {%- if cart_image == blank and variant[1].image and variant[1].image != blank -%}
+            {%- assign cart_image = variant[1].image -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
       {%- unless first -%},{%- endunless -%}
       {
         "id": {{ slug | jsonify }},
         "name": {{ item.title | jsonify }},
         "price": {{ meta.price | default: 0 }},
-        "image": {{ item.image | relative_url | jsonify }},
+        "image": {{ cart_image | relative_url | jsonify }},
         "url": {{ item.url | relative_url | jsonify }},
         "kind": "product",
         "requiresShipping": true,

@@ -111,6 +111,10 @@
       }
     }
   },
+  "pencil-case": {
+    "name": "קלמר קנבס לרקמה",
+    "price": 20
+  },
   "portrait": {
     "name": "מסגרת רקומה",
     "price": 250

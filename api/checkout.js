@@ -21,6 +21,7 @@ const {
   createRateLimiter,
   clientIp,
 } = require('../lib/origin');
+const { newOrderId, signOrder } = require('../lib/order-token');
 
 const VAT_RATE = 0.18;
 const GROW_PRODUCTION_PLUGIN_ID = '453df580-760d-439d-a848-4fe7dc1fb9b3';
@@ -192,7 +193,21 @@ async function reserveInventory(env, order) {
   }
 }
 
-function buildPaymentFormPayload({ order, customer, env, envVars, successUrl, failureUrl }) {
+/**
+ * Where Morning reports a completed payment. A preview deployment has its own
+ * signing secret and stock branch, so it must hear about its own payments.
+ */
+function notifyUrlFor(envVars, token) {
+  const vars = envVars || {};
+  const deployment = String(vars.VERCEL_URL || '').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  const origin =
+    String(vars.VERCEL_ENV || '').toLowerCase() !== 'production' && deployment
+      ? `https://${deployment}`
+      : checkoutReturnUrls(vars).origin;
+  return `${origin}/api/payment-notify/?order=${encodeURIComponent(token)}`;
+}
+
+function buildPaymentFormPayload({ order, customer, env, envVars, successUrl, failureUrl, notifyUrl }) {
   const vars = envVars || {};
   const incomeVatType = Number(vars.MORNING_VAT_TYPE || 1);
   const documentVatType = Number(vars.MORNING_DOCUMENT_VAT_TYPE ?? 0);
@@ -217,7 +232,7 @@ function buildPaymentFormPayload({ order, customer, env, envVars, successUrl, fa
   payload.maxPayments = Number.isInteger(maxPayments) && maxPayments >= 1 ? maxPayments : 1;
 
   if (pluginId) payload.pluginId = pluginId;
-  if (vars.MORNING_NOTIFY_URL) payload.notifyUrl = vars.MORNING_NOTIFY_URL;
+  if (notifyUrl) payload.notifyUrl = notifyUrl;
   return payload;
 }
 
@@ -327,16 +342,20 @@ async function handler(req, res) {
     return res.status(502).json({ error: 'לא הצלחנו להתחבר לסליקה. נסי שוב בעוד רגע.' });
   }
 
-  let pricedOrder = order;
-
-  const payload = buildPaymentFormPayload({
-    order: pricedOrder,
+  const draft = buildPaymentFormPayload({
+    order,
     customer: customerResult.customer,
     env,
     envVars: process.env,
     successUrl,
     failureUrl,
   });
+  const orderToken = signOrder(process.env, {
+    orderId: newOrderId(),
+    purchases: inventoryPurchases(order),
+    amount: draft.amount,
+  });
+  const payload = { ...draft, notifyUrl: notifyUrlFor(process.env, orderToken) };
 
   let result;
   try {
@@ -388,12 +407,9 @@ async function handler(req, res) {
     });
   }
 
-  const reserved = await reserveInventory(process.env, pricedOrder);
-  if (reserved.error) {
-    console.error('inventory reserve failed after payment form', reserved.error);
-    return res.status(409).json({ error: reserved.error });
-  }
-
+  // Stock is not touched here: opening a payment form is free, so reserving
+  // on it would let anyone empty the shop. api/payment-notify.js decrements
+  // once Morning confirms the payment.
   return res.status(200).json({ url });
 }
 
@@ -405,6 +421,8 @@ handler.buildIncomeRows = buildIncomeRows;
 handler.morningErrorMessage = morningErrorMessage;
 handler.publicEnvStatus = publicEnvStatus;
 handler.checkoutReturnUrls = checkoutReturnUrls;
+handler.notifyUrlFor = notifyUrlFor;
+handler.inventoryPurchases = inventoryPurchases;
 handler.isAllowedPaymentUrl = isAllowedPaymentUrl;
 handler.GROW_PRODUCTION_PLUGIN_ID = GROW_PRODUCTION_PLUGIN_ID;
 handler.GROW_SANDBOX_PLUGIN_ID = GROW_SANDBOX_PLUGIN_ID;

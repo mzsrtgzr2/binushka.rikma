@@ -638,3 +638,38 @@ test('newsletter admin rejects a foreign Origin', async () => {
   assert.equal(res.statusCode, 403);
   assert.equal(res.body.code, 'forbidden');
 });
+
+test('a slug cannot escape the newsletter folder', async () => {
+  const outside = path.join(root, 'api', 'owned.md');
+  for (const slug of ['../api/owned', '..%2Fapi', 'a/b', '.hidden', '']) {
+    assert.equal(issues.isValidSlug(slug), false, slug);
+  }
+
+  const saved = await call({
+    body: { action: 'save', issue: { slug: '../api/owned', title: 'x', body: 'x' } },
+  });
+  assert.equal(saved.statusCode, 422);
+  assert.equal(saved.body.code, 'invalid_slug');
+  assert.equal(fs.existsSync(outside), false);
+
+  const edited = await call({ body: { action: 'save', slug: '../../etc/passwd', issue: { title: 'x' } } });
+  assert.equal(edited.statusCode, 422);
+
+  fs.mkdirSync(path.join(root, 'api'), { recursive: true });
+  fs.writeFileSync(outside, '---\ntitle: x\nstatus: draft\n---\n');
+  const deleted = await call({ body: { action: 'delete', slug: '../api/owned' } });
+  assert.equal(deleted.statusCode, 404);
+  assert.equal(fs.existsSync(outside), true);
+});
+
+test('front matter fields cannot inject extra keys through newlines', () => {
+  const issue = issues.normalize({
+    title: 'כותרת\nlayout: evil',
+    subtitle: 'a\r\npermalink: /admin/',
+    date: '2026-01-01\nlayout: evil',
+    body: 'x',
+  });
+  const text = issues.serialize(issue);
+  assert.doesNotMatch(text, /^layout:/m);
+  assert.doesNotMatch(text, /^permalink:/m);
+});

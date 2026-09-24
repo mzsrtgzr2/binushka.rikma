@@ -33,6 +33,7 @@ async function loadIssues(env) {
 }
 
 async function loadIssue(env, slug) {
+  if (!issues.isValidSlug(slug)) return null;
   const raw = await repo.readFile(env, issues.pathFor(slug));
   return raw ? issues.parse(slug, raw) : null;
 }
@@ -44,13 +45,17 @@ async function loadIssue(env, slug) {
  * cannot turn into a second send.
  */
 async function handleSave(req, res, env, body) {
+  if (body.slug && !issues.isValidSlug(body.slug)) {
+    return sendJson(res, 422, { ok: false, code: 'invalid_slug' });
+  }
   const existing = body.slug ? await loadIssue(env, body.slug) : null;
 
   let issue;
   try {
     issue = issues.normalize(body.issue || {}, existing);
-  } catch {
-    return sendJson(res, 422, { ok: false, code: 'title_required' });
+  } catch (error) {
+    const code = error.message === 'invalid slug' ? 'invalid_slug' : 'title_required';
+    return sendJson(res, 422, { ok: false, code });
   }
 
   if (!existing && (await loadIssue(env, issue.slug))) {

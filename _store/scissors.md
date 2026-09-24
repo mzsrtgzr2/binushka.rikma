@@ -3,9 +3,9 @@ title: מספרי רקמה איכותיות
 date: 2026-09-23 19:39:00 +0000
 subtitle: של dmc
 image: /images/store/scissors/screenshot-2026-09-23-at-22-36-13-mueib4k5.jpg
-price: ₪70
+price: ₪70 – ₪80
 out_of_stock: false
-limited_stock: false
+limited_stock: true
 hide: false
 category: embroidery-supplies
 variants:
@@ -27,5 +27,11 @@ variants:
     gallery:
       - /images/store/scissors/screenshot-2026-09-23-at-22-01-39-muej8ry4.jpg
     description: "גיליתי אותן בצ׳כיה לפני שנה ומאז לא מצאתי כאלה בארץ! סוף סוף הצלחתי לשים ידיי על 2 זוגות.\nגם הן בגודל 9 ס״מ."
+  singer:
+    name: מספרי רקמה פרחוניות של singer
+    price: 80
+    stock: 1
+    image: /images/store/scissors/screenshot-2026-09-24-at-15-32-45-mufij4sz.jpg
+    description: "איך אפשר שלא להתאהב בך\nגודל 10.1 cm"
 ---
 

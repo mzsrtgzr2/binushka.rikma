@@ -7,11 +7,7 @@ const { fallbackPriceBook } = require('./catalog');
 const admin = require('./admin');
 
 function cors(req, res) {
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.headers.origin) {
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  }
+  res.setHeader('Cache-Control', 'no-store');
 }
 
 function mergeInventory(book, inventory) {

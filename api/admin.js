@@ -8,28 +8,32 @@
  * product at once and inventory has to be checked and decremented for both.
  */
 
-const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const store = require('./admin-store');
+const auth = require('../lib/admin/session');
+const { foreignOrigin, createRateLimiter, clientIp } = require('../lib/origin');
 
-const COOKIE = 'binushka-admin-v1';
-const SESSION_PAYLOAD = 'binushka-admin-session-v1';
 const CATALOG_FILES = store.CATALOG_FILES;
 
 function json(res, status, body, extraHeaders) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
   if (extraHeaders) {
     Object.entries(extraHeaders).forEach(([key, value]) => res.setHeader(key, value));
   }
   return res.end(JSON.stringify(body));
 }
 
-function safeEqual(a, b) {
-  const left = crypto.createHash('sha256').update(String(a || '')).digest();
-  const right = crypto.createHash('sha256').update(String(b || '')).digest();
-  return crypto.timingSafeEqual(left, right);
+function redirect(res, location, extraHeaders) {
+  res.statusCode = 303;
+  res.setHeader('Location', location);
+  res.setHeader('Cache-Control', 'no-store');
+  if (extraHeaders) {
+    Object.entries(extraHeaders).forEach(([key, value]) => res.setHeader(key, value));
+  }
+  return res.end();
 }
 
 function pickEnv(bag, name) {
@@ -38,65 +42,37 @@ function pickEnv(bag, name) {
 }
 
 function adminPassword(env) {
-  const bag = env || process.env;
-  return pickEnv(bag, 'ADMIN_PASSWORD') || pickEnv(bag, 'BINUSHKA_ADMIN_PASSWORD');
+  return auth.adminPassword(env);
+}
+
+function requestBody(req) {
+  const body = req.body;
+  if (body && typeof body === 'object' && !Buffer.isBuffer(body) && !Array.isArray(body)) {
+    return body;
+  }
+  const raw = Buffer.isBuffer(body) ? body.toString('utf8') : String(body || '');
+  if (!raw) return {};
+  const type = String((req.headers && req.headers['content-type']) || '');
+  if (type.includes('application/x-www-form-urlencoded')) {
+    return Object.fromEntries(new URLSearchParams(raw));
+  }
+  if (type.includes('application/json')) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+  return {};
 }
 
 function adminConfigHint(env) {
   const bag = env || process.env;
   const vercelEnv = pickEnv(bag, 'VERCEL_ENV') || 'unknown';
   const gitRef = pickEnv(bag, 'VERCEL_GIT_COMMIT_REF');
-  const adminKeys = Object.keys(bag).filter((key) => /admin/i.test(key));
   const parts = [`סביבה: ${vercelEnv}`];
   if (gitRef) parts.push(`ענף: ${gitRef}`);
-  if (adminKeys.length) parts.push(`מפתחות: ${adminKeys.join(', ')}`);
   return parts.join(', ');
-}
-
-function sessionToken(env) {
-  const secret = adminPassword(env);
-  if (!secret) return '';
-  return crypto.createHmac('sha256', secret).update(SESSION_PAYLOAD).digest('hex');
-}
-
-function readCookie(req, name) {
-  const raw = String((req.headers && req.headers.cookie) || '');
-  const parts = raw.split(';');
-  for (const part of parts) {
-    const i = part.indexOf('=');
-    if (i === -1) continue;
-    if (part.slice(0, i).trim() === name) {
-      try {
-        return decodeURIComponent(part.slice(i + 1).trim());
-      } catch {
-        return '';
-      }
-    }
-  }
-  return '';
-}
-
-function cookieHeader(token, { clear, secure } = {}) {
-  const parts = [
-    `${COOKIE}=${clear ? '' : token}`,
-    'Path=/',
-    'HttpOnly',
-    'SameSite=Lax',
-    clear ? 'Max-Age=0' : 'Max-Age=2592000',
-  ];
-  if (secure) parts.push('Secure');
-  return parts.join('; ');
-}
-
-function isSecureReq(req) {
-  const proto = String((req.headers && req.headers['x-forwarded-proto']) || '').split(',')[0].trim();
-  return proto === 'https';
-}
-
-function isAuthed(req, env) {
-  const expected = sessionToken(env);
-  if (!expected) return false;
-  return safeEqual(readCookie(req, COOKIE), expected);
 }
 
 function repoParts(env) {
@@ -482,11 +458,38 @@ async function saveFlags(env, updates) {
   return { target: listed.target, changed };
 }
 
+const PAID_ORDERS_DIR = '_paid_orders';
+
+function paidOrderPath(orderId) {
+  if (!/^[a-f0-9]{24}$/.test(String(orderId || ''))) throw new Error('invalid order id');
+  return `${PAID_ORDERS_DIR}/${orderId}.json`;
+}
+
+/** The record left by a processed payment, or null if this order was never applied. */
+async function readPaidOrder(env, orderId) {
+  const filePath = paidOrderPath(orderId);
+  const target = writeTarget(env);
+  if (target === 'local') {
+    const full = path.join(localRoot(env), filePath);
+    return fs.existsSync(full) ? JSON.parse(fs.readFileSync(full, 'utf8')) : null;
+  }
+  if (target !== 'github') return null;
+  try {
+    return JSON.parse(await githubRead(env, filePath));
+  } catch (err) {
+    if (err.status === 404) return null;
+    throw err;
+  }
+}
+
 /**
- * After a paid checkout starts successfully, reduce tracked stock quantities.
+ * After Morning confirms a payment, reduce tracked stock quantities.
  * purchases: [{ slug|id, quantity, variant? }]
+ * opts.extraFiles are written in the same commit, so a paid-order marker and
+ * the stock it consumed land together or not at all.
  */
-async function decrementInventory(env, purchases) {
+async function decrementInventory(env, purchases, opts = {}) {
+  const extraFiles = opts.extraFiles || [];
   const target = writeTarget(env);
   if (!target) return { skipped: true, reason: 'no-write-target' };
 
@@ -553,9 +556,14 @@ async function decrementInventory(env, purchases) {
   if (!changed.length) return { target, changed: [] };
 
   if (target === 'local') {
+    for (const file of extraFiles) {
+      const full = path.join(localRoot(env), file.path);
+      fs.mkdirSync(path.dirname(full), { recursive: true });
+      fs.writeFileSync(full, file.content);
+    }
     return { target, changed };
   }
-  await commitFiles(env, files, 'Decrement store stock after purchase');
+  await commitFiles(env, [...files, ...extraFiles], opts.message || 'Decrement store stock after purchase');
   return { target, changed };
 }
 
@@ -716,42 +724,62 @@ async function publicInventory(env) {
   return { source, products };
 }
 
-async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  if (req.headers.origin) {
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  }
+const loginLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
 
+async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
     return res.end();
   }
 
   const env = process.env;
+  if (foreignOrigin(req, env)) {
+    return json(res, 403, { error: 'בקשה לא מורשית' });
+  }
+
   if (!adminPassword(env)) {
     return json(res, 503, {
       error: `ניהול החנות עדיין לא הוגדר (ADMIN_PASSWORD). ${adminConfigHint(env)}. צריך משתנה Preview בשם ADMIN_PASSWORD ואז Redeploy.`,
     });
   }
 
-  const secure = isSecureReq(req);
-  const body = req.body || {};
+  const secure = auth.isSecureReq(req);
+  const body = requestBody(req);
 
   if (req.method === 'POST') {
     if (body.action === 'login') {
-      if (!safeEqual(body.password, adminPassword(env))) {
+      const next = auth.safeNext(body.next);
+      const ip = clientIp(req);
+      if (loginLimiter.isBlocked(ip)) {
+        if (auth.wantsRedirect(req)) {
+          return redirect(res, `${next}?login=locked`);
+        }
+        return json(res, 429, { error: 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' });
+      }
+      if (!auth.safeEqual(body.password, adminPassword(env))) {
+        loginLimiter(ip);
+        if (auth.wantsRedirect(req)) {
+          return redirect(res, `${next}?login=error`);
+        }
         return json(res, 401, { error: 'סיסמה שגויה' });
       }
-      return json(res, 200, { ok: true }, { 'Set-Cookie': cookieHeader(sessionToken(env), { secure }) });
+      loginLimiter.reset(ip);
+      const cookies = { 'Set-Cookie': auth.loginSetCookie(env, { secure }) };
+      if (auth.wantsRedirect(req)) {
+        return redirect(res, next, cookies);
+      }
+      return json(res, 200, { ok: true }, cookies);
     }
     if (body.action === 'logout') {
-      return json(res, 200, { ok: true }, { 'Set-Cookie': cookieHeader('', { clear: true, secure }) });
+      const cookies = { 'Set-Cookie': auth.logoutSetCookie({ secure }) };
+      if (auth.wantsRedirect(req)) {
+        return redirect(res, auth.safeNext(body.next), cookies);
+      }
+      return json(res, 200, { ok: true }, cookies);
     }
   }
 
-  if (!isAuthed(req, env)) {
+  if (!auth.isAuthed(req, env)) {
     return json(res, 401, { error: 'צריך להתחבר' });
   }
 
@@ -829,9 +857,11 @@ async function handler(req, res) {
   }
 }
 
-handler.sessionToken = sessionToken;
-handler.isAuthed = isAuthed;
-handler.COOKIE = COOKIE;
+handler.sessionToken = auth.sessionToken;
+handler.issueSession = auth.issueSession;
+handler.isAuthed = auth.isAuthed;
+handler.COOKIE = auth.COOKIE;
+handler.LEGACY_COOKIE = auth.LEGACY_COOKIE;
 handler.splitFrontMatter = store.splitFrontMatter;
 handler.yamlValue = store.yamlValue;
 handler.setYamlBool = store.setYamlBool;
@@ -839,6 +869,8 @@ handler.parseProduct = (slug, raw) => store.parsePage(slug, raw);
 handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('x', raw), ...flags });
 handler.normalizeUpdates = normalizeFlags;
 handler.decrementInventory = decrementInventory;
+handler.readPaidOrder = readPaidOrder;
+handler.paidOrderPath = paidOrderPath;
 handler.assertInventory = assertInventory;
 handler.publicInventory = publicInventory;
 handler.parseStock = store.parseStock;

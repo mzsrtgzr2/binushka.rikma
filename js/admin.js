@@ -67,7 +67,7 @@
   }
 
   function api(method, body) {
-    var opts = { method: method, credentials: 'same-origin', headers: {} };
+    var opts = { method: method, credentials: 'same-origin', cache: 'no-store', headers: {} };
     if (body) {
       opts.headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(body);
@@ -1403,16 +1403,17 @@
     go();
   }
 
-  loginForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    var password = document.getElementById('admin-password').value;
-    show(loginMessage, '', '');
-    api('POST', { action: 'login', password: password })
-      .then(loadBoard)
-      .catch(function (err) {
-        show(loginMessage, err.message || 'סיסמה שגויה', 'error');
-      });
-  });
+  function showLoginError(message) {
+    showLogin();
+    show(loginMessage, message, 'error');
+  }
+
+  function consumeLoginQuery() {
+    var match = /[?&]login=(error|locked)\b/.exec(window.location.search);
+    if (!match) return;
+    show(loginMessage, match[1] === 'locked' ? 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' : 'סיסמה שגויה', 'error');
+    if (history.replaceState) history.replaceState({}, '', window.location.pathname);
+  }
 
   listEl.addEventListener('change', function (event) {
     var stockInput = event.target.closest('input[data-stock]');
@@ -1695,13 +1696,24 @@
   });
 
   logoutBtn.addEventListener('click', function () {
-    api('POST', { action: 'logout' }).finally(function () {
-      showLogin();
-      loginForm.reset();
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = loginForm.getAttribute('action') || '/api/admin/';
+    [['action', 'logout'], ['next', window.location.pathname]].forEach(function (pair) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = pair[0];
+      input.value = pair[1];
+      form.appendChild(input);
     });
+    document.body.appendChild(form);
+    form.submit();
   });
 
-  loadBoard().catch(function () {
+  loadBoard().catch(function (err) {
     showLogin();
+    consumeLoginQuery();
+    if (err && err.status === 401) return;
+    showLoginError((err && err.message) || 'לא הצלחנו לטעון את הניהול. נסי לרענן.');
   });
 })();

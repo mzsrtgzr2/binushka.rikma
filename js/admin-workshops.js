@@ -115,7 +115,7 @@
   }
 
   function request(url, method, body) {
-    var opts = { method: method, credentials: 'same-origin', headers: {} };
+    var opts = { method: method, credentials: 'same-origin', cache: 'no-store', headers: {} };
     if (body) {
       opts.headers['Content-Type'] = 'application/json';
       opts.body = JSON.stringify(body);
@@ -134,6 +134,7 @@
         if (!res.ok) {
           var error = new Error(data.error || errorText(data.code) || 'שגיאה');
           error.field = data.field || null;
+          error.status = res.status;
           throw error;
         }
         return data;
@@ -1268,22 +1269,26 @@
 
   /* ------------------------------------------------------------------ events */
 
-  loginForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    var password = document.getElementById('admin-password').value;
-    show(loginMessage, 'רגע...', 'info');
-
-    request('/api/admin/', 'POST', { action: 'login', password: password })
-      .then(load)
-      .catch(function (error) {
-        show(loginMessage, error.message, 'error');
-      });
-  });
+  function consumeLoginQuery() {
+    var match = /[?&]login=(error|locked)\b/.exec(window.location.search);
+    if (!match) return;
+    show(loginMessage, match[1] === 'locked' ? 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' : 'סיסמה שגויה', 'error');
+    if (history.replaceState) history.replaceState({}, '', window.location.pathname);
+  }
 
   logoutBtn.addEventListener('click', function () {
-    request('/api/admin/', 'POST', { action: 'logout' }).then(function () {
-      window.location.reload();
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = loginForm.getAttribute('action') || '/api/admin/';
+    [['action', 'logout'], ['next', window.location.pathname]].forEach(function (pair) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = pair[0];
+      input.value = pair[1];
+      form.appendChild(input);
     });
+    document.body.appendChild(form);
+    form.submit();
   });
 
   newBtn.addEventListener('click', function () {
@@ -1576,8 +1581,12 @@
       });
   });
 
-  // An existing session skips the password prompt.
-  load().catch(function () {
+  // An existing session skips the password prompt. Login itself is a real
+  // form POST so the browser keeps the HttpOnly cookie.
+  load().catch(function (error) {
     loginForm.hidden = false;
+    consumeLoginQuery();
+    if (error && error.status === 401) return;
+    show(loginMessage, (error && error.message) || 'לא הצלחנו לטעון. נסי לרענן.', 'error');
   });
 })();

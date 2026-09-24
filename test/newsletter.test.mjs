@@ -62,6 +62,7 @@ function clearCredentials() {
 test.afterEach(() => {
   clearCredentials();
   delete process.env.SITE_URL;
+  delete process.env.VERCEL_URL;
 });
 
 /* -------------------------------------------------------------- addresses */
@@ -129,9 +130,23 @@ test('SITE_URL wins so links in mail never point at a preview deploy', () => {
   assert.equal(siteUrl(request), 'https://rikma.binushka.com');
 });
 
-test('without SITE_URL the request host is used', () => {
-  const request = makeRequest({ headers: { host: 'example.test', 'x-forwarded-proto': 'https' } });
-  assert.equal(siteUrl(request), 'https://example.test');
+test('without SITE_URL an unknown request host is ignored', () => {
+  const request = makeRequest({
+    headers: {
+      host: 'evil.example',
+      'x-forwarded-host': 'evil.example',
+      'x-forwarded-proto': 'https',
+    },
+  });
+  assert.equal(siteUrl(request), 'https://rikma.binushka.com');
+});
+
+test('without SITE_URL an allowlisted Vercel host is used', () => {
+  process.env.VERCEL_URL = 'preview-abc.vercel.app';
+  const request = makeRequest({
+    headers: { host: 'preview-abc.vercel.app', 'x-forwarded-proto': 'https' },
+  });
+  assert.equal(siteUrl(request), 'https://preview-abc.vercel.app');
 });
 
 test('the unsubscribe link carries a verifiable token', () => {

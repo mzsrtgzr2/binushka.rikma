@@ -8,13 +8,13 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 
 import handler, { delivery } from '../api/admin-newsletter.mjs';
+import { COOKIE, issueSession } from '../lib/admin/auth.mjs';
 import * as repo from '../lib/admin/repo.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
 import { applyOmit, recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
@@ -24,12 +24,7 @@ const realSendIssue = delivery.sendIssue;
 const PASSWORD = 'test-password';
 
 function sessionCookie() {
-  const token = crypto
-    .createHmac('sha256', PASSWORD)
-    .update('binushka-admin-session-v1')
-    .digest('hex');
-
-  return `binushka-admin-v1=${token}`;
+  return `${COOKIE}=${issueSession({ ADMIN_PASSWORD: PASSWORD })}`;
 }
 
 function makeRequest({ method = 'POST', body, headers = {} } = {}) {
@@ -635,4 +630,46 @@ test('an unknown action is rejected', async () => {
 
   assert.equal(res.statusCode, 400);
   assert.equal(res.body.code, 'unknown_action');
+});
+
+test('newsletter admin rejects a foreign Origin', async () => {
+  const res = makeResponse();
+  await handler(authed({ method: 'GET', headers: { origin: 'https://evil.example' } }), res);
+  assert.equal(res.statusCode, 403);
+  assert.equal(res.body.code, 'forbidden');
+});
+
+test('a slug cannot escape the newsletter folder', async () => {
+  const outside = path.join(root, 'api', 'owned.md');
+  for (const slug of ['../api/owned', '..%2Fapi', 'a/b', '.hidden', '']) {
+    assert.equal(issues.isValidSlug(slug), false, slug);
+  }
+
+  const saved = await call({
+    body: { action: 'save', issue: { slug: '../api/owned', title: 'x', body: 'x' } },
+  });
+  assert.equal(saved.statusCode, 422);
+  assert.equal(saved.body.code, 'invalid_slug');
+  assert.equal(fs.existsSync(outside), false);
+
+  const edited = await call({ body: { action: 'save', slug: '../../etc/passwd', issue: { title: 'x' } } });
+  assert.equal(edited.statusCode, 422);
+
+  fs.mkdirSync(path.join(root, 'api'), { recursive: true });
+  fs.writeFileSync(outside, '---\ntitle: x\nstatus: draft\n---\n');
+  const deleted = await call({ body: { action: 'delete', slug: '../api/owned' } });
+  assert.equal(deleted.statusCode, 404);
+  assert.equal(fs.existsSync(outside), true);
+});
+
+test('front matter fields cannot inject extra keys through newlines', () => {
+  const issue = issues.normalize({
+    title: 'כותרת\nlayout: evil',
+    subtitle: 'a\r\npermalink: /admin/',
+    date: '2026-01-01\nlayout: evil',
+    body: 'x',
+  });
+  const text = issues.serialize(issue);
+  assert.doesNotMatch(text, /^layout:/m);
+  assert.doesNotMatch(text, /^permalink:/m);
 });

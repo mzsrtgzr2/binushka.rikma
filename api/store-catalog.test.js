@@ -308,3 +308,60 @@ test('normalizeProductInput rejects unknown category', () => {
   assert.equal(ok.error, undefined);
   assert.equal(ok.input.category, 'embroidery-supplies');
 });
+
+test('a product title cannot break out of its front matter line', () => {
+  const page = store.newPage({
+    slug: 'evil',
+    title: 'תיק\n---\nlayout default',
+    subtitle: 'x\n- form_url',
+    price: 100,
+    kind: 'fixed',
+    body: 'body',
+  });
+  assert.equal(page.match(/^---$/gm).length, 2);
+  assert.doesNotMatch(page, /^(layout|- form_url)/m);
+});
+
+test('variant descriptions keep real newlines across save/load', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-desc-'));
+  const description = 'שורה ראשונה\nשורה שנייה\nשורה שלישית';
+  writePage(
+    dir,
+    'books',
+    `title: ספרים
+price: ₪100
+variants:
+  one:
+    name: ספר
+    price: 100
+    description: ${JSON.stringify(description)}
+`
+  );
+  const page = store.parsePage('books', fs.readFileSync(path.join(dir, 'books.md'), 'utf8'));
+  assert.equal(page.variants[0].description, description);
+
+  const saved = store.applyPage(fs.readFileSync(path.join(dir, 'books.md'), 'utf8'), page);
+  const again = store.parsePage('books', saved);
+  assert.equal(again.variants[0].description, description);
+  // Must not accumulate backslashes on rewrite.
+  assert.match(saved, /description: ".*\\n.*"/);
+  assert.doesNotMatch(saved, /description: ".*\\\\n.*"/);
+
+  // Legacy doubled escapes from older saves collapse to real newlines.
+  writePage(
+    dir,
+    'legacy',
+    `title: ישן
+price: ₪50
+variants:
+  a:
+    name: סוג
+    price: 50
+    description: "שורה אחת\\\\\\\\nשורה שתיים"
+`
+  );
+  const legacy = store.parsePage('legacy', fs.readFileSync(path.join(dir, 'legacy.md'), 'utf8'));
+  assert.equal(legacy.variants[0].description, 'שורה אחת\nשורה שתיים');
+
+  fs.rmSync(dir, { recursive: true, force: true });
+});

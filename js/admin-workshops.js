@@ -718,10 +718,14 @@
       ? '<p class="admin-preview__hidden">מוסתרת — הסדנה לא תופיע ברשימה ולא תהיה בסל</p>'
       : '';
 
+    // A page's address does not always follow its slug, so an existing one is
+    // read off the page rather than guessed from the name in the form.
+    var url = (current && current.permalink) || (workshop.slug ? '/projects/' + workshop.slug + '/' : '');
+
     previewCard.innerHTML = '<h3 class="admin-preview__label">ברשימת הסדנאות</h3>' + hiddenNote + cardHtml(workshop);
     previewPage.innerHTML =
       '<h3 class="admin-preview__label">עמוד הסדנה</h3>' +
-      (workshop.slug ? '<p class="admin-preview__url" dir="ltr">/projects/' + escapeHtml(workshop.slug) + '/</p>' : '') +
+      (url ? '<p class="admin-preview__url" dir="ltr">' + escapeHtml(url) + '</p>' : '') +
       '<div class="admin-preview__page">' + pageHtml(workshop) + '</div>';
   }
 

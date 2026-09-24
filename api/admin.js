@@ -4,28 +4,31 @@
  * Production writes go to GitHub so Vercel rebuilds the site.
  */
 
-const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const store = require('./admin-store');
+const auth = require('../lib/admin/session');
 
-const COOKIE = 'binushka-admin-v1';
-const SESSION_PAYLOAD = 'binushka-admin-session-v1';
 const CATALOG_FILES = store.CATALOG_FILES;
 
 function json(res, status, body, extraHeaders) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
   if (extraHeaders) {
     Object.entries(extraHeaders).forEach(([key, value]) => res.setHeader(key, value));
   }
   return res.end(JSON.stringify(body));
 }
 
-function safeEqual(a, b) {
-  const left = crypto.createHash('sha256').update(String(a || '')).digest();
-  const right = crypto.createHash('sha256').update(String(b || '')).digest();
-  return crypto.timingSafeEqual(left, right);
+function redirect(res, location, extraHeaders) {
+  res.statusCode = 303;
+  res.setHeader('Location', location);
+  res.setHeader('Cache-Control', 'no-store');
+  if (extraHeaders) {
+    Object.entries(extraHeaders).forEach(([key, value]) => res.setHeader(key, value));
+  }
+  return res.end();
 }
 
 function pickEnv(bag, name) {
@@ -34,8 +37,28 @@ function pickEnv(bag, name) {
 }
 
 function adminPassword(env) {
-  const bag = env || process.env;
-  return pickEnv(bag, 'ADMIN_PASSWORD') || pickEnv(bag, 'BINUSHKA_ADMIN_PASSWORD');
+  return auth.adminPassword(env);
+}
+
+function requestBody(req) {
+  const body = req.body;
+  if (body && typeof body === 'object' && !Buffer.isBuffer(body) && !Array.isArray(body)) {
+    return body;
+  }
+  const raw = Buffer.isBuffer(body) ? body.toString('utf8') : String(body || '');
+  if (!raw) return {};
+  const type = String((req.headers && req.headers['content-type']) || '');
+  if (type.includes('application/x-www-form-urlencoded')) {
+    return Object.fromEntries(new URLSearchParams(raw));
+  }
+  if (type.includes('application/json')) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  }
+  return {};
 }
 
 function adminConfigHint(env) {
@@ -47,52 +70,6 @@ function adminConfigHint(env) {
   if (gitRef) parts.push(`ענף: ${gitRef}`);
   if (adminKeys.length) parts.push(`מפתחות: ${adminKeys.join(', ')}`);
   return parts.join(', ');
-}
-
-function sessionToken(env) {
-  const secret = adminPassword(env);
-  if (!secret) return '';
-  return crypto.createHmac('sha256', secret).update(SESSION_PAYLOAD).digest('hex');
-}
-
-function readCookie(req, name) {
-  const raw = String((req.headers && req.headers.cookie) || '');
-  const parts = raw.split(';');
-  for (const part of parts) {
-    const i = part.indexOf('=');
-    if (i === -1) continue;
-    if (part.slice(0, i).trim() === name) {
-      try {
-        return decodeURIComponent(part.slice(i + 1).trim());
-      } catch {
-        return '';
-      }
-    }
-  }
-  return '';
-}
-
-function cookieHeader(token, { clear, secure } = {}) {
-  const parts = [
-    `${COOKIE}=${clear ? '' : token}`,
-    'Path=/',
-    'HttpOnly',
-    'SameSite=Lax',
-    clear ? 'Max-Age=0' : 'Max-Age=2592000',
-  ];
-  if (secure) parts.push('Secure');
-  return parts.join('; ');
-}
-
-function isSecureReq(req) {
-  const proto = String((req.headers && req.headers['x-forwarded-proto']) || '').split(',')[0].trim();
-  return proto === 'https';
-}
-
-function isAuthed(req, env) {
-  const expected = sessionToken(env);
-  if (!expected) return false;
-  return safeEqual(readCookie(req, COOKIE), expected);
 }
 
 function repoParts(env) {
@@ -788,22 +765,34 @@ async function handler(req, res) {
     });
   }
 
-  const secure = isSecureReq(req);
-  const body = req.body || {};
+  const secure = auth.isSecureReq(req);
+  const body = requestBody(req);
 
   if (req.method === 'POST') {
     if (body.action === 'login') {
-      if (!safeEqual(body.password, adminPassword(env))) {
+      const next = auth.safeNext(body.next);
+      if (!auth.safeEqual(body.password, adminPassword(env))) {
+        if (auth.wantsRedirect(req)) {
+          return redirect(res, `${next}?login=error`);
+        }
         return json(res, 401, { error: 'סיסמה שגויה' });
       }
-      return json(res, 200, { ok: true }, { 'Set-Cookie': cookieHeader(sessionToken(env), { secure }) });
+      const cookies = { 'Set-Cookie': auth.loginSetCookie(env, { secure }) };
+      if (auth.wantsRedirect(req)) {
+        return redirect(res, next, cookies);
+      }
+      return json(res, 200, { ok: true }, cookies);
     }
     if (body.action === 'logout') {
-      return json(res, 200, { ok: true }, { 'Set-Cookie': cookieHeader('', { clear: true, secure }) });
+      const cookies = { 'Set-Cookie': auth.logoutSetCookie({ secure }) };
+      if (auth.wantsRedirect(req)) {
+        return redirect(res, auth.safeNext(body.next), cookies);
+      }
+      return json(res, 200, { ok: true }, cookies);
     }
   }
 
-  if (!isAuthed(req, env)) {
+  if (!auth.isAuthed(req, env)) {
     return json(res, 401, { error: 'צריך להתחבר' });
   }
 
@@ -896,9 +885,11 @@ async function handler(req, res) {
   }
 }
 
-handler.sessionToken = sessionToken;
-handler.isAuthed = isAuthed;
-handler.COOKIE = COOKIE;
+handler.sessionToken = auth.sessionToken;
+handler.issueSession = auth.issueSession;
+handler.isAuthed = auth.isAuthed;
+handler.COOKIE = auth.COOKIE;
+handler.LEGACY_COOKIE = auth.LEGACY_COOKIE;
 handler.splitFrontMatter = store.splitFrontMatter;
 handler.yamlValue = store.yamlValue;
 handler.setYamlBool = store.setYamlBool;

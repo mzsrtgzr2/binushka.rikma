@@ -8,13 +8,13 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 
 import handler, { delivery } from '../api/admin-newsletter.mjs';
+import { COOKIE, issueSession } from '../lib/admin/auth.mjs';
 import * as repo from '../lib/admin/repo.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
 import { applyOmit, recipientOverride, recipientOverrideIgnored } from '../lib/newsletter/recipients.mjs';
@@ -24,12 +24,7 @@ const realSendIssue = delivery.sendIssue;
 const PASSWORD = 'test-password';
 
 function sessionCookie() {
-  const token = crypto
-    .createHmac('sha256', PASSWORD)
-    .update('binushka-admin-session-v1')
-    .digest('hex');
-
-  return `binushka-admin-v1=${token}`;
+  return `${COOKIE}=${issueSession({ ADMIN_PASSWORD: PASSWORD })}`;
 }
 
 function makeRequest({ method = 'POST', body, headers = {} } = {}) {

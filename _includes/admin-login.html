@@ -1,8 +1,14 @@
 {%- comment -%}
 The same password and the same session cookie cover every section, so this form
-is identical wherever it appears.
+is identical wherever it appears. A real POST (not fetch) lets the browser store
+the HttpOnly session cookie as a first-party navigation cookie, and lets the
+password manager save the login.
 {%- endcomment -%}
-<form class="admin-login" id="admin-login">
+<form class="admin-login" id="admin-login" method="post" action="{{ '/api/admin/' | relative_url }}">
+  <input type="hidden" name="action" value="login">
+  <input type="hidden" name="next" value="{{ page.url | relative_url }}">
+  <label class="admin-login__username-label" for="admin-username">שם משתמש</label>
+  <input class="admin-login__username" type="text" id="admin-username" name="username" autocomplete="username" value="admin" tabindex="-1">
   <label class="form__label" for="admin-password">סיסמה</label>
   <input class="form__input" type="password" id="admin-password" name="password" autocomplete="current-password" required>
   <button type="submit" class="button button--primary">כניסה</button>

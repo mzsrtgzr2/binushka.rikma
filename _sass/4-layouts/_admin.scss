@@ -1187,3 +1187,178 @@
   flex-wrap: wrap;
   margin-top: 20px;
 }
+
+/* Workshop backoffice: the registration packs editor and the site preview. */
+
+.admin-packs-group {
+  margin-top: 20px;
+}
+
+.admin-packs {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+
+  &:empty {
+    margin: 0;
+  }
+}
+
+.admin-pack {
+  padding: 14px 16px;
+  border: 1px solid #e3e3e8;
+  border-radius: 10px;
+  background: #fbfbfd;
+}
+
+.admin-pack__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.admin-pack__label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.admin-pack__remove {
+  border: 0;
+  background: none;
+  color: #b42318;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.admin-pack__fields {
+  display: grid;
+  /* The name needs the room; the two numbers are two digits wide. */
+  grid-template-columns: 1fr 120px 120px;
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-pack__field {
+  display: block;
+  min-width: 0;
+
+  span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: var(--text-alt-color);
+  }
+
+  .form__input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* The card and the page below reuse the site's own classes so the preview
+   stays honest. These rules only scale them down to the preview column. */
+
+.admin-preview .project {
+  margin-bottom: 0;
+
+  &:hover {
+    transform: none;
+  }
+}
+
+.admin-preview .project__image {
+  min-height: 0;
+}
+
+.admin-preview .project__info {
+  margin-top: 16px;
+
+  .project__title {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .project__footer {
+    margin-top: 12px;
+  }
+}
+
+.admin-preview .registration-full,
+.admin-preview .registration-full-text {
+  font-size: 15px;
+}
+
+.admin-preview .registration-full {
+  bottom: 10px;
+  right: 10px;
+  padding: 4px 10px;
+}
+
+.admin-preview .project-subtitle {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.admin-preview .project-price {
+  margin-top: 10px;
+  font-size: 20px;
+}
+
+.admin-preview .project-image-container {
+  display: block;
+}
+
+.admin-preview .project-image-container img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.admin-preview .page-image .project-image-container {
+  position: absolute;
+  inset: 0;
+}
+
+.admin-preview .workshop-booking {
+  max-width: none;
+  margin: 24px 0;
+  padding: 20px 16px;
+
+  .workshop-booking__price {
+    font-size: 26px;
+  }
+
+  .workshop-booking__pack-price {
+    font-size: 20px;
+  }
+
+  .workshop-booking__note {
+    font-size: 12px;
+  }
+
+  .button {
+    margin-top: 16px;
+  }
+}
+
+/* A hidden workshop still renders, so the fade is the only thing saying it
+   will not be on the site. */
+.admin-preview .is-preview-hidden {
+  opacity: 0.5;
+}
+
+@media only screen and (max-width: $mobile) {
+  .admin-pack__fields {
+    grid-template-columns: 1fr 1fr;
+
+    .admin-pack__field:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+}

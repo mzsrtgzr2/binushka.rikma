@@ -26,7 +26,7 @@ variants:
     image: /images/store/scissors/screenshot-2026-09-23-at-23-03-34-muej8ry3.jpg
     gallery:
       - /images/store/scissors/screenshot-2026-09-23-at-22-01-39-muej8ry4.jpg
-    description: "גיליתי אותן בצ׳כיה לפני שנה ומאז לא מצאתי כאלה בארץ! סוף סוף הצלחתי לשים ידיי על 2 זוגות.\\nגם הן בגודל 9 ס״מ."
+    description: "גיליתי אותן בצ׳כיה לפני שנה ומאז לא מצאתי כאלה בארץ! סוף סוף הצלחתי לשים ידיי על 2 זוגות.\nגם הן בגודל 9 ס״מ."
   singer:
     name: מספרי רקמה פרחוניות של singer
     price: 80

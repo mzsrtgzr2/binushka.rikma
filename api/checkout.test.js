@@ -189,6 +189,94 @@ test('a pair pack is one income line at the discounted price', () => {
   assert.equal(payload.amount, 600);
 });
 
+test('checkout return URLs are pinned to SITE_URL and ignore client paths', () => {
+  const urls = checkout.checkoutReturnUrls({
+    SITE_URL: 'https://rikma.binushka.com',
+  });
+  assert.equal(urls.successUrl, 'https://rikma.binushka.com/thanks/');
+  assert.equal(urls.failureUrl, 'https://rikma.binushka.com/checkout/');
+});
+
+test('checkout rejects a payment URL on an unknown host', () => {
+  const env = { SITE_URL: 'https://rikma.binushka.com' };
+  assert.equal(checkout.isAllowedPaymentUrl('https://evil.example/pay', env), false);
+  assert.equal(
+    checkout.isAllowedPaymentUrl('https://www.greeninvoice.co.il/pay/abc', env),
+    true
+  );
+});
+
+function mockRes() {
+  return {
+    headers: {},
+    statusCode: 200,
+    body: null,
+    setHeader(key, value) {
+      this.headers[String(key).toLowerCase()] = value;
+    },
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(body) {
+      this.body = body;
+      return this;
+    },
+    end() {
+      return this;
+    },
+  };
+}
+
+test('checkout handler rejects a foreign Origin before creating a payment', async () => {
+  const req = {
+    method: 'POST',
+    headers: { origin: 'https://evil.example' },
+    body: {
+      items: [{ id: 'fox', quantity: 1 }],
+      shipping: 'pickup',
+      ...customerBody,
+      successPath: 'https://evil.example/thanks/',
+    },
+  };
+  const res = mockRes();
+  await checkout(req, res);
+  assert.equal(res.statusCode, 403);
+  assert.equal(res.headers['access-control-allow-origin'], undefined);
+  assert.equal(res.body.error, 'בקשה לא מורשית');
+});
+
+test('skip-payment is refused on production', async () => {
+  const saved = {
+    MORNING_DEV_SKIP_PAYMENT: process.env.MORNING_DEV_SKIP_PAYMENT,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    MORNING_API_KEY_ID: process.env.MORNING_API_KEY_ID,
+    MORNING_API_KEY_SECRET: process.env.MORNING_API_KEY_SECRET,
+    SITE_URL: process.env.SITE_URL,
+  };
+  process.env.MORNING_DEV_SKIP_PAYMENT = 'true';
+  process.env.VERCEL_ENV = 'production';
+  process.env.MORNING_API_KEY_ID = 'key';
+  process.env.MORNING_API_KEY_SECRET = 'secret';
+  process.env.SITE_URL = 'https://rikma.binushka.com';
+  const req = {
+    method: 'POST',
+    headers: { origin: 'https://rikma.binushka.com' },
+    body: { items: [{ id: 'fox', quantity: 1 }], shipping: 'pickup', ...customerBody },
+  };
+  const res = mockRes();
+  try {
+    await checkout(req, res);
+    assert.equal(res.statusCode, 503);
+    assert.match(res.body.error, /פרודקשן/);
+  } finally {
+    Object.keys(saved).forEach((key) => {
+      if (saved[key] === undefined) delete process.env[key];
+      else process.env[key] = saved[key];
+    });
+  }
+});
+
 test('workshop places become income lines without shipping', () => {
   const order = applyWorkshopNote(
     buildOrder([{ id: 'workshop-rehovot-04-12', quantity: 2 }], 'none'),

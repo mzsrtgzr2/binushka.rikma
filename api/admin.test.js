@@ -1311,3 +1311,33 @@ body
   assert.equal(book.products.hoops.stock, null);
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+test('login locks an IP after repeated failures, even for the right password', async () => {
+  const headers = { 'x-forwarded-for': '203.0.113.77' };
+  const env = { ADMIN_PASSWORD: 'secret-pass' };
+  for (let i = 0; i < 5; i += 1) {
+    const miss = await request(admin, { method: 'POST', headers, body: { action: 'login', password: `guess-${i}` }, env });
+    assert.equal(miss.status, 401);
+  }
+  const locked = await request(admin, { method: 'POST', headers, body: { action: 'login', password: 'secret-pass' }, env });
+  assert.equal(locked.status, 429);
+  assert.equal(locked.headers['set-cookie'], undefined);
+
+  const form = await request(admin, {
+    method: 'POST',
+    headers: { ...headers, 'content-type': 'application/x-www-form-urlencoded' },
+    body: { action: 'login', password: 'secret-pass', next: '/admin/store/' },
+    env,
+  });
+  assert.equal(form.status, 303);
+  assert.equal(form.headers.location, '/admin/store/?login=locked');
+  assert.equal(form.headers['set-cookie'], undefined);
+
+  const other = await request(admin, {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '203.0.113.78' },
+    body: { action: 'login', password: 'secret-pass' },
+    env,
+  });
+  assert.equal(other.status, 200);
+});

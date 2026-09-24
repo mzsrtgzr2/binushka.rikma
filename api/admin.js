@@ -769,16 +769,21 @@ async function handler(req, res) {
   if (req.method === 'POST') {
     if (body.action === 'login') {
       const next = auth.safeNext(body.next);
+      const ip = clientIp(req);
+      if (loginLimiter.isBlocked(ip)) {
+        if (auth.wantsRedirect(req)) {
+          return redirect(res, `${next}?login=locked`);
+        }
+        return json(res, 429, { error: 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' });
+      }
       if (!auth.safeEqual(body.password, adminPassword(env))) {
-        const limited = loginLimiter(clientIp(req));
+        loginLimiter(ip);
         if (auth.wantsRedirect(req)) {
           return redirect(res, `${next}?login=error`);
         }
-        if (limited) {
-          return json(res, 429, { error: 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' });
-        }
         return json(res, 401, { error: 'סיסמה שגויה' });
       }
+      loginLimiter.reset(ip);
       const cookies = { 'Set-Cookie': auth.loginSetCookie(env, { secure }) };
       if (auth.wantsRedirect(req)) {
         return redirect(res, next, cookies);

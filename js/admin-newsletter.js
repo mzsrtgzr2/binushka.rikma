@@ -716,8 +716,9 @@
   /* ------------------------------------------------------------------ events */
 
   function consumeLoginQuery() {
-    if (!/[?&]login=error\b/.test(window.location.search)) return;
-    show(loginMessage, 'סיסמה שגויה', 'error');
+    var match = /[?&]login=(error|locked)\b/.exec(window.location.search);
+    if (!match) return;
+    show(loginMessage, match[1] === 'locked' ? 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' : 'סיסמה שגויה', 'error');
     if (history.replaceState) history.replaceState({}, '', window.location.pathname);
   }
 

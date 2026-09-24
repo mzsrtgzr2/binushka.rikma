@@ -29,23 +29,31 @@ layout: default
   </div>
 
   <div class="row" id="store-grid">
-    {% assign sorted = site.store | sort: 'date' %}
-    {% assign store_available = '' | split: '' %}
+    {% comment %}
+      Default order (no-JS / first paint): title A–Z, embroidery-supplies first.
+      Client store-sort.js re-applies the same default and honors sort menu changes.
+    {% endcomment %}
+    {% assign sorted = site.store | sort: 'title' %}
+    {% assign store_embroidery = '' | split: '' %}
+    {% assign store_other = '' | split: '' %}
     {% assign store_gift_card = '' | split: '' %}
     {% assign store_sold_out = '' | split: '' %}
     {% for item in sorted %}
-      {% unless item.hide %}
+      {% comment %}Skip hidden items and broken front matter (empty title husks).{% endcomment %}
+      {% unless item.hide or item.title == blank %}
         {% assign item_slug = item.slug | default: item.basename %}
         {% if item.out_of_stock or item.stock == 0 %}
           {% assign store_sold_out = store_sold_out | push: item %}
         {% elsif item_slug == 'gift-card' %}
           {% assign store_gift_card = store_gift_card | push: item %}
+        {% elsif item.category == 'embroidery-supplies' %}
+          {% assign store_embroidery = store_embroidery | push: item %}
         {% else %}
-          {% assign store_available = store_available | push: item %}
+          {% assign store_other = store_other | push: item %}
         {% endif %}
       {% endunless %}
     {% endfor %}
-    {% assign store_display = store_available | concat: store_gift_card | concat: store_sold_out %}
+    {% assign store_display = store_embroidery | concat: store_other | concat: store_gift_card | concat: store_sold_out %}
 
     {% for item in store_display %}
       {% assign sold_out = false %}
@@ -93,6 +101,7 @@ layout: default
         class="store-item col col-4 col-d-6 col-t-12"
         data-product-id="{{ slug }}"
         data-category="{{ item.category }}"
+        data-title="{{ item.title | escape }}"
         data-price="{{ sort_price }}"
         data-sold-out="{% if sold_out %}true{% else %}false{% endif %}"
         data-date="{{ item.date | date: '%s' }}"

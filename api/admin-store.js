@@ -1254,6 +1254,7 @@ module.exports = {
   normalizeCategory,
   splitFrontMatter,
   yamlValue,
+  formatYamlScalar,
   setYamlBool,
   setYamlScalar,
   setYamlGallery,

@@ -661,6 +661,128 @@ test('a quick edit naming an unknown workshop is refused whole', async () => {
   );
 });
 
+/* -------------------------------------------------------------------- order */
+
+/** Three workshops, deliberately not in date order once placed by hand. */
+function seedThree() {
+  write('2026-03-04-rehovot-spring.md', EXISTING);
+  write(
+    '2026-04-10-tel-aviv.md',
+    '---\ntitle: "רקמה בתל אביב"\ndate: 2026-04-10 19:00:00 +0300\nhide: false\n---\n\nטקסט\n'
+  );
+  write(
+    '2026-05-20-haifa.md',
+    '---\ntitle: "רקמה בחיפה"\ndate: 2026-05-20 19:00:00 +0300\nhide: false\n---\n\nטקסט\n'
+  );
+}
+
+const slugsOf = (res) => res.body.workshops.map((workshop) => workshop.slug);
+
+test('without a hand-picked order the list reads by date, soonest first', async () => {
+  seedThree();
+
+  const res = await call({ method: 'GET' });
+
+  assert.deepEqual(slugsOf(res), ['rehovot-spring', 'tel-aviv', 'haifa']);
+});
+
+test('saving the list writes each workshop its position', async () => {
+  seedThree();
+
+  const res = await call({
+    body: {
+      action: 'stock',
+      workshops: [
+        { slug: 'haifa', order: 1 },
+        { slug: 'rehovot-spring', spots: 8, order: 2 },
+        { slug: 'tel-aviv', order: 3 },
+      ],
+    },
+  });
+
+  assert.equal(res.statusCode, 200);
+  assert.match(read('2026-05-20-haifa.md'), /^order: 1$/m);
+  assert.match(read('2026-03-04-rehovot-spring.md'), /^order: 2$/m);
+  assert.match(read('2026-04-10-tel-aviv.md'), /^order: 3$/m);
+});
+
+// The backoffice list is what gets dragged, so it has to come back in the
+// order the workshops page will show. If the two disagreed, saving would
+// silently rewrite the site to whatever the backoffice happened to show.
+test('the list comes back in the order it was placed in', async () => {
+  seedThree();
+
+  await call({
+    body: {
+      action: 'stock',
+      workshops: [
+        { slug: 'haifa', order: 1 },
+        { slug: 'rehovot-spring', order: 2 },
+        { slug: 'tel-aviv', order: 3 },
+      ],
+    },
+  });
+
+  assert.deepEqual(slugsOf(await call({ method: 'GET' })), ['haifa', 'rehovot-spring', 'tel-aviv']);
+});
+
+test('a workshop nobody has placed yet sorts after the ones that were, by date', async () => {
+  seedThree();
+
+  await call({ body: { action: 'stock', workshops: [{ slug: 'haifa', order: 1 }] } });
+
+  assert.deepEqual(slugsOf(await call({ method: 'GET' })), ['haifa', 'rehovot-spring', 'tel-aviv']);
+});
+
+test('hidden workshops sit at the end, where they are out of the way', async () => {
+  seedThree();
+
+  await call({ body: { action: 'stock', workshops: [{ slug: 'rehovot-spring', hide: true }] } });
+
+  assert.deepEqual(slugsOf(await call({ method: 'GET' })), ['tel-aviv', 'haifa', 'rehovot-spring']);
+});
+
+// The editor has no say over the order, so a save from it must not be the
+// thing that loses a position set in the list.
+test('editing a workshop keeps the position it was given', async () => {
+  seedThree();
+  await call({ body: { action: 'stock', workshops: [{ slug: 'rehovot-spring', order: 7 }] } });
+
+  const opened = (await call({ method: 'GET' })).body.workshops.find(
+    (workshop) => workshop.slug === 'rehovot-spring'
+  );
+  assert.equal(opened.order, 7);
+
+  await call({ body: { action: 'save', workshop: { ...opened, title: 'שם חדש' } } });
+
+  assert.match(read('2026-03-04-rehovot-spring.md'), /^order: 7$/m);
+});
+
+test('a position that is not a count is refused', async () => {
+  seed();
+
+  const res = await call({
+    body: { action: 'stock', workshops: [{ slug: 'rehovot-spring', order: 0 }] },
+  });
+
+  assert.equal(res.statusCode, 422);
+  assert.equal(res.body.code, 'order_invalid');
+});
+
+test('saving the same positions again writes nothing', async () => {
+  seedThree();
+  const rows = [
+    { slug: 'haifa', order: 1 },
+    { slug: 'rehovot-spring', spots: 8, order: 2 },
+    { slug: 'tel-aviv', order: 3 },
+  ];
+
+  await call({ body: { action: 'stock', workshops: rows } });
+  const res = await call({ body: { action: 'stock', workshops: rows } });
+
+  assert.deepEqual(res.body.changed, []);
+});
+
 /* ------------------------------------------------------------------ delete */
 
 test('deleting removes the page and the catalog entry', async () => {

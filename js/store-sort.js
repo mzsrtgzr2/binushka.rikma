@@ -10,19 +10,15 @@
     return Number.isFinite(n) ? n : 0;
   }
 
-  function productDate(el) {
-    var raw = el.getAttribute('data-date');
-    var n = Number(raw);
+  /** Where the shop chose to put this card, decided at build time. */
+  function productOrder(el) {
+    var n = Number(el.getAttribute('data-order'));
     return Number.isFinite(n) ? n : 0;
   }
 
   function isSoldOut(el) {
     if (el.getAttribute('data-sold-out') === 'true') return true;
     return Boolean(el.querySelector('.out-of-stock'));
-  }
-
-  function isGiftCard(el) {
-    return el.getAttribute('data-product-id') === 'gift-card';
   }
 
   function syncFromLiveCatalog() {
@@ -41,16 +37,11 @@
   }
 
   function compareProducts(a, b, mode) {
+    // Something that sold out since the page was built sinks here rather than
+    // at build time, so the shop does not lead with it until the next deploy.
     var aOut = isSoldOut(a);
     var bOut = isSoldOut(b);
     if (aOut !== bOut) return aOut ? 1 : -1;
-
-    // Gift card stays last among available products, before sold-out.
-    if (!aOut && !bOut) {
-      var aGift = isGiftCard(a);
-      var bGift = isGiftCard(b);
-      if (aGift !== bGift) return aGift ? 1 : -1;
-    }
 
     if (mode === 'price-asc') {
       var asc = productPrice(a) - productPrice(b);
@@ -60,7 +51,9 @@
       if (desc !== 0) return desc;
     }
 
-    return productDate(a) - productDate(b);
+    // The shop's own order, which the visitor's choice of sort displaces and
+    // which is what «ברירת מחדל» puts back.
+    return productOrder(a) - productOrder(b);
   }
 
   function applyCategoryFilter() {

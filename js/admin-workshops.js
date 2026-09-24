@@ -62,6 +62,8 @@
 
   var workshops = [];
   var original = {};
+  var originalOrder = '';
+  var reorder = null;
   var current = null;
   var previewTimer;
   var saveHint = '';
@@ -749,7 +751,13 @@
     return map;
   }
 
+  function orderOf(list) {
+    return (list || []).map(function (workshop) { return workshop.slug; }).join('|');
+  }
+
   function isDirty() {
+    if (orderOf(workshops) !== originalOrder) return true;
+
     return workshops.some(function (workshop) {
       var before = original[workshop.slug] || {};
       var spots = workshop.spots == null ? null : Number(workshop.spots);
@@ -774,10 +782,23 @@
     return parts.join(' · ');
   }
 
+  /** The arrows, the grip and the position this row is currently in. */
+  function orderControlsHtml(index) {
+    return (
+      '<div class="admin-card__order">' +
+      '<button type="button" class="admin-card__move" data-move="up" title="העלאה" aria-label="העלאה">↑</button>' +
+      '<span class="admin-card__rank" dir="ltr">' + (index + 1) + '</span>' +
+      '<button type="button" class="admin-card__move" data-move="down" title="הורדה" aria-label="הורדה">↓</button>' +
+      '<span class="admin-card__grip" data-drag-handle draggable="true" title="גרירה" aria-hidden="true">⠿</span>' +
+      '</div>'
+    );
+  }
+
   function render() {
-    listEl.innerHTML = workshops.map(function (workshop) {
+    listEl.innerHTML = workshops.map(function (workshop, index) {
       return (
         '<li class="admin-card" data-slug="' + escapeHtml(workshop.slug) + '">' +
+        orderControlsHtml(index) +
         (workshop.image
           ? '<img class="admin-card__thumb" src="' + escapeHtml(previewSrc(workshop.image)) + '" alt="">'
           : '<span class="admin-card__thumb admin-card__thumb--empty"></span>') +
@@ -804,7 +825,15 @@
       listEl.innerHTML = '<li class="admin-hint">עוד אין סדנאות. אפשר להתחיל מ«סדנה חדשה».</li>';
     }
 
+    if (reorder) reorder.refresh();
     saveSpotsBtn.disabled = !isDirty();
+  }
+
+  /** Renumber in place: re-rendering here would take the focus off the arrow. */
+  function syncRanks() {
+    Array.prototype.forEach.call(listEl.querySelectorAll('.admin-card__rank'), function (el, index) {
+      el.textContent = index + 1;
+    });
   }
 
   function renderStats() {
@@ -833,17 +862,21 @@
     saveSpotsBtn.disabled = true;
     show(boardMessage, 'שומרת…', 'info');
 
-    var payload = workshops.map(function (workshop) {
+    // The position is the row's place in this list, so saving is what turns a
+    // drag into the order the site will show.
+    var payload = workshops.map(function (workshop, index) {
       return {
         slug: workshop.slug,
         spots: workshop.spots,
         registration_full: workshop.registration_full,
-        hide: workshop.hide
+        hide: workshop.hide,
+        order: index + 1
       };
     });
 
     return api('POST', { action: 'stock', workshops: payload }).then(function (data) {
       original = snapshot(workshops);
+      originalOrder = orderOf(workshops);
       render();
       var changed = (data.changed || []).length;
       show(boardMessage, changed ? savedMessage(data, 'נשמר.') : 'אין שינויים לשמור', changed ? 'ok' : 'info');
@@ -1172,6 +1205,7 @@
     return api('GET').then(function (data) {
       workshops = data.workshops || [];
       original = snapshot(workshops);
+      originalOrder = orderOf(workshops);
       render();
       renderStats();
       board.hidden = false;
@@ -1255,6 +1289,17 @@
     var workshop = findWorkshop(button.getAttribute('data-edit'));
     if (workshop) openEditor(workshop);
   });
+
+  if (window.AdminReorder) {
+    reorder = AdminReorder.attach(listEl, {
+      itemSelector: '.admin-card',
+      onChange: function (slugs) {
+        workshops = slugs.map(function (slug) { return findWorkshop(slug); }).filter(Boolean);
+        syncRanks();
+        saveSpotsBtn.disabled = !isDirty();
+      }
+    });
+  }
 
   editorCancel.addEventListener('click', closeEditor);
 

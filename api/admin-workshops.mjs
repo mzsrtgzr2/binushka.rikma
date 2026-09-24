@@ -32,19 +32,25 @@ function parseAll(rawByFile) {
   return Object.keys(rawByFile)
     .map((filename) => workshops.parse(filename, rawByFile[filename]))
     .filter(Boolean)
-    .sort(byDateNewestFirst);
+    .sort(byListOrder);
 }
 
 /**
- * Open workshops first, then the newest date: the one being filled up is what
- * the backoffice is opened for, and last year's is what it is scrolled past.
+ * The order the workshops page will show, so that dragging a row here means
+ * what it looks like it means. Hidden workshops are not on that page at all,
+ * so they sit at the end, out of the way of the ones being arranged.
  */
-function byDateNewestFirst(a, b) {
+function byListOrder(a, b) {
   if (Boolean(a.hide) !== Boolean(b.hide)) return a.hide ? 1 : -1;
+
+  // A workshop only has an order once it has been placed by hand. Until then
+  // it falls back to its date, after everything already placed.
+  if (a.order && b.order) return a.order - b.order;
+  if (a.order || b.order) return a.order ? -1 : 1;
 
   const left = Date.parse(a.date) || 0;
   const right = Date.parse(b.date) || 0;
-  return right - left || String(a.title).localeCompare(String(b.title), 'he');
+  return left - right || String(a.title).localeCompare(String(b.title), 'he');
 }
 
 function findBySlug(rawByFile, slug) {
@@ -106,10 +112,16 @@ async function handleStock(res, env, body) {
 
     const registrationFull = Boolean(row.registration_full) || spots === 0;
     const hide = Boolean(row.hide);
+
+    const parsedOrder = workshops.parseOrder(row.order);
+    if (parsedOrder.error) return sendJson(res, 422, { ok: false, code: 'order_invalid' });
+    const order = parsedOrder.order;
+
     if (
       current.spots === spots &&
       current.registration_full === registrationFull &&
-      current.hide === hide
+      current.hide === hide &&
+      (order == null || current.order === order)
     ) {
       continue;
     }
@@ -118,6 +130,7 @@ async function handleStock(res, env, body) {
       spots,
       registration_full: registrationFull,
       hide,
+      order,
     });
 
     nextRaw[current.file] = content;

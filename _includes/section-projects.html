@@ -13,11 +13,9 @@
           </div>
 
           <div class="row">
-            {% assign sorted = site.projects | sort: 'date'  %}
-            {% for project in sorted %}
-              {% unless project.hide %}
-                {% include project-card.html project=project %}
-              {% endunless %}
+            {% include projects-ordered.html %}
+            {% for project in projects_ordered %}
+              {% include project-card.html project=project %}
             {% endfor %}
           </div>
 

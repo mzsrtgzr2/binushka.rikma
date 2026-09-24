@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const store = require('./admin-store');
 const auth = require('../lib/admin/session');
+const { foreignOrigin, createRateLimiter, clientIp } = require('../lib/origin');
 
 const CATALOG_FILES = store.CATALOG_FILES;
 
@@ -65,10 +66,8 @@ function adminConfigHint(env) {
   const bag = env || process.env;
   const vercelEnv = pickEnv(bag, 'VERCEL_ENV') || 'unknown';
   const gitRef = pickEnv(bag, 'VERCEL_GIT_COMMIT_REF');
-  const adminKeys = Object.keys(bag).filter((key) => /admin/i.test(key));
   const parts = [`סביבה: ${vercelEnv}`];
   if (gitRef) parts.push(`ענף: ${gitRef}`);
-  if (adminKeys.length) parts.push(`מפתחות: ${adminKeys.join(', ')}`);
   return parts.join(', ');
 }
 
@@ -511,11 +510,38 @@ async function saveWorkshopFlags(env, updates) {
   return { target: loaded.target, changed };
 }
 
+const PAID_ORDERS_DIR = '_paid_orders';
+
+function paidOrderPath(orderId) {
+  if (!/^[a-f0-9]{24}$/.test(String(orderId || ''))) throw new Error('invalid order id');
+  return `${PAID_ORDERS_DIR}/${orderId}.json`;
+}
+
+/** The record left by a processed payment, or null if this order was never applied. */
+async function readPaidOrder(env, orderId) {
+  const filePath = paidOrderPath(orderId);
+  const target = writeTarget(env);
+  if (target === 'local') {
+    const full = path.join(localRoot(env), filePath);
+    return fs.existsSync(full) ? JSON.parse(fs.readFileSync(full, 'utf8')) : null;
+  }
+  if (target !== 'github') return null;
+  try {
+    return JSON.parse(await githubRead(env, filePath));
+  } catch (err) {
+    if (err.status === 404) return null;
+    throw err;
+  }
+}
+
 /**
- * After a paid checkout starts successfully, reduce tracked stock quantities.
+ * After Morning confirms a payment, reduce tracked stock quantities.
  * purchases: [{ slug|id, quantity, variant? }]
+ * opts.extraFiles are written in the same commit, so a paid-order marker and
+ * the stock it consumed land together or not at all.
  */
-async function decrementInventory(env, purchases) {
+async function decrementInventory(env, purchases, opts = {}) {
+  const extraFiles = opts.extraFiles || [];
   const target = writeTarget(env);
   if (!target) return { skipped: true, reason: 'no-write-target' };
 
@@ -582,9 +608,14 @@ async function decrementInventory(env, purchases) {
   if (!changed.length) return { target, changed: [] };
 
   if (target === 'local') {
+    for (const file of extraFiles) {
+      const full = path.join(localRoot(env), file.path);
+      fs.mkdirSync(path.dirname(full), { recursive: true });
+      fs.writeFileSync(full, file.content);
+    }
     return { target, changed };
   }
-  await commitFiles(env, files, 'Decrement store stock after purchase');
+  await commitFiles(env, [...files, ...extraFiles], opts.message || 'Decrement store stock after purchase');
   return { target, changed };
 }
 
@@ -745,20 +776,19 @@ async function publicInventory(env) {
   return { source, products };
 }
 
-async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  if (req.headers.origin) {
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  }
+const loginLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
 
+async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
     return res.end();
   }
 
   const env = process.env;
+  if (foreignOrigin(req, env)) {
+    return json(res, 403, { error: 'בקשה לא מורשית' });
+  }
+
   if (!adminPassword(env)) {
     return json(res, 503, {
       error: `ניהול החנות עדיין לא הוגדר (ADMIN_PASSWORD). ${adminConfigHint(env)}. צריך משתנה Preview בשם ADMIN_PASSWORD ואז Redeploy.`,
@@ -771,12 +801,21 @@ async function handler(req, res) {
   if (req.method === 'POST') {
     if (body.action === 'login') {
       const next = auth.safeNext(body.next);
+      const ip = clientIp(req);
+      if (loginLimiter.isBlocked(ip)) {
+        if (auth.wantsRedirect(req)) {
+          return redirect(res, `${next}?login=locked`);
+        }
+        return json(res, 429, { error: 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' });
+      }
       if (!auth.safeEqual(body.password, adminPassword(env))) {
+        loginLimiter(ip);
         if (auth.wantsRedirect(req)) {
           return redirect(res, `${next}?login=error`);
         }
         return json(res, 401, { error: 'סיסמה שגויה' });
       }
+      loginLimiter.reset(ip);
       const cookies = { 'Set-Cookie': auth.loginSetCookie(env, { secure }) };
       if (auth.wantsRedirect(req)) {
         return redirect(res, next, cookies);
@@ -898,6 +937,8 @@ handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('
 handler.normalizeUpdates = normalizeFlags;
 handler.normalizeWorkshopUpdates = normalizeWorkshopFlags;
 handler.decrementInventory = decrementInventory;
+handler.readPaidOrder = readPaidOrder;
+handler.paidOrderPath = paidOrderPath;
 handler.assertInventory = assertInventory;
 handler.publicInventory = publicInventory;
 handler.parseStock = store.parseStock;

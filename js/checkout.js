@@ -75,6 +75,33 @@
     return filled;
   }
 
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : String(s);
+    return d.innerHTML;
+  }
+
+  function isSafePaymentUrl(url) {
+    try {
+      var parsed = new URL(url, window.location.origin);
+      if (parsed.username || parsed.password) return false;
+      var host = parsed.hostname.toLowerCase();
+      var https = parsed.protocol === 'https:';
+      var local = host === 'localhost' || host === '127.0.0.1';
+      if (!https && !local) return false;
+      if (host === window.location.hostname) {
+        return parsed.pathname === '/thanks' || parsed.pathname === '/thanks/';
+      }
+      if (host === 'greeninvoice.co.il' || host.slice(-20) === '.greeninvoice.co.il') return https;
+      if (host === 'morning.co' || host.slice(-11) === '.morning.co') return https;
+      if (host === 'morning.dev' || host.slice(-12) === '.morning.dev') return https;
+      if (host === 'mrng.to' || host === 'pay.grow.link') return https;
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function showMessage(text, type) {
     if (!messageEl) return;
     messageEl.textContent = text;
@@ -155,18 +182,18 @@
         .map(function (item) {
           var img = item.image
             ? '<img class="checkout-lines__thumb" src="' +
-              item.image +
+              escapeHtml(item.image) +
               '" alt="">'
             : '<span class="checkout-lines__thumb checkout-lines__thumb--empty" aria-hidden="true"></span>';
           return (
             '<li class="checkout-lines__item checkout-lines__item--product">' +
             img +
             '<span class="checkout-lines__info"><span class="checkout-lines__name">' +
-            item.name +
+            escapeHtml(item.name) +
             '</span><span class="checkout-lines__qty">× ' +
-            item.quantity +
+            escapeHtml(item.quantity) +
             '</span></span><span class="checkout-lines__price">₪' +
-            item.price * item.quantity +
+            escapeHtml(item.price * item.quantity) +
             '</span></li>'
           );
         })
@@ -376,7 +403,6 @@
       city: data.city,
       zip: data.zip || '',
       country: data.country,
-      successPath: '/thanks/',
     };
     if (data.variantNote) payload.variantNote = String(data.variantNote).trim();
     if (data.participantsNote) payload.participantsNote = String(data.participantsNote).trim();
@@ -415,7 +441,7 @@
               body = {};
             }
           }
-          if (!res.ok || !body.url) {
+          if (!res.ok || !body.url || !isSafePaymentUrl(body.url)) {
             throw new Error(body.error || 'לא הצלחנו לפתוח תשלום. נסי שוב.');
           }
           return body;

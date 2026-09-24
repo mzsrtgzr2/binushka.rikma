@@ -142,6 +142,13 @@
     return d.innerHTML;
   }
 
+  function safeSitePath(url) {
+    var value = String(url || '');
+    if (!value || value.charAt(0) !== '/' || value.charAt(1) === '/') return '';
+    if (value.indexOf('\\') !== -1 || /[\s<>"'`]/.test(value)) return '';
+    return value;
+  }
+
   function hasPerVariantStock(p) {
     if (!p || !p.variants || p.kind === 'workshop') return false;
     return Object.keys(p.variants).some(function (id) {
@@ -629,7 +636,11 @@
       li.innerHTML =
         thumb +
         '<div class="store-cart__line-info">' +
-        '<a href="' + item.url + '">' + escapeHtml(item.name) + '</a>' +
+        '<a href="' +
+        escapeHtml(safeSitePath(item.url) || '#') +
+        '">' +
+        escapeHtml(item.name) +
+        '</a>' +
         '<span class="store-cart__line-price">₪' + item.price * item.quantity + '</span>' +
         '</div>' +
         '<div class="store-cart__line-actions' + (atMax ? ' is-at-max' : '') + '">' +

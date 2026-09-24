@@ -309,6 +309,19 @@ test('normalizeProductInput rejects unknown category', () => {
   assert.equal(ok.input.category, 'embroidery-supplies');
 });
 
+test('a product title cannot break out of its front matter line', () => {
+  const page = store.newPage({
+    slug: 'evil',
+    title: 'תיק\n---\nlayout default',
+    subtitle: 'x\n- form_url',
+    price: 100,
+    kind: 'fixed',
+    body: 'body',
+  });
+  assert.equal(page.match(/^---$/gm).length, 2);
+  assert.doesNotMatch(page, /^(layout|- form_url)/m);
+});
+
 test('variant descriptions keep real newlines across save/load', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-desc-'));
   const description = 'שורה ראשונה\nשורה שנייה\nשורה שלישית';

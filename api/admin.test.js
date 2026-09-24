@@ -193,6 +193,29 @@ test('expired or tampered session is unauthorized', async () => {
   assert.equal(tamperedResult.status, 401);
 });
 
+test('admin rejects a foreign Origin and does not reflect CORS', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { origin: 'https://evil.example' },
+    body: { action: 'login', password: 'secret-pass' },
+    env: { ADMIN_PASSWORD: 'secret-pass' },
+  });
+  assert.equal(result.status, 403);
+  assert.equal(result.headers['access-control-allow-origin'], undefined);
+  assert.equal(result.headers['access-control-allow-credentials'], undefined);
+});
+
+test('admin login is allowed from the real shop origin', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { origin: 'https://rikma.binushka.com', 'x-forwarded-proto': 'https' },
+    body: { action: 'login', password: 'secret-pass' },
+    env: { ADMIN_PASSWORD: 'secret-pass', SITE_URL: 'https://rikma.binushka.com' },
+  });
+  assert.equal(result.status, 200);
+  assert.match(String(result.headers['set-cookie']), /binushka-admin-v2=v2\./);
+});
+
 test('wrong password is rejected', async () => {
   const result = await request(admin, {
     method: 'POST',
@@ -1287,4 +1310,34 @@ body
   assert.equal(book.products.hoops.variants.large.stock, 1);
   assert.equal(book.products.hoops.stock, null);
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('login locks an IP after repeated failures, even for the right password', async () => {
+  const headers = { 'x-forwarded-for': '203.0.113.77' };
+  const env = { ADMIN_PASSWORD: 'secret-pass' };
+  for (let i = 0; i < 5; i += 1) {
+    const miss = await request(admin, { method: 'POST', headers, body: { action: 'login', password: `guess-${i}` }, env });
+    assert.equal(miss.status, 401);
+  }
+  const locked = await request(admin, { method: 'POST', headers, body: { action: 'login', password: 'secret-pass' }, env });
+  assert.equal(locked.status, 429);
+  assert.equal(locked.headers['set-cookie'], undefined);
+
+  const form = await request(admin, {
+    method: 'POST',
+    headers: { ...headers, 'content-type': 'application/x-www-form-urlencoded' },
+    body: { action: 'login', password: 'secret-pass', next: '/admin/store/' },
+    env,
+  });
+  assert.equal(form.status, 303);
+  assert.equal(form.headers.location, '/admin/store/?login=locked');
+  assert.equal(form.headers['set-cookie'], undefined);
+
+  const other = await request(admin, {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '203.0.113.78' },
+    body: { action: 'login', password: 'secret-pass' },
+    env,
+  });
+  assert.equal(other.status, 200);
 });

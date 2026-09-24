@@ -67,7 +67,14 @@ function setYamlBool(yaml, key, value) {
 function formatYamlScalar(value) {
   const s = String(value == null ? '' : value);
   if (s === '') return '""';
-  if (/[:#{}[\],&*?!|>%@`]/.test(s) || /^\s|\s$/.test(s) || s.includes("'") || s.includes('"')) {
+  // Newlines must be JSON-quoted; an embedded line break breaks the whole front matter.
+  if (
+    /[\r\n]/.test(s) ||
+    /[:#{}[\],&*?!|>%@`]/.test(s) ||
+    /^\s|\s$/.test(s) ||
+    s.includes("'") ||
+    s.includes('"')
+  ) {
     return JSON.stringify(s);
   }
   return s;
@@ -1232,6 +1239,7 @@ module.exports = {
   normalizeCategory,
   splitFrontMatter,
   yamlValue,
+  formatYamlScalar,
   setYamlBool,
   setYamlScalar,
   setYamlGallery,

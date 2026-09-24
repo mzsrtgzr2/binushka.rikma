@@ -39,7 +39,8 @@ layout: default
     {% assign store_gift_card = '' | split: '' %}
     {% assign store_sold_out = '' | split: '' %}
     {% for item in sorted %}
-      {% unless item.hide %}
+      {% comment %}Skip hidden items and broken front matter (empty title husks).{% endcomment %}
+      {% unless item.hide or item.title == blank %}
         {% assign item_slug = item.slug | default: item.basename %}
         {% if item.out_of_stock or item.stock == 0 %}
           {% assign store_sold_out = store_sold_out | push: item %}

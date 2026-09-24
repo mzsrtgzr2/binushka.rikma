@@ -214,7 +214,8 @@ jobs:
 
           gh issue comment "$THREAD_NUMBER" --body-file "$ack_reply"
 
-      - name: Enable automatic merge
+      - name: Merge approved pull request
+        id: merge
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve'
         env:
           GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
@@ -224,8 +225,12 @@ jobs:
         run: |
           set -euo pipefail
 
+          merged=false
+          needs_resolution=false
           merge_log="$RUNNER_TEMP/cursor-merge.log"
+
           if gh pr merge "$PR_NUMBER" --squash --auto --delete-branch >"$merge_log" 2>&1; then
+            merged=true
             approve_reply="$RUNNER_TEMP/cursor-approve-reply.md"
             {
               echo "<!-- cursor-agent-status -->"
@@ -233,21 +238,41 @@ jobs:
             } > "$approve_reply"
 
             gh issue comment "$THREAD_NUMBER" --body-file "$approve_reply"
-          elif grep -Fq "Protected branch rules not configured" "$merge_log"; then
-            gh pr merge "$PR_NUMBER" --squash --delete-branch
+          elif grep -Eiq "Protected branch rules not configured|Pull request is in clean status" "$merge_log"; then
+            immediate_merge_log="$RUNNER_TEMP/cursor-immediate-merge.log"
+            if gh pr merge "$PR_NUMBER" --squash --delete-branch >"$immediate_merge_log" 2>&1; then
+              merged=true
+              approve_reply="$RUNNER_TEMP/cursor-approve-immediate-reply.md"
+              {
+                echo "<!-- cursor-agent-status -->"
+                echo "Approval received. GitHub auto-merge was not available for this PR, so I squash-merged $PR_URL now."
+              } > "$approve_reply"
 
-            approve_reply="$RUNNER_TEMP/cursor-approve-immediate-reply.md"
-            {
-              echo "<!-- cursor-agent-status -->"
-              echo "Approval received. This repository does not have protected branch rules for GitHub auto-merge, so I squash-merged $PR_URL now."
-            } > "$approve_reply"
+              gh issue comment "$THREAD_NUMBER" --body-file "$approve_reply"
+            elif grep -Eiq "conflict|not mergeable|must be resolved|mergeable state" "$immediate_merge_log"; then
+              needs_resolution=true
+            else
+              approve_failure_reply="$RUNNER_TEMP/cursor-approve-failure-reply.md"
+              {
+                echo "<!-- cursor-agent-status -->"
+                echo "Approval received, but I could not merge the pull request."
+                echo
+                echo "GitHub CLI output:"
+                echo '```'
+                cat "$immediate_merge_log"
+                echo '```'
+              } > "$approve_failure_reply"
 
-            gh issue comment "$THREAD_NUMBER" --body-file "$approve_reply"
+              gh issue comment "$THREAD_NUMBER" --body-file "$approve_failure_reply"
+              exit 1
+            fi
+          elif grep -Eiq "conflict|not mergeable|must be resolved|mergeable state" "$merge_log"; then
+            needs_resolution=true
           else
             approve_failure_reply="$RUNNER_TEMP/cursor-approve-failure-reply.md"
             {
               echo "<!-- cursor-agent-status -->"
-              echo "Approval received, but I could not enable auto-merge. Please check that repository auto-merge is enabled and required checks are passing."
+              echo "Approval received, but I could not enable auto-merge or merge the pull request."
               echo
               echo "GitHub CLI output:"
               echo '```'
@@ -256,6 +281,169 @@ jobs:
             } > "$approve_failure_reply"
 
             gh issue comment "$THREAD_NUMBER" --body-file "$approve_failure_reply"
+            exit 1
+          fi
+
+          if [ "$needs_resolution" = "true" ]; then
+            approve_reply="$RUNNER_TEMP/cursor-approve-immediate-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Approval received, but GitHub says this pull request has merge conflicts. Cursor will try to resolve the conflicts and merge again."
+            } > "$approve_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$approve_reply"
+          fi
+
+          echo "merged=$merged" >> "$GITHUB_OUTPUT"
+          echo "needs_resolution=$needs_resolution" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout pull request branch for conflict resolution
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_GITHUB || github.token }}
+          ref: ${{ steps.context.outputs.branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Cursor CLI for conflict resolution
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
+
+      - name: Merge base branch for conflict resolution
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
+        id: conflict_merge
+        env:
+          BASE_BRANCH: ${{ steps.context.outputs.base_branch }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "Cursor Agent Bot"
+          git config user.email "cursor-agent-bot@users.noreply.github.com"
+          git fetch origin "$BASE_BRANCH"
+
+          set +e
+          git merge --no-edit "origin/$BASE_BRANCH"
+          merge_exit=$?
+          set -e
+
+          if [ "$merge_exit" -eq 0 ]; then
+            echo "has_conflicts=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_conflicts=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve merge conflicts with Cursor
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true' && steps.conflict_merge.outputs.has_conflicts == 'true'
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'auto' }}
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+          PR_URL: ${{ steps.context.outputs.pr_url }}
+          PR_TITLE: ${{ steps.context.outputs.title }}
+          BASE_BRANCH: ${{ steps.context.outputs.base_branch }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          model="$CURSOR_MODEL"
+          if [ "$model" = "gpt-5" ]; then
+            echo "::warning::Cursor CLI does not offer model 'gpt-5' for this account; falling back to 'auto'."
+            model="auto"
+          fi
+
+          conflicts="$(git diff --name-only --diff-filter=U || true)"
+          prompt_file="$RUNNER_TEMP/cursor-conflict-prompt.md"
+          {
+            echo "You are Cursor Agent working in repository ${REPOSITORY}."
+            echo
+            echo "Pull request: #${PR_NUMBER} - ${PR_TITLE}"
+            echo "PR URL: ${PR_URL}"
+            echo "Base branch: ${BASE_BRANCH}"
+            echo
+            echo "The PR was approved, but merging ${BASE_BRANCH} into the PR branch produced merge conflicts."
+            echo "Resolve all conflict markers and make the final code satisfy both the PR intent and the current base branch."
+            echo
+            echo "Conflicted files:"
+            echo '---'
+            printf '%s\n' "$conflicts"
+            echo '---'
+            echo
+            echo "Do not create, merge, or update pull requests yourself; the GitHub Action will commit, push, and retry the merge after you finish."
+          } > "$prompt_file"
+
+          agent -p "$(cat "$prompt_file")" \
+            --model "$model" \
+            --force \
+            --trust \
+            --output-format text
+
+      - name: Commit and push conflict resolution
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          BRANCH_NAME: ${{ steps.context.outputs.branch }}
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+          THREAD_NUMBER: ${{ steps.context.outputs.thread_number }}
+        run: |
+          set -euo pipefail
+
+          unresolved="$(git diff --name-only --diff-filter=U || true)"
+          if [ -n "$unresolved" ]; then
+            unresolved_reply="$RUNNER_TEMP/cursor-unresolved-conflicts-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Cursor tried to resolve the merge conflicts, but these files still have unresolved conflicts:"
+              echo
+              printf '%s\n' "$unresolved"
+            } > "$unresolved_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$unresolved_reply"
+            exit 1
+          fi
+
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "fix(cursor): resolve merge conflicts for PR #${PR_NUMBER}"
+          fi
+
+          gh auth setup-git
+          git push origin "$BRANCH_NAME"
+
+      - name: Retry merge after conflict resolution
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_GITHUB || github.token }}
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+          PR_URL: ${{ steps.context.outputs.pr_url }}
+          THREAD_NUMBER: ${{ steps.context.outputs.thread_number }}
+        run: |
+          set -euo pipefail
+
+          retry_merge_log="$RUNNER_TEMP/cursor-retry-merge.log"
+          if gh pr merge "$PR_NUMBER" --squash --delete-branch >"$retry_merge_log" 2>&1; then
+            retry_reply="$RUNNER_TEMP/cursor-conflict-merge-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Cursor resolved the merge conflicts and squash-merged $PR_URL."
+            } > "$retry_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$retry_reply"
+          else
+            retry_failure_reply="$RUNNER_TEMP/cursor-conflict-merge-failure-reply.md"
+            {
+              echo "<!-- cursor-agent-status -->"
+              echo "Cursor resolved the conflicts and pushed an update, but GitHub still would not merge the PR."
+              echo
+              echo "GitHub CLI output:"
+              echo '```'
+              cat "$retry_merge_log"
+              echo '```'
+            } > "$retry_failure_reply"
+
+            gh issue comment "$THREAD_NUMBER" --body-file "$retry_failure_reply"
             exit 1
           fi
 

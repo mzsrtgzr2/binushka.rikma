@@ -1281,14 +1281,54 @@
         '</div>'
       );
     }
+    return productGalleryHtml('', paths, '');
+  }
+
+  function productGalleryHtml(mainSrc, galleryPaths, stockHtml) {
+    var images = [];
+    function pushUnique(src) {
+      if (!src || images.indexOf(src) !== -1) return;
+      images.push(src);
+    }
+    pushUnique(mainSrc);
+    (galleryPaths || []).forEach(pushUnique);
+    if (!images.length) return '';
+
+    var thumbs = '';
+    if (images.length > 1) {
+      thumbs =
+        '<div class="product-gallery__thumbs" role="list">' +
+        images
+          .map(function (src, index) {
+            var active = index === 0;
+            return (
+              '<button type="button" class="product-gallery__thumb' +
+              (active ? ' is-active' : '') +
+              '" data-gallery-src="' +
+              escapeHtml(src) +
+              '" aria-label="תמונה ' +
+              (index + 1) +
+              '" aria-pressed="' +
+              (active ? 'true' : 'false') +
+              '"><img src="' +
+              escapeHtml(src) +
+              '" alt=""></button>'
+            );
+          })
+          .join('') +
+        '</div>';
+    }
+
     return (
-      '<div class="store-item-gallery">' +
-      paths
-        .map(function (src) {
-          return '<img class="store-item-gallery__img" src="' + escapeHtml(src) + '" alt="">';
-        })
-        .join('') +
-      '</div>'
+      '<div class="store-item-content"><div class="product-gallery" data-product-gallery>' +
+      '<div class="product-gallery__stage store-item-image-container">' +
+      '<img class="product-gallery__image" data-gallery-main src="' +
+      escapeHtml(images[0]) +
+      '" alt="">' +
+      (stockHtml || '') +
+      '</div>' +
+      thumbs +
+      '</div></div>'
     );
   }
 
@@ -1360,16 +1400,7 @@
         (cart ? '<div class="store-item-content">' + cart + '</div>' : '')
       );
     }
-    var mainImage = p.image
-      ? '<div class="store-item-content"><div class="page-image"><div class="store-item-image-container">' +
-        '<img src="' +
-        escapeHtml(p.image) +
-        '" alt="">' +
-        stockOverlay(p) +
-        '</div></div>' +
-        galleryHtml(p.gallery, false) +
-        '</div>'
-      : galleryHtml(p.gallery, false);
+    var mainImage = productGalleryHtml(p.image, p.gallery, stockOverlay(p));
     return (
       '<div class="page-head">' +
       '<h1 class="page-title">' +

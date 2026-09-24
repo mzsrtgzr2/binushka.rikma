@@ -981,7 +981,7 @@
   var restoring = false;
 
   /** Everything the form holds. Caret is kept aside so it never counts as a change. */
-  function snapshot() {
+  function editorSnapshot() {
     var active = document.activeElement;
     var caret = active && typeof active.selectionStart === 'number'
       ? [active.selectionStart, active.selectionEnd]
@@ -1056,7 +1056,7 @@
   function record(label, groupKey) {
     if (restoring || editor.hidden) return;
 
-    var version = snapshot();
+    var version = editorSnapshot();
     if (versionAt >= 0 && sameFields(versions[versionAt], version)) return;
 
     // Stepping back and then editing replaces what was undone: the versions
@@ -1087,7 +1087,7 @@
     openGroup = '';
     clearTimeout(groupTimer);
 
-    var version = snapshot();
+    var version = editorSnapshot();
     versions.push({ label: label, at: Date.now(), fields: version.fields, focus: '', caret: null });
     versionAt = 0;
 

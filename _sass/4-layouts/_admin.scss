@@ -169,11 +169,13 @@
   }
 }
 
-/* The position the shop or the workshops page will show this in. */
+/* The position the shop or the workshops page will show this in. It is the only
+   thing on the card that says where the row will land, so it is not meta text. */
 .admin-card__rank {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--text-alt-color);
+  line-height: 1.2;
+  color: var(--text-color);
 }
 
 .admin-card__thumb {

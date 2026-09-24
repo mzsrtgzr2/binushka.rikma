@@ -44,13 +44,10 @@ function splitFrontMatter(raw) {
 function yamlValue(yaml, key) {
   const match = String(yaml).match(new RegExp(`^${key}:\\s*(.*)$`, 'm'));
   if (!match) return undefined;
-  let value = match[1].trim();
-  if (
-    (value.startsWith("'") && value.endsWith("'")) ||
-    (value.startsWith('"') && value.endsWith('"'))
-  ) {
-    value = value.slice(1, -1);
-  }
+  const raw = match[1].trim();
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  const value = unquote(raw);
   if (value === 'true') return true;
   if (value === 'false') return false;
   return value;
@@ -67,7 +64,15 @@ function setYamlBool(yaml, key, value) {
 function formatYamlScalar(value) {
   const s = String(value == null ? '' : value);
   if (s === '') return '""';
-  if (/[:#{}[\],&*?!|>%@`]/.test(s) || /^\s|\s$/.test(s) || s.includes("'") || s.includes('"')) {
+  // Newlines and backslashes must be JSON-escaped. Without this, a real
+  // newline breaks the YAML line, and a literal \n is doubled on every save.
+  if (
+    /[:#{}[\],&*?!|>%@`\\]/.test(s) ||
+    /[\n\r]/.test(s) ||
+    /^\s|\s$/.test(s) ||
+    s.includes("'") ||
+    s.includes('"')
+  ) {
     return JSON.stringify(s);
   }
   return s;
@@ -139,13 +144,25 @@ function setYamlGallery(yaml, items) {
 
 function unquote(value) {
   let v = String(value == null ? '' : value).trim();
-  if (
-    (v.startsWith("'") && v.endsWith("'")) ||
-    (v.startsWith('"') && v.endsWith('"'))
-  ) {
-    v = v.slice(1, -1);
+  if (v.startsWith('"') && v.endsWith('"') && v.length >= 2) {
+    try {
+      // Decode JSON/YAML double-quoted escapes (\n, \\, \", …).
+      return JSON.parse(v);
+    } catch {
+      v = v.slice(1, -1);
+    }
+  } else if (v.startsWith("'") && v.endsWith("'") && v.length >= 2) {
+    v = v.slice(1, -1).replace(/''/g, "'");
   }
   return v;
+}
+
+/**
+ * Older admin saves turned real newlines into literal \n, then doubled the
+ * backslashes on every rewrite (\\n → \\\\n → …). Collapse those artifacts.
+ */
+function normalizeEscapedNewlines(value) {
+  return String(value == null ? '' : value).replace(/\\+n/g, '\n');
 }
 
 function parseShekelPrice(raw) {
@@ -337,6 +354,7 @@ function parseVariantsYaml(yaml) {
         const parsed = parseStock(value);
         if (!parsed.error && parsed.stock != null) out[currentId].stock = parsed.stock;
       } else if (key === 'gallery') out[currentId].gallery = [];
+      else if (key === 'description') out[currentId].description = normalizeEscapedNewlines(value);
       else out[currentId][key] = value;
     }
   }
@@ -364,7 +382,9 @@ function setYamlVariants(yaml, variants) {
         lines.push(`      - ${formatYamlScalar(img)}`);
       });
     }
-    if (row.description) lines.push(`    description: ${formatYamlScalar(row.description)}`);
+    if (row.description) {
+      lines.push(`    description: ${formatYamlScalar(normalizeEscapedNewlines(row.description))}`);
+    }
   });
   return `${next}\n${lines.join('\n')}\n`;
 }
@@ -660,7 +680,7 @@ function variantsToArray(variants) {
       image: images[0] || '',
       gallery: images.slice(1),
       images,
-      description: row.description || '',
+      description: normalizeEscapedNewlines(row.description || ''),
       stock: stockParsed.error ? null : stockParsed.stock,
     };
     return item;
@@ -689,7 +709,7 @@ function variantsFromArray(rows) {
       name: String((row && row.name) || unique).trim() || unique,
       price,
       image: images[0] || '',
-      description: String((row && row.description) || '').trim(),
+      description: normalizeEscapedNewlines(String((row && row.description) || '').trim()),
     };
     if (!stockParsed.error && stockParsed.stock != null) out[unique].stock = stockParsed.stock;
     if (images.length > 1) out[unique].gallery = images.slice(1);

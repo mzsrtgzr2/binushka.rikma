@@ -32,7 +32,8 @@ variants:
     price: 80
     stock: 1
     image: /images/store/scissors/screenshot-2026-09-24-at-15-32-45-mufij4sz.jpg
-    description: איך אפשר שלא להתאהב בך
-גודל 10.1 cm
+    description: |
+      איך אפשר שלא להתאהב בך
+      גודל 10.1 cm
 ---
 

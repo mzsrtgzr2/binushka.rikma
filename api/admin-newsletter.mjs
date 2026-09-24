@@ -7,6 +7,7 @@
  */
 
 import { isAuthed } from '../lib/admin/auth.mjs';
+import { foreignOrigin } from '../lib/origin.js';
 import * as repo from '../lib/admin/repo.mjs';
 import { emailCopy } from '../lib/newsletter/email-copy.mjs';
 import { readJsonBody, sendJson } from '../lib/newsletter/http.mjs';
@@ -236,6 +237,10 @@ async function handleSend(req, res, env, body) {
 
 export default async function handler(req, res) {
   const env = process.env;
+
+  if (foreignOrigin(req, env)) {
+    return sendJson(res, 403, { ok: false, code: 'forbidden', error: 'בקשה לא מורשית' });
+  }
 
   if (!isAuthed(req, env)) {
     return sendJson(res, 401, { ok: false, code: 'unauthorized', error: 'צריך להתחבר' });

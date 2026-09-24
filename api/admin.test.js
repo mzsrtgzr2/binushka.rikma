@@ -193,6 +193,29 @@ test('expired or tampered session is unauthorized', async () => {
   assert.equal(tamperedResult.status, 401);
 });
 
+test('admin rejects a foreign Origin and does not reflect CORS', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { origin: 'https://evil.example' },
+    body: { action: 'login', password: 'secret-pass' },
+    env: { ADMIN_PASSWORD: 'secret-pass' },
+  });
+  assert.equal(result.status, 403);
+  assert.equal(result.headers['access-control-allow-origin'], undefined);
+  assert.equal(result.headers['access-control-allow-credentials'], undefined);
+});
+
+test('admin login is allowed from the real shop origin', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { origin: 'https://rikma.binushka.com', 'x-forwarded-proto': 'https' },
+    body: { action: 'login', password: 'secret-pass' },
+    env: { ADMIN_PASSWORD: 'secret-pass', SITE_URL: 'https://rikma.binushka.com' },
+  });
+  assert.equal(result.status, 200);
+  assert.match(String(result.headers['set-cookie']), /binushka-admin-v2=v2\./);
+});
+
 test('wrong password is rejected', async () => {
   const result = await request(admin, {
     method: 'POST',

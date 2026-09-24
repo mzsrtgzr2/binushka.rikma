@@ -631,3 +631,10 @@ test('an unknown action is rejected', async () => {
   assert.equal(res.statusCode, 400);
   assert.equal(res.body.code, 'unknown_action');
 });
+
+test('newsletter admin rejects a foreign Origin', async () => {
+  const res = makeResponse();
+  await handler(authed({ method: 'GET', headers: { origin: 'https://evil.example' } }), res);
+  assert.equal(res.statusCode, 403);
+  assert.equal(res.body.code, 'forbidden');
+});

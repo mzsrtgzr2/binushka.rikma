@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const store = require('./admin-store');
 const auth = require('../lib/admin/session');
+const { foreignOrigin, createRateLimiter, clientIp } = require('../lib/origin');
 
 const CATALOG_FILES = store.CATALOG_FILES;
 
@@ -65,10 +66,8 @@ function adminConfigHint(env) {
   const bag = env || process.env;
   const vercelEnv = pickEnv(bag, 'VERCEL_ENV') || 'unknown';
   const gitRef = pickEnv(bag, 'VERCEL_GIT_COMMIT_REF');
-  const adminKeys = Object.keys(bag).filter((key) => /admin/i.test(key));
   const parts = [`סביבה: ${vercelEnv}`];
   if (gitRef) parts.push(`ענף: ${gitRef}`);
-  if (adminKeys.length) parts.push(`מפתחות: ${adminKeys.join(', ')}`);
   return parts.join(', ');
 }
 
@@ -745,20 +744,19 @@ async function publicInventory(env) {
   return { source, products };
 }
 
-async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  if (req.headers.origin) {
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-  }
+const loginLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
 
+async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.statusCode = 204;
     return res.end();
   }
 
   const env = process.env;
+  if (foreignOrigin(req, env)) {
+    return json(res, 403, { error: 'בקשה לא מורשית' });
+  }
+
   if (!adminPassword(env)) {
     return json(res, 503, {
       error: `ניהול החנות עדיין לא הוגדר (ADMIN_PASSWORD). ${adminConfigHint(env)}. צריך משתנה Preview בשם ADMIN_PASSWORD ואז Redeploy.`,
@@ -772,8 +770,12 @@ async function handler(req, res) {
     if (body.action === 'login') {
       const next = auth.safeNext(body.next);
       if (!auth.safeEqual(body.password, adminPassword(env))) {
+        const limited = loginLimiter(clientIp(req));
         if (auth.wantsRedirect(req)) {
           return redirect(res, `${next}?login=error`);
+        }
+        if (limited) {
+          return json(res, 429, { error: 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' });
         }
         return json(res, 401, { error: 'סיסמה שגויה' });
       }

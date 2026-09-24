@@ -13,7 +13,26 @@
           </div>
 
           <div class="row">
-            {% include projects-ordered.html %}
+            {% comment %}
+              Same ordering as the workshops page: placed by hand first, then
+              whatever has not been placed, by date. Kept here rather than in a
+              shared include because the sort was already written out in both.
+            {% endcomment %}
+            {% assign projects_placed = '' | split: '' %}
+            {% assign projects_by_date = '' | split: '' %}
+            {% for project in site.projects %}
+              {% unless project.hide %}
+                {% if project.order %}
+                  {% assign projects_placed = projects_placed | push: project %}
+                {% else %}
+                  {% assign projects_by_date = projects_by_date | push: project %}
+                {% endif %}
+              {% endunless %}
+            {% endfor %}
+            {% assign projects_placed = projects_placed | sort: 'order' %}
+            {% assign projects_by_date = projects_by_date | sort: 'date' %}
+            {% assign projects_ordered = projects_placed | concat: projects_by_date %}
+
             {% for project in projects_ordered %}
               {% include project-card.html project=project %}
             {% endfor %}

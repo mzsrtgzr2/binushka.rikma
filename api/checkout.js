@@ -126,6 +126,13 @@ function readCustomer(body) {
   if (!firstName || !lastName || !email || !phone || !address || !city || !country) {
     return { error: 'חסרים פרטי לקוח' };
   }
+  if (
+    [firstName, lastName, city, zip, country].some((value) => value.length > 80) ||
+    address.length > 200 ||
+    email.length > 254
+  ) {
+    return { error: 'פרטי הלקוח ארוכים מדי' };
+  }
   if (!/^0[0-9]{8,9}$/.test(phone)) {
     return { error: 'מספר טלפון לא תקין' };
   }

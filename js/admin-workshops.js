@@ -770,7 +770,7 @@
       return (
         '<li class="admin-card" data-slug="' + escapeHtml(workshop.slug) + '">' +
         (workshop.image
-          ? '<img class="admin-card__thumb" src="' + escapeHtml(workshop.image) + '" alt="">'
+          ? '<img class="admin-card__thumb" src="' + escapeHtml(previewSrc(workshop.image)) + '" alt="">'
           : '<span class="admin-card__thumb admin-card__thumb--empty"></span>') +
         '<div class="admin-card__body">' +
         '<div class="admin-card__head">' +

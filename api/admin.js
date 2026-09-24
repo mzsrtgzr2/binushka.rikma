@@ -404,8 +404,7 @@ function byListOrder(a, b) {
   // than taking up a position among the ones being arranged.
   if (Boolean(a.hide) !== Boolean(b.hide)) return a.hide ? 1 : -1;
 
-  // A product only has an order once it has been placed by hand. Until then it
-  // falls back to the date it was added, which is how the shop started out.
+  // A product only has an order once it has been placed by hand.
   if (a.order && b.order) return a.order - b.order;
   if (a.order || b.order) return a.order ? -1 : 1;
 
@@ -413,9 +412,14 @@ function byListOrder(a, b) {
     return a.slug === 'gift-card' ? 1 : -1;
   }
 
-  const left = Date.parse(a.date) || 0;
-  const right = Date.parse(b.date) || 0;
-  return left - right || String(a.title).localeCompare(String(b.title), 'he');
+  // Until it is placed, a product sits where the shop puts it on its own:
+  // embroidery supplies first, then by title. Same rule as store/index.html,
+  // so the list being dragged is the list the shop shows.
+  const aSupplies = a.category === 'embroidery-supplies';
+  const bSupplies = b.category === 'embroidery-supplies';
+  if (aSupplies !== bSupplies) return aSupplies ? -1 : 1;
+
+  return String(a.title).localeCompare(String(b.title), 'he');
 }
 
 function stockEqual(a, b) {

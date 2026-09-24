@@ -1203,15 +1203,20 @@ body
 
 /* -------------------------------------------------------------------- order */
 
-/** Three products with dates, so the fallback order is something to check. */
+/**
+ * Products whose date order (fabric, hoop, thread) is not their title order,
+ * and only two of which are supplies, so the fallback has something to say.
+ */
 function shopRoot() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-admin-'));
   fs.mkdirSync(path.join(root, '_store'));
-  const page = (title, date) =>
-    `---\ntitle: ${title}\nprice: ₪50\nout_of_stock: false\nhide: false\ndate: ${date}\n---\n\nbody\n`;
-  fs.writeFileSync(path.join(root, '_store', 'thread.md'), page('חוטים', '2024-01-01'));
-  fs.writeFileSync(path.join(root, '_store', 'hoop.md'), page('חישוק', '2024-02-01'));
-  fs.writeFileSync(path.join(root, '_store', 'gift-card.md'), page('שובר מתנה', '2024-03-01'));
+  const page = (title, date, category) =>
+    `---\ntitle: ${title}\nprice: ₪50\nout_of_stock: false\nhide: false\n` +
+    `category: ${category}\ndate: ${date}\n---\n\nbody\n`;
+  fs.writeFileSync(path.join(root, '_store', 'thread.md'), page('חוטים', '2024-03-01', 'embroidery-supplies'));
+  fs.writeFileSync(path.join(root, '_store', 'hoop.md'), page('חישוק', '2024-02-01', 'embroidery-supplies'));
+  fs.writeFileSync(path.join(root, '_store', 'fabric.md'), page('בד', '2024-01-01', 'works-for-sale'));
+  fs.writeFileSync(path.join(root, '_store', 'gift-card.md'), page('שובר מתנה', '2024-04-01', 'works-for-sale'));
   writeCatalog(root, {});
   return root;
 }
@@ -1221,11 +1226,13 @@ async function slugsInOrder(root, cookie) {
   return listed.json.products.map((p) => p.slug);
 }
 
-test('without a hand-picked order the shop list reads by date, gift card last', async () => {
+// The same order store/index.html falls back to, so the list being dragged
+// here is the list the shop is showing.
+test('without a hand-picked order the list reads supplies first, then by title', async () => {
   const root = shopRoot();
   const cookie = await loginCookie(root);
 
-  assert.deepEqual(await slugsInOrder(root, cookie), ['thread', 'hoop', 'gift-card']);
+  assert.deepEqual(await slugsInOrder(root, cookie), ['thread', 'hoop', 'fabric', 'gift-card']);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
@@ -1249,7 +1256,8 @@ test('saving the shop list writes each product its position', async () => {
 
   assert.equal(saved.status, 200);
   assert.match(fs.readFileSync(path.join(root, '_store', 'gift-card.md'), 'utf8'), /^order: 1$/m);
-  assert.deepEqual(await slugsInOrder(root, cookie), ['gift-card', 'hoop', 'thread']);
+  // `fabric` was not given a position, so it falls in behind the three that were.
+  assert.deepEqual(await slugsInOrder(root, cookie), ['gift-card', 'hoop', 'thread', 'fabric']);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
@@ -1289,7 +1297,7 @@ test('a hidden product sits after everything the shop shows', async () => {
   const page = fs.readFileSync(path.join(root, '_store', 'thread.md'), 'utf8');
   fs.writeFileSync(path.join(root, '_store', 'thread.md'), page.replace('hide: false', 'hide: true'));
 
-  assert.deepEqual(await slugsInOrder(root, cookie), ['hoop', 'gift-card', 'thread']);
+  assert.deepEqual(await slugsInOrder(root, cookie), ['hoop', 'fabric', 'gift-card', 'thread']);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

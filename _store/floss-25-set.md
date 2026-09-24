@@ -5,11 +5,13 @@ subtitle: שאני מרכיבה לך
 image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
 price: ₪100
 out_of_stock: false
-limited_stock: false
+limited_stock: true
 hide: false
 category: embroidery-supplies
 stock: 2
 cart_price: 100
+gallery:
+  - /images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg
 ---
 
 הצבעים שאני משתמשת בהם הכי הרבה בסט מעולה למתחילות, מתקדמות.

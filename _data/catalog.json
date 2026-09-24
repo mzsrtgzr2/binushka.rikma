@@ -59,6 +59,10 @@
     "name": "רקמה בהזמנה אישית",
     "price": 100
   },
+  "floss-25-set": {
+    "name": "סט של 25 חוטי מולינה dmc",
+    "price": 100
+  },
   "flower-bag": {
     "name": "תיק בד לזר פרחים",
     "variants": {

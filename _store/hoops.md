@@ -24,5 +24,16 @@ variants:
     name: קוטר 19 ס״מ
     price: 35
     image: /images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg
+  oval-16x10cm:
+    name: אובאלי 16X10 ס״מ
+    price: 35
+    image: /images/store/oval-hoop/screenshot-2026-09-23-at-18-49-00-muea6x4t.jpg
+    gallery:
+      - /images/store/oval-hoop/screenshot-2026-09-23-at-18-41-15-muea6x4s.jpg
+    description: "חישוק אובאלי מעץ בוק איכותי."
+  oval-21x13cm:
+    name: אובאלי 21X13 ס״מ
+    price: 35
+    image: /images/store/oval-hoop/screenshot-2026-09-23-at-18-49-38-muea6x4u.jpg
+    description: "חישוק אובאלי מעץ בוק איכותי."
 ---
-

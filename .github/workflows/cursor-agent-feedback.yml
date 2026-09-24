@@ -135,7 +135,7 @@ jobs:
           is_pr="$(jq -r '(.issue.pull_request != null)' "$GITHUB_EVENT_PATH")"
           if [ "$is_pr" = "true" ]; then
             if ! gh pr view "$ISSUE_OR_PR_NUMBER" \
-              --json number,url,headRefName,baseRefName,body,state,labels,title \
+              --json number,url,headRefName,baseRefName,body,state,labels,title,isCrossRepository \
               > "$pr_file"; then
               echo "skip=true" >> "$GITHUB_OUTPUT"
               exit 0
@@ -151,7 +151,7 @@ jobs:
             if ! gh pr list \
               --state open \
               --head "$branch" \
-              --json number,url,headRefName,baseRefName,body,state,labels,title \
+              --json number,url,headRefName,baseRefName,body,state,labels,title,isCrossRepository \
               --jq '.[0] // empty' > "$pr_file"; then
               echo "skip=true" >> "$GITHUB_OUTPUT"
               exit 0
@@ -170,10 +170,13 @@ jobs:
             fi
           fi
 
+          # Anyone can open a PR whose body mentions the task marker, so only
+          # trust PRs this automation opened: same-repo head branch, the
+          # automation's branch prefix, and the label (which needs write access).
           is_cursor_pr="$(jq -r '
-            ([.labels[].name] | index("cursor-agent") != null) or
-            ((.body // "") | contains("cursor-agent-task:")) or
-            (.headRefName | startswith("cursor/issue-"))
+            (.isCrossRepository == false) and
+            ([.labels[].name] | index("cursor-agent") != null) and
+            (.headRefName | test("^cursor/issue-[0-9]+$"))
           ' "$pr_file")"
 
           if [ "$is_cursor_pr" != "true" ]; then
@@ -195,7 +198,7 @@ jobs:
           echo "pr_url=$(jq -r '.url' "$pr_file")" >> "$GITHUB_OUTPUT"
           echo "branch=$(jq -r '.headRefName' "$pr_file")" >> "$GITHUB_OUTPUT"
           echo "base_branch=$(jq -r '.baseRefName' "$pr_file")" >> "$GITHUB_OUTPUT"
-          echo "title=$(jq -r '.title' "$pr_file")" >> "$GITHUB_OUTPUT"
+          echo "title=$(jq -r '.title | gsub("[\\r\\n]"; " ")' "$pr_file")" >> "$GITHUB_OUTPUT"
 
       - name: Acknowledge feedback
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'

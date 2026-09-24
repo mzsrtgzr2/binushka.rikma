@@ -31,6 +31,8 @@
 
   var products = [];
   var original = {};
+  var originalOrder = '';
+  var reorder = null;
   var editingNew = false;
   var saveHint = '';
   var photoItems = [];
@@ -308,7 +310,13 @@
     return map;
   }
 
+  function orderOf(list) {
+    return (list || []).map(function (p) { return p.slug; }).join('|');
+  }
+
   function isDirty() {
+    if (orderOf(products) !== originalOrder) return true;
+
     return products.some(function (p) {
       var orig = original[p.slug] || {};
       var stock = p.stock == null || p.stock === '' ? null : Number(p.stock);
@@ -396,9 +404,21 @@
     return fallback || 'נשמר. האתר יתעדכן אחרי הבילד ב-Vercel (בדרך כלל עד דקה-שתיים).';
   }
 
+  /** The arrows, the grip and the position this row is currently in. */
+  function orderControlsHtml(index) {
+    return (
+      '<div class="admin-card__order">' +
+      '<button type="button" class="admin-card__move" data-move="up" title="העלאה" aria-label="העלאה">↑</button>' +
+      '<span class="admin-card__rank" dir="ltr">' + (index + 1) + '</span>' +
+      '<button type="button" class="admin-card__move" data-move="down" title="הורדה" aria-label="הורדה">↓</button>' +
+      '<span class="admin-card__grip" data-drag-handle draggable="true" title="גרירה" aria-hidden="true">⠿</span>' +
+      '</div>'
+    );
+  }
+
   function render() {
     listEl.innerHTML = products
-      .map(function (p) {
+      .map(function (p, index) {
         var thumb = productCardImage(p);
         var img = thumb
           ? '<img class="admin-card__thumb" src="' + escapeHtml(thumb) + '" alt="">'
@@ -408,6 +428,7 @@
           '<li class="admin-card" data-slug="' +
           escapeHtml(p.slug) +
           '">' +
+          orderControlsHtml(index) +
           img +
           '<div class="admin-card__body">' +
           '<div class="admin-card__head">' +
@@ -445,7 +466,15 @@
         );
       })
       .join('');
+    if (reorder) reorder.refresh();
     saveBtn.disabled = !isDirty();
+  }
+
+  /** Renumber in place: re-rendering here would take the focus off the arrow. */
+  function syncRanks() {
+    Array.prototype.forEach.call(listEl.querySelectorAll('.admin-card__rank'), function (el, index) {
+      el.textContent = index + 1;
+    });
   }
 
   function showBoard() {
@@ -1313,6 +1342,7 @@
     return api('GET').then(function (data) {
       products = data.products || [];
       original = snapshot(products);
+      originalOrder = orderOf(products);
       showBoard();
       showList();
       render();
@@ -1328,8 +1358,23 @@
   function saveStock() {
     saveBtn.disabled = true;
     show(boardMessage, 'שומרת…', 'info');
-    return api('POST', { action: 'save', products: products }).then(function (data) {
+
+    // The position is the row's place in this list, so saving is what turns a
+    // drag into the order the shop will show.
+    var payload = products.map(function (p, index) {
+      return {
+        slug: p.slug,
+        stock: p.stock,
+        out_of_stock: p.out_of_stock,
+        limited_stock: p.limited_stock,
+        hide: p.hide,
+        order: index + 1
+      };
+    });
+
+    return api('POST', { action: 'save', products: payload }).then(function (data) {
       original = snapshot(products);
+      originalOrder = orderOf(products);
       render();
       var n = (data.changed || []).length;
       var msg =
@@ -1412,6 +1457,21 @@
     });
     if (product) openEditor(false, product);
   });
+
+  if (window.AdminReorder) {
+    reorder = AdminReorder.attach(listEl, {
+      itemSelector: '.admin-card',
+      onChange: function (slugs) {
+        products = slugs
+          .map(function (slug) {
+            return products.find(function (p) { return p.slug === slug; });
+          })
+          .filter(Boolean);
+        syncRanks();
+        saveBtn.disabled = !isDirty();
+      }
+    });
+  }
 
   saveBtn.addEventListener('click', function () {
     saveStock().catch(function (err) {

@@ -1087,3 +1087,110 @@ body
   assert.equal(book.products.hoops.stock, null);
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+/* -------------------------------------------------------------------- order */
+
+/** Three products with dates, so the fallback order is something to check. */
+function shopRoot() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-admin-'));
+  fs.mkdirSync(path.join(root, '_store'));
+  const page = (title, date) =>
+    `---\ntitle: ${title}\nprice: ₪50\nout_of_stock: false\nhide: false\ndate: ${date}\n---\n\nbody\n`;
+  fs.writeFileSync(path.join(root, '_store', 'thread.md'), page('חוטים', '2024-01-01'));
+  fs.writeFileSync(path.join(root, '_store', 'hoop.md'), page('חישוק', '2024-02-01'));
+  fs.writeFileSync(path.join(root, '_store', 'gift-card.md'), page('שובר מתנה', '2024-03-01'));
+  writeCatalog(root, {});
+  return root;
+}
+
+async function slugsInOrder(root, cookie) {
+  const listed = await request(admin, { method: 'GET', headers: { cookie }, env: authEnv(root) });
+  return listed.json.products.map((p) => p.slug);
+}
+
+test('without a hand-picked order the shop list reads by date, gift card last', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  assert.deepEqual(await slugsInOrder(root, cookie), ['thread', 'hoop', 'gift-card']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('saving the shop list writes each product its position', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  const saved = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'save',
+      products: [
+        { slug: 'gift-card', order: 1 },
+        { slug: 'hoop', order: 2 },
+        { slug: 'thread', order: 3 },
+      ],
+    },
+    env: authEnv(root),
+  });
+
+  assert.equal(saved.status, 200);
+  assert.match(fs.readFileSync(path.join(root, '_store', 'gift-card.md'), 'utf8'), /^order: 1$/m);
+  assert.deepEqual(await slugsInOrder(root, cookie), ['gift-card', 'hoop', 'thread']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+// The editor has no say over the order, so a save from it must not be the
+// thing that loses a position set in the list.
+test('editing a product keeps the position it was given', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: { action: 'save', products: [{ slug: 'hoop', order: 4 }] },
+    env: authEnv(root),
+  });
+
+  const edited = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: { action: 'upsert', product: { slug: 'hoop', title: 'חישוק גדול', kind: 'fixed', cart_price: 60 } },
+    env: authEnv(root),
+  });
+  assert.equal(edited.status, 200);
+
+  const page = fs.readFileSync(path.join(root, '_store', 'hoop.md'), 'utf8');
+  assert.match(page, /^title: חישוק גדול$/m, 'the edit has to have landed for this to mean anything');
+  assert.match(page, /^order: 4$/m);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+// A hidden product is not in the shop, so it must not sit between two rows
+// being arranged and make their numbers mean something other than the shop.
+test('a hidden product sits after everything the shop shows', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  const page = fs.readFileSync(path.join(root, '_store', 'thread.md'), 'utf8');
+  fs.writeFileSync(path.join(root, '_store', 'thread.md'), page.replace('hide: false', 'hide: true'));
+
+  assert.deepEqual(await slugsInOrder(root, cookie), ['hoop', 'gift-card', 'thread']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('a position that is not a count is refused', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  const saved = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: { action: 'save', products: [{ slug: 'hoop', order: -1 }] },
+    env: authEnv(root),
+  });
+
+  assert.equal(saved.status, 400);
+  fs.rmSync(root, { recursive: true, force: true });
+});

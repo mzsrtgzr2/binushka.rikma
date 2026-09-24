@@ -62,6 +62,8 @@
 
   var workshops = [];
   var original = {};
+  var originalOrder = '';
+  var reorder = null;
   var current = null;
   var previewTimer;
   var saveHint = '';
@@ -749,7 +751,13 @@
     return map;
   }
 
+  function orderOf(list) {
+    return (list || []).map(function (workshop) { return workshop.slug; }).join('|');
+  }
+
   function isDirty() {
+    if (orderOf(workshops) !== originalOrder) return true;
+
     return workshops.some(function (workshop) {
       var before = original[workshop.slug] || {};
       var spots = workshop.spots == null ? null : Number(workshop.spots);
@@ -774,10 +782,23 @@
     return parts.join(' · ');
   }
 
+  /** The arrows, the grip and the position this row is currently in. */
+  function orderControlsHtml(index) {
+    return (
+      '<div class="admin-card__order">' +
+      '<button type="button" class="admin-card__move" data-move="up" title="העלאה" aria-label="העלאה">↑</button>' +
+      '<span class="admin-card__rank" dir="ltr">' + (index + 1) + '</span>' +
+      '<button type="button" class="admin-card__move" data-move="down" title="הורדה" aria-label="הורדה">↓</button>' +
+      '<span class="admin-card__grip" data-drag-handle draggable="true" title="גרירה" aria-hidden="true">⠿</span>' +
+      '</div>'
+    );
+  }
+
   function render() {
-    listEl.innerHTML = workshops.map(function (workshop) {
+    listEl.innerHTML = workshops.map(function (workshop, index) {
       return (
         '<li class="admin-card" data-slug="' + escapeHtml(workshop.slug) + '">' +
+        orderControlsHtml(index) +
         (workshop.image
           ? '<img class="admin-card__thumb" src="' + escapeHtml(previewSrc(workshop.image)) + '" alt="">'
           : '<span class="admin-card__thumb admin-card__thumb--empty"></span>') +
@@ -795,7 +816,10 @@
         (workshop.registration_full ? ' checked' : '') + '> ההרשמה מלאה</label>' +
         '<label class="admin-check"><input type="checkbox" data-flag="hide"' +
         (workshop.hide ? ' checked' : '') + '> הסתר מהאתר</label>' +
+        '<div class="admin-card__actions">' +
         '<button type="button" class="admin-card__edit" data-edit="' + escapeHtml(workshop.slug) + '">עריכה</button>' +
+        '<button type="button" class="admin-card__edit" data-duplicate="' + escapeHtml(workshop.slug) + '">שכפול</button>' +
+        '</div>' +
         '</div></li>'
       );
     }).join('');
@@ -804,7 +828,15 @@
       listEl.innerHTML = '<li class="admin-hint">עוד אין סדנאות. אפשר להתחיל מ«סדנה חדשה».</li>';
     }
 
+    if (reorder) reorder.refresh();
     saveSpotsBtn.disabled = !isDirty();
+  }
+
+  /** Renumber in place: re-rendering here would take the focus off the arrow. */
+  function syncRanks() {
+    Array.prototype.forEach.call(listEl.querySelectorAll('.admin-card__rank'), function (el, index) {
+      el.textContent = index + 1;
+    });
   }
 
   function renderStats() {
@@ -833,17 +865,21 @@
     saveSpotsBtn.disabled = true;
     show(boardMessage, 'שומרת…', 'info');
 
-    var payload = workshops.map(function (workshop) {
+    // The position is the row's place in this list, so saving is what turns a
+    // drag into the order the site will show.
+    var payload = workshops.map(function (workshop, index) {
       return {
         slug: workshop.slug,
         spots: workshop.spots,
         registration_full: workshop.registration_full,
-        hide: workshop.hide
+        hide: workshop.hide,
+        order: index + 1
       };
     });
 
     return api('POST', { action: 'stock', workshops: payload }).then(function (data) {
       original = snapshot(workshops);
+      originalOrder = orderOf(workshops);
       render();
       var changed = (data.changed || []).length;
       show(boardMessage, changed ? savedMessage(data, 'נשמר.') : 'אין שינויים לשמור', changed ? 'ok' : 'info');
@@ -875,6 +911,44 @@
     };
   }
 
+  /** `rehovot-spring` → `rehovot-spring-copy`, or `-copy-2` once that is taken. */
+  function freeSlug(slug) {
+    // The server trims a slug to 60 characters, so leave the suffix room rather
+    // than let it be the part that gets cut off.
+    var base = String(slug || 'workshop').slice(0, 50) + '-copy';
+    if (!findWorkshop(base)) return base;
+
+    var n = 2;
+    while (findWorkshop(base + '-' + n)) n += 1;
+    return base + '-' + n;
+  }
+
+  /**
+   * A workshop copied into a new one, ready for the editor. It starts hidden:
+   * a duplicate is the draft of the next workshop, not a second live page
+   * saying the same thing as the first.
+   */
+  function duplicateOf(workshop) {
+    var copy = {};
+    Object.keys(workshop).forEach(function (key) { copy[key] = workshop[key]; });
+
+    copy.title = (workshop.title || workshop.slug) + ' עותק';
+    copy.slug = freeSlug(workshop.slug);
+    copy.hide = true;
+    copy.packs = (workshop.packs || []).map(function (pack) {
+      return { id: pack.id, name: pack.name, price: pack.price, places: pack.places };
+    });
+
+    // The file, the URL and the place in the listing belong to the page being
+    // copied, and the copy earns its own when it is saved.
+    delete copy.file;
+    delete copy.permalink;
+    delete copy.order;
+    delete copy.id;
+
+    return copy;
+  }
+
   function syncPricePer() {
     var perWorkshop = pricePerSelect.value === 'workshop';
     // A price for the whole session has no places to count and nothing to
@@ -883,11 +957,14 @@
     packsGroup.hidden = perWorkshop;
   }
 
-  function fillEditor(workshop, historyLabel) {
-    current = workshop && workshop.slug ? workshop : null;
+  function fillEditor(workshop, options) {
+    var opts = options || {};
+    // A duplicate arrives with a slug already filled in and nothing behind it
+    // on the site, so whether this is an edit is not something the slug knows.
+    current = opts.isNew || !(workshop && workshop.slug) ? null : workshop;
     var data = workshop || blankWorkshop();
 
-    editorTitle.textContent = current ? 'עריכת ' + (data.title || data.slug) : 'סדנה חדשה';
+    editorTitle.textContent = opts.heading || (current ? 'עריכת ' + (data.title || data.slug) : 'סדנה חדשה');
     slugInput.value = data.slug || '';
     slugInput.readOnly = Boolean(current);
     slugHint.textContent = current
@@ -916,7 +993,7 @@
 
     // A save is a floor, not a step: undoing past it would suggest it could be
     // taken back, and the page is already committed by then.
-    resetHistory(historyLabel || (current ? 'הסדנה נפתחה' : 'סדנה חדשה'));
+    resetHistory(opts.history || (current ? 'הסדנה נפתחה' : 'סדנה חדשה'));
   }
 
   function readEditor() {
@@ -1143,13 +1220,14 @@
     if (redoBtn) redoBtn.disabled = versionAt >= versions.length - 1;
   }
 
-  function openEditor(workshop) {
+  function openEditor(workshop, options) {
     var go = function () {
-      fillEditor(workshop);
+      fillEditor(workshop, options);
       listView.hidden = true;
       editor.hidden = false;
       window.scrollTo(0, 0);
       updatePreview();
+      if (options && options.note) show(editorMessage, options.note, 'info');
     };
 
     if (isDirty()) {
@@ -1172,6 +1250,7 @@
     return api('GET').then(function (data) {
       workshops = data.workshops || [];
       original = snapshot(workshops);
+      originalOrder = orderOf(workshops);
       render();
       renderStats();
       board.hidden = false;
@@ -1249,12 +1328,38 @@
   });
 
   listEl.addEventListener('click', function (event) {
+    var copy = event.target.closest('[data-duplicate]');
+    if (copy) {
+      var source = findWorkshop(copy.getAttribute('data-duplicate'));
+      if (!source) return;
+
+      // Nothing is written yet: the copy is a form, and saving it is what makes
+      // it a workshop. That way a duplicate opened by accident costs nothing.
+      return openEditor(duplicateOf(source), {
+        isNew: true,
+        heading: 'עותק של ' + (source.title || source.slug),
+        history: 'שכפול הסדנה',
+        note: 'זהו עותק של «' + (source.title || source.slug) + '». שמירה תיצור סדנה חדשה ומוסתרת.'
+      });
+    }
+
     var button = event.target.closest('[data-edit]');
     if (!button) return;
 
     var workshop = findWorkshop(button.getAttribute('data-edit'));
     if (workshop) openEditor(workshop);
   });
+
+  if (window.AdminReorder) {
+    reorder = AdminReorder.attach(listEl, {
+      itemSelector: '.admin-card',
+      onChange: function (slugs) {
+        workshops = slugs.map(function (slug) { return findWorkshop(slug); }).filter(Boolean);
+        syncRanks();
+        saveSpotsBtn.disabled = !isDirty();
+      }
+    });
+  }
 
   editorCancel.addEventListener('click', closeEditor);
 
@@ -1435,7 +1540,7 @@
       .then(function (data) {
         return load().then(function () {
           var saved = findWorkshop(data.slug);
-          fillEditor(saved, 'נשמר');
+          fillEditor(saved, { history: 'נשמר' });
           updatePreview();
           show(editorMessage, savedMessage(data, 'נשמר.'), 'ok');
         });

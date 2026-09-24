@@ -25,6 +25,17 @@
     return el.getAttribute('data-product-id') === 'gift-card';
   }
 
+  function isEmbroiderySupplies(el) {
+    return el.getAttribute('data-category') === 'embroidery-supplies';
+  }
+
+  function productTitle(el) {
+    var raw = el.getAttribute('data-title');
+    if (raw != null && raw !== '') return raw;
+    var titleEl = el.querySelector('.store-item__title');
+    return titleEl ? (titleEl.textContent || '').trim() : '';
+  }
+
   function syncFromLiveCatalog() {
     if (!window.StoreCart || !StoreCart.catalog) return;
     var items = grid.querySelectorAll('.store-item[data-product-id]');
@@ -55,11 +66,21 @@
     if (mode === 'price-asc') {
       var asc = productPrice(a) - productPrice(b);
       if (asc !== 0) return asc;
-    } else if (mode === 'price-desc') {
+      return productDate(a) - productDate(b);
+    }
+    if (mode === 'price-desc') {
       var desc = productPrice(b) - productPrice(a);
       if (desc !== 0) return desc;
+      return productDate(a) - productDate(b);
     }
 
+    // Default: embroidery supplies first, then Hebrew alphabetical by title.
+    var aEmbroidery = isEmbroiderySupplies(a);
+    var bEmbroidery = isEmbroiderySupplies(b);
+    if (aEmbroidery !== bEmbroidery) return aEmbroidery ? -1 : 1;
+
+    var byTitle = productTitle(a).localeCompare(productTitle(b), 'he');
+    if (byTitle !== 0) return byTitle;
     return productDate(a) - productDate(b);
   }
 

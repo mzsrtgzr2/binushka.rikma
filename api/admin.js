@@ -325,7 +325,7 @@ async function listProducts(env) {
   const products = Object.keys(loaded.rawBySlug)
     .map((slug) => store.parsePage(slug, loaded.rawBySlug[slug]))
     .filter(Boolean)
-    .sort((a, b) => String(a.title).localeCompare(String(b.title), 'he'));
+    .sort(byListOrder);
   return { target: loaded.target, products, catalog, rawBySlug: loaded.rawBySlug };
 }
 
@@ -403,6 +403,8 @@ function normalizeFlags(rawProducts, allowedSlugs) {
     }
     const stockParsed = store.parseStock(row.stock);
     if (stockParsed.error) return { error: stockParsed.error };
+    const orderParsed = store.parseOrder(row.order);
+    if (orderParsed.error) return { error: orderParsed.error };
     const flags = store.applyStockFlags({
       slug,
       out_of_stock: Boolean(row.out_of_stock),
@@ -410,9 +412,30 @@ function normalizeFlags(rawProducts, allowedSlugs) {
       hide: Boolean(row.hide),
       stock: stockParsed.stock,
     });
-    updates.push(flags);
+    updates.push({ ...flags, order: orderParsed.order });
   }
   return { updates };
+}
+
+/**
+ * The order the shop will show, so that dragging a row here means what it
+ * looks like it means. Sold out is left where it is: the shop sinks it on its
+ * own as stock changes, and a product that sold out should not lose the place
+ * it was given once it is back.
+ */
+function byListOrder(a, b) {
+  // A product only has an order once it has been placed by hand. Until then it
+  // falls back to the date it was added, which is how the shop started out.
+  if (a.order && b.order) return a.order - b.order;
+  if (a.order || b.order) return a.order ? -1 : 1;
+
+  if (a.slug !== b.slug && (a.slug === 'gift-card' || b.slug === 'gift-card')) {
+    return a.slug === 'gift-card' ? 1 : -1;
+  }
+
+  const left = Date.parse(a.date) || 0;
+  const right = Date.parse(b.date) || 0;
+  return left - right || String(a.title).localeCompare(String(b.title), 'he');
 }
 
 function stockEqual(a, b) {
@@ -433,7 +456,8 @@ async function saveFlags(env, updates) {
       Boolean(current.out_of_stock) === flags.out_of_stock &&
       Boolean(current.limited_stock) === flags.limited_stock &&
       Boolean(current.hide) === flags.hide &&
-      stockEqual(current.stock, flags.stock)
+      stockEqual(current.stock, flags.stock) &&
+      (flags.order == null || current.order === flags.order)
     ) {
       continue;
     }

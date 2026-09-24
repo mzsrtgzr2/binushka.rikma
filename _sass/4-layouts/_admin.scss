@@ -116,12 +116,64 @@
 
 .admin-card {
   display: grid;
-  grid-template-columns: 88px 1fr;
+  grid-template-columns: auto 88px 1fr;
   gap: 16px;
   background: var(--background-color);
   border-radius: 16px;
   padding: 16px;
   align-items: start;
+
+  /* Half-transparent rather than hidden: the row has to stay visible while it
+     is dragged, because it is the thing being aimed. */
+  &.is-dragging {
+    opacity: 0.4;
+  }
+}
+
+.admin-card__order {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+}
+
+.admin-card__move {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--background-alt-color);
+  width: 30px;
+  height: 26px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:disabled {
+    background: transparent;
+    border-color: transparent;
+    color: #a0a0aa;
+    cursor: default;
+  }
+}
+
+.admin-card__grip {
+  width: 30px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: var(--text-alt-color);
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* The position the shop or the workshops page will show this in. */
+.admin-card__rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-alt-color);
 }
 
 .admin-card__thumb {
@@ -924,12 +976,19 @@
 
 @media only screen and (max-width: $mobile) {
   .admin-card {
-    grid-template-columns: 64px 1fr;
+    grid-template-columns: auto 64px 1fr;
+    gap: 10px;
   }
 
   .admin-card__thumb {
     width: 64px;
     height: 64px;
+  }
+
+  /* Dragging needs a mouse, so on a phone the arrows are the whole control
+     and the grip would only take room from the card. */
+  .admin-card__grip {
+    display: none;
   }
 
   .admin-toolbar,

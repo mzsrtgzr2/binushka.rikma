@@ -170,6 +170,39 @@ function parseStock(raw) {
   return { stock: n };
 }
 
+/**
+ * Where the page sits in its listing. null = never placed by hand, so the
+ * listing falls back to the date, which is how every page started out.
+ */
+function parseOrder(raw) {
+  if (raw === undefined || raw === null || raw === '') return { order: null };
+  if (typeof raw === 'boolean') return { error: 'סדר תצוגה לא תקין' };
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1 || n > 9999) return { error: 'סדר תצוגה לא תקין' };
+  return { order: n };
+}
+
+function yamlOrder(yaml) {
+  const parsed = parseOrder(yamlValue(yaml, 'order'));
+  return parsed.error ? null : parsed.order;
+}
+
+/**
+ * Only writes when given a number. A save that says nothing about the order —
+ * the product editor, which has no say in it — has to leave it where it is
+ * rather than clear it.
+ */
+function applyOrder(raw, order) {
+  if (!Number.isInteger(Number(order))) return raw;
+  const parts = splitFrontMatter(raw);
+  if (!parts) return raw;
+
+  const yaml = setYamlScalar(parts.yaml, 'order', Number(order));
+  const nl = parts.newline || '\n';
+  const bodyOut = parts.body.startsWith('\n') || parts.body.startsWith('\r') ? parts.body : `\n${parts.body}`;
+  return `---${nl}${yaml.replace(/\s+$/, '')}${nl}---${nl}${bodyOut.replace(/^\r?\n/, '\n')}`;
+}
+
 function yamlStock(yaml, ...keys) {
   const names = keys.length ? keys : ['stock'];
   for (const key of names) {
@@ -755,6 +788,8 @@ function parsePage(slug, raw) {
     out_of_stock: soldOut,
     limited_stock: limited,
     hide: yamlValue(yaml, 'hide') === true,
+    order: yamlOrder(yaml),
+    date: String(yamlValue(yaml, 'date') || '').trim(),
     stock: perVariant ? null : stock,
     layout: yamlValue(yaml, 'layout') || '',
     hero_image: heroImage,
@@ -816,6 +851,9 @@ function applyPage(raw, input, { isNew } = {}) {
     yaml = setYamlScalar(yaml, 'price', '');
   }
   const withFlags = applyStockFlags(input);
+  if (Number.isInteger(Number(input.order))) {
+    yaml = setYamlScalar(yaml, 'order', Number(input.order));
+  }
   yaml = setYamlScalar(yaml, 'category', normalizeCategory(input.category));
   yaml = setYamlBool(yaml, 'out_of_stock', Boolean(withFlags.out_of_stock));
   yaml = setYamlBool(yaml, 'limited_stock', Boolean(withFlags.limited_stock));
@@ -1251,6 +1289,8 @@ module.exports = {
   parsePresets,
   parseShekelPrice,
   parseStock,
+  parseOrder,
+  applyOrder,
   yamlStock,
   tracksInventory,
   variantsTrackStock,

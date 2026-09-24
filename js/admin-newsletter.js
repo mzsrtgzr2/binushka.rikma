@@ -361,7 +361,10 @@
         .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, function (match, alt, url) {
           return '<img src="' + escapeHtml(previewSrc(url)) + '" alt="' + alt + '">';
         })
-        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>')
+        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (match, label, url) {
+          var safe = /^(https?:|mailto:|\/(?!\/)|#)/i.test(url) ? url : '#';
+          return '<a href="' + safe + '" target="_blank" rel="noopener">' + label + '</a>';
+        })
         .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>')
         .replace(/`([^`]+)`/g, '<code>$1</code>');

@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
+const { installFixtureWorkshops } = require('../test/fixtures/workshops');
 const {
   buildOrder,
   fallbackPriceBook,
@@ -10,6 +11,19 @@ const {
   applyGiftPacking,
   PRODUCTS,
 } = require('./catalog');
+
+const FIXTURES = installFixtureWorkshops();
+
+test('fixture workshops are built from markdown like the real ones', () => {
+  assert.deepEqual(Object.keys(FIXTURES).sort(), [
+    'workshop-fixture-few',
+    'workshop-fixture-full',
+    'workshop-fixture-pairs',
+    'workshop-fixture-single',
+  ]);
+  assert.equal(PRODUCTS['workshop-fixture-single'].stock, 12);
+  assert.equal(PRODUCTS['workshop-fixture-pairs'].stock, 10);
+});
 
 test('fallback price book includes every cart product', () => {
   const book = fallbackPriceBook();
@@ -188,7 +202,6 @@ test('bookable workshops from markdown are in the checkout catalog', () => {
   const workshop = PRODUCTS['workshop-rehovot-04-12'];
   assert.equal(workshop.kind, 'workshop');
   assert.equal(workshop.price, 330);
-  assert.equal(workshop.stock, 12);
   assert.equal(workshop.requiresShipping, false);
   assert.match(workshop.name, /סדנת רקמה של שישי בבוקר/);
 });
@@ -215,7 +228,6 @@ test('mothers morning with Bar is in the cart catalog at ₪330', () => {
   const workshop = PRODUCTS['workshop-bar-14-10'];
   assert.equal(workshop.kind, 'workshop');
   assert.equal(workshop.price, 330);
-  assert.equal(workshop.stock, 10);
   assert.match(workshop.name, /בוקר פינוק לאמהות/);
   assert.equal(workshop.variants.one.price, 330);
   assert.equal(workshop.variants.one.places, 1);
@@ -224,7 +236,7 @@ test('mothers morning with Bar is in the cart catalog at ₪330', () => {
 });
 
 test('a pair pack is ₪600 and uses two workshop places', () => {
-  const order = buildOrder([{ id: 'workshop-bar-14-10', quantity: 1, variant: 'pair' }], 'none');
+  const order = buildOrder([{ id: 'workshop-fixture-pairs', quantity: 1, variant: 'pair' }], 'none');
   assert.equal(order.error, undefined);
   assert.equal(order.total, 600);
   assert.equal(order.lines[0].kind, 'workshop');
@@ -234,7 +246,7 @@ test('a pair pack is ₪600 and uses two workshop places', () => {
 });
 
 test('two singles cost more than the pair pack', () => {
-  const two = buildOrder([{ id: 'workshop-bar-14-10', quantity: 2, variant: 'one' }], 'none');
+  const two = buildOrder([{ id: 'workshop-fixture-pairs', quantity: 2, variant: 'one' }], 'none');
   assert.equal(two.total, 660);
   assert.equal(two.lines[0].places, 1);
 });
@@ -242,8 +254,8 @@ test('two singles cost more than the pair pack', () => {
 test('workshop packs count places, not cart units, against spots', () => {
   const nine = buildOrder(
     [
-      { id: 'workshop-bar-14-10', quantity: 4, variant: 'pair' },
-      { id: 'workshop-bar-14-10', quantity: 1, variant: 'one' },
+      { id: 'workshop-fixture-pairs', quantity: 4, variant: 'pair' },
+      { id: 'workshop-fixture-pairs', quantity: 1, variant: 'one' },
     ],
     'none'
   );
@@ -252,8 +264,8 @@ test('workshop packs count places, not cart units, against spots', () => {
   assert.match(
     buildOrder(
       [
-        { id: 'workshop-bar-14-10', quantity: 5, variant: 'pair' },
-        { id: 'workshop-bar-14-10', quantity: 1, variant: 'one' },
+        { id: 'workshop-fixture-pairs', quantity: 5, variant: 'pair' },
+        { id: 'workshop-fixture-pairs', quantity: 1, variant: 'one' },
       ],
       'none'
     ).error,
@@ -262,11 +274,11 @@ test('workshop packs count places, not cart units, against spots', () => {
 });
 
 test('a workshop pack without a chosen variant is rejected', () => {
-  assert.equal(buildOrder([{ id: 'workshop-bar-14-10', quantity: 1 }], 'none').error, 'סוג לא תקין');
+  assert.equal(buildOrder([{ id: 'workshop-fixture-pairs', quantity: 1 }], 'none').error, 'סוג לא תקין');
 });
 
 test('a workshop-only order skips shipping', () => {
-  const order = buildOrder([{ id: 'workshop-rehovot-04-12', quantity: 2 }], 'none');
+  const order = buildOrder([{ id: 'workshop-fixture-single', quantity: 2 }], 'none');
   assert.equal(order.error, undefined);
   assert.equal(order.needsShipping, false);
   assert.equal(order.shipping, 0);
@@ -278,7 +290,7 @@ test('a workshop-only order skips shipping', () => {
 test('a mixed cart of a workshop and a shop product still needs shipping', () => {
   const order = buildOrder(
     [
-      { id: 'workshop-rehovot-04-12', quantity: 1 },
+      { id: 'workshop-fixture-single', quantity: 1 },
       { id: 'fox', quantity: 1 },
     ],
     'courier'
@@ -290,14 +302,14 @@ test('a mixed cart of a workshop and a shop product still needs shipping', () =>
 
 test('workshop places are stock: sold out and over-booking are rejected', () => {
   assert.match(
-    buildOrder([{ id: 'workshop-2022-11-04', quantity: 1 }], 'none').error,
+    buildOrder([{ id: 'workshop-fixture-full', quantity: 1 }], 'none').error,
     /אין מקומות פנויים/
   );
   assert.match(
-    buildOrder([{ id: 'workshop-rehovot-29-10', quantity: 4 }], 'none').error,
+    buildOrder([{ id: 'workshop-fixture-few', quantity: 4 }], 'none').error,
     /נשארו 3 מקומות/
   );
-  const ok = buildOrder([{ id: 'workshop-rehovot-29-10', quantity: 3 }], 'none');
+  const ok = buildOrder([{ id: 'workshop-fixture-few', quantity: 3 }], 'none');
   assert.equal(ok.subtotal, 990);
 });
 
@@ -310,7 +322,7 @@ test('participant names are appended only to workshop lines', () => {
     buildOrder(
       [
         { id: 'fox', quantity: 1 },
-        { id: 'workshop-rehovot-04-12', quantity: 2 },
+        { id: 'workshop-fixture-single', quantity: 2 },
       ],
       'pickup'
     ),
@@ -322,6 +334,7 @@ test('participant names are appended only to workshop lines', () => {
 
 test('every visible workshop is in the cart at the page price', () => {
   const store = require('./admin-store');
+  const { installFixtureWorkshops } = require('../test/fixtures/workshops');
   const dir = path.join(__dirname, '..', '_projects');
   const files = fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
   const visible = [];
@@ -355,7 +368,7 @@ test('gift packing skips workshop lines', () => {
     buildOrder(
       [
         { id: 'fox', quantity: 1 },
-        { id: 'workshop-rehovot-04-12', quantity: 1 },
+        { id: 'workshop-fixture-single', quantity: 1 },
       ],
       'pickup'
     ),

@@ -1167,6 +1167,19 @@ test('editing a product keeps the position it was given', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+// A hidden product is not in the shop, so it must not sit between two rows
+// being arranged and make their numbers mean something other than the shop.
+test('a hidden product sits after everything the shop shows', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  const page = fs.readFileSync(path.join(root, '_store', 'thread.md'), 'utf8');
+  fs.writeFileSync(path.join(root, '_store', 'thread.md'), page.replace('hide: false', 'hide: true'));
+
+  assert.deepEqual(await slugsInOrder(root, cookie), ['hoop', 'gift-card', 'thread']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('a position that is not a count is refused', async () => {
   const root = shopRoot();
   const cookie = await loginCookie(root);

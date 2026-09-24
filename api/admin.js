@@ -424,6 +424,10 @@ function normalizeFlags(rawProducts, allowedSlugs) {
  * it was given once it is back.
  */
 function byListOrder(a, b) {
+  // Hidden products are not in the shop at all, so they sit at the end rather
+  // than taking up a position among the ones being arranged.
+  if (Boolean(a.hide) !== Boolean(b.hide)) return a.hide ? 1 : -1;
+
   // A product only has an order once it has been placed by hand. Until then it
   // falls back to the date it was added, which is how the shop started out.
   if (a.order && b.order) return a.order - b.order;

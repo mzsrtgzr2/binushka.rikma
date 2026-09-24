@@ -51,8 +51,11 @@
       if (desc !== 0) return desc;
     }
 
-    // The shop's own order, which the visitor's choice of sort displaces and
-    // which is what «ברירת מחדל» puts back.
+    // The shop's own order: whatever was placed by hand in the backoffice,
+    // then embroidery supplies, then title. All of it is decided at build time
+    // and arrives here as data-order, so the rule lives in one place. Sorting
+    // by price displaces it and «ברירת מחדל» puts it back; two products at the
+    // same price keep it rather than falling into an order nobody chose.
     return productOrder(a) - productOrder(b);
   }
 

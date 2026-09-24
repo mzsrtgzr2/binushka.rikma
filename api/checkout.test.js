@@ -2,6 +2,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { buildOrder, applyVariantNote, applyWorkshopNote, applyGiftPacking } = require('./catalog');
 const checkout = require('./checkout');
+const { installFixtureWorkshops } = require('../test/fixtures/workshops');
+
+installFixtureWorkshops();
 
 const customerBody = {
   firstName: 'נועה',
@@ -172,7 +175,7 @@ test('gift packing appears on payment income descriptions', () => {
 });
 
 test('a pair pack is one income line at the discounted price', () => {
-  const order = buildOrder([{ id: 'workshop-bar-14-10', quantity: 1, variant: 'pair' }], 'none');
+  const order = buildOrder([{ id: 'workshop-fixture-pairs', quantity: 1, variant: 'pair' }], 'none');
   const { customer } = checkout.readCustomer(customerBody);
   const payload = checkout.buildPaymentFormPayload({
     order,
@@ -279,7 +282,7 @@ test('skip-payment is refused on production', async () => {
 
 test('workshop places become income lines without shipping', () => {
   const order = applyWorkshopNote(
-    buildOrder([{ id: 'workshop-rehovot-04-12', quantity: 2 }], 'none'),
+    buildOrder([{ id: 'workshop-fixture-single', quantity: 2 }], 'none'),
     'נועה כהן, מיכל לוי'
   );
   const { customer } = checkout.readCustomer(customerBody);

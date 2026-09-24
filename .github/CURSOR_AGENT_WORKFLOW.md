@@ -77,3 +77,6 @@ gh pr merge --squash --auto --delete-branch
 If GitHub supports auto-merge for the PR, GitHub will merge it in the background once checks
 pass. If GitHub rejects auto-merge because protected branch rules are not configured, the
 workflow falls back to an immediate squash merge after the authorized `/approve` comment.
+If GitHub reports merge conflicts, the workflow checks out the PR branch, merges the latest
+base branch into it, asks Cursor to resolve any conflict markers, pushes the resolution commit,
+and retries the squash merge.

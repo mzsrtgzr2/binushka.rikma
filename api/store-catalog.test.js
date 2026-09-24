@@ -5,6 +5,16 @@ const os = require('os');
 const path = require('path');
 const store = require('./admin-store');
 
+test('formatYamlScalar quotes values that contain newlines', () => {
+  assert.equal(store.formatYamlScalar('שורה אחת'), 'שורה אחת');
+  assert.equal(
+    store.formatYamlScalar('איך אפשר שלא להתאהב בך\nגודל 10.1 cm'),
+    JSON.stringify('איך אפשר שלא להתאהב בך\nגודל 10.1 cm')
+  );
+  // Quoted form must stay a single YAML line so front matter does not break.
+  assert.equal(store.formatYamlScalar('a\nb').includes('\n'), false);
+});
+
 function writePage(dir, slug, yaml, body = 'body') {
   fs.writeFileSync(
     path.join(dir, `${slug}.md`),

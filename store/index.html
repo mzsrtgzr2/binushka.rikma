@@ -31,28 +31,32 @@ layout: default
   <div class="row" id="store-grid">
     {% comment %}
       A product only carries `order` once it has been placed by hand in the
-      backoffice. Anything not placed yet keeps falling back to the date it was
-      added, with the gift card after it — which is the order the shop had
-      before any of this could be set.
+      backoffice, and a placement made by hand is the one thing here that was
+      asked for on purpose, so it comes first. Everything else falls back to the
+      shop's own default: embroidery supplies, then title A–Z, gift card after.
     {% endcomment %}
+    {% assign sorted = site.store | sort: 'title' %}
     {% assign store_placed = '' | split: '' %}
-    {% assign store_by_date = '' | split: '' %}
+    {% assign store_embroidery = '' | split: '' %}
+    {% assign store_other = '' | split: '' %}
     {% assign store_gift_card = '' | split: '' %}
-    {% for item in site.store %}
-      {% unless item.hide %}
+    {% for item in sorted %}
+      {% comment %}Skip hidden items and broken front matter (empty title husks).{% endcomment %}
+      {% unless item.hide or item.title == blank %}
         {% assign item_slug = item.slug | default: item.basename %}
         {% if item.order %}
           {% assign store_placed = store_placed | push: item %}
         {% elsif item_slug == 'gift-card' %}
           {% assign store_gift_card = store_gift_card | push: item %}
+        {% elsif item.category == 'embroidery-supplies' %}
+          {% assign store_embroidery = store_embroidery | push: item %}
         {% else %}
-          {% assign store_by_date = store_by_date | push: item %}
+          {% assign store_other = store_other | push: item %}
         {% endif %}
       {% endunless %}
     {% endfor %}
     {% assign store_placed = store_placed | sort: 'order' %}
-    {% assign store_by_date = store_by_date | sort: 'date' %}
-    {% assign store_ordered = store_placed | concat: store_by_date | concat: store_gift_card %}
+    {% assign store_ordered = store_placed | concat: store_embroidery | concat: store_other | concat: store_gift_card %}
 
     {% comment %}
       Sold out sinks last whatever the chosen order says: what is in stock

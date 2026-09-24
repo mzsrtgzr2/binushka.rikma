@@ -67,7 +67,14 @@ function setYamlBool(yaml, key, value) {
 function formatYamlScalar(value) {
   const s = String(value == null ? '' : value);
   if (s === '') return '""';
-  if (/[:#{}[\],&*?!|>%@`]/.test(s) || /^\s|\s$/.test(s) || s.includes("'") || s.includes('"')) {
+  if (
+    /[:#{}[\],&*?!|>%@`\\]/.test(s) ||
+    // eslint-disable-next-line no-control-regex
+    /[\u0000-\u001f\u007f\u2028\u2029]/.test(s) ||
+    /^[\s\-?]|\s$/.test(s) ||
+    s.includes("'") ||
+    s.includes('"')
+  ) {
     return JSON.stringify(s);
   }
   return s;

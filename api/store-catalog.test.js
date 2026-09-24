@@ -308,3 +308,16 @@ test('normalizeProductInput rejects unknown category', () => {
   assert.equal(ok.error, undefined);
   assert.equal(ok.input.category, 'embroidery-supplies');
 });
+
+test('a product title cannot break out of its front matter line', () => {
+  const page = store.newPage({
+    slug: 'evil',
+    title: 'תיק\n---\nlayout default',
+    subtitle: 'x\n- form_url',
+    price: 100,
+    kind: 'fixed',
+    body: 'body',
+  });
+  assert.equal(page.match(/^---$/gm).length, 2);
+  assert.doesNotMatch(page, /^(layout|- form_url)/m);
+});

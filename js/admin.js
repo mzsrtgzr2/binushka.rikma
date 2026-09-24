@@ -1,6 +1,6 @@
 /**
- * Store backoffice: login, list, create / update / delete products,
- * shop stock, and workshop spots.
+ * Store backoffice: login, list, create / update / delete products and stock.
+ * Workshops have their own section at /admin/workshops/.
  */
 (function () {
   var loginForm = document.getElementById('admin-login');
@@ -9,9 +9,6 @@
   var boardMessage = document.getElementById('admin-board-message');
   var listView = document.getElementById('admin-list-view');
   var listEl = document.getElementById('admin-list');
-  var workshopsEl = document.getElementById('admin-workshops');
-  var workshopsHeading = document.getElementById('admin-workshops-heading');
-  var workshopsHint = document.getElementById('admin-workshops-hint');
   var saveBtn = document.getElementById('admin-save');
   var newBtn = document.getElementById('admin-new');
   var logoutBtn = document.getElementById('admin-logout');
@@ -33,9 +30,7 @@
   if (!loginForm || !board || !editor || !photosEl) return;
 
   var products = [];
-  var workshops = [];
   var original = {};
-  var originalWorkshops = {};
   var editingNew = false;
   var saveHint = '';
   var photoItems = [];
@@ -313,20 +308,8 @@
     return map;
   }
 
-  function snapshotWorkshops(list) {
-    var map = {};
-    (list || []).forEach(function (w) {
-      map[w.slug] = {
-        registration_full: Boolean(w.registration_full),
-        hide: Boolean(w.hide),
-        spots: w.spots == null || w.spots === '' ? null : Number(w.spots),
-      };
-    });
-    return map;
-  }
-
   function isDirty() {
-    var productsDirty = products.some(function (p) {
+    return products.some(function (p) {
       var orig = original[p.slug] || {};
       var stock = p.stock == null || p.stock === '' ? null : Number(p.stock);
       var origStock = orig.stock == null || orig.stock === '' ? null : Number(orig.stock);
@@ -335,17 +318,6 @@
         Boolean(p.limited_stock) !== Boolean(orig.limited_stock) ||
         Boolean(p.hide) !== Boolean(orig.hide) ||
         stock !== origStock
-      );
-    });
-    if (productsDirty) return true;
-    return workshops.some(function (w) {
-      var orig = originalWorkshops[w.slug] || {};
-      var spots = w.spots == null || w.spots === '' ? null : Number(w.spots);
-      var origSpots = orig.spots == null || orig.spots === '' ? null : Number(orig.spots);
-      return (
-        Boolean(w.registration_full) !== Boolean(orig.registration_full) ||
-        Boolean(w.hide) !== Boolean(orig.hide) ||
-        spots !== origSpots
       );
     });
   }
@@ -367,14 +339,6 @@
     if (p.stock != null && p.stock !== '') return 'מלאי: ' + p.stock;
     if (p.limited_stock) return 'מלאי מוגבל';
     return 'במלאי';
-  }
-
-  function workshopStatusLabel(w) {
-    if (w.hide) return 'מוסתרת';
-    if (w.registration_full || w.spots === 0) return 'מלאה';
-    if (w.spots != null && w.spots !== '') return 'מקומות: ' + w.spots;
-    if (w.registration_not_open) return 'הרשמה סגורה';
-    return 'פתוחה';
   }
 
   function kindLabel(p) {
@@ -481,67 +445,6 @@
         );
       })
       .join('');
-    if (workshopsEl) {
-      workshopsEl.innerHTML = workshops
-        .map(function (w) {
-          var img = w.image
-            ? '<img class="admin-card__thumb" src="' + escapeHtml(w.image) + '" alt="">'
-            : '<span class="admin-card__thumb admin-card__thumb--empty"></span>';
-          var price = '';
-          if (w.variants) {
-            var packPrices = Object.keys(w.variants)
-              .map(function (id) {
-                return Number(w.variants[id] && w.variants[id].price);
-              })
-              .filter(function (n) {
-                return n > 0;
-              });
-            if (packPrices.length) {
-              var pmin = Math.min.apply(null, packPrices);
-              var pmax = Math.max.apply(null, packPrices);
-              price = pmin === pmax ? '₪' + pmin : '₪' + pmin + ' – ₪' + pmax;
-            }
-          } else if (w.price > 0) {
-            price = '₪' + w.price;
-          }
-          var meta = ['סדנה'];
-          if (w.subtitle) meta.push(w.subtitle);
-          if (price) meta.push(price);
-          return (
-            '<li class="admin-card" data-workshop-slug="' +
-            escapeHtml(w.slug) +
-            '">' +
-            img +
-            '<div class="admin-card__body">' +
-            '<div class="admin-card__head">' +
-            '<strong>' +
-            escapeHtml(w.title) +
-            '</strong>' +
-            '<span class="admin-card__badge">' +
-            workshopStatusLabel(w) +
-            '</span>' +
-            '</div>' +
-            '<p class="admin-card__meta">' +
-            escapeHtml(meta.join(' · ')) +
-            '</p>' +
-            '<label class="admin-stock">מקומות פנויים' +
-            '<input type="number" class="admin-stock__input" data-workshop-spots min="0" step="1" dir="ltr" ' +
-            'placeholder="—"' +
-            (w.spots != null && w.spots !== '' ? ' value="' + escapeHtml(w.spots) + '"' : '') +
-            '></label>' +
-            '<label class="admin-check"><input type="checkbox" data-workshop-flag="registration_full"' +
-            (w.registration_full ? ' checked' : '') +
-            '> ההרשמה מלאה</label>' +
-            '<label class="admin-check"><input type="checkbox" data-workshop-flag="hide"' +
-            (w.hide ? ' checked' : '') +
-            '> הסתר מהאתר</label>' +
-            '</div></li>'
-          );
-        })
-        .join('');
-    }
-    if (workshopsHeading) workshopsHeading.hidden = workshops.length === 0;
-    if (workshopsHint) workshopsHint.hidden = workshops.length === 0;
     saveBtn.disabled = !isDirty();
   }
 
@@ -556,8 +459,6 @@
     board.hidden = true;
     logoutBtn.hidden = true;
     products = [];
-    workshops = [];
-    originalWorkshops = {};
     closeEditor();
   }
 
@@ -1411,9 +1312,7 @@
   function loadBoard() {
     return api('GET').then(function (data) {
       products = data.products || [];
-      workshops = data.workshops || [];
       original = snapshot(products);
-      originalWorkshops = snapshotWorkshops(workshops);
       showBoard();
       showList();
       render();
@@ -1429,9 +1328,8 @@
   function saveStock() {
     saveBtn.disabled = true;
     show(boardMessage, 'שומרת…', 'info');
-    return api('POST', { action: 'save', products: products, workshops: workshops }).then(function (data) {
+    return api('POST', { action: 'save', products: products }).then(function (data) {
       original = snapshot(products);
-      originalWorkshops = snapshotWorkshops(workshops);
       render();
       var n = (data.changed || []).length;
       var msg =
@@ -1514,45 +1412,6 @@
     });
     if (product) openEditor(false, product);
   });
-
-  function findWorkshop(card) {
-    if (!card) return null;
-    var slug = card.getAttribute('data-workshop-slug');
-    return workshops.find(function (w) {
-      return w.slug === slug;
-    });
-  }
-
-  if (workshopsEl) {
-    workshopsEl.addEventListener('change', function (event) {
-      var spotsInput = event.target.closest('input[data-workshop-spots]');
-      if (spotsInput) {
-        var workshop = findWorkshop(spotsInput.closest('[data-workshop-slug]'));
-        if (!workshop) return;
-        var raw = spotsInput.value.trim();
-        if (raw === '') {
-          workshop.spots = null;
-        } else {
-          var n = Number(raw);
-          if (!Number.isInteger(n) || n < 0) {
-            spotsInput.value = workshop.spots != null ? workshop.spots : '';
-            return;
-          }
-          workshop.spots = n;
-          if (n === 0) workshop.registration_full = true;
-          else if (n > 0) workshop.registration_full = false;
-        }
-        render();
-        return;
-      }
-      var flagInput = event.target.closest('input[data-workshop-flag]');
-      if (!flagInput) return;
-      var flagged = findWorkshop(flagInput.closest('[data-workshop-slug]'));
-      if (!flagged) return;
-      flagged[flagInput.getAttribute('data-workshop-flag')] = flagInput.checked;
-      render();
-    });
-  }
 
   saveBtn.addEventListener('click', function () {
     saveStock().catch(function (err) {

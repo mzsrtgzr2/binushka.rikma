@@ -104,15 +104,93 @@ test('missing ADMIN_PASSWORD is reported as not configured', async () => {
   assert.match(result.json.error, /cursor\/store-cart-34b6/);
 });
 
-test('login with the right password sets a session cookie', async () => {
+test('login with the right password sets a persistent session cookie', async () => {
   const result = await request(admin, {
     method: 'POST',
-    headers: {},
+    headers: { 'x-forwarded-proto': 'https' },
     body: { action: 'login', password: 'secret-pass' },
     env: { ADMIN_PASSWORD: 'secret-pass' },
   });
   assert.equal(result.status, 200);
-  assert.match(String(result.headers['set-cookie']), /binushka-admin-v1=/);
+  const cookie = String(result.headers['set-cookie']);
+  assert.match(cookie, /binushka-admin-v2=v2\./);
+  assert.match(cookie, /HttpOnly/);
+  assert.match(cookie, /SameSite=Lax/);
+  assert.match(cookie, /Max-Age=2592000/);
+  assert.match(cookie, /Expires=/);
+  assert.match(cookie, /Secure/);
+  assert.match(cookie, /Path=\//);
+  assert.equal(result.headers['cache-control'], 'no-store');
+});
+
+test('form login redirects back to the admin page with a session cookie', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      'x-forwarded-proto': 'https',
+    },
+    body: { action: 'login', password: 'secret-pass', next: '/admin/newsletter/' },
+    env: { ADMIN_PASSWORD: 'secret-pass' },
+  });
+  assert.equal(result.status, 303);
+  assert.equal(result.headers.location, '/admin/newsletter/');
+  assert.match(String(result.headers['set-cookie']), /binushka-admin-v2=v2\./);
+});
+
+test('form login with a wrong password redirects with login=error', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: { action: 'login', password: 'nope', next: '/admin/store/' },
+    env: { ADMIN_PASSWORD: 'secret-pass' },
+  });
+  assert.equal(result.status, 303);
+  assert.equal(result.headers.location, '/admin/store/?login=error');
+  assert.equal(result.headers['set-cookie'], undefined);
+});
+
+test('form login rejects an open redirect', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: { action: 'login', password: 'secret-pass', next: 'https://evil.example/' },
+    env: { ADMIN_PASSWORD: 'secret-pass' },
+  });
+  assert.equal(result.status, 303);
+  assert.equal(result.headers.location, '/admin/store/');
+});
+
+test('legacy v1 session cookie still authorizes', async () => {
+  const root = foxRoot();
+  const token = admin.sessionToken({ ADMIN_PASSWORD: 'secret-pass' });
+  const result = await request(admin, {
+    method: 'GET',
+    headers: { cookie: `${admin.LEGACY_COOKIE}=${token}` },
+    env: { ADMIN_PASSWORD: 'secret-pass', ADMIN_LOCAL_ROOT: root },
+  });
+  assert.equal(result.status, 200);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('expired or tampered session is unauthorized', async () => {
+  const env = { ADMIN_PASSWORD: 'secret-pass' };
+  const expired = admin.issueSession(env, Date.now() - 31 * 24 * 60 * 60 * 1000);
+  const expiredResult = await request(admin, {
+    method: 'GET',
+    headers: { cookie: `${admin.COOKIE}=${expired}` },
+    env,
+  });
+  assert.equal(expiredResult.status, 401);
+
+  const live = admin.issueSession(env);
+  const tampered = live.replace(/\.[a-f0-9]{64}$/, `.${'ab'.repeat(32)}`);
+  const tamperedResult = await request(admin, {
+    method: 'GET',
+    headers: { cookie: `${admin.COOKIE}=${tampered}` },
+    env,
+  });
+  assert.equal(tamperedResult.status, 401);
 });
 
 test('wrong password is rejected', async () => {
@@ -123,6 +201,18 @@ test('wrong password is rejected', async () => {
     env: { ADMIN_PASSWORD: 'secret-pass' },
   });
   assert.equal(result.status, 401);
+});
+
+test('form logout clears the session and returns to the admin page', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: { action: 'logout', next: '/admin/store/' },
+    env: { ADMIN_PASSWORD: 'secret-pass' },
+  });
+  assert.equal(result.status, 303);
+  assert.equal(result.headers.location, '/admin/store/');
+  assert.match(String(result.headers['set-cookie']), /Max-Age=0/);
 });
 
 test('listing without a session is unauthorized', async () => {

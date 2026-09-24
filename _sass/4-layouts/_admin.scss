@@ -210,6 +210,13 @@
   font-size: 14px;
 }
 
+/* Both things that can be done to a whole row, on one line so neither of them
+   reads as the one that was meant. */
+.admin-card__actions {
+  display: flex;
+  gap: 16px;
+}
+
 .admin-card__edit {
   margin-top: 10px;
   border: 0;

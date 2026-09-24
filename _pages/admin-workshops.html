@@ -168,12 +168,30 @@ noindex: true
           </fieldset>
         </div>
 
-        <aside class="admin-preview" aria-label="תצוגה מקדימה כמו באתר">
-          <p class="admin-preview__kicker">תצוגה מקדימה</p>
-          <p class="admin-preview__lead">כך הסדנה תיראה ברשימת הסדנאות ובעמוד שלה, לפי השדות כאן.</p>
-          <div id="workshop-preview-card"></div>
-          <div id="workshop-preview-page"></div>
-        </aside>
+        <div class="admin-side">
+          <section class="admin-history" aria-label="היסטוריית השינויים">
+            <div class="admin-history__head">
+              <p class="admin-history__kicker">היסטוריה</p>
+              <div class="admin-history__actions">
+                <button type="button" class="admin-history__btn" id="workshop-undo" title="Ctrl+Z">ביטול</button>
+                <button type="button" class="admin-history__btn" id="workshop-redo" title="Ctrl+Shift+Z">שחזור</button>
+              </div>
+            </div>
+            <p class="admin-history__lead">
+              כל שינוי נשמר כאן. <kbd>Ctrl</kbd>+<kbd>Z</kbd> חוזר שלב אחורה,
+              <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> קדימה, ואפשר גם ללחוץ על שלב כדי לקפוץ אליו.
+              ההיסטוריה מתחילה מחדש בכל פתיחה של סדנה.
+            </p>
+            <ol class="admin-history__list" id="workshop-history"></ol>
+          </section>
+
+          <aside class="admin-preview" aria-label="תצוגה מקדימה כמו באתר">
+            <p class="admin-preview__kicker">תצוגה מקדימה</p>
+            <p class="admin-preview__lead">כך הסדנה תיראה ברשימת הסדנאות ובעמוד שלה, לפי השדות כאן.</p>
+            <div id="workshop-preview-card"></div>
+            <div id="workshop-preview-page"></div>
+          </aside>
+        </div>
       </div>
 
       <div class="admin-editor__actions">

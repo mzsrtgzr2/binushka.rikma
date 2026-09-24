@@ -326,7 +326,8 @@
   padding: 16px 16px 24px;
 }
 
-.admin-preview__kicker {
+.admin-preview__kicker,
+.admin-history__kicker {
   margin: 0;
   font-size: 12px;
   font-weight: 700;
@@ -335,7 +336,8 @@
   color: var(--text-alt-color);
 }
 
-.admin-preview__lead {
+.admin-preview__lead,
+.admin-history__lead {
   margin: 6px 0 16px;
   font-size: 13px;
   line-height: 1.5;
@@ -945,7 +947,8 @@
     min-height: 120px;
   }
 
-  .admin-preview {
+  .admin-preview,
+  .admin-side {
     position: static;
     max-height: none;
   }
@@ -960,7 +963,8 @@
     grid-template-columns: 1fr;
   }
 
-  .admin-preview {
+  .admin-preview,
+  .admin-side {
     position: static;
     max-height: none;
   }
@@ -1178,7 +1182,131 @@
   margin-top: 20px;
 }
 
-/* Workshop backoffice: the registration packs editor and the site preview. */
+/* Workshop backoffice: the registration packs editor, the change history and
+   the site preview. */
+
+/* The history and the preview share one sticky column, so the preview keeps
+   its own styling but stops being the thing that sticks. */
+.admin-side {
+  position: sticky;
+  top: 16px;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.admin-side .admin-preview {
+  position: static;
+  max-height: none;
+  overflow: visible;
+}
+
+.admin-history {
+  background: var(--background-alt-color);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 16px;
+
+  kbd {
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border: 1px solid #d5d5dd;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: #ffffff;
+    white-space: nowrap;
+  }
+}
+
+.admin-history__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-history__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-history__btn {
+  border: 1px solid #d5d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+
+  /* At the ends of the history one of these does nothing, and fading a white
+     button on a light panel is too quiet to notice: it has to drop out of the
+     panel entirely to read as unavailable. */
+  &:disabled {
+    background: transparent;
+    border-color: transparent;
+    color: #a0a0aa;
+    cursor: default;
+  }
+}
+
+.admin-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.admin-history__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 12px;
+  border: 0;
+  border-bottom: 1px solid #f0f0f4;
+  background: none;
+  text-align: start;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: #f2f2f7;
+  }
+}
+
+.admin-history__list li:last-child .admin-history__item {
+  border-bottom: 0;
+}
+
+.admin-history__item.is-current {
+  background: var(--brand-color);
+  font-weight: 700;
+}
+
+/* Steps ahead of where the form stands: undone, but still reachable until the
+   next edit replaces them. */
+.admin-history__item.is-undone {
+  opacity: 0.45;
+}
+
+.admin-history__time {
+  font-size: 11px;
+  color: var(--text-alt-color);
+  flex-shrink: 0;
+}
+
+.admin-history__item.is-current .admin-history__time {
+  color: var(--dark);
+}
 
 .admin-packs-group {
   margin-top: 20px;

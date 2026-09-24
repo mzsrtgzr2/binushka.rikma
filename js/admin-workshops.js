@@ -53,6 +53,9 @@
   var hideInput = document.getElementById('workshop-hide');
   var previewCard = document.getElementById('workshop-preview-card');
   var previewPage = document.getElementById('workshop-preview-page');
+  var historyEl = document.getElementById('workshop-history');
+  var undoBtn = document.getElementById('workshop-undo');
+  var redoBtn = document.getElementById('workshop-redo');
   if (!loginForm || !board || !editor || !packsEl) return;
 
   var MAX_PACKS = 6;
@@ -357,21 +360,14 @@
     }
 
     var text = linkTextInput.value.trim() || url;
-    var selectionLength = bodyInput.selectionEnd - bodyInput.selectionStart;
 
-    // Replaces the selection when the link was built around one, so the words
-    // do not end up written twice.
-    if (selectionLength > 0) {
-      var start = bodyInput.selectionStart;
-      bodyInput.value =
-        bodyInput.value.slice(0, start) + '[' + text + '](' + url + ')' + bodyInput.value.slice(bodyInput.selectionEnd);
-      bodyInput.selectionStart = bodyInput.selectionEnd = start + text.length + url.length + 4;
-    } else {
-      insertAtCaret(bodyInput, '[' + text + '](' + url + ')');
-    }
+    // insertAtCaret writes over the selection, so a link built around selected
+    // words replaces them rather than writing them out twice.
+    insertAtCaret(bodyInput, '[' + text + '](' + url + ')');
 
     closeLinkBox();
     updatePreview();
+    record('הוספת קישור', '');
   }
 
   /* ---------------------------------------------------------------- markdown
@@ -520,7 +516,8 @@
     });
   }
 
-  function readPacks() {
+  /** Every row as it stands, blank ones included, so history can restore one. */
+  function packRows() {
     return Array.prototype.map.call(packsEl.querySelectorAll('.admin-pack'), function (row) {
       return {
         id: row.getAttribute('data-pack-id') || '',
@@ -528,7 +525,11 @@
         price: (row.querySelector('[data-pack="price"]') || {}).value || '',
         places: (row.querySelector('[data-pack="places"]') || {}).value || ''
       };
-    }).filter(function (pack) {
+    });
+  }
+
+  function readPacks() {
+    return packRows().filter(function (pack) {
       return String(pack.name).trim() || String(pack.price).trim();
     });
   }
@@ -882,7 +883,7 @@
     packsGroup.hidden = perWorkshop;
   }
 
-  function fillEditor(workshop) {
+  function fillEditor(workshop, historyLabel) {
     current = workshop && workshop.slug ? workshop : null;
     var data = workshop || blankWorkshop();
 
@@ -912,6 +913,10 @@
     editorDelete.hidden = !current;
     syncPricePer();
     show(editorMessage, '');
+
+    // A save is a floor, not a step: undoing past it would suggest it could be
+    // taken back, and the page is already committed by then.
+    resetHistory(historyLabel || (current ? 'הסדנה נפתחה' : 'סדנה חדשה'));
   }
 
   function readEditor() {
@@ -935,6 +940,207 @@
       last_places: lastPlacesInput.checked,
       hide: hideInput.checked
     };
+  }
+
+  /* ----------------------------------------------------------------- history
+
+     Every change to the form becomes a version, and Ctrl+Z walks back through
+     them. The browser's own undo is deliberately displaced: it only knows
+     about one field at a time and nothing about uploading an image or
+     removing a pack, so leaving it in place would mean two undo stacks that
+     disagree about what the last change was. */
+
+  var VERSION_LIMIT = 100;
+
+  /* A burst of typing in one field is one version. Recording a version per
+     keystroke would bury the steps worth returning to under a step per
+     letter. */
+  var TYPING_GROUP_MS = 700;
+
+  var FIELD_LABELS = {
+    'workshop-title': 'שם הסדנה',
+    'workshop-subtitle': 'תת כותרת',
+    'workshop-date': 'תאריך ושעה',
+    'workshop-slug': 'מזהה',
+    'workshop-image': 'תמונה ראשית',
+    'workshop-body': 'תוכן העמוד',
+    'workshop-price-per': 'אופן הגבייה',
+    'workshop-price': 'מחיר',
+    'workshop-spots': 'מקומות פנויים',
+    'workshop-form-url': 'קישור הרשמה',
+    'workshop-registration-full': 'ההרשמה מלאה',
+    'workshop-last-places': 'מקומות אחרונים',
+    'workshop-registration-not-open': 'ההרשמה לא נפתחה',
+    'workshop-hide': 'הסתרה מהאתר'
+  };
+
+  var versions = [];
+  var versionAt = -1;
+  var openGroup = '';
+  var groupTimer;
+  var restoring = false;
+
+  /** Everything the form holds. Caret is kept aside so it never counts as a change. */
+  function snapshot() {
+    var active = document.activeElement;
+    var caret = active && typeof active.selectionStart === 'number'
+      ? [active.selectionStart, active.selectionEnd]
+      : null;
+
+    return {
+      fields: {
+        title: titleInput.value,
+        subtitle: subtitleInput.value,
+        date: dateInput.value,
+        slug: slugInput.value,
+        image: imageInput.value,
+        body: bodyInput.value,
+        price_per: pricePerSelect.value,
+        cart_price: priceInput.value,
+        spots: spotsInput.value,
+        form_url: formUrlInput.value,
+        registration_full: fullInput.checked,
+        last_places: lastPlacesInput.checked,
+        registration_not_open: notOpenInput.checked,
+        hide: hideInput.checked,
+        packs: packRows()
+      },
+      focus: active && active.id ? active.id : '',
+      caret: caret
+    };
+  }
+
+  function applySnapshot(version) {
+    var fields = version.fields;
+
+    restoring = true;
+    titleInput.value = fields.title;
+    subtitleInput.value = fields.subtitle;
+    dateInput.value = fields.date;
+    slugInput.value = fields.slug;
+    imageInput.value = fields.image;
+    bodyInput.value = fields.body;
+    pricePerSelect.value = fields.price_per;
+    priceInput.value = fields.cart_price;
+    spotsInput.value = fields.spots;
+    formUrlInput.value = fields.form_url;
+    fullInput.checked = fields.registration_full;
+    lastPlacesInput.checked = fields.last_places;
+    notOpenInput.checked = fields.registration_not_open;
+    hideInput.checked = fields.hide;
+    renderPacks(fields.packs);
+    syncPricePer();
+    restoring = false;
+
+    // Putting the caret back where it was is what makes undoing a burst of
+    // typing feel like undoing rather than like reloading the form.
+    var focused = version.focus && document.getElementById(version.focus);
+    if (focused && !focused.closest('[hidden]')) {
+      focused.focus();
+      if (version.caret && typeof focused.setSelectionRange === 'function') {
+        try {
+          focused.setSelectionRange(version.caret[0], version.caret[1]);
+        } catch (error) {
+          /* A number input refuses a selection range in some browsers. */
+        }
+      }
+    }
+
+    updatePreview();
+  }
+
+  function sameFields(a, b) {
+    return JSON.stringify(a.fields) === JSON.stringify(b.fields);
+  }
+
+  function record(label, groupKey) {
+    if (restoring || editor.hidden) return;
+
+    var version = snapshot();
+    if (versionAt >= 0 && sameFields(versions[versionAt], version)) return;
+
+    // Stepping back and then editing replaces what was undone: the versions
+    // ahead described a future this edit has just ruled out.
+    versions.length = versionAt + 1;
+
+    var extendsGroup = groupKey && openGroup === groupKey && versionAt > 0;
+    if (extendsGroup) {
+      versions[versionAt] = { label: versions[versionAt].label, at: Date.now(), fields: version.fields, focus: version.focus, caret: version.caret };
+    } else {
+      versions.push({ label: label, at: Date.now(), fields: version.fields, focus: version.focus, caret: version.caret });
+      if (versions.length > VERSION_LIMIT) versions.shift();
+      versionAt = versions.length - 1;
+    }
+
+    openGroup = groupKey || '';
+    clearTimeout(groupTimer);
+    if (groupKey) {
+      groupTimer = setTimeout(function () { openGroup = ''; }, TYPING_GROUP_MS);
+    }
+
+    renderHistory();
+  }
+
+  function resetHistory(label) {
+    versions = [];
+    versionAt = -1;
+    openGroup = '';
+    clearTimeout(groupTimer);
+
+    var version = snapshot();
+    versions.push({ label: label, at: Date.now(), fields: version.fields, focus: '', caret: null });
+    versionAt = 0;
+
+    renderHistory();
+  }
+
+  function goToVersion(index) {
+    if (index < 0 || index >= versions.length || index === versionAt) return;
+
+    versionAt = index;
+    openGroup = '';
+    clearTimeout(groupTimer);
+    applySnapshot(versions[index]);
+    renderHistory();
+  }
+
+  function undo() {
+    if (versionAt <= 0) return;
+    goToVersion(versionAt - 1);
+  }
+
+  function redo() {
+    if (versionAt >= versions.length - 1) return;
+    goToVersion(versionAt + 1);
+  }
+
+  function versionTime(at) {
+    var date = new Date(at);
+    return pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+  }
+
+  function renderHistory() {
+    if (!historyEl) return;
+
+    // Newest first, so the step just taken is the one under the cursor rather
+    // than the one furthest down a growing list.
+    var rows = [];
+    for (var index = versions.length - 1; index >= 0; index--) {
+      var entry = versions[index];
+      rows.push(
+        '<li><button type="button" class="admin-history__item' +
+        (index === versionAt ? ' is-current' : '') +
+        (index > versionAt ? ' is-undone' : '') +
+        '" data-version="' + index + '">' +
+        '<span class="admin-history__label">' + escapeHtml(entry.label) + '</span>' +
+        '<span class="admin-history__time" dir="ltr">' + versionTime(entry.at) + '</span>' +
+        '</button></li>'
+      );
+    }
+
+    historyEl.innerHTML = rows.join('');
+    if (undoBtn) undoBtn.disabled = versionAt <= 0;
+    if (redoBtn) redoBtn.disabled = versionAt >= versions.length - 1;
   }
 
   function openEditor(workshop) {
@@ -1056,12 +1262,16 @@
   bodyImagePick.addEventListener('click', function () { bodyImageFile.click(); });
 
   imageFile.addEventListener('change', function () {
-    handlePicked(imageFile, function (url) { imageInput.value = url; });
+    handlePicked(imageFile, function (url) {
+      imageInput.value = url;
+      record('העלאת תמונה ראשית', '');
+    });
   });
 
   bodyImageFile.addEventListener('change', function () {
     handlePicked(bodyImageFile, function (url) {
       insertAtCaret(bodyInput, '\n\n![](' + url + ')\n\n');
+      record('הוספת תמונה לטקסט', '');
     });
   });
 
@@ -1140,6 +1350,7 @@
     }
     packsEl.insertAdjacentHTML('beforeend', packRowHtml({ places: 1 }, count));
     schedulePreview();
+    record('הוספת חבילה', '');
   });
 
   packsEl.addEventListener('click', function (event) {
@@ -1149,10 +1360,61 @@
     if (row) row.remove();
     renumberPacks();
     schedulePreview();
+    record('הסרת חבילה', '');
   });
 
-  editor.addEventListener('input', schedulePreview);
-  editor.addEventListener('change', schedulePreview);
+  /** True for the fields where a keystroke is one of many, not one decision. */
+  function isTyping(el) {
+    if (el.tagName === 'TEXTAREA') return true;
+    if (el.tagName !== 'INPUT') return false;
+    return el.type !== 'checkbox' && el.type !== 'radio' && el.type !== 'file';
+  }
+
+  function recordFromEvent(event, typing) {
+    var el = event.target;
+    if (!el || !el.tagName || el.type === 'file') return;
+
+    var inPack = el.closest && el.closest('.admin-pack');
+    var label = inPack ? 'חבילות הרשמה' : FIELD_LABELS[el.id];
+    if (!label) return;
+
+    record(label, typing && isTyping(el) ? (inPack ? 'packs' : el.id) : '');
+  }
+
+  editor.addEventListener('input', function (event) {
+    schedulePreview();
+    recordFromEvent(event, true);
+  });
+
+  editor.addEventListener('change', function (event) {
+    schedulePreview();
+    recordFromEvent(event, false);
+  });
+
+  if (historyEl) {
+    historyEl.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-version]');
+      if (button) goToVersion(Number(button.getAttribute('data-version')));
+    });
+  }
+
+  if (undoBtn) undoBtn.addEventListener('click', undo);
+  if (redoBtn) redoBtn.addEventListener('click', redo);
+
+  document.addEventListener('keydown', function (event) {
+    if (editor.hidden || !(event.ctrlKey || event.metaKey) || event.altKey) return;
+
+    // event.key follows the keyboard layout — on a Hebrew one the Z key types
+    // ז — so the shortcut is matched on the physical key instead.
+    var key = String(event.key || '').toLowerCase();
+    var isUndoKey = event.code === 'KeyZ' || key === 'z' || key === 'ז';
+    var isRedoKey = event.code === 'KeyY' || key === 'y' || key === 'ט';
+    if (!isUndoKey && !isRedoKey) return;
+
+    event.preventDefault();
+    if (isRedoKey || event.shiftKey) redo();
+    else undo();
+  });
 
   editor.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -1173,7 +1435,7 @@
       .then(function (data) {
         return load().then(function () {
           var saved = findWorkshop(data.slug);
-          fillEditor(saved);
+          fillEditor(saved, 'נשמר');
           updatePreview();
           show(editorMessage, savedMessage(data, 'נשמר.'), 'ok');
         });

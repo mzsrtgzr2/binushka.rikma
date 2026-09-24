@@ -15,10 +15,11 @@ variants:
     image: /images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg
     gallery:
       - /images/store/hoops/screenshot-2026-09-23-at-15-50-13-mue3pll1.jpg
-    description: "אני הכי אוהבת את חישוק 13 ס״מ!\\nלא גדול מידי ולא קטן מידי.\\nגודל מעולה גם למי שרוצה לרקום על חולצה ולמתוח חלק קטן יותר מהבד."
+    description: "אני הכי אוהבת את חישוק 13 ס״מ!\\\\nלא גדול מידי ולא קטן מידי.\\\\nגודל מעולה גם למי שרוצה לרקום על חולצה ולמתוח חלק קטן יותר מהבד."
   16:
     name: קוטר 16 ס״מ
     price: 35
+    image: /images/store/hoops/screenshot-2026-09-24-at-15-42-15-mufiv0hq.jpg
   19:
     name: קוטר 19 ס״מ
     price: 35

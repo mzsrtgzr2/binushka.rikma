@@ -435,6 +435,75 @@ test('packs round-trip through the page and into the catalog', async () => {
   assert.equal(entry.variants[Object.keys(entry.variants)[1]].places, 2);
 });
 
+// A pack's id is the variant a cart holds. Deriving it from the name again on
+// every save would strand a full cart the moment the pack was renamed — or,
+// because the names are Hebrew and slugs are Latin, on any save at all.
+test('an existing pack keeps its id when the workshop is edited', async () => {
+  write(
+    '2026-05-01-keep-ids.md',
+    `---
+title: "סדנה"
+date: 2026-05-01 18:30:00 +0300
+permalink: /projects/keep-ids/
+cart_price: 330
+spots: 10
+variants:
+  one:
+    name: משתתפת אחת
+    price: 330
+    places: 1
+  pair:
+    name: שתי משתתפות ביחד
+    price: 600
+    places: 2
+---
+
+טקסט.
+`
+  );
+
+  const before = workshops.parse('2026-05-01-keep-ids.md', read('2026-05-01-keep-ids.md'));
+  assert.deepEqual(before.packs.map((pack) => pack.id), ['one', 'pair']);
+
+  const res = await call({
+    body: {
+      action: 'save',
+      slug: 'keep-ids',
+      workshop: {
+        title: 'סדנה',
+        date: '2026-05-01T18:30',
+        cart_price: 330,
+        spots: 10,
+        packs: before.packs.map((pack) => ({ ...pack, name: pack.name + ' (עודכן)' })),
+      },
+    },
+  });
+
+  assert.equal(res.statusCode, 200);
+
+  const after = workshops.parse('2026-05-01-keep-ids.md', read('2026-05-01-keep-ids.md'));
+  assert.deepEqual(after.packs.map((pack) => pack.id), ['one', 'pair']);
+  assert.deepEqual(Object.keys(catalog()['workshop-keep-ids'].variants), ['one', 'pair']);
+});
+
+test('a new pack with a Hebrew name still gets a usable id', async () => {
+  await call({
+    body: {
+      action: 'save',
+      workshop: {
+        title: 'x',
+        slug: 'new-pack',
+        date: '2026-05-01T18:30',
+        cart_price: 100,
+        packs: [{ name: 'משתתפת אחת', price: 100, places: 1 }],
+      },
+    },
+  });
+
+  const [pack] = workshops.parse('2026-05-01-new-pack.md', read('2026-05-01-new-pack.md')).packs;
+  assert.match(pack.id, /^[a-z0-9-]+$/);
+});
+
 test('a pack priced at nothing is refused rather than sold for free', async () => {
   const res = await call({
     body: {

@@ -485,10 +485,13 @@
 
   /* ------------------------------------------------------------------- packs */
 
+  /* A pack's id is the variant a cart holds, so an existing one is carried
+     through the form rather than derived again from its name — renaming the
+     pack, or just saving an unrelated field, must not strand a full cart. */
   function packRowHtml(pack, index) {
     pack = pack || {};
     return (
-      '<div class="admin-pack">' +
+      '<div class="admin-pack" data-pack-id="' + escapeHtml(pack.id || '') + '">' +
       '<div class="admin-pack__heading">' +
       '<p class="admin-pack__label">חבילה ' + (index + 1) + '</p>' +
       '<button type="button" class="admin-pack__remove" data-remove-pack>הסרה</button>' +
@@ -520,6 +523,7 @@
   function readPacks() {
     return Array.prototype.map.call(packsEl.querySelectorAll('.admin-pack'), function (row) {
       return {
+        id: row.getAttribute('data-pack-id') || '',
         name: (row.querySelector('[data-pack="name"]') || {}).value || '',
         price: (row.querySelector('[data-pack="price"]') || {}).value || '',
         places: (row.querySelector('[data-pack="places"]') || {}).value || ''
@@ -600,7 +604,7 @@
       footer = soldOut
         ? '<span class="project__sold-out">אין מקומות פנויים</span>'
         : fakeButton(
-            (workshop.packs || []).length || workshop.price_per === 'workshop' ? 'הזמנת סדנה' : 'הרשמה לסדנה',
+            workshop.price_per === 'workshop' ? 'הזמנת סדנה' : 'הרשמה לסדנה',
             'project__add'
           );
     }

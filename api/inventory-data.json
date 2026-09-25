@@ -248,9 +248,9 @@
     "workshop-bar-14-10": {
       "name": "בוקר פינוק לאמהות — ב14.10 עם בר גרנות",
       "price": 330,
-      "stock": 1,
-      "outOfStock": false,
-      "limitedStock": true
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false
     },
     "workshop-mothers-1-6": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה2 בנובמבר",
@@ -262,9 +262,9 @@
     "workshop-mothers-5-10-26": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה5 באוקטובר",
       "price": 1090,
-      "stock": 0,
-      "outOfStock": true,
-      "limitedStock": false
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true
     },
     "workshop-rehovot-04-12": {
       "name": "סדנת רקמה של שישי בבוקר — ב4.12 ברחובות",

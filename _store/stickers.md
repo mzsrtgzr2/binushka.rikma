@@ -9,6 +9,7 @@ limited_stock: false
 hide: false
 category: embroidery-supplies
 gallery:
+  - /images/store/stickers/screenshot-2026-09-25-at-23-20-17-muheo9mj.jpg
   - /images/store/stickers/screenshot-2026-09-23-at-22-18-22-muehnd9r.jpg
 variants:
   type-1:

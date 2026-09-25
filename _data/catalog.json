@@ -23,7 +23,7 @@
         "price": 195,
         "image": "/images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg",
         "description": "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)",
-        "stock": 2,
+        "stock": 1,
         "gallery": [
           "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-18-50-33-mufplh69.jpg",
@@ -357,6 +357,17 @@
         "gallery": [
           "/images/store/stickers/screenshot-2026-09-23-at-23-10-22-muejgum3.jpg",
           "/images/store/stickers/screenshot-2026-09-23-at-23-10-40-muejgum4.jpg"
+        ]
+      },
+      "type-3": {
+        "name": "דף מדבקות רקמה בהזמנה אישית",
+        "price": 80,
+        "image": "/images/store/stickers/screenshot-2026-09-25-at-18-52-46-muh59pds.jpg",
+        "description": "אשמח להפוך את פנטזיית היצירה שלכם למציאות :)\nשלחו לי מה שתרצו ואדפיס לכם על דף ייעודי לרקמה.\nמתאים לרקמה על חולצות, תיקים, בד מתוח על חישוק, קלמרים.\nבתמונות ניתן לראות מדבקות שהוזמנו ואת תהליך הרקמה שלהן.\nהמדבקה נשטפת במים והחוטים נשארים יפים ומבריקים כי חוטי dmc הם 100% כותנה וניתן לשטוף ולכבס אותם ללא דאגה.\n\nלאחר התשלום אשלח לכם הודעה ונמשיך את התהליך.",
+        "gallery": [
+          "/images/store/stickers/screenshot-2026-09-25-at-18-51-48-muh59pdt.jpg",
+          "/images/store/stickers/screenshot-2026-09-25-at-18-54-24-muh59pdt.jpg",
+          "/images/store/stickers/screenshot-2026-09-25-at-18-54-40-muh59pdu.jpg"
         ]
       }
     }

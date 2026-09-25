@@ -44,7 +44,7 @@
     "price": 1090,
     "kind": "workshop",
     "shipping": false,
-    "stock": 1
+    "stock": 0
   },
   "workshop-private-workshop": {
     "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",

@@ -219,6 +219,13 @@
         "image": "/images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg",
         "description": "מיוצר ע״י חברת vog מעץ אשוח."
       },
+      "22": {
+        "name": "קוטר 22 ס״מ",
+        "price": 45,
+        "image": "",
+        "description": "חישוק לרקמה גדול ואיכותי של vog.",
+        "stock": 2
+      },
       "oval-16x10cm": {
         "name": "אובאלי 16X10 ס״מ",
         "price": 35,

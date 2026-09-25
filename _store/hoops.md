@@ -5,7 +5,7 @@ subtitle: במגוון גדלים וצורות
 image: /images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg
 price: ₪35 – ₪45
 out_of_stock: false
-limited_stock: false
+limited_stock: true
 hide: false
 category: embroidery-supplies
 variants:
@@ -26,6 +26,11 @@ variants:
     price: 35
     image: /images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg
     description: מיוצר ע״י חברת vog מעץ אשוח.
+  22:
+    name: קוטר 22 ס״מ
+    price: 45
+    stock: 2
+    description: חישוק לרקמה גדול ואיכותי של vog.
   oval-16x10cm:
     name: אובאלי 16X10 ס״מ
     price: 35

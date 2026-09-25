@@ -23,12 +23,12 @@ variants:
     description: מיוצר ע״י חברת vog מעץ אשוח.
   19:
     name: קוטר 19 ס״מ
-    price: 35
+    price: 40
     image: /images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg
     description: מיוצר ע״י חברת vog מעץ אשוח.
   22:
     name: קוטר 22 ס״מ
-    price: 45
+    price: 40
     stock: 2
     description: חישוק לרקמה גדול ואיכותי של vog.
   oval-16x10cm:

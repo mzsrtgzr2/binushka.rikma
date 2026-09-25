@@ -1,0 +1,298 @@
+{
+  "products": {
+    "birth-hoop": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "תעודת לידה רקומה",
+      "price": 450
+    },
+    "dmc-etoile-set": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סט חוטים מנצנצים",
+      "price": 330
+    },
+    "dmc-kit-flowers": {
+      "stock": 3,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכת רקמה עם 2 דוגמאות",
+      "price": 100
+    },
+    "dmc-kit-pearl": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכת רקמה עם חוטי פנינה",
+      "price": 120
+    },
+    "embroidery-books": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ספרי רקמה",
+      "variants": {
+        "365": {
+          "stock": 2
+        },
+        "380": {
+          "stock": null
+        },
+        "paintwiththread": {
+          "stock": null
+        },
+        "type-3": {
+          "stock": 2
+        },
+        "type-4": {
+          "stock": 2
+        },
+        "type-6": {
+          "stock": 3
+        }
+      }
+    },
+    "embroidery-case": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "קלמר פשתן עם רקמת כותנה",
+      "price": 160
+    },
+    "embroidery-flowers": {
+      "stock": null,
+      "outOfStock": true,
+      "limitedStock": false,
+      "name": "זר פרחים רקום",
+      "price": 300
+    },
+    "embroidery-tshirt": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "רקמה בהזמנה אישית",
+      "price": 100
+    },
+    "fabrics": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "ריבועי בד לרקמה",
+      "variants": {
+        "type-1": {
+          "stock": 100
+        },
+        "type-2": {
+          "stock": 100
+        }
+      }
+    },
+    "floss-25-set": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "חוטי מולינה dmc",
+      "variants": {
+        "custom-25": {
+          "stock": 2
+        },
+        "set-30": {
+          "stock": 1
+        },
+        "original-27": {
+          "stock": 1
+        }
+      }
+    },
+    "flower-bag": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "תיק בד לזר פרחים"
+    },
+    "flowers-yumiko-1": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "פרחים בהשראת הטבע ויומיקו",
+      "price": 300
+    },
+    "fox": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "רקמת שועל משמח",
+      "price": 220
+    },
+    "gift-card": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "גיפט קארד"
+    },
+    "hoops": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "חישוקי רקמה מעץ",
+      "variants": {
+        "13": {
+          "stock": null
+        },
+        "16": {
+          "stock": null
+        },
+        "19": {
+          "stock": null
+        },
+        "oval-16x10cm": {
+          "stock": null
+        },
+        "oval-21x13cm": {
+          "stock": null
+        },
+        "type-6": {
+          "stock": 3
+        }
+      }
+    },
+    "kit": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "ערכת רקמה מפנקת",
+      "price": 210
+    },
+    "pencil-case": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "קלמר קנבס לרקמה",
+      "price": 20
+    },
+    "portrait": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "מסגרת רקומה",
+      "price": 250
+    },
+    "prym-marker-purple": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "טוש לבדים"
+    },
+    "scissors": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "מספרי רקמה איכותיות",
+      "variants": {
+        "9": {
+          "stock": null
+        },
+        "9-2": {
+          "stock": null
+        },
+        "type-3": {
+          "stock": 2
+        },
+        "singer": {
+          "stock": 1
+        }
+      }
+    },
+    "scrunchies": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'יז בעבודת יד"
+    },
+    "stickers": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "מדבקות לרקמה"
+    },
+    "voucher-gift": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "שובר מתנה - בוקר פינוק לאמהות",
+      "price": 330
+    },
+    "yam": {
+      "stock": null,
+      "outOfStock": true,
+      "limitedStock": true,
+      "name": "רקמת בטטה מושרשת",
+      "price": 300
+    },
+    "workshop-monthly-meeting": {
+      "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",
+      "price": 110,
+      "stock": 7,
+      "outOfStock": false,
+      "limitedStock": false
+    },
+    "workshop-private-workshop": {
+      "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",
+      "price": 2800,
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false
+    },
+    "workshop-bar-14-10": {
+      "name": "בוקר פינוק לאמהות — ב14.10 עם בר גרנות",
+      "price": 330,
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false
+    },
+    "workshop-mothers-1-6": {
+      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה2 בנובמבר",
+      "price": 1090,
+      "stock": 7,
+      "outOfStock": false,
+      "limitedStock": false
+    },
+    "workshop-mothers-5-10-26": {
+      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה5 באוקטובר",
+      "price": 1090,
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true
+    },
+    "workshop-rehovot-04-12": {
+      "name": "סדנת רקמה של שישי בבוקר — ב4.12 ברחובות",
+      "price": 330,
+      "stock": 8,
+      "outOfStock": false,
+      "limitedStock": false
+    },
+    "workshop-rehovot-09-10": {
+      "name": "סדנת קרושה למתחילות — 9.10 שישי בבוקר",
+      "price": 330,
+      "stock": 5,
+      "outOfStock": false,
+      "limitedStock": false
+    },
+    "workshop-rehovot-29-10": {
+      "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",
+      "price": 330,
+      "stock": 4,
+      "outOfStock": false,
+      "limitedStock": false
+    },
+    "workshop-2022-11-04": {
+      "name": "מסיבת מדיומים לאמהות — ב4.11 בלי ילדים🫣",
+      "price": 330,
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false
+    }
+  }
+}

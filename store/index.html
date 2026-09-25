@@ -30,20 +30,22 @@ layout: default
 
   <div class="row" id="store-grid">
     {% comment %}
-      Default order (no-JS / first paint): title A–Z, embroidery-supplies first.
-      Client store-sort.js re-applies the same default and honors sort menu changes.
+      A product only carries `order` once it has been placed by hand in the
+      backoffice, and a placement made by hand is the one thing here that was
+      asked for on purpose, so it comes first. Everything else falls back to the
+      shop's own default: embroidery supplies, then title A–Z, gift card after.
     {% endcomment %}
     {% assign sorted = site.store | sort: 'title' %}
+    {% assign store_placed = '' | split: '' %}
     {% assign store_embroidery = '' | split: '' %}
     {% assign store_other = '' | split: '' %}
     {% assign store_gift_card = '' | split: '' %}
-    {% assign store_sold_out = '' | split: '' %}
     {% for item in sorted %}
       {% comment %}Skip hidden items and broken front matter (empty title husks).{% endcomment %}
       {% unless item.hide or item.title == blank %}
         {% assign item_slug = item.slug | default: item.basename %}
-        {% if item.out_of_stock or item.stock == 0 %}
-          {% assign store_sold_out = store_sold_out | push: item %}
+        {% if item.order %}
+          {% assign store_placed = store_placed | push: item %}
         {% elsif item_slug == 'gift-card' %}
           {% assign store_gift_card = store_gift_card | push: item %}
         {% elsif item.category == 'embroidery-supplies' %}
@@ -53,7 +55,24 @@ layout: default
         {% endif %}
       {% endunless %}
     {% endfor %}
-    {% assign store_display = store_embroidery | concat: store_other | concat: store_gift_card | concat: store_sold_out %}
+    {% assign store_placed = store_placed | sort: 'order' %}
+    {% assign store_ordered = store_placed | concat: store_embroidery | concat: store_other | concat: store_gift_card %}
+
+    {% comment %}
+      Sold out sinks last whatever the chosen order says: what is in stock
+      changes on its own as things sell, and the top of the shop should not be
+      spent on something nobody can buy.
+    {% endcomment %}
+    {% assign store_available = '' | split: '' %}
+    {% assign store_sold_out = '' | split: '' %}
+    {% for item in store_ordered %}
+      {% if item.out_of_stock or item.stock == 0 %}
+        {% assign store_sold_out = store_sold_out | push: item %}
+      {% else %}
+        {% assign store_available = store_available | push: item %}
+      {% endif %}
+    {% endfor %}
+    {% assign store_display = store_available | concat: store_sold_out %}
 
     {% for item in store_display %}
       {% assign sold_out = false %}
@@ -101,10 +120,9 @@ layout: default
         class="store-item col col-4 col-d-6 col-t-12"
         data-product-id="{{ slug }}"
         data-category="{{ item.category }}"
-        data-title="{{ item.title | escape }}"
         data-price="{{ sort_price }}"
         data-sold-out="{% if sold_out %}true{% else %}false{% endif %}"
-        data-date="{{ item.date | date: '%s' }}"
+        data-order="{{ forloop.index }}"
       >
         <div class="store-item__content">
           <a href="{{item.url}}" class="store-item__image">

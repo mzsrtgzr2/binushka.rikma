@@ -11,7 +11,7 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 10,
+    "stock": 0,
     "variants": {
       "one": {
         "name": "משתתפת אחת",
@@ -30,21 +30,21 @@
     "price": 110,
     "kind": "workshop",
     "shipping": false,
-    "stock": 12
+    "stock": 7
   },
   "workshop-mothers-1-6": {
     "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה2 בנובמבר",
     "price": 1090,
     "kind": "workshop",
     "shipping": false,
-    "stock": 10
+    "stock": 7
   },
   "workshop-mothers-5-10-26": {
     "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה5 באוקטובר",
     "price": 1090,
     "kind": "workshop",
     "shipping": false,
-    "stock": 3
+    "stock": 1
   },
   "workshop-private-workshop": {
     "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",
@@ -57,20 +57,20 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 12
+    "stock": 8
   },
   "workshop-rehovot-09-10": {
     "name": "סדנת קרושה למתחילות — 9.10 שישי בבוקר",
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 12
+    "stock": 5
   },
   "workshop-rehovot-29-10": {
     "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 3
+    "stock": 4
   }
 }

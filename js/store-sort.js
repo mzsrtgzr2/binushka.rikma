@@ -10,30 +10,15 @@
     return Number.isFinite(n) ? n : 0;
   }
 
-  function productDate(el) {
-    var raw = el.getAttribute('data-date');
-    var n = Number(raw);
+  /** Where the shop chose to put this card, decided at build time. */
+  function productOrder(el) {
+    var n = Number(el.getAttribute('data-order'));
     return Number.isFinite(n) ? n : 0;
   }
 
   function isSoldOut(el) {
     if (el.getAttribute('data-sold-out') === 'true') return true;
     return Boolean(el.querySelector('.out-of-stock'));
-  }
-
-  function isGiftCard(el) {
-    return el.getAttribute('data-product-id') === 'gift-card';
-  }
-
-  function isEmbroiderySupplies(el) {
-    return el.getAttribute('data-category') === 'embroidery-supplies';
-  }
-
-  function productTitle(el) {
-    var raw = el.getAttribute('data-title');
-    if (raw != null && raw !== '') return raw;
-    var titleEl = el.querySelector('.store-item__title');
-    return titleEl ? (titleEl.textContent || '').trim() : '';
   }
 
   function syncFromLiveCatalog() {
@@ -52,36 +37,26 @@
   }
 
   function compareProducts(a, b, mode) {
+    // Something that sold out since the page was built sinks here rather than
+    // at build time, so the shop does not lead with it until the next deploy.
     var aOut = isSoldOut(a);
     var bOut = isSoldOut(b);
     if (aOut !== bOut) return aOut ? 1 : -1;
 
-    // Gift card stays last among available products, before sold-out.
-    if (!aOut && !bOut) {
-      var aGift = isGiftCard(a);
-      var bGift = isGiftCard(b);
-      if (aGift !== bGift) return aGift ? 1 : -1;
-    }
-
     if (mode === 'price-asc') {
       var asc = productPrice(a) - productPrice(b);
       if (asc !== 0) return asc;
-      return productDate(a) - productDate(b);
-    }
-    if (mode === 'price-desc') {
+    } else if (mode === 'price-desc') {
       var desc = productPrice(b) - productPrice(a);
       if (desc !== 0) return desc;
-      return productDate(a) - productDate(b);
     }
 
-    // Default: embroidery supplies first, then Hebrew alphabetical by title.
-    var aEmbroidery = isEmbroiderySupplies(a);
-    var bEmbroidery = isEmbroiderySupplies(b);
-    if (aEmbroidery !== bEmbroidery) return aEmbroidery ? -1 : 1;
-
-    var byTitle = productTitle(a).localeCompare(productTitle(b), 'he');
-    if (byTitle !== 0) return byTitle;
-    return productDate(a) - productDate(b);
+    // The shop's own order: whatever was placed by hand in the backoffice,
+    // then embroidery supplies, then title. All of it is decided at build time
+    // and arrives here as data-order, so the rule lives in one place. Sorting
+    // by price displaces it and «ברירת מחדל» puts it back; two products at the
+    // same price keep it rather than falling into an order nobody chose.
+    return productOrder(a) - productOrder(b);
   }
 
   function applyCategoryFilter() {

@@ -1,7 +1,11 @@
 /**
  * Password-protected store backoffice.
- * Create / update / delete products and stock flags, plus workshop spots.
+ * Create / update / delete products and stock flags.
  * Production writes go to GitHub so Vercel rebuilds the site.
+ *
+ * Workshops are edited in their own section (api/admin-workshops.mjs). They
+ * are still read here, because a cart can hold a workshop place and a shop
+ * product at once and inventory has to be checked and decremented for both.
  */
 
 const fs = require('fs');
@@ -154,6 +158,16 @@ async function githubRead(env, filePath) {
   return decodeGithubFile(file);
 }
 
+async function githubReadDirMarkdown(env, dir) {
+  const branch = gitBranch(env);
+  const entries = await githubJson(env, `/contents/${dir}?ref=${encodeURIComponent(branch)}`);
+  const names = (Array.isArray(entries) ? entries : [])
+    .filter((entry) => entry.name && entry.name.endsWith('.md'))
+    .map((entry) => entry.name);
+  const files = await Promise.all(names.map((name) => githubRead(env, `${dir}/${name}`)));
+  return names.map((name, index) => ({ name, raw: files[index] }));
+}
+
 async function commitFiles(env, files, message) {
   const blobs = [];
   for (const file of files) {
@@ -220,13 +234,9 @@ async function readStoreMap(env) {
       rawBySlug[name.replace(/\.md$/, '')] = readStoreLocal(env, name);
     });
   } else {
-    const branch = gitBranch(env);
-    const entries = await githubJson(env, `/contents/_store?ref=${encodeURIComponent(branch)}`);
-    const names = (Array.isArray(entries) ? entries : [])
-      .filter((entry) => entry.name && entry.name.endsWith('.md'))
-      .map((entry) => entry.name);
-    for (const name of names) {
-      rawBySlug[name.replace(/\.md$/, '')] = await githubRead(env, `_store/${name}`);
+    const files = await githubReadDirMarkdown(env, '_store');
+    for (const { name, raw } of files) {
+      rawBySlug[name.replace(/\.md$/, '')] = raw;
     }
   }
   return { target, rawBySlug };
@@ -257,13 +267,9 @@ async function readProjectsMap(env) {
       add(name, fs.readFileSync(path.join(localRoot(env), '_projects', name), 'utf8'));
     });
   } else {
-    const branch = gitBranch(env);
-    const entries = await githubJson(env, `/contents/_projects?ref=${encodeURIComponent(branch)}`);
-    const names = (Array.isArray(entries) ? entries : [])
-      .filter((entry) => entry.name && entry.name.endsWith('.md'))
-      .map((entry) => entry.name);
-    for (const name of names) {
-      add(name, await githubRead(env, `_projects/${name}`));
+    const files = await githubReadDirMarkdown(env, '_projects');
+    for (const { name, raw } of files) {
+      add(name, raw);
     }
   }
   return { target, rawBySlug, fileBySlug };
@@ -297,42 +303,48 @@ async function listProducts(env) {
   const products = Object.keys(loaded.rawBySlug)
     .map((slug) => store.parsePage(slug, loaded.rawBySlug[slug]))
     .filter(Boolean)
-    .sort((a, b) => String(a.title).localeCompare(String(b.title), 'he'));
+    .sort(byListOrder);
   return { target: loaded.target, products, catalog, rawBySlug: loaded.rawBySlug };
-}
-
-function workshopDateValue(page) {
-  const raw = String((page && page.date) || '');
-  const stamp = Date.parse(raw);
-  return Number.isFinite(stamp) ? stamp : 0;
-}
-
-async function listWorkshops(env) {
-  try {
-    const loaded = await readProjectsMap(env);
-    if (loaded.error) return { target: loaded.target, workshops: [] };
-    const workshops = Object.keys(loaded.rawBySlug)
-      .map((slug) => store.parseWorkshopPage(slug, loaded.rawBySlug[slug]))
-      .filter(Boolean)
-      .sort((a, b) => {
-        if (Boolean(a.hide) !== Boolean(b.hide)) return a.hide ? 1 : -1;
-        return workshopDateValue(b) - workshopDateValue(a) || String(a.title).localeCompare(String(b.title), 'he');
-      });
-    return {
-      target: loaded.target,
-      workshops,
-      rawBySlug: loaded.rawBySlug,
-      fileBySlug: loaded.fileBySlug,
-    };
-  } catch (err) {
-    console.error('admin workshops list failed', err);
-    return { target: writeTarget(env), workshops: [] };
-  }
 }
 
 function catalogFilesFrom(catalog) {
   const json = store.prettyCatalog(catalog);
   return CATALOG_FILES.map((pathName) => ({ path: pathName, content: json }));
+}
+
+async function readInventorySnapshot(env) {
+  const target = writeTarget(env);
+  if (target === 'local') {
+    const full = path.join(localRoot(env), store.INVENTORY_FILE);
+    if (!fs.existsSync(full)) return null;
+    try {
+      const parsed = JSON.parse(fs.readFileSync(full, 'utf8'));
+      return parsed && parsed.products && typeof parsed.products === 'object' ? parsed.products : null;
+    } catch {
+      return null;
+    }
+  }
+  if (target !== 'github') return null;
+  try {
+    const parsed = JSON.parse(await githubRead(env, store.INVENTORY_FILE));
+    return parsed && parsed.products && typeof parsed.products === 'object' ? parsed.products : null;
+  } catch (err) {
+    if (err.status === 404) return null;
+    throw err;
+  }
+}
+
+async function inventoryFilesForGithubCommit(env, updates, fallbackMaps = {}) {
+  if (writeTarget(env) !== 'github') return [];
+  let products = await readInventorySnapshot(env);
+  if (!products) {
+    const storeRaw = fallbackMaps.storeRaw || (await readStoreMap(env)).rawBySlug || {};
+    const projectsRaw = fallbackMaps.projectsRaw || (await readProjectsMap(env)).rawBySlug || {};
+    products = store.buildPublicInventory(storeRaw, projectsRaw);
+  } else {
+    products = store.applyInventoryUpdates(products, updates);
+  }
+  return [store.inventorySnapshotFile(products)];
 }
 
 function writeLocalFiles(env, files) {
@@ -367,9 +379,19 @@ async function upsertProduct(env, input, { isNew, files = [], rawBySlug } = {}) 
 
   await commitFiles(
     env,
-    [{ path: mdPath, content: markdown }, ...catalogFilesFrom(catalog), ...files],
+    [
+      { path: mdPath, content: markdown },
+      ...catalogFilesFrom(catalog),
+      ...files,
+      ...(await inventoryFilesForGithubCommit(
+        env,
+        { storeUpdates: { [input.slug]: markdown } },
+        { storeRaw: nextRaw }
+      )),
+    ],
     isNew ? `Add store product ${input.slug}` : `Update store product ${input.slug}`
   );
+  clearPublicInventoryCache();
   return { target, slug: input.slug };
 }
 
@@ -385,12 +407,20 @@ async function deleteProduct(env, slug, { rawBySlug } = {}) {
     writeLocalCatalog(env, catalog);
     return { target, slug };
   }
-  await commitFiles(env, catalogFilesFrom(catalog), `Remove ${slug} from catalog`);
+  await commitFiles(
+    env,
+    [
+      ...catalogFilesFrom(catalog),
+      ...(await inventoryFilesForGithubCommit(env, { removeIds: [slug] }, { storeRaw: storeMap })),
+    ],
+    `Remove ${slug} from catalog`
+  );
   try {
     await githubDelete(env, mdPath, `Delete store product ${slug}`);
   } catch (err) {
     if (Number(err.status) !== 404) throw err;
   }
+  clearPublicInventoryCache();
   return { target, slug };
 }
 
@@ -404,6 +434,8 @@ function normalizeFlags(rawProducts, allowedSlugs) {
     }
     const stockParsed = store.parseStock(row.stock);
     if (stockParsed.error) return { error: stockParsed.error };
+    const orderParsed = store.parseOrder(row.order);
+    if (orderParsed.error) return { error: orderParsed.error };
     const flags = store.applyStockFlags({
       slug,
       out_of_stock: Boolean(row.out_of_stock),
@@ -411,31 +443,38 @@ function normalizeFlags(rawProducts, allowedSlugs) {
       hide: Boolean(row.hide),
       stock: stockParsed.stock,
     });
-    updates.push(flags);
+    updates.push({ ...flags, order: orderParsed.order });
   }
   return { updates };
 }
 
-function normalizeWorkshopFlags(rawWorkshops, allowedSlugs) {
-  if (rawWorkshops == null) return { updates: [] };
-  if (!Array.isArray(rawWorkshops)) return { error: 'אין רשימת סדנאות' };
-  const updates = [];
-  for (const row of rawWorkshops) {
-    const slug = row && row.slug;
-    if (!store.SLUG_RE.test(String(slug || '')) || !allowedSlugs.has(slug)) {
-      return { error: 'סדנה לא מוכרת' };
-    }
-    const stockParsed = store.parseStock(row.spots != null ? row.spots : row.stock);
-    if (stockParsed.error) return { error: stockParsed.error };
-    const spots = stockParsed.stock;
-    updates.push({
-      slug,
-      spots,
-      registration_full: Boolean(row.registration_full) || spots === 0,
-      hide: Boolean(row.hide),
-    });
+/**
+ * The order the shop will show, so that dragging a row here means what it
+ * looks like it means. Sold out is left where it is: the shop sinks it on its
+ * own as stock changes, and a product that sold out should not lose the place
+ * it was given once it is back.
+ */
+function byListOrder(a, b) {
+  // Hidden products are not in the shop at all, so they sit at the end rather
+  // than taking up a position among the ones being arranged.
+  if (Boolean(a.hide) !== Boolean(b.hide)) return a.hide ? 1 : -1;
+
+  // A product only has an order once it has been placed by hand.
+  if (a.order && b.order) return a.order - b.order;
+  if (a.order || b.order) return a.order ? -1 : 1;
+
+  if (a.slug !== b.slug && (a.slug === 'gift-card' || b.slug === 'gift-card')) {
+    return a.slug === 'gift-card' ? 1 : -1;
   }
-  return { updates };
+
+  // Until it is placed, a product sits where the shop puts it on its own:
+  // embroidery supplies first, then by title. Same rule as store/index.html,
+  // so the list being dragged is the list the shop shows.
+  const aSupplies = a.category === 'embroidery-supplies';
+  const bSupplies = b.category === 'embroidery-supplies';
+  if (aSupplies !== bSupplies) return aSupplies ? -1 : 1;
+
+  return String(a.title).localeCompare(String(b.title), 'he');
 }
 
 function stockEqual(a, b) {
@@ -456,7 +495,8 @@ async function saveFlags(env, updates) {
       Boolean(current.out_of_stock) === flags.out_of_stock &&
       Boolean(current.limited_stock) === flags.limited_stock &&
       Boolean(current.hide) === flags.hide &&
-      stockEqual(current.stock, flags.stock)
+      stockEqual(current.stock, flags.stock) &&
+      (flags.order == null || current.order === flags.order)
     ) {
       continue;
     }
@@ -472,42 +512,28 @@ async function saveFlags(env, updates) {
     changed.push(flags.slug);
   }
   if (listed.target === 'github' && files.length) {
-    await commitFiles(env, files, 'Update store stock from admin');
+    const storeUpdates = {};
+    files.forEach((file) => {
+      const slug = String(file.path || '')
+        .replace(/^_store\//, '')
+        .replace(/\.md$/, '');
+      if (slug) storeUpdates[slug] = file.content;
+    });
+    await commitFiles(
+      env,
+      [
+        ...files,
+        ...(await inventoryFilesForGithubCommit(
+          env,
+          { storeUpdates },
+          { storeRaw: { ...listed.rawBySlug, ...storeUpdates } }
+        )),
+      ],
+      'Update store stock from admin'
+    );
+    clearPublicInventoryCache();
   }
   return { target: listed.target, changed };
-}
-
-async function saveWorkshopFlags(env, updates) {
-  if (!updates.length) return { target: writeTarget(env), changed: [] };
-  const loaded = await readProjectsMap(env);
-  if (loaded.error) return loaded;
-  const files = [];
-  const changed = [];
-  for (const flags of updates) {
-    const raw = loaded.rawBySlug[flags.slug];
-    const filename = loaded.fileBySlug[flags.slug];
-    if (!raw || !filename) continue;
-    const current = store.parseWorkshopPage(flags.slug, raw);
-    if (!current) continue;
-    if (
-      stockEqual(current.spots, flags.spots) &&
-      Boolean(current.registration_full) === Boolean(flags.registration_full) &&
-      Boolean(current.hide) === Boolean(flags.hide)
-    ) {
-      continue;
-    }
-    const next = store.applyWorkshopStock(raw, flags);
-    if (loaded.target === 'local') {
-      fs.writeFileSync(path.join(localRoot(env), '_projects', filename), next);
-    } else {
-      files.push({ path: `_projects/${filename}`, content: next });
-    }
-    changed.push(store.workshopId(flags.slug));
-  }
-  if (loaded.target === 'github' && files.length) {
-    await commitFiles(env, files, 'Update workshop spots from admin');
-  }
-  return { target: loaded.target, changed };
 }
 
 const PAID_ORDERS_DIR = '_paid_orders';
@@ -566,16 +592,23 @@ async function decrementInventory(env, purchases, opts = {}) {
   const files = [];
   const changed = [];
   const storeRaw = new Map();
+  const storeUpdates = {};
+  const projectUpdates = {};
+  let fallbackStoreRaw;
+  let fallbackProjectsRaw;
 
   if (storeTotals.size) {
     const loaded = await readStoreMap(env);
     if (loaded.error) return loaded;
+    fallbackStoreRaw = { ...loaded.rawBySlug };
     for (const { slug, variant, quantity } of storeTotals.values()) {
       const raw = storeRaw.get(slug) || loaded.rawBySlug[slug];
       if (!raw) continue;
       const updated = store.decrementPageStock(raw, slug, quantity, variant || undefined);
       if (!updated) continue;
       storeRaw.set(slug, updated);
+      storeUpdates[slug] = updated;
+      fallbackStoreRaw[slug] = updated;
       if (!changed.includes(slug)) changed.push(slug);
     }
     for (const [slug, updated] of storeRaw) {
@@ -590,12 +623,15 @@ async function decrementInventory(env, purchases, opts = {}) {
   if (workshopTotals.size) {
     const loaded = await readProjectsMap(env);
     if (loaded.error) return loaded;
+    fallbackProjectsRaw = { ...loaded.rawBySlug };
     for (const [slug, quantity] of workshopTotals) {
       const raw = loaded.rawBySlug[slug];
       const filename = loaded.fileBySlug[slug];
       if (!raw || !filename) continue;
       const updated = store.decrementWorkshopPage(raw, slug, quantity);
       if (!updated) continue;
+      projectUpdates[slug] = updated;
+      fallbackProjectsRaw[slug] = updated;
       changed.push(store.workshopId(slug));
       if (target === 'local') {
         fs.writeFileSync(path.join(localRoot(env), '_projects', filename), updated);
@@ -615,7 +651,20 @@ async function decrementInventory(env, purchases, opts = {}) {
     }
     return { target, changed };
   }
-  await commitFiles(env, [...files, ...extraFiles], opts.message || 'Decrement store stock after purchase');
+  await commitFiles(
+    env,
+    [
+      ...files,
+      ...extraFiles,
+      ...(await inventoryFilesForGithubCommit(
+        env,
+        { storeUpdates, projectUpdates },
+        { storeRaw: fallbackStoreRaw, projectsRaw: fallbackProjectsRaw }
+      )),
+    ],
+    opts.message || 'Decrement store stock after purchase'
+  );
+  clearPublicInventoryCache();
   return { target, changed };
 }
 
@@ -704,76 +753,72 @@ function bundledStoreRaw() {
   return rawBySlug;
 }
 
+const PUBLIC_INVENTORY_TTL_MS = 30 * 1000;
+let publicInventoryCache = null;
+
+function publicInventoryCacheKey(env) {
+  const target = writeTarget(env) || 'bundled';
+  if (target !== 'github') return '';
+  const repo = repoParts(env);
+  return `${target}:${repo ? `${repo.owner}/${repo.repo}` : ''}:${gitBranch(env)}`;
+}
+
+function clearPublicInventoryCache() {
+  publicInventoryCache = null;
+}
+
+function rememberPublicInventory(env, value) {
+  const key = publicInventoryCacheKey(env);
+  if (!key) return value;
+  publicInventoryCache = { key, expires: Date.now() + PUBLIC_INVENTORY_TTL_MS, value };
+  return value;
+}
+
 /**
  * Public inventory for the storefront cart (no auth).
  * Prefers live GitHub/local admin target; falls back to bundled markdown.
  */
 async function publicInventory(env) {
-  const products = {};
-  let source = 'bundled';
-  let rawBySlug = null;
+  const cacheKey = publicInventoryCacheKey(env);
+  if (
+    cacheKey &&
+    publicInventoryCache &&
+    publicInventoryCache.key === cacheKey &&
+    publicInventoryCache.expires > Date.now()
+  ) {
+    return publicInventoryCache.value;
+  }
 
   const target = writeTarget(env);
+  if (target === 'github') {
+    try {
+      const snapshot = await readInventorySnapshot(env);
+      if (snapshot) return rememberPublicInventory(env, { source: 'github', products: snapshot });
+    } catch (err) {
+      console.error('publicInventory snapshot read failed', err);
+    }
+  }
+
+  let source = 'bundled';
+  let rawBySlug = null;
+  let projects = bundledProjectsRaw();
+
   if (target) {
     try {
-      const loaded = await readStoreMap(env);
-      if (!loaded.error) {
-        rawBySlug = loaded.rawBySlug;
+      const [storeLoaded, projectsLoaded] = await Promise.all([readStoreMap(env), readProjectsMap(env)]);
+      if (!storeLoaded.error) {
+        rawBySlug = storeLoaded.rawBySlug;
         source = target;
       }
+      if (projectsLoaded && !projectsLoaded.error) projects = projectsLoaded;
     } catch (err) {
       console.error('publicInventory live read failed', err);
     }
   }
   if (!rawBySlug) rawBySlug = bundledStoreRaw() || {};
 
-  for (const [slug, raw] of Object.entries(rawBySlug)) {
-    const page = store.parsePage(slug, raw);
-    if (!page || page.in_cart === false) continue;
-    const soldOut = Boolean(page.out_of_stock) || page.stock === 0;
-    const row = {
-      stock: page.stock == null ? null : Number(page.stock),
-      outOfStock: soldOut,
-      limitedStock: Boolean(page.limited_stock),
-    };
-    if (page.title) row.name = page.title;
-    const price = Number(page.cart_price);
-    if (price > 0) row.price = price;
-    if (store.variantsTrackStock(page.variants)) {
-      row.variants = {};
-      (page.variants || []).forEach((item) => {
-        if (!item || !item.id) return;
-        row.variants[item.id] = {
-          stock: item.stock == null ? null : Number(item.stock),
-        };
-      });
-      row.stock = null;
-    }
-    products[slug] = row;
-  }
-
-  let projects = bundledProjectsRaw();
-  if (target) {
-    try {
-      const loaded = await readProjectsMap(env);
-      if (!loaded.error) projects = loaded;
-    } catch (err) {
-      console.error('publicInventory workshops read failed', err);
-    }
-  }
-  Object.entries(projects.rawBySlug || {}).forEach(([slug, raw]) => {
-    const page = store.parseWorkshopPage(slug, raw);
-    const catalog = store.workshopCatalogRow(page);
-    if (!catalog) return;
-    products[store.workshopId(slug)] = {
-      name: catalog.name,
-      price: catalog.price,
-      stock: page.stock == null ? null : Number(page.stock),
-      outOfStock: Boolean(page.registration_full) || page.stock === 0,
-      limitedStock: store.isLowStock(page.stock),
-    };
-  });
-  return { source, products };
+  const products = store.buildPublicInventory(rawBySlug, projects.rawBySlug);
+  return rememberPublicInventory(env, { source, products });
 }
 
 const loginLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
@@ -839,12 +884,7 @@ async function handler(req, res) {
     try {
       const listed = await listProducts(env);
       if (listed.error) return json(res, 503, { error: listed.error });
-      const workshopsListed = await listWorkshops(env);
-      return json(res, 200, {
-        products: listed.products,
-        workshops: workshopsListed.workshops || [],
-        target: listed.target,
-      });
+      return json(res, 200, { products: listed.products, target: listed.target });
     } catch (err) {
       console.error('admin list failed', err);
       return json(res, 502, { error: 'לא הצלחנו לקרוא את המוצרים מ-GitHub' });
@@ -862,19 +902,9 @@ async function handler(req, res) {
       const allowed = new Set(listed.products.map((product) => product.slug));
       const normalized = normalizeFlags(body.products, allowed);
       if (normalized.error) return json(res, 400, { error: normalized.error });
-      const workshopsListed = await listWorkshops(env);
-      const allowedWorkshops = new Set((workshopsListed.workshops || []).map((workshop) => workshop.slug));
-      const normalizedWorkshops = normalizeWorkshopFlags(body.workshops, allowedWorkshops);
-      if (normalizedWorkshops.error) return json(res, 400, { error: normalizedWorkshops.error });
       const saved = await saveFlags(env, normalized.updates);
       if (saved.error) return json(res, 503, { error: saved.error });
-      const savedWorkshops = await saveWorkshopFlags(env, normalizedWorkshops.updates);
-      if (savedWorkshops.error) return json(res, 503, { error: savedWorkshops.error });
-      return json(res, 200, {
-        ok: true,
-        changed: [...saved.changed, ...savedWorkshops.changed],
-        target: saved.target,
-      });
+      return json(res, 200, { ok: true, changed: saved.changed, target: saved.target });
     }
 
     if (body.action === 'upsert') {
@@ -935,12 +965,12 @@ handler.setYamlBool = store.setYamlBool;
 handler.parseProduct = (slug, raw) => store.parsePage(slug, raw);
 handler.applyFlags = (raw, flags) => store.applyPage(raw, { ...store.parsePage('x', raw), ...flags });
 handler.normalizeUpdates = normalizeFlags;
-handler.normalizeWorkshopUpdates = normalizeWorkshopFlags;
 handler.decrementInventory = decrementInventory;
 handler.readPaidOrder = readPaidOrder;
 handler.paidOrderPath = paidOrderPath;
 handler.assertInventory = assertInventory;
 handler.publicInventory = publicInventory;
+handler.clearPublicInventoryCache = clearPublicInventoryCache;
 handler.parseStock = store.parseStock;
 
 module.exports = handler;

@@ -1,4 +1,4 @@
-import { createRateLimiter, readClientIp, readJsonBody, sendJson } from '../../lib/newsletter/http.mjs';
+import { createRateLimiter, readClientIp, readJsonBody, sendJson } from '../../lib/http.mjs';
 import * as store from '../../lib/newsletter/subscribers.mjs';
 import { readToken } from '../../lib/newsletter/tokens.mjs';
 

@@ -10,7 +10,7 @@ import { isAuthed } from '../lib/admin/auth.mjs';
 import { foreignOrigin } from '../lib/origin.js';
 import * as repo from '../lib/admin/repo.mjs';
 import { emailCopy } from '../lib/newsletter/email-copy.mjs';
-import { readJsonBody, sendJson } from '../lib/newsletter/http.mjs';
+import { readJsonBody, sendJson } from '../lib/http.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';
 import * as mailer from '../lib/newsletter/mailer.mjs';
 import { MediaError, prepareUpload } from '../lib/newsletter/media.mjs';

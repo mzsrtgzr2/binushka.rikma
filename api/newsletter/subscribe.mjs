@@ -1,5 +1,5 @@
 import { emailCopy } from '../../lib/newsletter/email-copy.mjs';
-import { createRateLimiter, readClientIp, readJsonBody, sendJson } from '../../lib/newsletter/http.mjs';
+import { createRateLimiter, readClientIp, readJsonBody, sendJson } from '../../lib/http.mjs';
 import * as mailer from '../../lib/newsletter/mailer.mjs';
 import * as store from '../../lib/newsletter/subscribers.mjs';
 import * as tokens from '../../lib/newsletter/tokens.mjs';

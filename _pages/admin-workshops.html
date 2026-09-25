@@ -1,0 +1,206 @@
+---
+layout: admin
+admin_script: admin-workshops.js
+admin_section: workshops
+title: ניהול הסדנאות
+description: יצירה, עריכה ומחיקה של סדנאות — תוכן, תמונה, מקומות ומחיר בקופה
+permalink: /admin/workshops/
+sitemap: false
+noindex: true
+---
+
+{% include admin-link-index.html %}
+
+  <p class="admin-lead">
+    כאן כותבים סדנה, מעלים לה תמונה וקובעים כמה מקומות יש ומה המחיר בקופה.
+    כל סדנה היא עמוד באתר, ואחרי שמירה הוא מופיע בעמוד הסדנאות ובסל.
+    מקומות פנויים אפשר לעדכן ישר מהרשימה בלי להיכנס לעריכה.
+    «שכפול» פותח עותק של סדנה קיימת כסדנה חדשה ומוסתרת — נוח למחזור הבא של אותה סדנה.
+    הסדר כאן הוא הסדר שבו הסדנאות יופיעו באתר — אפשר לגרור או להשתמש בחיצים,
+    ואז לשמור. סדנה חדשה נכנסת למקומה לפי התאריך עד שמזיזים אותה.
+  </p>
+
+  {% include admin-login.html %}
+
+  <div class="admin-board" id="admin-board" hidden>
+    <div id="admin-list-view">
+      <div class="admin-toolbar">
+        <p class="admin-message" id="admin-board-message" hidden></p>
+        <div class="admin-toolbar__actions">
+          <button type="button" class="button" id="admin-new">סדנה חדשה</button>
+          <button type="button" class="button button--primary" id="admin-save" disabled>שמירת הרשימה</button>
+        </div>
+      </div>
+
+      <p class="admin-hint" id="admin-stats"></p>
+      <ul class="admin-list" id="admin-list"></ul>
+    </div>
+
+    <form class="admin-editor" id="admin-editor" hidden novalidate>
+      <div class="admin-editor__top">
+        <h2 class="admin-editor__title" id="admin-editor-title">סדנה חדשה</h2>
+        <p class="admin-message" id="admin-editor-message" hidden></p>
+      </div>
+
+      <div class="admin-editor__split">
+        <div class="admin-editor__fields">
+          <fieldset class="admin-fieldset">
+            <legend>פרטי הסדנה</legend>
+
+            <div class="form__group">
+              <label class="form__label" for="workshop-title">שם הסדנה</label>
+              <input class="form__input" type="text" id="workshop-title" required>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="workshop-subtitle">תת כותרת</label>
+              <input class="form__input" type="text" id="workshop-subtitle" placeholder="למשל: 19.6 שישי בוקר">
+              <p class="admin-hint">מופיעה מתחת לשם, בכרטיס ובעמוד הסדנה.</p>
+            </div>
+
+            <div class="admin-grid">
+              <div class="form__group">
+                <label class="form__label" for="workshop-date">תאריך ושעה</label>
+                <input class="form__input admin-input--ltr" type="datetime-local" id="workshop-date" dir="ltr">
+                <p class="admin-hint">קובע את סדר הסדנאות באתר.</p>
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="workshop-slug">מזהה (כתובת)</label>
+                <input class="form__input admin-input--ltr" type="text" id="workshop-slug" dir="ltr" autocomplete="off">
+                <p class="admin-hint" id="workshop-slug-hint">באנגלית, אותיות קטנות ומקפים. הכתובת תהיה /projects/המזהה/</p>
+              </div>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="workshop-image">תמונה ראשית</label>
+              <div class="admin-upload-row">
+                <input class="form__input admin-input--ltr" type="text" id="workshop-image" dir="ltr" placeholder="/images/workshops/2026-09/...">
+                <button type="button" class="button admin-upload-btn" id="workshop-image-pick">העלאת תמונה</button>
+                <input type="file" id="workshop-image-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+              </div>
+              <p class="admin-hint">מופיעה בכרטיס ברשימת הסדנאות ובתחתית עמוד הסדנה. אפשר גם להדביק נתיב לתמונה שכבר קיימת באתר.</p>
+            </div>
+          </fieldset>
+
+          <fieldset class="admin-fieldset">
+            <legend>תוכן העמוד</legend>
+
+            <div class="form__group">
+              <div class="admin-label-row">
+                <label class="form__label" for="workshop-body">מה כתוב בעמוד (Markdown)</label>
+                <span class="admin-label-row__actions">
+                  <button type="button" class="button admin-upload-btn" id="workshop-link-pick">הוספת קישור</button>
+                  <button type="button" class="button admin-upload-btn" id="workshop-body-image-pick">הוספת תמונה לטקסט</button>
+                </span>
+                <input type="file" id="workshop-body-image-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+              </div>
+
+              <div class="admin-linkbox" id="workshop-linkbox" hidden>
+                <div class="form__group">
+                  <label class="form__label" for="workshop-link-text">מלל הקישור</label>
+                  <input class="form__input" type="text" id="workshop-link-text" placeholder="מה יופיע בטקסט">
+                </div>
+                <div class="form__group admin-linkbox__search">
+                  <label class="form__label" for="workshop-link-url">לאן מקשר</label>
+                  <input class="form__input admin-input--ltr" type="text" id="workshop-link-url" dir="ltr"
+                         autocomplete="off" placeholder="חיפוש בעמודי האתר, או הדבקת כתובת">
+                  <ul class="admin-linkbox__results" id="workshop-link-results" hidden></ul>
+                </div>
+                <div class="admin-linkbox__actions">
+                  <button type="button" class="button button--primary" id="workshop-link-insert">הוספה</button>
+                  <button type="button" class="button" id="workshop-link-cancel">ביטול</button>
+                </div>
+              </div>
+
+              <textarea class="form__input admin-markdown" id="workshop-body" rows="20"
+                        placeholder="## פרטי הסדנה&#10;&#10;פסקה שמספרת על היום.&#10;&#10;**מיקום:** אייזנברג, רחובות&#10;**שעה:** 09:00-12:00&#10;&#10;### מה נלמד בסדנה?&#10;&#10;- יסודות הרקמה&#10;- תכים ומרקמים"></textarea>
+              <p class="admin-hint">
+                <code>##</code> כותרת · <code>**מודגש**</code> · <code>- </code> רשימה ·
+                <code>[טקסט](כתובת)</code> קישור · <code>![](/images/x.png)</code> תמונה
+              </p>
+            </div>
+          </fieldset>
+
+          <fieldset class="admin-fieldset">
+            <legend>הרשמה ותשלום</legend>
+
+            <div class="admin-grid">
+              <div class="form__group">
+                <label class="form__label" for="workshop-price-per">איך גובים</label>
+                <select class="form__input" id="workshop-price-per">
+                  <option value="participant">מחיר למשתתפת</option>
+                  <option value="workshop">מחיר לסדנה שלמה (סדנה פרטית)</option>
+                </select>
+              </div>
+              <div class="form__group">
+                <label class="form__label" for="workshop-price">מחיר בקופה (₪)</label>
+                <input class="form__input" type="number" id="workshop-price" min="0" step="1" dir="ltr" placeholder="ריק = בלי הרשמה בסל">
+                <p class="admin-hint">ריק או 0 משאיר את כפתור ההרשמה על הקישור החיצוני.</p>
+              </div>
+            </div>
+
+            <div class="form__group" id="workshop-spots-group">
+              <label class="form__label" for="workshop-spots">מקומות פנויים</label>
+              <input class="form__input" type="number" id="workshop-spots" min="0" step="1" dir="ltr" placeholder="ריק = בלי מעקב">
+              <p class="admin-hint">המלאי של הסדנה. יורד לבד עם כל הרשמה. 0 = ההרשמה מלאה, 1–3 = «מקומות אחרונים».</p>
+            </div>
+
+            <div class="form__group">
+              <label class="form__label" for="workshop-form-url">קישור הרשמה חיצוני</label>
+              <input class="form__input admin-input--ltr" type="text" id="workshop-form-url" dir="ltr" placeholder="https://...">
+              <p class="admin-hint">משמש רק כשאין מחיר בקופה — למשל טופס או דף תשלום חיצוני.</p>
+            </div>
+
+            <div class="admin-packs-group" id="workshop-packs-group">
+              <p class="form__label">חבילות הרשמה</p>
+              <p class="admin-hint">אופציונלי. מחיר אחד למקום אחד, מחיר אחר לשתיים שנרשמות יחד. «מקומות» הוא כמה מקומות החבילה תופסת.</p>
+              <div class="admin-packs" id="workshop-packs"></div>
+              <button type="button" class="button admin-upload-btn admin-upload-btn--compact" id="workshop-add-pack">הוספת חבילה</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="admin-fieldset">
+            <legend>מצב הסדנה</legend>
+            <div class="admin-flags">
+              <label class="admin-check"><input type="checkbox" id="workshop-registration-full"> ההרשמה מלאה</label>
+              <label class="admin-check"><input type="checkbox" id="workshop-last-places"> מקומות אחרונים</label>
+              <label class="admin-check"><input type="checkbox" id="workshop-registration-not-open"> ההרשמה עוד לא נפתחה</label>
+              <label class="admin-check"><input type="checkbox" id="workshop-hide"> הסתר מהאתר</label>
+            </div>
+            <p class="admin-hint">הסתרה מורידה את הסדנה מרשימת הסדנאות, מהסל ומגוגל. העמוד עצמו נשאר בכתובתו, כדי שקישור שכבר נשלח למישהי לא יישבר.</p>
+          </fieldset>
+        </div>
+
+        <div class="admin-side">
+          <section class="admin-history" aria-label="היסטוריית השינויים">
+            <div class="admin-history__head">
+              <p class="admin-history__kicker">היסטוריה</p>
+              <div class="admin-history__actions">
+                <button type="button" class="admin-history__btn" id="workshop-undo" title="Ctrl+Z">ביטול</button>
+                <button type="button" class="admin-history__btn" id="workshop-redo" title="Ctrl+Shift+Z">שחזור</button>
+              </div>
+            </div>
+            <p class="admin-history__lead">
+              כל שינוי נשמר כאן. <kbd>Ctrl</kbd>+<kbd>Z</kbd> חוזר שלב אחורה,
+              <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> קדימה, ואפשר גם ללחוץ על שלב כדי לקפוץ אליו.
+              ההיסטוריה מתחילה מחדש בכל פתיחה של סדנה.
+            </p>
+            <ol class="admin-history__list" id="workshop-history"></ol>
+          </section>
+
+          <aside class="admin-preview" aria-label="תצוגה מקדימה כמו באתר">
+            <p class="admin-preview__kicker">תצוגה מקדימה</p>
+            <p class="admin-preview__lead">כך הסדנה תיראה ברשימת הסדנאות ובעמוד שלה, לפי השדות כאן.</p>
+            <div id="workshop-preview-card"></div>
+            <div id="workshop-preview-page"></div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="admin-editor__actions">
+        <button type="submit" class="button button--primary" id="workshop-save">שמירת הסדנה</button>
+        <button type="button" class="button" id="admin-editor-cancel">חזרה</button>
+        <button type="button" class="admin-delete" id="admin-editor-delete" hidden>מחיקת הסדנה</button>
+      </div>
+    </form>
+  </div>

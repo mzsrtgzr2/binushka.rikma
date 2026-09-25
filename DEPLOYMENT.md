@@ -73,8 +73,9 @@ pages (`scripts/build-catalog.js`) during the Vercel build and again whenever
 ## Store admin (`/admin/store/`)
 
 The backoffice is split into sections that share one login and one session:
-`/admin/store/` and `/admin/newsletter/`, with tabs between them. `/admin/`
-redirects to the store, so an old bookmark still lands somewhere sensible.
+`/admin/store/`, `/admin/workshops/` and `/admin/newsletter/`, with tabs
+between them. `/admin/` redirects to the store, so an old bookmark still lands
+somewhere sensible.
 
 
 A password-protected Hebrew backoffice for **every** store product: create,
@@ -116,6 +117,47 @@ field. Grow is payments only — it is not a catalog.
 
 To add a new cart product: either `/admin/store/` → מוצר חדש, or a new markdown
 file in `_store/`. Morning does not need a matching item to charge.
+
+## Workshop catalog
+
+`_projects/<date>-<slug>.md` is a workshop: front matter for what the site and
+the cart need, Markdown for what the day itself is. Jekyll drops the date
+prefix, so `_projects/2026-03-04-rehovot-spring.md` is served at the page's
+`permalink` and is `workshop-rehovot-spring` in the cart.
+
+- `cart_price` is the price charged at checkout. A ₪ figure that appears only
+  in the page text is prose, not a price — it is never sold from.
+- `spots` is inventory. Checkout refuses to over-book it and `api/admin.js`
+  counts it down after a booking, so a full workshop stops selling itself.
+- `price_per: workshop` prices the whole session rather than a place. Those
+  have no places to count, so they take no `spots` and no packs.
+- `variants:` are registration packs — one place at one price, two together at
+  another. A pack's `places` is how much of `spots` it consumes.
+- `hide` keeps the page (old links and paid bookings still have to resolve)
+  but takes the workshop out of the list, the cart and search results.
+
+`_data/workshops.json` and `api/workshops-data.json` are generated from those
+pages, the same way the store catalog is. Do not hand-edit them.
+
+## Workshop admin (`/admin/workshops/`)
+
+The same login as the rest of the backoffice. The list shows every workshop,
+open ones first, and edits places and full/hidden in place. Opening one gives
+the full editor: details, Markdown body with a live preview of both the card
+and the page, image upload, price, packs and status.
+
+Saving commits `_projects/<date>-<slug>.md` and regenerates both workshop
+catalog snapshots in the same commit, so the cart can never offer a price the
+page does not show. Uploaded images are committed under
+`images/workshops/<year-month>/`.
+
+A workshop's slug, filename and permalink are its identity and never move on
+an edit — changing the date or the title only changes the page. A workshop
+that has already run should be hidden rather than deleted: its URL may be in a
+confirmation mail somebody paid against.
+
+Needs the same variables as the store admin (`ADMIN_PASSWORD`, `GITHUB_TOKEN`,
+`GITHUB_BRANCH`, `GITHUB_REPO`), or `ADMIN_LOCAL_ROOT` for `vercel dev`.
 
 ## Newsletter
 

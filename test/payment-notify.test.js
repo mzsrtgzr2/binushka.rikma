@@ -180,6 +180,52 @@ test('the Morning callback body is read as a form or JSON', () => {
   assert.equal(notify.documentIdFrom(notify.readForm({ documentId: '../etc' })), null);
 });
 
+test('only POST is accepted, and a callback needs a document id', async () => {
+  const get = mockRes();
+  await notify({ method: 'GET', headers: {}, query: { order: orderToken() } }, get);
+  assert.equal(get.statusCode, 405);
+
+  const missing = await callNotify(orderToken(), {});
+  assert.equal(missing.statusCode, 400);
+  assert.equal(missing.body.code, 'no-document');
+  assert.equal(stockOf(root), 2);
+});
+
+test('a burst from one address is throttled before stock moves', async () => {
+  let last;
+  for (let i = 0; i < 61; i += 1) {
+    const res = mockRes();
+    await notify(
+      {
+        method: 'POST',
+        headers: { 'x-forwarded-for': '198.51.100.8' },
+        query: { order: 'nope' },
+        body: {},
+      },
+      res
+    );
+    last = res;
+  }
+  assert.equal(last.statusCode, 429);
+  assert.equal(stockOf(root), 2);
+});
+
+test('Morning is asked to retry when this deploy has no API key', async () => {
+  const keyId = process.env.MORNING_API_KEY_ID;
+  delete process.env.MORNING_API_KEY_ID;
+  delete process.env.MORNING_API_KEY_SECRET;
+  notify.morning.fetchDocument = realFetchDocument;
+  try {
+    const res = await callNotify(orderToken());
+    assert.equal(res.statusCode, 502);
+    assert.equal(res.body.code, 'retry');
+    assert.equal(stockOf(root), 2);
+  } finally {
+    if (keyId === undefined) delete process.env.MORNING_API_KEY_ID;
+    else process.env.MORNING_API_KEY_ID = keyId;
+  }
+});
+
 test('expired order tokens are refused', () => {
   const token = orderToken({ issuedAt: Date.now() - 8 * 24 * 60 * 60 * 1000 });
   assert.equal(verifyOrder(process.env, token), null);

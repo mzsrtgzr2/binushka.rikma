@@ -7,7 +7,7 @@
  * `_store` / `_projects`.
  */
 
-const { fallbackPriceBook } = require('./catalog');
+const { fallbackPriceBook } = require('../lib/catalog');
 const admin = require('./admin');
 
 function cors(req, res) {

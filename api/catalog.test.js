@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { installFixtureWorkshops } = require('../test/fixtures/workshops');
-const store = require('./admin-store');
+const store = require('../lib/store');
 const {
   buildOrder,
   fallbackPriceBook,
@@ -11,7 +11,7 @@ const {
   applyWorkshopNote,
   applyGiftPacking,
   PRODUCTS,
-} = require('./catalog');
+} = require('../lib/catalog');
 
 const FIXTURES = installFixtureWorkshops();
 
@@ -344,7 +344,7 @@ test('participant names are appended only to workshop lines', () => {
 });
 
 test('every visible workshop is in the cart at the page price', () => {
-  const store = require('./admin-store');
+  const store = require('../lib/store');
   const { installFixtureWorkshops } = require('../test/fixtures/workshops');
   const dir = path.join(__dirname, '..', '_projects');
   const files = fs.readdirSync(dir).filter((name) => name.endsWith('.md'));

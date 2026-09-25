@@ -1,6 +1,10 @@
 /**
- * Store prices + live stock from `_store/*.md` (GitHub when configured).
+ * Store prices + live stock.
  * GET /api/prices/
+ *
+ * Live stock is one GitHub file (`api/inventory-data.json`), rewritten whenever
+ * admin or a payment changes markdown. Missing snapshot falls back to scanning
+ * `_store` / `_projects`.
  */
 
 const { fallbackPriceBook } = require('./catalog');

@@ -63,5 +63,15 @@ variants:
       - /images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-18-53-14-mufpr95m.jpg
     description: "הספר האחרון של יומיקו שמלווה אותי בכל טיול בזמן האחרון.\nאת כוס המרטיני רקמתי מתוך הספר בטיול האחרון ללונדון.\nיש בו אלמנטים כמעט מכל תחום - טבע, תעופה, מוזיקה, אוכל.."
+  type-7:
+    name: רקמות חיות על פי יומיקו
+    price: 195
+    stock: 3
+    image: /images/store/embroidery-books/screenshot-2026-09-25-at-23-09-05-muhei8a9.jpg
+    gallery:
+      - /images/store/embroidery-books/screenshot-2026-09-23-at-22-32-12-muhei8a9.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-25-at-23-14-39-muhei8a9.png
+      - /images/store/embroidery-books/screenshot-2026-09-25-at-23-15-10-muhei8aa.jpg
+    description: "כמה מפתיע ומשמח ספר יכול להיות?\nפיל בקרקס או קוף על ענף עם בננה ביד.. תרקמו מה שתרצו מהספר היפהיפה הזה של יומיקו.\nהרבה תך שרשרת המדיטטיבי נוכח בעבודות של יומיקו וגם כאן בספר הרקמה של החיות.\nבתמונות אפשר לראות את הינשוף שרקמתי בהשראת הספר, עם חוטים מנצנצים של dmc מסדרת etoile."
 ---
 

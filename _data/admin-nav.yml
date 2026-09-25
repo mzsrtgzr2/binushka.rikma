@@ -4,6 +4,10 @@
   label: החנות
   url: /admin/store/
 
+- id: workshops
+  label: הסדנאות
+  url: /admin/workshops/
+
 - id: newsletter
   label: הניוזלטר
   url: /admin/newsletter/

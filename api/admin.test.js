@@ -51,12 +51,6 @@ test('unknown slug is rejected', () => {
   assert.equal(result.error, 'מוצר לא מוכר');
 });
 
-test('unknown workshop slug is rejected', () => {
-  const allowed = new Set(['rehovot-04-12']);
-  const result = admin.normalizeWorkshopUpdates([{ slug: '../etc', spots: 4 }], allowed);
-  assert.equal(result.error, 'סדנה לא מוכרת');
-});
-
 function request(handler, { method, headers, body, env }) {
   const saved = { ...process.env };
   Object.keys(env || {}).forEach((key) => {
@@ -530,111 +524,6 @@ function foxRoot() {
   writeCatalog(root, { fox: { name: 'רקמת שועל משמח', price: 220 } });
   return root;
 }
-
-const WORKSHOP = `---
-title: סדנת רקמה
-subtitle: שישי בבוקר
-date: 2025-12-04 19:00:00 +0300
-cart_price: 330
-spots: 12
-registration_full: false
-hide: false
----
-
-body
-`;
-
-function writeWorkshop(root, filename, raw) {
-  fs.mkdirSync(path.join(root, '_projects'), { recursive: true });
-  fs.writeFileSync(path.join(root, '_projects', filename), raw);
-}
-
-test('authenticated list includes workshop spots', async () => {
-  const root = foxRoot();
-  writeWorkshop(root, '2022-01-25-rehovot-04-12.md', WORKSHOP);
-  writeWorkshop(
-    root,
-    '2022-01-09-hidden.md',
-    `---
-title: סדנה ישנה
-hide: true
-spots: 0
-registration_full: true
----
-
-body
-`
-  );
-  const cookie = await loginCookie(root);
-  const listed = await request(admin, {
-    method: 'GET',
-    headers: { cookie },
-    env: authEnv(root),
-  });
-  assert.equal(listed.status, 200);
-  assert.equal(listed.json.products[0].slug, 'fox');
-  const visible = listed.json.workshops.find((w) => w.slug === 'rehovot-04-12');
-  const hidden = listed.json.workshops.find((w) => w.slug === 'hidden');
-  assert.equal(visible.title, 'סדנת רקמה');
-  assert.equal(visible.spots, 12);
-  assert.equal(visible.registration_full, false);
-  assert.equal(visible.hide, false);
-  assert.equal(visible.price, 330);
-  assert.equal(hidden.hide, true);
-  assert.equal(listed.json.workshops[0].slug, 'rehovot-04-12');
-  fs.rmSync(root, { recursive: true, force: true });
-});
-
-test('authenticated save updates workshop spots and hide', async () => {
-  const root = foxRoot();
-  writeWorkshop(root, '2022-01-25-rehovot-04-12.md', WORKSHOP);
-  const cookie = await loginCookie(root);
-  const saved = await request(admin, {
-    method: 'POST',
-    headers: { cookie },
-    body: {
-      action: 'save',
-      products: [{ slug: 'fox', out_of_stock: false, limited_stock: true, hide: false }],
-      workshops: [{ slug: 'rehovot-04-12', spots: 4, registration_full: false, hide: true }],
-    },
-    env: authEnv(root),
-  });
-  assert.equal(saved.status, 200);
-  assert.deepEqual(saved.json.changed, ['workshop-rehovot-04-12']);
-  const page = require('./admin-store').parseWorkshopPage(
-    'rehovot-04-12',
-    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
-  );
-  assert.equal(page.spots, 4);
-  assert.equal(page.registration_full, false);
-  assert.equal(page.hide, true);
-  fs.rmSync(root, { recursive: true, force: true });
-});
-
-test('authenticated save marks a workshop full when spots is zero', async () => {
-  const root = foxRoot();
-  writeWorkshop(root, '2022-01-25-rehovot-04-12.md', WORKSHOP);
-  const cookie = await loginCookie(root);
-  const saved = await request(admin, {
-    method: 'POST',
-    headers: { cookie },
-    body: {
-      action: 'save',
-      products: [{ slug: 'fox', out_of_stock: false, limited_stock: true, hide: false }],
-      workshops: [{ slug: 'rehovot-04-12', spots: 0, registration_full: false, hide: false }],
-    },
-    env: authEnv(root),
-  });
-  assert.equal(saved.status, 200);
-  const page = require('./admin-store').parseWorkshopPage(
-    'rehovot-04-12',
-    fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
-  );
-  assert.equal(page.spots, 0);
-  assert.equal(page.registration_full, true);
-  assert.equal(page.stock, 0);
-  fs.rmSync(root, { recursive: true, force: true });
-});
 
 test('authenticated list includes catalog price and kind', async () => {
   const root = foxRoot();
@@ -1309,6 +1198,121 @@ body
   assert.equal(book.products.hoops.variants.small.stock, 1);
   assert.equal(book.products.hoops.variants.large.stock, 1);
   assert.equal(book.products.hoops.stock, null);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+/* -------------------------------------------------------------------- order */
+
+/**
+ * Products whose date order (fabric, hoop, thread) is not their title order,
+ * and only two of which are supplies, so the fallback has something to say.
+ */
+function shopRoot() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-admin-'));
+  fs.mkdirSync(path.join(root, '_store'));
+  const page = (title, date, category) =>
+    `---\ntitle: ${title}\nprice: ₪50\nout_of_stock: false\nhide: false\n` +
+    `category: ${category}\ndate: ${date}\n---\n\nbody\n`;
+  fs.writeFileSync(path.join(root, '_store', 'thread.md'), page('חוטים', '2024-03-01', 'embroidery-supplies'));
+  fs.writeFileSync(path.join(root, '_store', 'hoop.md'), page('חישוק', '2024-02-01', 'embroidery-supplies'));
+  fs.writeFileSync(path.join(root, '_store', 'fabric.md'), page('בד', '2024-01-01', 'works-for-sale'));
+  fs.writeFileSync(path.join(root, '_store', 'gift-card.md'), page('שובר מתנה', '2024-04-01', 'works-for-sale'));
+  writeCatalog(root, {});
+  return root;
+}
+
+async function slugsInOrder(root, cookie) {
+  const listed = await request(admin, { method: 'GET', headers: { cookie }, env: authEnv(root) });
+  return listed.json.products.map((p) => p.slug);
+}
+
+// The same order store/index.html falls back to, so the list being dragged
+// here is the list the shop is showing.
+test('without a hand-picked order the list reads supplies first, then by title', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  assert.deepEqual(await slugsInOrder(root, cookie), ['thread', 'hoop', 'fabric', 'gift-card']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('saving the shop list writes each product its position', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  const saved = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'save',
+      products: [
+        { slug: 'gift-card', order: 1 },
+        { slug: 'hoop', order: 2 },
+        { slug: 'thread', order: 3 },
+      ],
+    },
+    env: authEnv(root),
+  });
+
+  assert.equal(saved.status, 200);
+  assert.match(fs.readFileSync(path.join(root, '_store', 'gift-card.md'), 'utf8'), /^order: 1$/m);
+  // `fabric` was not given a position, so it falls in behind the three that were.
+  assert.deepEqual(await slugsInOrder(root, cookie), ['gift-card', 'hoop', 'thread', 'fabric']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+// The editor has no say over the order, so a save from it must not be the
+// thing that loses a position set in the list.
+test('editing a product keeps the position it was given', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: { action: 'save', products: [{ slug: 'hoop', order: 4 }] },
+    env: authEnv(root),
+  });
+
+  const edited = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: { action: 'upsert', product: { slug: 'hoop', title: 'חישוק גדול', kind: 'fixed', cart_price: 60 } },
+    env: authEnv(root),
+  });
+  assert.equal(edited.status, 200);
+
+  const page = fs.readFileSync(path.join(root, '_store', 'hoop.md'), 'utf8');
+  assert.match(page, /^title: חישוק גדול$/m, 'the edit has to have landed for this to mean anything');
+  assert.match(page, /^order: 4$/m);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+// A hidden product is not in the shop, so it must not sit between two rows
+// being arranged and make their numbers mean something other than the shop.
+test('a hidden product sits after everything the shop shows', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  const page = fs.readFileSync(path.join(root, '_store', 'thread.md'), 'utf8');
+  fs.writeFileSync(path.join(root, '_store', 'thread.md'), page.replace('hide: false', 'hide: true'));
+
+  assert.deepEqual(await slugsInOrder(root, cookie), ['hoop', 'fabric', 'gift-card', 'thread']);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('a position that is not a count is refused', async () => {
+  const root = shopRoot();
+  const cookie = await loginCookie(root);
+
+  const saved = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: { action: 'save', products: [{ slug: 'hoop', order: -1 }] },
+    env: authEnv(root),
+  });
+
+  assert.equal(saved.status, 400);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

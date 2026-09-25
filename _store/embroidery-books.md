@@ -15,6 +15,7 @@ variants:
     stock: 1
     image: /images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg
     gallery:
+      - /images/store/embroidery-books/screenshot-2026-09-25-at-23-29-18-muhf0vew.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-18-50-33-mufplh69.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-06-mufplh6b.jpg
@@ -73,5 +74,11 @@ variants:
       - /images/store/embroidery-books/screenshot-2026-09-25-at-23-14-39-muhei8a9.png
       - /images/store/embroidery-books/screenshot-2026-09-25-at-23-15-10-muhei8aa.jpg
     description: "כמה מפתיע ומשמח ספר יכול להיות?\nפיל בקרקס או קוף על ענף עם בננה ביד.. תרקמו מה שתרצו מהספר היפהיפה הזה של יומיקו.\nהרבה תך שרשרת המדיטטיבי נוכח בעבודות של יומיקו וגם כאן בספר הרקמה של החיות.\nבתמונות אפשר לראות את הינשוף שרקמתי בהשראת הספר, עם חוטים מנצנצים של dmc מסדרת etoile."
+  type-8:
+    name: רקמה יפנית מודרנית בשני צבעים מאת יומיקו
+    price: 195
+    stock: 1
+    image: /images/store/embroidery-books/screenshot-2026-09-25-at-23-19-42-muhf0vex.jpg
+    description: "ספר השראה והדרכה לרקמה בסגנון יפני נקי ומינימליסטי, עם מגוון דוגמאות דו־צבעוניות פשוטות ומקסימות.\nמתאים למי שאוהבת רקמה עכשווית, מדויקת ושקטה, ולמי שמחפשת פרויקטים קטנים שאפשר לשלב על בגדים, תיקי בד, כלי טקסטיל ועוד.\nכולל הסברים מלאים כמו בכל הספרים של יומיקו."
 ---
 

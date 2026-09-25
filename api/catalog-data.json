@@ -25,6 +25,7 @@
         "description": "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)",
         "stock": 1,
         "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-25-at-23-29-18-muhf0vew.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-18-50-33-mufplh69.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-06-mufplh6b.jpg",
@@ -95,6 +96,13 @@
           "/images/store/embroidery-books/screenshot-2026-09-25-at-23-14-39-muhei8a9.png",
           "/images/store/embroidery-books/screenshot-2026-09-25-at-23-15-10-muhei8aa.jpg"
         ]
+      },
+      "type-8": {
+        "name": "רקמה יפנית מודרנית בשני צבעים מאת יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-25-at-23-19-42-muhf0vex.jpg",
+        "description": "ספר השראה והדרכה לרקמה בסגנון יפני נקי ומינימליסטי, עם מגוון דוגמאות דו־צבעוניות פשוטות ומקסימות.\nמתאים למי שאוהבת רקמה עכשווית, מדויקת ושקטה, ולמי שמחפשת פרויקטים קטנים שאפשר לשלב על בגדים, תיקי בד, כלי טקסטיל ועוד.\nכולל הסברים מלאים כמו בכל הספרים של יומיקו.",
+        "stock": 1
       }
     }
   },

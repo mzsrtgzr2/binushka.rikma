@@ -26,11 +26,12 @@ variants:
   type-3:
     name: דף מדבקות רקמה בהזמנה אישית
     price: 80
-    image: /images/store/stickers/screenshot-2026-09-25-at-18-52-46-muh59pds.jpg
+    image: /images/store/stickers/screenshot-2026-09-25-at-18-51-48-muh59pdt.jpg
     gallery:
-      - /images/store/stickers/screenshot-2026-09-25-at-18-51-48-muh59pdt.jpg
       - /images/store/stickers/screenshot-2026-09-25-at-18-54-24-muh59pdt.jpg
       - /images/store/stickers/screenshot-2026-09-25-at-18-54-40-muh59pdu.jpg
+      - /images/store/stickers/screenshot-2026-09-25-at-18-49-53-muh7vdxb.jpg
+      - /images/store/stickers/screenshot-2026-09-25-at-18-54-03-muh7vdxb.jpg
     description: "אשמח להפוך את פנטזיית היצירה שלכם למציאות :)\nשלחו לי מה שתרצו ואדפיס לכם על דף ייעודי לרקמה.\nמתאים לרקמה על חולצות, תיקים, בד מתוח על חישוק, קלמרים.\nבתמונות ניתן לראות מדבקות שהוזמנו ואת תהליך הרקמה שלהן.\nהמדבקה נשטפת במים והחוטים נשארים יפים ומבריקים כי חוטי dmc הם 100% כותנה וניתן לשטוף ולכבס אותם ללא דאגה.\n\nלאחר התשלום אשלח לכם הודעה ונמשיך את התהליך."
   type-4:
     name: "דף מדבקה לרקמה - ריק, להדפסה בבית"

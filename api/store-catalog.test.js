@@ -375,3 +375,46 @@ variants:
 
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('public inventory snapshot is one compact product map', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-inv-'));
+  writePage(
+    dir,
+    'fox',
+    `title: שועל
+price: ₪220
+stock: 2
+limited_stock: true
+`
+  );
+  writePage(
+    dir,
+    'kit',
+    `title: ערכה
+price: ₪60
+in_cart: false
+`
+  );
+  const products = store.buildPublicInventoryFromDirs(dir, dir);
+  assert.equal(products.fox.price, 220);
+  assert.equal(products.fox.stock, 2);
+  assert.equal(products.fox.limitedStock, true);
+  assert.equal(products.kit, undefined);
+
+  const next = store.applyInventoryUpdates(products, {
+    storeUpdates: {
+      fox: `---
+title: שועל
+price: ₪220
+stock: 0
+---
+
+body
+`,
+    },
+    removeIds: ['gone'],
+  });
+  assert.equal(next.fox.stock, 0);
+  assert.equal(next.fox.outOfStock, true);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

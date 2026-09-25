@@ -312,6 +312,41 @@ function catalogFilesFrom(catalog) {
   return CATALOG_FILES.map((pathName) => ({ path: pathName, content: json }));
 }
 
+async function readInventorySnapshot(env) {
+  const target = writeTarget(env);
+  if (target === 'local') {
+    const full = path.join(localRoot(env), store.INVENTORY_FILE);
+    if (!fs.existsSync(full)) return null;
+    try {
+      const parsed = JSON.parse(fs.readFileSync(full, 'utf8'));
+      return parsed && parsed.products && typeof parsed.products === 'object' ? parsed.products : null;
+    } catch {
+      return null;
+    }
+  }
+  if (target !== 'github') return null;
+  try {
+    const parsed = JSON.parse(await githubRead(env, store.INVENTORY_FILE));
+    return parsed && parsed.products && typeof parsed.products === 'object' ? parsed.products : null;
+  } catch (err) {
+    if (err.status === 404) return null;
+    throw err;
+  }
+}
+
+async function inventoryFilesForGithubCommit(env, updates, fallbackMaps = {}) {
+  if (writeTarget(env) !== 'github') return [];
+  let products = await readInventorySnapshot(env);
+  if (!products) {
+    const storeRaw = fallbackMaps.storeRaw || (await readStoreMap(env)).rawBySlug || {};
+    const projectsRaw = fallbackMaps.projectsRaw || (await readProjectsMap(env)).rawBySlug || {};
+    products = store.buildPublicInventory(storeRaw, projectsRaw);
+  } else {
+    products = store.applyInventoryUpdates(products, updates);
+  }
+  return [store.inventorySnapshotFile(products)];
+}
+
 function writeLocalFiles(env, files) {
   const root = localRoot(env);
   const resolvedRoot = path.resolve(root);
@@ -344,7 +379,16 @@ async function upsertProduct(env, input, { isNew, files = [], rawBySlug } = {}) 
 
   await commitFiles(
     env,
-    [{ path: mdPath, content: markdown }, ...catalogFilesFrom(catalog), ...files],
+    [
+      { path: mdPath, content: markdown },
+      ...catalogFilesFrom(catalog),
+      ...files,
+      ...(await inventoryFilesForGithubCommit(
+        env,
+        { storeUpdates: { [input.slug]: markdown } },
+        { storeRaw: nextRaw }
+      )),
+    ],
     isNew ? `Add store product ${input.slug}` : `Update store product ${input.slug}`
   );
   clearPublicInventoryCache();
@@ -363,7 +407,14 @@ async function deleteProduct(env, slug, { rawBySlug } = {}) {
     writeLocalCatalog(env, catalog);
     return { target, slug };
   }
-  await commitFiles(env, catalogFilesFrom(catalog), `Remove ${slug} from catalog`);
+  await commitFiles(
+    env,
+    [
+      ...catalogFilesFrom(catalog),
+      ...(await inventoryFilesForGithubCommit(env, { removeIds: [slug] }, { storeRaw: storeMap })),
+    ],
+    `Remove ${slug} from catalog`
+  );
   try {
     await githubDelete(env, mdPath, `Delete store product ${slug}`);
   } catch (err) {
@@ -461,7 +512,25 @@ async function saveFlags(env, updates) {
     changed.push(flags.slug);
   }
   if (listed.target === 'github' && files.length) {
-    await commitFiles(env, files, 'Update store stock from admin');
+    const storeUpdates = {};
+    files.forEach((file) => {
+      const slug = String(file.path || '')
+        .replace(/^_store\//, '')
+        .replace(/\.md$/, '');
+      if (slug) storeUpdates[slug] = file.content;
+    });
+    await commitFiles(
+      env,
+      [
+        ...files,
+        ...(await inventoryFilesForGithubCommit(
+          env,
+          { storeUpdates },
+          { storeRaw: { ...listed.rawBySlug, ...storeUpdates } }
+        )),
+      ],
+      'Update store stock from admin'
+    );
     clearPublicInventoryCache();
   }
   return { target: listed.target, changed };
@@ -523,16 +592,23 @@ async function decrementInventory(env, purchases, opts = {}) {
   const files = [];
   const changed = [];
   const storeRaw = new Map();
+  const storeUpdates = {};
+  const projectUpdates = {};
+  let fallbackStoreRaw;
+  let fallbackProjectsRaw;
 
   if (storeTotals.size) {
     const loaded = await readStoreMap(env);
     if (loaded.error) return loaded;
+    fallbackStoreRaw = { ...loaded.rawBySlug };
     for (const { slug, variant, quantity } of storeTotals.values()) {
       const raw = storeRaw.get(slug) || loaded.rawBySlug[slug];
       if (!raw) continue;
       const updated = store.decrementPageStock(raw, slug, quantity, variant || undefined);
       if (!updated) continue;
       storeRaw.set(slug, updated);
+      storeUpdates[slug] = updated;
+      fallbackStoreRaw[slug] = updated;
       if (!changed.includes(slug)) changed.push(slug);
     }
     for (const [slug, updated] of storeRaw) {
@@ -547,12 +623,15 @@ async function decrementInventory(env, purchases, opts = {}) {
   if (workshopTotals.size) {
     const loaded = await readProjectsMap(env);
     if (loaded.error) return loaded;
+    fallbackProjectsRaw = { ...loaded.rawBySlug };
     for (const [slug, quantity] of workshopTotals) {
       const raw = loaded.rawBySlug[slug];
       const filename = loaded.fileBySlug[slug];
       if (!raw || !filename) continue;
       const updated = store.decrementWorkshopPage(raw, slug, quantity);
       if (!updated) continue;
+      projectUpdates[slug] = updated;
+      fallbackProjectsRaw[slug] = updated;
       changed.push(store.workshopId(slug));
       if (target === 'local') {
         fs.writeFileSync(path.join(localRoot(env), '_projects', filename), updated);
@@ -572,7 +651,19 @@ async function decrementInventory(env, purchases, opts = {}) {
     }
     return { target, changed };
   }
-  await commitFiles(env, [...files, ...extraFiles], opts.message || 'Decrement store stock after purchase');
+  await commitFiles(
+    env,
+    [
+      ...files,
+      ...extraFiles,
+      ...(await inventoryFilesForGithubCommit(
+        env,
+        { storeUpdates, projectUpdates },
+        { storeRaw: fallbackStoreRaw, projectsRaw: fallbackProjectsRaw }
+      )),
+    ],
+    opts.message || 'Decrement store stock after purchase'
+  );
   clearPublicInventoryCache();
   return { target, changed };
 }
@@ -698,12 +789,20 @@ async function publicInventory(env) {
     return publicInventoryCache.value;
   }
 
-  const products = {};
+  const target = writeTarget(env);
+  if (target === 'github') {
+    try {
+      const snapshot = await readInventorySnapshot(env);
+      if (snapshot) return rememberPublicInventory(env, { source: 'github', products: snapshot });
+    } catch (err) {
+      console.error('publicInventory snapshot read failed', err);
+    }
+  }
+
   let source = 'bundled';
   let rawBySlug = null;
   let projects = bundledProjectsRaw();
 
-  const target = writeTarget(env);
   if (target) {
     try {
       const [storeLoaded, projectsLoaded] = await Promise.all([readStoreMap(env), readProjectsMap(env)]);
@@ -718,43 +817,7 @@ async function publicInventory(env) {
   }
   if (!rawBySlug) rawBySlug = bundledStoreRaw() || {};
 
-  for (const [slug, raw] of Object.entries(rawBySlug)) {
-    const page = store.parsePage(slug, raw);
-    if (!page || page.in_cart === false) continue;
-    const soldOut = Boolean(page.out_of_stock) || page.stock === 0;
-    const row = {
-      stock: page.stock == null ? null : Number(page.stock),
-      outOfStock: soldOut,
-      limitedStock: Boolean(page.limited_stock),
-    };
-    if (page.title) row.name = page.title;
-    const price = Number(page.cart_price);
-    if (price > 0) row.price = price;
-    if (store.variantsTrackStock(page.variants)) {
-      row.variants = {};
-      (page.variants || []).forEach((item) => {
-        if (!item || !item.id) return;
-        row.variants[item.id] = {
-          stock: item.stock == null ? null : Number(item.stock),
-        };
-      });
-      row.stock = null;
-    }
-    products[slug] = row;
-  }
-
-  Object.entries(projects.rawBySlug || {}).forEach(([slug, raw]) => {
-    const page = store.parseWorkshopPage(slug, raw);
-    const catalog = store.workshopCatalogRow(page);
-    if (!catalog) return;
-    products[store.workshopId(slug)] = {
-      name: catalog.name,
-      price: catalog.price,
-      stock: page.stock == null ? null : Number(page.stock),
-      outOfStock: Boolean(page.registration_full) || page.stock === 0,
-      limitedStock: store.isLowStock(page.stock),
-    };
-  });
+  const products = store.buildPublicInventory(rawBySlug, projects.rawBySlug);
   return rememberPublicInventory(env, { source, products });
 }
 

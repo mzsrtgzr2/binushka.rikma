@@ -12,7 +12,21 @@ import { foreignOrigin } from '../lib/origin.js';
 import { MediaError, prepareUpload } from '../lib/admin/media.mjs';
 import * as repo from '../lib/admin/repo.mjs';
 import * as workshops from '../lib/admin/workshops.mjs';
+import store from './admin-store.js';
 import { readJsonBody, sendJson } from '../lib/http.mjs';
+
+async function inventorySnapshotFiles(env, nextRaw) {
+  const existing = await repo.readFile(env, store.INVENTORY_FILE);
+  let storeRaw;
+  if (!existing) {
+    const files = await repo.listDir(env, '_store');
+    storeRaw = {};
+    files.forEach((file) => {
+      storeRaw[file.name.replace(/\.md$/, '')] = file.content;
+    });
+  }
+  return workshops.inventoryFiles(nextRaw, existing, storeRaw);
+}
 
 // A workshop page is prose, and an upload is a base64 image on top of that —
 // roughly a third larger than the 2.5MB the image itself may be.
@@ -83,7 +97,11 @@ async function handleSave(res, env, body) {
 
   await repo.commitFiles(
     env,
-    [{ path: workshops.pathFor(workshop.file), content }, ...workshops.catalogFiles(nextRaw)],
+    [
+      { path: workshops.pathFor(workshop.file), content },
+      ...workshops.catalogFiles(nextRaw),
+      ...(await inventorySnapshotFiles(env, nextRaw)),
+    ],
     existing ? `Update workshop ${workshop.slug}` : `Add workshop ${workshop.slug}`
   );
 
@@ -143,7 +161,7 @@ async function handleStock(res, env, body) {
 
   await repo.commitFiles(
     env,
-    [...files, ...workshops.catalogFiles(nextRaw)],
+    [...files, ...workshops.catalogFiles(nextRaw), ...(await inventorySnapshotFiles(env, nextRaw))],
     'Update workshop places from admin'
   );
 
@@ -182,7 +200,11 @@ async function handleDelete(res, env, body) {
 
   // The catalog goes first: between the two writes the workshop is better off
   // missing from the cart than sellable with no page behind it.
-  await repo.commitFiles(env, workshops.catalogFiles(nextRaw), `Remove workshop ${slug} from the catalog`);
+  await repo.commitFiles(
+    env,
+    [...workshops.catalogFiles(nextRaw), ...(await inventorySnapshotFiles(env, nextRaw))],
+    `Remove workshop ${slug} from the catalog`
+  );
   await repo.deleteFile(env, workshops.pathFor(existing.file), `Delete workshop ${slug}`);
 
   return sendJson(res, 200, { ok: true, slug });

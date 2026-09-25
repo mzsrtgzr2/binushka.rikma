@@ -1178,14 +1178,7 @@
                   '</div>'
                 : '');
           } else {
-            img =
-              '<div class="store-variant__photos">' +
-              sources
-                .map(function (src) {
-                  return '<img class="store-variant__photo" src="' + escapeHtml(src) + '" alt="">';
-                })
-                .join('') +
-              '</div>';
+            img = variantGalleryHtml(sources, name);
           }
         }
         if (scrunchie) {
@@ -1284,6 +1277,61 @@
     return productGalleryHtml('', paths, '');
   }
 
+  function galleryThumbsHtml(images) {
+    if (!images || images.length < 2) return '';
+    return (
+      '<div class="product-gallery__thumbs" role="list">' +
+      images
+        .map(function (src, index) {
+          var active = index === 0;
+          return (
+            '<button type="button" class="product-gallery__thumb' +
+            (active ? ' is-active' : '') +
+            '" data-gallery-src="' +
+            escapeHtml(src) +
+            '" aria-label="תמונה ' +
+            (index + 1) +
+            '" aria-pressed="' +
+            (active ? 'true' : 'false') +
+            '"><img src="' +
+            escapeHtml(src) +
+            '" alt=""></button>'
+          );
+        })
+        .join('') +
+      '</div>'
+    );
+  }
+
+  function galleryNavHtml(images) {
+    if (!images || images.length < 2) return '';
+    return (
+      '<button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>' +
+      '<button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="תמונה הבאה"></button>'
+    );
+  }
+
+  function variantGalleryHtml(sources, alt) {
+    var images = [];
+    (sources || []).forEach(function (src) {
+      if (src && images.indexOf(src) === -1) images.push(src);
+    });
+    if (!images.length) return '';
+    return (
+      '<div class="product-gallery product-gallery--variant" data-product-gallery>' +
+      '<div class="product-gallery__stage">' +
+      '<img class="product-gallery__image" data-gallery-main src="' +
+      escapeHtml(images[0]) +
+      '" alt="' +
+      escapeHtml(alt || '') +
+      '">' +
+      galleryNavHtml(images) +
+      '</div>' +
+      galleryThumbsHtml(images) +
+      '</div>'
+    );
+  }
+
   function productGalleryHtml(mainSrc, galleryPaths, stockHtml) {
     var images = [];
     function pushUnique(src) {
@@ -1294,31 +1342,6 @@
     (galleryPaths || []).forEach(pushUnique);
     if (!images.length) return '';
 
-    var thumbs = '';
-    if (images.length > 1) {
-      thumbs =
-        '<div class="product-gallery__thumbs" role="list">' +
-        images
-          .map(function (src, index) {
-            var active = index === 0;
-            return (
-              '<button type="button" class="product-gallery__thumb' +
-              (active ? ' is-active' : '') +
-              '" data-gallery-src="' +
-              escapeHtml(src) +
-              '" aria-label="תמונה ' +
-              (index + 1) +
-              '" aria-pressed="' +
-              (active ? 'true' : 'false') +
-              '"><img src="' +
-              escapeHtml(src) +
-              '" alt=""></button>'
-            );
-          })
-          .join('') +
-        '</div>';
-    }
-
     return (
       '<div class="store-item-content"><div class="product-gallery" data-product-gallery>' +
       '<div class="product-gallery__stage store-item-image-container">' +
@@ -1326,8 +1349,9 @@
       escapeHtml(images[0]) +
       '" alt="">' +
       (stockHtml || '') +
+      galleryNavHtml(images) +
       '</div>' +
-      thumbs +
+      galleryThumbsHtml(images) +
       '</div></div>'
     );
   }

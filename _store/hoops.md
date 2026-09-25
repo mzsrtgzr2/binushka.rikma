@@ -30,6 +30,7 @@ variants:
     name: קוטר 22 ס״מ
     price: 40
     stock: 2
+    image: /images/store/hoops/screenshot-2026-09-25-at-20-24-06-muh8dexe.jpg
     description: חישוק לרקמה גדול ואיכותי של vog.
   oval-16x10cm:
     name: אובאלי 16X10 ס״מ

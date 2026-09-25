@@ -23,6 +23,7 @@ variants:
   380:
     name: 380 רקמות חתולים
     price: 195
+    stock: 1
     image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-28-35-muei03el.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-23-at-22-29-44-muei03em.jpg
@@ -30,6 +31,7 @@ variants:
   paintwiththread:
     name: paint with thread
     price: 195
+    stock: 2
     image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-23-35-muehtzc2.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-23-at-22-23-44-muehtzc2.jpg

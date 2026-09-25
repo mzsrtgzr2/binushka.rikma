@@ -7,7 +7,7 @@ const { fallbackPriceBook } = require('./catalog');
 const admin = require('./admin');
 
 function cors(req, res) {
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=120');
 }
 
 function mergeInventory(book, inventory) {

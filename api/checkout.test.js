@@ -207,6 +207,13 @@ test('checkout rejects a payment URL on an unknown host', () => {
     checkout.isAllowedPaymentUrl('https://www.greeninvoice.co.il/pay/abc', env),
     true
   );
+  assert.equal(
+    checkout.isAllowedPaymentUrl(
+      'https://secure.meshulam.co.il/credit-checkout?l=3af73cdfa76c5abfd472784791e442fa%MzUxNDQyNzY',
+      env
+    ),
+    true
+  );
 });
 
 function mockRes() {

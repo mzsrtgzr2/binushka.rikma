@@ -86,6 +86,9 @@
         },
         "type-2": {
           "stock": 100
+        },
+        "type-3": {
+          "stock": null
         }
       }
     },

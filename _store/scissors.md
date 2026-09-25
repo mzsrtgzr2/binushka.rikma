@@ -1,7 +1,7 @@
 ---
 title: מספרי רקמה איכותיות
 date: 2026-09-23 19:39:00 +0000
-subtitle: של dmc
+subtitle: "של dmc, singer ועוד"
 image: /images/store/scissors/screenshot-2026-09-23-at-22-36-13-mueib4k5.jpg
 price: ₪70 – ₪80
 out_of_stock: false

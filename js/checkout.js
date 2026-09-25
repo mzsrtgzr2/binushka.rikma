@@ -95,6 +95,7 @@
       if (host === 'greeninvoice.co.il' || host.slice(-20) === '.greeninvoice.co.il') return https;
       if (host === 'morning.co' || host.slice(-11) === '.morning.co') return https;
       if (host === 'morning.dev' || host.slice(-12) === '.morning.dev') return https;
+      if (host === 'meshulam.co.il' || host.slice(-15) === '.meshulam.co.il') return https;
       if (host === 'mrng.to' || host === 'pay.grow.link') return https;
       return false;
     } catch (e) {

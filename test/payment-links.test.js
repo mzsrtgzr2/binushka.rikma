@@ -37,6 +37,7 @@ test('payment link allowlist rejects lookalikes and non-https', () => {
   assert.equal(isAllowedPaymentLink('https://pay.grow.link/abc'), true);
   assert.equal(isAllowedPaymentLink('https://pages.greeninvoice.co.il/payments/links/x'), true);
   assert.equal(isAllowedPaymentLink('https://mrng.to/x'), true);
+  assert.equal(isAllowedPaymentLink('https://secure.meshulam.co.il/credit-checkout?l=abc'), true);
   assert.equal(isAllowedPaymentLink('http://pay.grow.link/abc'), false);
   assert.equal(isAllowedPaymentLink('https://pay.grow.link.evil.example/abc'), false);
   assert.equal(isAllowedPaymentLink('https://evilgreeninvoice.co.il/x'), false);

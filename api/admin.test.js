@@ -1345,3 +1345,95 @@ test('login locks an IP after repeated failures, even for the right password', a
   });
   assert.equal(other.status, 200);
 });
+
+function githubOk(body) {
+  return {
+    ok: true,
+    status: 200,
+    async text() {
+      return JSON.stringify(body);
+    },
+  };
+}
+
+function githubFile(raw) {
+  return githubOk({ content: Buffer.from(raw, 'utf8').toString('base64') });
+}
+
+test('publicInventory fetches GitHub markdown in parallel and caches the result', async () => {
+  admin.clearPublicInventoryCache();
+  const foxMd = `---
+title: רקמת שועל משמח
+price: ₪220
+stock: 3
+---
+
+body
+`;
+  const hoopMd = `---
+title: חישוקים
+price: ₪20
+stock: 2
+---
+
+body
+`;
+  const workshopMd = `---
+title: סדנה
+subtitle: שישי
+date: 2026-10-01
+spots: 4
+---
+
+**מחיר:** 330 ש"ח
+`;
+
+  let inFlight = 0;
+  let maxInFlight = 0;
+  let fetches = 0;
+  const originalFetch = global.fetch;
+  global.fetch = async (url) => {
+    fetches += 1;
+    inFlight += 1;
+    maxInFlight = Math.max(maxInFlight, inFlight);
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    inFlight -= 1;
+    const href = String(url);
+    if (href.includes('/contents/_store?')) {
+      return githubOk([
+        { name: 'fox.md', type: 'file' },
+        { name: 'hoops.md', type: 'file' },
+      ]);
+    }
+    if (href.includes('/contents/_projects?')) {
+      return githubOk([{ name: '2026-10-01-rehovot.md', type: 'file' }]);
+    }
+    if (href.includes('/contents/_store/fox.md')) return githubFile(foxMd);
+    if (href.includes('/contents/_store/hoops.md')) return githubFile(hoopMd);
+    if (href.includes('/contents/_projects/2026-10-01-rehovot.md')) return githubFile(workshopMd);
+    throw new Error(`unexpected GitHub URL ${href}`);
+  };
+
+  const env = {
+    GITHUB_TOKEN: 'token',
+    GITHUB_REPO: 'owner/repo',
+    GITHUB_BRANCH: 'master',
+  };
+
+  try {
+    const first = await admin.publicInventory(env);
+    assert.equal(first.source, 'github');
+    assert.equal(first.products.fox.stock, 3);
+    assert.equal(first.products.hoops.stock, 2);
+    assert.equal(first.products['workshop-rehovot'].stock, 4);
+    assert.ok(maxInFlight > 1, `expected parallel GitHub reads, got max in-flight ${maxInFlight}`);
+    const fetchesAfterFirst = fetches;
+
+    const second = await admin.publicInventory(env);
+    assert.equal(second.products.fox.stock, 3);
+    assert.equal(fetches, fetchesAfterFirst);
+  } finally {
+    global.fetch = originalFetch;
+    admin.clearPublicInventoryCache();
+  }
+});

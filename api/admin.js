@@ -158,6 +158,16 @@ async function githubRead(env, filePath) {
   return decodeGithubFile(file);
 }
 
+async function githubReadDirMarkdown(env, dir) {
+  const branch = gitBranch(env);
+  const entries = await githubJson(env, `/contents/${dir}?ref=${encodeURIComponent(branch)}`);
+  const names = (Array.isArray(entries) ? entries : [])
+    .filter((entry) => entry.name && entry.name.endsWith('.md'))
+    .map((entry) => entry.name);
+  const files = await Promise.all(names.map((name) => githubRead(env, `${dir}/${name}`)));
+  return names.map((name, index) => ({ name, raw: files[index] }));
+}
+
 async function commitFiles(env, files, message) {
   const blobs = [];
   for (const file of files) {
@@ -224,13 +234,9 @@ async function readStoreMap(env) {
       rawBySlug[name.replace(/\.md$/, '')] = readStoreLocal(env, name);
     });
   } else {
-    const branch = gitBranch(env);
-    const entries = await githubJson(env, `/contents/_store?ref=${encodeURIComponent(branch)}`);
-    const names = (Array.isArray(entries) ? entries : [])
-      .filter((entry) => entry.name && entry.name.endsWith('.md'))
-      .map((entry) => entry.name);
-    for (const name of names) {
-      rawBySlug[name.replace(/\.md$/, '')] = await githubRead(env, `_store/${name}`);
+    const files = await githubReadDirMarkdown(env, '_store');
+    for (const { name, raw } of files) {
+      rawBySlug[name.replace(/\.md$/, '')] = raw;
     }
   }
   return { target, rawBySlug };
@@ -261,13 +267,9 @@ async function readProjectsMap(env) {
       add(name, fs.readFileSync(path.join(localRoot(env), '_projects', name), 'utf8'));
     });
   } else {
-    const branch = gitBranch(env);
-    const entries = await githubJson(env, `/contents/_projects?ref=${encodeURIComponent(branch)}`);
-    const names = (Array.isArray(entries) ? entries : [])
-      .filter((entry) => entry.name && entry.name.endsWith('.md'))
-      .map((entry) => entry.name);
-    for (const name of names) {
-      add(name, await githubRead(env, `_projects/${name}`));
+    const files = await githubReadDirMarkdown(env, '_projects');
+    for (const { name, raw } of files) {
+      add(name, raw);
     }
   }
   return { target, rawBySlug, fileBySlug };
@@ -345,6 +347,7 @@ async function upsertProduct(env, input, { isNew, files = [], rawBySlug } = {}) 
     [{ path: mdPath, content: markdown }, ...catalogFilesFrom(catalog), ...files],
     isNew ? `Add store product ${input.slug}` : `Update store product ${input.slug}`
   );
+  clearPublicInventoryCache();
   return { target, slug: input.slug };
 }
 
@@ -366,6 +369,7 @@ async function deleteProduct(env, slug, { rawBySlug } = {}) {
   } catch (err) {
     if (Number(err.status) !== 404) throw err;
   }
+  clearPublicInventoryCache();
   return { target, slug };
 }
 
@@ -458,6 +462,7 @@ async function saveFlags(env, updates) {
   }
   if (listed.target === 'github' && files.length) {
     await commitFiles(env, files, 'Update store stock from admin');
+    clearPublicInventoryCache();
   }
   return { target: listed.target, changed };
 }
@@ -568,6 +573,7 @@ async function decrementInventory(env, purchases, opts = {}) {
     return { target, changed };
   }
   await commitFiles(env, [...files, ...extraFiles], opts.message || 'Decrement store stock after purchase');
+  clearPublicInventoryCache();
   return { target, changed };
 }
 
@@ -656,23 +662,56 @@ function bundledStoreRaw() {
   return rawBySlug;
 }
 
+const PUBLIC_INVENTORY_TTL_MS = 30 * 1000;
+let publicInventoryCache = null;
+
+function publicInventoryCacheKey(env) {
+  const target = writeTarget(env) || 'bundled';
+  if (target !== 'github') return '';
+  const repo = repoParts(env);
+  return `${target}:${repo ? `${repo.owner}/${repo.repo}` : ''}:${gitBranch(env)}`;
+}
+
+function clearPublicInventoryCache() {
+  publicInventoryCache = null;
+}
+
+function rememberPublicInventory(env, value) {
+  const key = publicInventoryCacheKey(env);
+  if (!key) return value;
+  publicInventoryCache = { key, expires: Date.now() + PUBLIC_INVENTORY_TTL_MS, value };
+  return value;
+}
+
 /**
  * Public inventory for the storefront cart (no auth).
  * Prefers live GitHub/local admin target; falls back to bundled markdown.
  */
 async function publicInventory(env) {
+  const cacheKey = publicInventoryCacheKey(env);
+  if (
+    cacheKey &&
+    publicInventoryCache &&
+    publicInventoryCache.key === cacheKey &&
+    publicInventoryCache.expires > Date.now()
+  ) {
+    return publicInventoryCache.value;
+  }
+
   const products = {};
   let source = 'bundled';
   let rawBySlug = null;
+  let projects = bundledProjectsRaw();
 
   const target = writeTarget(env);
   if (target) {
     try {
-      const loaded = await readStoreMap(env);
-      if (!loaded.error) {
-        rawBySlug = loaded.rawBySlug;
+      const [storeLoaded, projectsLoaded] = await Promise.all([readStoreMap(env), readProjectsMap(env)]);
+      if (!storeLoaded.error) {
+        rawBySlug = storeLoaded.rawBySlug;
         source = target;
       }
+      if (projectsLoaded && !projectsLoaded.error) projects = projectsLoaded;
     } catch (err) {
       console.error('publicInventory live read failed', err);
     }
@@ -704,15 +743,6 @@ async function publicInventory(env) {
     products[slug] = row;
   }
 
-  let projects = bundledProjectsRaw();
-  if (target) {
-    try {
-      const loaded = await readProjectsMap(env);
-      if (!loaded.error) projects = loaded;
-    } catch (err) {
-      console.error('publicInventory workshops read failed', err);
-    }
-  }
   Object.entries(projects.rawBySlug || {}).forEach(([slug, raw]) => {
     const page = store.parseWorkshopPage(slug, raw);
     const catalog = store.workshopCatalogRow(page);
@@ -725,7 +755,7 @@ async function publicInventory(env) {
       limitedStock: store.isLowStock(page.stock),
     };
   });
-  return { source, products };
+  return rememberPublicInventory(env, { source, products });
 }
 
 const loginLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
@@ -877,6 +907,7 @@ handler.readPaidOrder = readPaidOrder;
 handler.paidOrderPath = paidOrderPath;
 handler.assertInventory = assertInventory;
 handler.publicInventory = publicInventory;
+handler.clearPublicInventoryCache = clearPublicInventoryCache;
 handler.parseStock = store.parseStock;
 
 module.exports = handler;

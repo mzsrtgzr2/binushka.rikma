@@ -1108,14 +1108,7 @@
                   '</div>'
                 : '');
           } else {
-            img =
-              '<div class="store-variant__photos">' +
-              sources
-                .map(function (src) {
-                  return '<img class="store-variant__photo" src="' + escapeHtml(src) + '" alt="">';
-                })
-                .join('') +
-              '</div>';
+            img = variantGalleryHtml(sources, name);
           }
         }
         if (scrunchie) {
@@ -1211,14 +1204,85 @@
         '</div>'
       );
     }
+    return productGalleryHtml('', paths, '');
+  }
+
+  function galleryThumbsHtml(images) {
+    if (!images || images.length < 2) return '';
     return (
-      '<div class="store-item-gallery">' +
-      paths
-        .map(function (src) {
-          return '<img class="store-item-gallery__img" src="' + escapeHtml(src) + '" alt="">';
+      '<div class="product-gallery__thumbs" role="list">' +
+      images
+        .map(function (src, index) {
+          var active = index === 0;
+          return (
+            '<button type="button" class="product-gallery__thumb' +
+            (active ? ' is-active' : '') +
+            '" data-gallery-src="' +
+            escapeHtml(src) +
+            '" aria-label="תמונה ' +
+            (index + 1) +
+            '" aria-pressed="' +
+            (active ? 'true' : 'false') +
+            '"><img src="' +
+            escapeHtml(src) +
+            '" alt=""></button>'
+          );
         })
         .join('') +
       '</div>'
+    );
+  }
+
+  function galleryNavHtml(images) {
+    if (!images || images.length < 2) return '';
+    return (
+      '<button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>' +
+      '<button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="תמונה הבאה"></button>'
+    );
+  }
+
+  function variantGalleryHtml(sources, alt) {
+    var images = [];
+    (sources || []).forEach(function (src) {
+      if (src && images.indexOf(src) === -1) images.push(src);
+    });
+    if (!images.length) return '';
+    return (
+      '<div class="product-gallery product-gallery--variant" data-product-gallery>' +
+      '<div class="product-gallery__stage">' +
+      '<img class="product-gallery__image" data-gallery-main src="' +
+      escapeHtml(images[0]) +
+      '" alt="' +
+      escapeHtml(alt || '') +
+      '">' +
+      galleryNavHtml(images) +
+      '</div>' +
+      galleryThumbsHtml(images) +
+      '</div>'
+    );
+  }
+
+  function productGalleryHtml(mainSrc, galleryPaths, stockHtml) {
+    var images = [];
+    function pushUnique(src) {
+      if (!src || images.indexOf(src) !== -1) return;
+      images.push(src);
+    }
+    pushUnique(mainSrc);
+    (galleryPaths || []).forEach(pushUnique);
+    if (!images.length) return '';
+
+    return (
+      '<div class="store-item-content"><div class="product-gallery" data-product-gallery>' +
+      '<div class="product-gallery__stage store-item-image-container">' +
+      '<img class="product-gallery__image" data-gallery-main src="' +
+      escapeHtml(images[0]) +
+      '" alt="">' +
+      (stockHtml || '') +
+      galleryNavHtml(images) +
+      '</div>' +
+      galleryThumbsHtml(images) +
+      '</div></div>'
     );
   }
 
@@ -1290,16 +1354,7 @@
         (cart ? '<div class="store-item-content">' + cart + '</div>' : '')
       );
     }
-    var mainImage = p.image
-      ? '<div class="store-item-content"><div class="page-image"><div class="store-item-image-container">' +
-        '<img src="' +
-        escapeHtml(p.image) +
-        '" alt="">' +
-        stockOverlay(p) +
-        '</div></div>' +
-        galleryHtml(p.gallery, false) +
-        '</div>'
-      : galleryHtml(p.gallery, false);
+    var mainImage = productGalleryHtml(p.image, p.gallery, stockOverlay(p));
     return (
       '<div class="page-head">' +
       '<h1 class="page-title">' +

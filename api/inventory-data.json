@@ -296,6 +296,13 @@
       "stock": 0,
       "outOfStock": true,
       "limitedStock": false
+    },
+    "needle": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "מחט לרקמה",
+      "price": 2
     }
   }
 }

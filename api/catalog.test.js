@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const { installFixtureWorkshops } = require('../test/fixtures/workshops');
+const store = require('./admin-store');
 const {
   buildOrder,
   fallbackPriceBook,
@@ -45,6 +46,16 @@ test('generated catalog snapshots stay in sync with each other', () => {
   const apiCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-data.json'), 'utf8'));
   const dataCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '_data', 'catalog.json'), 'utf8'));
   assert.deepEqual(apiCatalog, dataCatalog);
+});
+
+test('generated inventory snapshot matches store and workshop markdown', () => {
+  const built = store.buildPublicInventoryFromDirs(
+    path.join(__dirname, '..', '_store'),
+    path.join(__dirname, '..', '_projects')
+  );
+  const saved = JSON.parse(fs.readFileSync(path.join(__dirname, 'inventory-data.json'), 'utf8'));
+  assert.deepEqual(saved.products, built);
+  assert.ok(saved.products.fox);
 });
 
 test('flower-bag from markdown is chargeable at checkout', () => {

@@ -54,7 +54,8 @@ variants:
     image: /images/store/embroidery-books/screenshot-2026-09-24-at-15-30-34-mufig8tg.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-24-at-15-30-24-mufig8th.jpg
-    description: "כמה רוגע אפשר לייצר בחזרתיות הזו של יומיקו, רקעים, עצים, חיים.\nספר עם המון השראה וייחודיות."
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-17-31-10-muhf8vkc.jpg
+    description: "כמה רוגע אפשר לייצר בחזרתיות הזו של יומיקו, רקעים, עצים, חיים.\nספר עם המון השראה וייחודיות.\nהרקמה בתמונה היא של שירן במפגשי אמהות רוקמות, בהשראת הספר והחיים."
   type-6:
     name: רקמות החיים ויום יום על פי יומיקו
     price: 195

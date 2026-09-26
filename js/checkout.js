@@ -30,7 +30,7 @@
     Analytics[method](a, b, c);
   }
 
-  /* Hebrew labels make the GA4 drop-off reports readable without a lookup. */
+  /* Hebrew labels make the Mixpanel drop-off reports readable without a lookup. */
   var FIELD_LABELS = {
     firstName: 'שם פרטי',
     lastName: 'שם משפחה',
@@ -414,7 +414,7 @@
     saveCustomer();
     submitted = true;
     reportShipping(items, shipping ? data.shipping : 'none');
-    /* GA4 dedupes purchases by transaction_id, so the order needs a stable ref. */
+    /* Mixpanel dedupes purchase by this ref ($insert_id), so it must stay stable. */
     var orderRef =
       'BNK-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
     track('addPaymentInfo', items, subtotal + ship, 'grow');

@@ -5,8 +5,8 @@
 
 <body>
 
-  {% if site.data.settings.google-analytics %}
-    {% include google-analytics.html %}
+  {% if site.data.settings.mixpanel-token %}
+    {% include mixpanel.html %}
   {% endif %}
   {% if site.data.settings.clarity %}
     {% include clarity.html %}

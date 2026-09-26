@@ -36,7 +36,8 @@
 
   var CATEGORY_LABELS = {
     'embroidery-supplies': 'ציוד רקמה',
-    'works-for-sale': 'עבודות למכירה'
+    'works-for-sale': 'עבודות למכירה',
+    workshops: 'סדנאות'
   };
 
   function escapeHtml(value) {

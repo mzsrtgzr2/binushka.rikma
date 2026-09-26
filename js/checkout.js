@@ -258,6 +258,15 @@
     });
   }
 
+  /** Scrunchie fabric note — only relevant when סקראנצ'יז are in the cart. */
+  function syncVariantNoteVisibility(items) {
+    var group = document.getElementById('checkout-variant-note-group');
+    if (!group) return;
+    group.hidden = !items.some(function (item) {
+      return item.id === 'scrunchies';
+    });
+  }
+
   function renderSummary() {
     if (!window.StoreCart) return [];
     var items = StoreCart.items();
@@ -270,8 +279,7 @@
       if (afterDiscountRow) afterDiscountRow.hidden = true;
       if (formSection) formSection.hidden = true;
       if (linesEl) linesEl.innerHTML = '';
-      var emptyNote = document.getElementById('checkout-variant-note-group');
-      if (emptyNote) emptyNote.hidden = true;
+      syncVariantNoteVisibility(items);
       syncParticipantsVisibility(items);
       return [];
     }
@@ -304,14 +312,7 @@
         .join('');
     }
 
-    var noteGroup = document.getElementById('checkout-variant-note-group');
-    if (noteGroup) {
-      var hasVariant = items.some(function (item) {
-        return item.variant;
-      });
-      noteGroup.hidden = !hasVariant;
-    }
-
+    syncVariantNoteVisibility(items);
     syncParticipantsVisibility(items);
     var shipping = syncShippingVisibility(items);
     var ship = shipping ? shippingCost(selectedShipping(), subtotal) : 0;
@@ -549,7 +550,12 @@
     };
     if (appliedCoupon && appliedCoupon.code) payload.couponCode = appliedCoupon.code;
     else if (data.couponCode) payload.couponCode = String(data.couponCode).trim();
-    if (data.variantNote) payload.variantNote = String(data.variantNote).trim();
+    var hasScrunchie = items.some(function (item) {
+      return item.id === 'scrunchies';
+    });
+    if (hasScrunchie && data.variantNote) {
+      payload.variantNote = String(data.variantNote).trim();
+    }
     if (data.participantsNote) payload.participantsNote = String(data.participantsNote).trim();
     if (data.packAsGift) {
       payload.packAsGift = true;

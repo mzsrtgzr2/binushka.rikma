@@ -154,6 +154,7 @@ test('variant fabric note is appended only to scrunchie lines', () => {
       [
         { id: 'fox', quantity: 1 },
         { id: 'scrunchies', quantity: 1, variant: 'regular' },
+        { id: 'hoops', quantity: 1, variant: Object.keys(PRODUCTS.hoops.variants)[0] },
       ],
       'pickup'
     ),
@@ -161,6 +162,7 @@ test('variant fabric note is appended only to scrunchie lines', () => {
   );
   assert.equal(order.lines[0].description, 'רקמת שועל משמח');
   assert.equal(order.lines[1].description, "סקראנצ'י גודל רגיל — דוגמא: פרחים ורודים");
+  assert.equal(order.lines[2].description, PRODUCTS.hoops.variants[Object.keys(PRODUCTS.hoops.variants)[0]].name);
 });
 
 test('empty variant note is ignored and long notes are trimmed', () => {

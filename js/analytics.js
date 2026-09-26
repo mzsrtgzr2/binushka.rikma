@@ -1,9 +1,14 @@
 /**
- * GA4 e-commerce tracking.
+ * Mixpanel shop tracking.
  *
  * Exposes window.Analytics, used by store-cart.js, checkout.js, thanks.js and
- * store-sort.js to report the shop funnel. Every call is a no-op when gtag is
- * missing, so the shop keeps working with analytics disabled or blocked.
+ * store-sort.js to report the shop funnel. Every call is a no-op when Mixpanel
+ * is missing, so the shop keeps working with analytics disabled or blocked.
+ *
+ * Page views and clicks are Mixpanel Autocapture. track_pageview stays off
+ * so those page views are not recorded a second time. The explicit events
+ * below are the shop funnel. Session replay is on so the Mixpanel setup
+ * check, and later visits, can show a recording.
  *
  * Add ?analytics_debug=1 to any URL to log events to the console.
  */
@@ -25,12 +30,84 @@
     /* private mode */
   }
 
-  /* gtag is defined inline at the top of <body>, but stay safe if GA is off. */
-  function send(name, params) {
-    if (debug) console.log('[analytics]', name, params || {});
-    if (typeof window.gtag !== 'function') return;
+  if (debug && window.mixpanel && typeof window.mixpanel.set_config === 'function') {
     try {
-      window.gtag('event', name, params || {});
+      window.mixpanel.set_config({ debug: true });
+    } catch (e) {
+      /* never let tracking break the page */
+    }
+  }
+
+  function present(value) {
+    return value != null && value !== '';
+  }
+
+  /*
+   * Mixpanel breaks down flat properties. A GA4-style `items` array of objects
+   * is stored, but it cannot be used in funnels or breakdowns, so it is
+   * unpacked: one line becomes item_id / item_name / price / quantity, and
+   * several lines become parallel lists.
+   */
+  function toMixpanelProps(name, params) {
+    var props = {};
+    var source = params || {};
+    var items = Array.isArray(source.items) ? source.items.filter(Boolean) : null;
+
+    Object.keys(source).forEach(function (key) {
+      if (key === 'items') return;
+      var value = source[key];
+      if (!present(value)) return;
+      if (Array.isArray(value)) {
+        var list = value.filter(function (entry) {
+          return present(entry) && typeof entry !== 'object';
+        });
+        if (list.length) props[key] = list;
+        return;
+      }
+      if (typeof value === 'object') return;
+      props[key] = value;
+    });
+
+    if (items) {
+      var ids = [];
+      var names = [];
+      var quantities = [];
+      var prices = [];
+      items.forEach(function (item) {
+        if (present(item.item_id)) ids.push(String(item.item_id));
+        if (present(item.item_name)) names.push(String(item.item_name));
+        if (present(item.quantity)) quantities.push(Number(item.quantity) || 0);
+        if (present(item.price)) prices.push(round(item.price));
+      });
+      if (props.items_count == null) props.items_count = items.length;
+      if (ids.length) props.item_ids = ids;
+      if (names.length) props.item_names = names;
+      if (items.length === 1) {
+        var item = items[0];
+        ['item_id', 'item_name', 'item_category', 'item_variant', 'price', 'quantity', 'index'].forEach(
+          function (key) {
+            if (present(item[key]) && props[key] == null) props[key] = item[key];
+          }
+        );
+      } else if (items.length > 1) {
+        if (quantities.length) props.item_quantities = quantities;
+        if (prices.length) props.item_prices = prices;
+      }
+    }
+
+    /* Mixpanel drops a repeat purchase with the same $insert_id. */
+    if (name === 'purchase' && present(props.transaction_id)) {
+      props.$insert_id = String(props.transaction_id);
+    }
+    return props;
+  }
+
+  function send(name, params) {
+    var props = toMixpanelProps(name, params);
+    if (debug) console.log('[analytics]', name, props);
+    if (!window.mixpanel || typeof window.mixpanel.track !== 'function') return;
+    try {
+      window.mixpanel.track(name, props);
     } catch (e) {
       /* never let tracking break the page */
     }
@@ -58,7 +135,7 @@
     return Math.round((Number(n) || 0) * 100) / 100;
   }
 
-  /* Maps a store-cart.js line (or a bare catalog entry) to a GA4 item. */
+  /* Maps a store-cart.js line (or a bare catalog entry) to an item. */
   function toItem(source, index) {
     if (!source) return null;
     var product = catalog()[source.id] || {};
@@ -92,7 +169,6 @@
     );
   }
 
-  /* GA4 e-commerce events all want currency + value alongside the items. */
   function ecommerce(name, items, extra) {
     var params = { currency: CURRENCY, items: items };
     params.value = extra && extra.value != null ? round(extra.value) : itemsValue(items);

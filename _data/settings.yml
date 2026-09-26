@@ -208,8 +208,10 @@ disqus-identifier: anvodstudio-demo # Add your shortname for Disqus Comment. For
 
 
 #-------------------------------
-# Google Analytics
-google-analytics: G-G3QBFMD0FQ
+# Mixpanel
+# Project token (public, same role as the old GA measurement id).
+# See ANALYTICS.md
+mixpanel-token: a43db660a3b2edd77491b45eaed23e12
 
 
 #-------------------------------

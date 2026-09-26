@@ -8,9 +8,9 @@ out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
+order: 9
 gallery:
   - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
-order: 9
 variants:
   type-1:
     name: דוגמא פרחונית מונוכרמטית כחולה
@@ -39,6 +39,5 @@ variants:
 
 גודל: 60×80 ס״מ
 בד: 100% כותנה
-מק״ט: 11-326
 
 הבד מגיע עם הדוגמה מודפסת עליו, כך שאפשר פשוט להתחיל לרקום. מתאים גם למי שאוהבת פרויקטים גדולים יותר ורוצה לקחת את הזמן עם רקמה שאפשר לחזור אליה שוב ושוב.

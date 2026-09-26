@@ -95,6 +95,9 @@ variants:
     image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-16-mui8fy5k.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-40-mui8fy5k.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-40-mui8gwqe.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-46-mui8gwqe.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-53-mui8gwqf.jpg
 ---
 
 ספר יפהפה של Yumiko Higuchi, שמחבר בין אהבתה למוטיבים מהטבע לבין משחק בחומר ובטקסטורה.

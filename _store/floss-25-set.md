@@ -5,7 +5,7 @@ subtitle: סטים במבחר גוונים
 image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
 price: ₪100 – ₪130
 out_of_stock: false
-limited_stock: true
+limited_stock: false
 hide: false
 category: embroidery-supplies
 order: 1

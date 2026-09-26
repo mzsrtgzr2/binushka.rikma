@@ -1269,11 +1269,26 @@
 
   /* ------------------------------------------------------------------ events */
 
-  function consumeLoginQuery() {
-    var match = /[?&]login=(error|locked)\b/.exec(window.location.search);
-    if (!match) return;
-    show(loginMessage, match[1] === 'locked' ? 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' : 'סיסמה שגויה', 'error');
-    if (history.replaceState) history.replaceState({}, '', window.location.pathname);
+  function loginQueryMessage(login) {
+    if (!login) return '';
+    if (login.kind === 'locked') return 'יותר מדי ניסיונות שגויים. נסי שוב בעוד כמה דקות';
+    if (login.kind === 'ok') {
+      return 'הסיסמה נכונה, אבל הדפדפן לא שמר את החיבור. נסי שוב מאותו חלון, בלי מצב פרטי.';
+    }
+    if (login.kind !== 'error') return '';
+    var message = 'סיסמה שגויה';
+    if (login.envName && login.envName !== 'production') {
+      message += '. ב-Preview הסיסמה היא ADMIN_PASSWORD של סביבת Preview, לא של Production. אחרי שינוי צריך Redeploy.';
+    }
+    return message;
+  }
+
+  function takeLoginQuery() {
+    var params = new URLSearchParams(window.location.search);
+    var kind = params.get('login');
+    var login = kind === 'error' || kind === 'locked' || kind === 'ok' ? { kind: kind, envName: params.get('env') || '' } : null;
+    if (login && history.replaceState) history.replaceState({}, '', window.location.pathname);
+    return login;
   }
 
   logoutBtn.addEventListener('click', function () {
@@ -1584,9 +1599,18 @@
   // An existing session skips the password prompt. Login itself is a real
   // form POST so the browser keeps the HttpOnly cookie.
   load().catch(function (error) {
-    loginForm.hidden = false;
-    consumeLoginQuery();
-    if (error && error.status === 401) return;
-    show(loginMessage, (error && error.message) || 'לא הצלחנו לטעון. נסי לרענן.', 'error');
+    var login = takeLoginQuery();
+    if (!error || error.status === 401) {
+      loginForm.hidden = false;
+      var message = loginQueryMessage(login);
+      if (message) show(loginMessage, message, login.kind === 'ok' ? 'info' : 'error');
+      return;
+    }
+    board.hidden = false;
+    loginForm.hidden = true;
+    logoutBtn.hidden = false;
+    var boardText = (error && error.message) || 'לא הצלחנו לטעון. נסי לרענן.';
+    if (login && login.kind === 'ok') boardText = 'התחברת. ' + boardText;
+    show(boardMessage, boardText, 'error');
   });
 })();

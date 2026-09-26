@@ -2,12 +2,14 @@
 title: שובר מתנה - בוקר פינוק לאמהות
 date: 2023-01-20 10:00:00 +0300
 subtitle: מתנה למי שצריכה פינוק ואהבה
-image: '/images/gallery/voucher-gift.png'
+image: /images/gallery/voucher-gift.png
 price: ₪330
 out_of_stock: false
 limited_stock: false
 hide: false
 form_url: https://pay.grow.link/65997fae6f0da07374ea72c89464965c-MjczNTM1OQ
+order: 23
+cart_price: 330
 ---
 
 ## שובר מתנה - בוקר פינוק לאמהות

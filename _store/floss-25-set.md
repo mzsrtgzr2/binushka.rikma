@@ -8,6 +8,7 @@ out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
+order: 1
 variants:
   custom-25:
     name: סט של 25 — שאני מרכיבה לך

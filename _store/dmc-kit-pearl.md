@@ -15,6 +15,7 @@ gallery:
   - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-25-mui9lg05.jpg
   - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-34-mui9lg06.jpg
   - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-48-03-mui9nxtz.jpg
+order: 12
 ---
 
 ערכת רקמה יפהיפיה שהבאתי מהטיול האחרון בלונדון! אחת לעצמי ו2 לכן. נהנתי ממנה מאוד, התוצאה משמחת והתהליך כיפי.

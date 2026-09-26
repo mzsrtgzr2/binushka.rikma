@@ -2,13 +2,15 @@
 title: מסגרת רקומה
 date: 2024-01-20 10:00:00 +0300
 subtitle: עם כל תמונה שתבחרו
-image: '/images/gallery/portrait.png'
+image: /images/gallery/portrait.png
 price: ₪250
 out_of_stock: false
 limited_stock: false
 hide: false
 category: works-for-sale
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+order: 16
+cart_price: 250
 ---
 
 ## מסגרת רקומה מחוטי כותנה יפהיפיים, בשילוב תמונה שלכם

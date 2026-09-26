@@ -5,9 +5,10 @@ subtitle: השראה מיוחדת
 image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-21-39-muehtzc1.jpg
 price: ₪195
 out_of_stock: false
-limited_stock: true
+limited_stock: false
 hide: false
 category: embroidery-supplies
+order: 8
 variants:
   365:
     name: "רקמה בכל יום! 365 רקמות פרקטיות"

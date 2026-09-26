@@ -2,13 +2,15 @@
 title: קלמר פשתן עם רקמת כותנה
 date: 2024-01-20 10:00:00 +0300
 subtitle: בהשראת אומנית הרקמה יומיקו
-image: '/images/gallery/pencil-bag.jpeg'
+image: /images/gallery/pencil-bag.jpeg
 price: ₪160
 out_of_stock: false
 limited_stock: true
 hide: false
 category: works-for-sale
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+order: 19
+cart_price: 160
 ---
 
 ## קלמר פשתן עם רקמת כותנה

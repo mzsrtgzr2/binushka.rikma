@@ -10,6 +10,7 @@ hide: false
 category: works-for-sale
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 stock: 1
+order: 24
 variants:
   type-1:
     name: בד פרחוני תכלת אפרסק

@@ -10,6 +10,7 @@ hide: false
 category: embroidery-supplies
 gallery:
   - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
+order: 9
 variants:
   type-1:
     name: דוגמא פרחונית מונוכרמטית כחולה

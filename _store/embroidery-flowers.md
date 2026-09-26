@@ -10,6 +10,7 @@ hide: false
 category: works-for-sale
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 cart_price: 300
+order: 15
 ---
 
 ## רקמת פרחים עדינה, ממוסגרת בעבודת יד

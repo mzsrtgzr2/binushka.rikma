@@ -7,10 +7,11 @@ price: ₪2
 out_of_stock: false
 limited_stock: false
 hide: false
-gallery:
-  - /images/store/needle/screenshot-2026-09-25-at-20-15-20-muh86vqq.jpg
 category: embroidery-supplies
 cart_price: 2
+gallery:
+  - /images/store/needle/screenshot-2026-09-25-at-20-15-20-muh86vqq.jpg
+order: 5
 ---
 
 מחט איכותית עם קוף גדול במיוחד למתחילות ולמי שלא רוצה לסבול.

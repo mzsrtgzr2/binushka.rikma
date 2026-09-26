@@ -54,11 +54,74 @@
       code_invalid: 'קוד לא תקין (אותיות באנגלית, ספרות, מקף או קו תחתון)',
       code_immutable: 'אי אפשר לשנות את הקוד אחרי יצירה — מחקי וצרי חדש',
       type_invalid: 'סוג הנחה לא תקין',
-      value_invalid: 'ערך לא תקין',
+      value_required: 'צריך למלא את שדה הערך (סכום או אחוז ההנחה)',
+      value_invalid: 'ערך לא תקין — לסכום קבוע יש להזין מספר שלם בשקלים, ולאחוזים מספר בין 1 ל־100',
       expires_invalid: 'תאריך תפוגה לא תקין',
       invalid_request: 'הבקשה לא תקינה'
     };
     return messages[code] || '';
+  }
+
+  function fieldEl(name) {
+    if (name === 'code') return codeInput;
+    if (name === 'type') return typeInput;
+    if (name === 'value') return valueInput;
+    if (name === 'expires') return expiresInput;
+    return null;
+  }
+
+  function readDiscountValue() {
+    if (!valueInput) return NaN;
+    var raw = String(valueInput.value || '')
+      .trim()
+      .replace(/[\u200e\u200f\u202a-\u202e]/g, '')
+      .replace(',', '.');
+    if (!raw) return NaN;
+    var n = Number(raw);
+    return Number.isFinite(n) ? n : NaN;
+  }
+
+  function validateBeforeSave() {
+    var code = String(codeInput.value || '').trim();
+    if (!code) {
+      show(formMessage, errorText('code_invalid') || 'יש להזין קוד', 'error');
+      codeInput.focus();
+      return null;
+    }
+    var type = typeInput.value;
+    if (type !== 'percent' && type !== 'amount') {
+      show(formMessage, errorText('type_invalid'), 'error');
+      typeInput.focus();
+      return null;
+    }
+    var value = readDiscountValue();
+    if (!Number.isFinite(value)) {
+      show(formMessage, errorText('value_required'), 'error');
+      valueInput.focus();
+      return null;
+    }
+    if (value <= 0 || (type === 'percent' && value > 100)) {
+      show(formMessage, errorText('value_invalid'), 'error');
+      valueInput.focus();
+      return null;
+    }
+    if (type === 'amount' && Math.abs(value - Math.round(value)) > 0.001) {
+      show(formMessage, errorText('value_invalid'), 'error');
+      valueInput.focus();
+      return null;
+    }
+    return {
+      action: 'save',
+      code: editing ? editing.code : undefined,
+      coupon: {
+        code: code,
+        type: type,
+        value: type === 'percent' ? value : Math.round(value),
+        note: noteInput.value,
+        expires: expiresInput ? expiresInput.value : '',
+        active: activeInput.checked
+      }
+    };
   }
 
   function request(url, method, body) {
@@ -81,6 +144,7 @@
           var error = new Error(data.error || errorText(data.code) || 'שגיאה');
           error.status = res.status;
           error.code = data.code;
+          error.field = data.field || null;
           throw error;
         }
         return data;
@@ -127,7 +191,9 @@
         ? 'מספר בין 1 ל־100 (אחוז הנחה מסכום המוצרים).'
         : 'סכום בשקלים שלמים שיופחת מסכום המוצרים.';
     valueInput.max = typeInput.value === 'percent' ? '100' : '100000';
-    valueInput.step = typeInput.value === 'percent' ? '0.01' : '1';
+    // step=any avoids browsers clearing .value on step mismatch when switching
+    // between percent (decimals) and amount (whole shekels).
+    valueInput.step = 'any';
   }
 
   function resetForm() {
@@ -259,18 +325,8 @@
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
-    var payload = {
-      action: 'save',
-      code: editing ? editing.code : undefined,
-      coupon: {
-        code: codeInput.value,
-        type: typeInput.value,
-        value: Number(valueInput.value),
-        note: noteInput.value,
-        expires: expiresInput ? expiresInput.value : '',
-        active: activeInput.checked
-      }
-    };
+    var payload = validateBeforeSave();
+    if (!payload) return;
     show(formMessage, 'שומרת…', 'info');
     api('POST', payload)
       .then(function () {
@@ -279,6 +335,8 @@
       })
       .catch(function (err) {
         show(formMessage, err.message || 'שמירה נכשלה', 'error');
+        var el = fieldEl(err && err.field);
+        if (el && el.focus) el.focus();
       });
   });
 

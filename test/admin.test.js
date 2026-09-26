@@ -218,6 +218,17 @@ test('admin rejects a foreign Origin and does not reflect CORS', async () => {
   assert.equal(result.headers['access-control-allow-credentials'], undefined);
 });
 
+test('form login with a stripped Origin is refused before the password is checked', async () => {
+  const result = await request(admin, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded', origin: 'null' },
+    body: { action: 'login', password: 'secret-pass', next: '/admin/store/' },
+    env: { ADMIN_PASSWORD: 'secret-pass', VERCEL_ENV: 'preview' },
+  });
+  assert.equal(result.status, 403);
+  assert.equal(result.json.error, 'בקשה לא מורשית');
+});
+
 test('admin login is allowed from the real shop origin', async () => {
   const result = await request(admin, {
     method: 'POST',

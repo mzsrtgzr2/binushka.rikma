@@ -8,6 +8,7 @@ out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
+order: 2
 variants:
   13:
     name: קוטר 13 ס״מ

@@ -5,9 +5,10 @@ subtitle: השראה מיוחדת
 image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-21-39-muehtzc1.jpg
 price: ₪195
 out_of_stock: false
-limited_stock: true
+limited_stock: false
 hide: false
 category: embroidery-supplies
+order: 8
 variants:
   365:
     name: "רקמה בכל יום! 365 רקמות פרקטיות"
@@ -25,9 +26,10 @@ variants:
     name: 380 רקמות חתולים
     price: 195
     stock: 1
-    image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-28-35-muei03el.jpg
+    image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-35-mui9x0mx.png
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-23-at-22-29-44-muei03em.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-43-mui9x0mx.jpg
     description: "הספר האחרון שקניתי והוא פשוט מטריף.\nהרבה השראה ורקמות מצחיקות של חתולים בכל מיני תנוחות של חתולים.\nתהנו. יש רק אחד :)\nאת הרקמה בתמונה השנייה רקמה נעמה בחוג לרוקמות מנוסות אצלי ברחובות."
   paintwiththread:
     name: paint with thread
@@ -74,6 +76,7 @@ variants:
       - /images/store/embroidery-books/screenshot-2026-09-23-at-22-32-12-muhei8a9.jpg
       - /images/store/embroidery-books/screenshot-2026-09-25-at-23-14-39-muhei8a9.png
       - /images/store/embroidery-books/screenshot-2026-09-25-at-23-15-10-muhei8aa.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-11-35-24-mui8agq3.jpg
     description: "כמה מפתיע ומשמח ספר יכול להיות?\nפיל בקרקס או קוף על ענף עם בננה ביד.. תרקמו מה שתרצו מהספר היפהיפה הזה של יומיקו.\nהרבה תך שרשרת המדיטטיבי נוכח בעבודות של יומיקו וגם כאן בספר הרקמה של החיות.\nבתמונות אפשר לראות את הינשוף שרקמתי בהשראת הספר, עם חוטים מנצנצים של dmc מסדרת etoile."
   type-8:
     name: רקמה יפנית מודרנית בשני צבעים מאת יומיקו
@@ -82,6 +85,21 @@ variants:
     image: /images/store/embroidery-books/screenshot-2026-09-25-at-23-19-42-muhf0vex.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-25-at-23-33-22-muhf4wfb.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-08-03-mui8agq4.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-08-11-mui8agq4.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-09-12-mui8agq4.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-10-49-mui8fy5k.jpg
     description: "ספר השראה והדרכה לרקמה בסגנון יפני נקי ומינימליסטי, עם מגוון דוגמאות דו־צבעוניות פשוטות ומקסימות.\nמתאים למי שאוהבת רקמה עכשווית, מדויקת ושקטה, ולמי שמחפשת פרויקטים קטנים שאפשר לשלב על בגדים, תיקי בד, כלי טקסטיל ועוד.\nכולל הסברים מלאים כמו בכל הספרים של יומיקו.\nספר שכיף לדפדף בו גם כשלא מחפשים פרויקט ספציפי ופשוט לקבל חשק לרקום."
+  type-9:
+    name: רקמות בוטניות של יומיקו
+    price: 195
+    stock: 2
+    image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-46-mui8gwqe.jpg
+    gallery:
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-16-mui8fy5k.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-40-mui8fy5k.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-53-mui8gwqf.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-34-mui8ne4o.jpg
+    description: "ספר יפהפה של Yumiko Higuchi, שמחבר בין אהבתה למוטיבים מהטבע לבין משחק בחומר ובטקסטורה.\n\nבספר תמצאי 39 פרויקטים של פרחים, עלים ומוטיבים בוטניים, שנרקמו בסוגים שונים של חוטים – מצמר וכותנה ועד פרל קוטון וחוטים מטאליים. כל סוג חוט נותן לרקמה אופי אחר, והספר מראה איך לעבוד איתם ולנצל את התכונות שלהם לטובת התוצאה הסופית.\n\nההסברים ברורים ומלווים בתצלומים, תרשימים והוראות שלב־אחר־שלב, כך שהוא מתאים גם למי שרק מתחילה להתנסות ברקמה וגם למי שכבר רוקמת ורוצה להכניס קצת יותר עומק, חומריות וטקסטורה לעבודות שלה.\n\nספר שכיף לפתוח בשביל פרויקט אחד – ולהישאר בו עוד קצת רק בשביל להסתכל."
 ---
 

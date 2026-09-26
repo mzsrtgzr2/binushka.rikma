@@ -8,6 +8,7 @@ out_of_stock: false
 limited_stock: false
 hide: false
 category: embroidery-supplies
+order: 14
 variants:
   type-1:
     name: דריל צבע לבן

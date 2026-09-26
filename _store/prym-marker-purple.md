@@ -8,6 +8,7 @@ out_of_stock: false
 limited_stock: false
 hide: false
 category: embroidery-supplies
+order: 3
 variants:
   water:
     name: יורד במים
@@ -15,7 +16,7 @@ variants:
     image: /images/store/water-marker/screenshot-2026-09-23-at-22-22-56-muejch5n.jpg
     gallery:
       - /images/store/water-marker/screenshot-2026-09-23-at-23-08-59-muejds6g.jpg
-    description: "טוש תכלת של חברת prym — יורד במים."
+    description: טוש תכלת של חברת prym — יורד במים.
   disappearing:
     name: מתנדף מעצמו
     price: 30

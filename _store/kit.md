@@ -1,14 +1,16 @@
 ---
 title: ערכת רקמה מפנקת
 date: 2023-01-20 10:00:00 +0300
-subtitle: מתנה שהייתי שמחה לקבל!
-image: '/images/gallery/kit.jpeg'
+subtitle: "מתנה שהייתי שמחה לקבל!"
+image: /images/gallery/kit.jpeg
 price: ₪210
 out_of_stock: false
 limited_stock: false
 hide: false
 category: embroidery-supplies
 form_url: https://pay.grow.link/fd01f222f818c6613104d886733c4e24-MjcxNjcwOA
+order: 10
+cart_price: 210
 ---
 
 ## ערכת רקמה מפנקת בהתאמה אישית

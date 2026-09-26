@@ -15,6 +15,7 @@ gallery:
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-21-49-05-muegj9ev.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-11-muegj9ew.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-26-muegj9ex.png
+order: 7
 ---
 
 סוף סוף חוטים מנצנצים שגם נוח לעבוד איתם!!!

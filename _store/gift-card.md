@@ -2,7 +2,7 @@
 title: גיפט קארד
 date: 2023-01-20 10:00:00 +0300
 subtitle: מתנה שהיא זמן איכות ופינוק
-image: '/images/gallery/giftcard.jpg'
+image: /images/gallery/giftcard.jpg
 price: כל סכום לבחירתך
 out_of_stock: false
 limited_stock: false
@@ -10,6 +10,8 @@ hide: false
 variable: true
 min_price: 50
 max_price: 2000
+form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
+order: 26
 presets:
   - 100
   - 150
@@ -17,7 +19,6 @@ presets:
   - 250
   - 300
   - 500
-form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
 ---
 
 ## גיפט קארד למי שצריכה פינוק

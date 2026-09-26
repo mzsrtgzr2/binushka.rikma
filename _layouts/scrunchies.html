@@ -129,7 +129,7 @@ layout: default
       {% if v_sold_out %}
       <div class="scrunchies-variant__stock out-of-stock-text">אזל מהמלאי</div>
       {% elsif v_limited %}
-      <div class="scrunchies-variant__stock limited-stock-text">מלאי מוגבל</div>
+      <div class="scrunchies-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
       {% endif %}
       <button type="button" class="button button--primary" data-cart-add="scrunchies" data-cart-variant="{{ vid }}">
         הוסיפי לסל

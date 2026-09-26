@@ -137,7 +137,7 @@ layout: default
                 product page — not as a card overlay on the shop grid.
               {% endcomment %}
               {% unless cart_meta.variants or item.variants %}
-              <div class="limited-stock">מלאי מוגבל</div>
+              <div class="limited-stock">{% if item.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
               {% endunless %}
             {% endif %}
           </a>

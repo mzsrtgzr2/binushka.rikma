@@ -1041,15 +1041,23 @@
       .join('');
   }
 
+  function limitedStockCopy(stock) {
+    return Number(stock) === 1 ? 'אחרון במלאי' : 'מלאי מוגבל';
+  }
+
   function stockOverlay(p) {
     if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock">אזל מהמלאי</div>';
-    if (p.limited_stock && p.kind !== 'variants') return '<div class="limited-stock">מלאי מוגבל</div>';
+    if (p.limited_stock && p.kind !== 'variants') {
+      return '<div class="limited-stock">' + limitedStockCopy(p.stock) + '</div>';
+    }
     return '';
   }
 
   function stockText(p) {
     if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
-    if (p.limited_stock && p.kind !== 'variants') return '<div class="limited-stock-text">מלאי מוגבל</div>';
+    if (p.limited_stock && p.kind !== 'variants') {
+      return '<div class="limited-stock-text">' + limitedStockCopy(p.stock) + '</div>';
+    }
     return '';
   }
 
@@ -1061,7 +1069,7 @@
     }
     var n = Number(stock);
     if (Number.isInteger(n) && n > 0 && n <= 3) {
-      return '<div class="' + cls + ' limited-stock-text">מלאי מוגבל</div>';
+      return '<div class="' + cls + ' limited-stock-text">' + limitedStockCopy(n) + '</div>';
     }
     return '';
   }

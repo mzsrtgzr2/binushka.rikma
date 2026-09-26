@@ -9,4 +9,6 @@ node_modules
 # Hobby deployments cap out at 12. These are node:test files that export no
 # handler, so they only ever deployed as broken endpoints and consumed slots.
 # `node --test` reads the repo, not the deployment, so it is unaffected.
+# Library modules belong in lib/. A non-handler file here is deployed as a
+# function and uses one of those slots.
 api/*.test.js

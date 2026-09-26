@@ -408,6 +408,22 @@ test('a filled honeypot is accepted without storing anything', async () => {
   assert.deepEqual(res.body, { ok: true, status: 'active' });
 });
 
+test('subscribe rejects a body that is not JSON', async () => {
+  configure();
+
+  const request = Readable.from([Buffer.from('{')]);
+  request.method = 'POST';
+  request.url = '/api/newsletter/subscribe';
+  request.headers = {};
+  request.socket = { remoteAddress: '203.0.113.21' };
+
+  const res = makeResponse();
+  await subscribe(request, res);
+
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.code, 'invalid_request');
+});
+
 test('subscribe rejects a malformed address before touching storage', async () => {
   configure();
 
@@ -460,6 +476,22 @@ test('a footer click with no token just lands on the newsletter page', async () 
 
   assert.equal(res.statusCode, 302);
   assert.equal(res.headers.location, '/newsletter/');
+});
+
+test('unsubscribe rejects a body that is not JSON', async () => {
+  configure();
+
+  const request = Readable.from([Buffer.from('not-json')]);
+  request.method = 'POST';
+  request.url = '/api/newsletter/unsubscribe';
+  request.headers = {};
+  request.socket = { remoteAddress: '203.0.113.22' };
+
+  const res = makeResponse();
+  await unsubscribe(request, res);
+
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.code, 'invalid_request');
 });
 
 test('unsubscribe rejects a malformed address', async () => {

@@ -7,7 +7,7 @@
  * amount has to match what we signed before any stock moves.
  */
 
-const { resolveMorningEnv, morningHosts, getMorningToken } = require('./morning');
+const { resolveMorningEnv, morningHosts, getMorningToken } = require('../lib/morning/client');
 const admin = require('./admin');
 const { verifyOrder } = require('../lib/order-token');
 const { createRateLimiter, clientIp } = require('../lib/origin');

@@ -9,7 +9,7 @@
  */
 
 const path = require('path');
-const store = require('../api/admin-store');
+const store = require('../lib/store');
 
 const root = path.join(__dirname, '..');
 

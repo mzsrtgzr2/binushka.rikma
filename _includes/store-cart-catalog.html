@@ -43,6 +43,9 @@
               "name": {{ variant[1].name | jsonify }},
               "price": {{ variant[1].price }},
               "image": {{ variant[1].image | relative_url | jsonify }}
+              {%- if variant[1].stock != nil and variant[1].stock != blank -%}
+              ,"stock": {{ variant[1].stock }}
+              {%- endif -%}
             }
             {%- assign vfirst = false -%}
           {%- endfor -%}

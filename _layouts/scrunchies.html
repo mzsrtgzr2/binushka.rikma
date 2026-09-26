@@ -99,7 +99,16 @@ layout: default
     {% for variant in cart_meta.variants %}
     {% assign vid = variant[0] %}
     {% assign v = variant[1] %}
-    <article class="scrunchies-variant">
+    {% assign v_sold_out = false %}
+    {% assign v_limited = false %}
+    {% if v.stock != nil and v.stock != blank %}
+      {% if v.stock == 0 %}
+        {% assign v_sold_out = true %}
+      {% elsif v.stock <= 3 %}
+        {% assign v_limited = true %}
+      {% endif %}
+    {% endif %}
+    <article class="scrunchies-variant" data-variant-id="{{ vid }}">
       {% if v.image %}
       <div class="scrunchies-variant__photo">
         <img class="lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
@@ -117,6 +126,11 @@ layout: default
       <p class="scrunchies-variant__desc">{{ v.description }}</p>
       {% endif %}
       <div class="scrunchies-variant__price">₪{{ v.price }}</div>
+      {% if v_sold_out %}
+      <div class="scrunchies-variant__stock out-of-stock-text">אזל מהמלאי</div>
+      {% elsif v_limited %}
+      <div class="scrunchies-variant__stock limited-stock-text">מלאי מוגבל</div>
+      {% endif %}
       <button type="button" class="button button--primary" data-cart-add="scrunchies" data-cart-variant="{{ vid }}">
         הוסיפי לסל
       </button>

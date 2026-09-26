@@ -5,7 +5,7 @@ subtitle: סטים במבחר גוונים
 image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
 price: ₪100 – ₪130
 out_of_stock: false
-limited_stock: false
+limited_stock: true
 hide: false
 category: embroidery-supplies
 order: 1
@@ -13,7 +13,7 @@ variants:
   custom-25:
     name: סט של 25 — שאני מרכיבה לך
     price: 100
-    stock: 2
+    stock: 20
     image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
     gallery:
       - /images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg

@@ -14,6 +14,8 @@
   var subtotalEl = document.getElementById('checkout-subtotal');
   var discountRow = document.getElementById('checkout-discount-row');
   var discountEl = document.getElementById('checkout-discount');
+  var afterDiscountRow = document.getElementById('checkout-after-discount-row');
+  var afterDiscountEl = document.getElementById('checkout-after-discount');
   var grandEl = document.getElementById('checkout-grand-total');
   var formSection = document.getElementById('checkout-form-section');
   var couponInput = document.getElementById('checkout-coupon-code');
@@ -265,6 +267,7 @@
       if (emptyEl) emptyEl.hidden = false;
       if (subtotalRow) subtotalRow.hidden = true;
       if (discountRow) discountRow.hidden = true;
+      if (afterDiscountRow) afterDiscountRow.hidden = true;
       if (formSection) formSection.hidden = true;
       if (linesEl) linesEl.innerHTML = '';
       var emptyNote = document.getElementById('checkout-variant-note-group');
@@ -316,6 +319,12 @@
     if (discountRow) {
       discountRow.hidden = !(discount > 0);
       if (discountEl && discount > 0) discountEl.textContent = '−₪' + discount;
+    }
+    if (afterDiscountRow) {
+      afterDiscountRow.hidden = !(discount > 0);
+      if (afterDiscountEl && discount > 0) {
+        afterDiscountEl.textContent = '₪' + Math.max(0, subtotal - discount);
+      }
     }
     if (grandEl) grandEl.textContent = '₪' + Math.max(0, subtotal + ship - discount);
     return items;

@@ -588,12 +588,6 @@
     empty: document.getElementById('store-cart-empty'),
     total: document.getElementById('store-cart-total'),
     checkout: document.getElementById('store-cart-checkout'),
-    couponBox: document.getElementById('store-cart-coupon'),
-    couponInput: document.getElementById('store-cart-coupon-code'),
-    couponApply: document.getElementById('store-cart-coupon-apply'),
-    couponMsg: document.getElementById('store-cart-coupon-msg'),
-    discountRow: document.getElementById('store-cart-discount'),
-    discountVal: document.getElementById('store-cart-discount-val'),
   };
 
   var headerHost = els.root && els.root.parentElement;
@@ -640,108 +634,21 @@
     document.body.classList.remove('store-cart-open');
   }
 
-  function showCouponMsg(text, type) {
-    if (!els.couponMsg) return;
-    if (!text) {
-      els.couponMsg.hidden = true;
-      els.couponMsg.textContent = '';
-      return;
-    }
-    els.couponMsg.hidden = false;
-    els.couponMsg.textContent = text;
-    els.couponMsg.className =
-      'store-cart__coupon-msg store-cart__coupon-msg--' + (type || 'info');
-  }
-
-  function couponPreviewShipping(items) {
-    var needs = items.some(function (item) {
-      return item.requiresShipping !== false;
-    });
-    return needs ? 'pickup' : 'none';
-  }
-
-  function refreshCouponDiscount(done) {
-    var coupon = loadCoupon();
-    var items = cartItems(loadCart());
-    if (!coupon || !items.length) {
-      if (els.discountRow) els.discountRow.hidden = true;
-      if (typeof done === 'function') done(null);
-      return;
-    }
-    fetch('/api/checkout/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'preview-coupon',
-        code: coupon.code,
-        items: items.map(function (item) {
-          var row = { id: item.id, quantity: item.quantity };
-          if (item.amount) row.amount = item.amount;
-          if (item.variant) row.variant = item.variant;
-          return row;
-        }),
-        shipping: couponPreviewShipping(items),
-      }),
-    })
-      .then(function (res) {
-        return res.text().then(function (text) {
-          var body = {};
-          if (text) {
-            try {
-              body = JSON.parse(text);
-            } catch (e) {
-              body = {};
-            }
-          }
-          if (!res.ok || !body.ok) {
-            throw new Error(body.error || 'קוד הקופון לא תקין');
-          }
-          return body;
-        });
-      })
-      .then(function (body) {
-        saveCoupon({ code: body.code, discount: body.discount });
-        if (els.discountRow) els.discountRow.hidden = false;
-        if (els.discountVal) els.discountVal.textContent = '−₪' + body.discount;
-        if (els.total) {
-          var subtotal = cartTotal(loadCart());
-          els.total.textContent = '₪' + Math.max(0, subtotal - body.discount);
-        }
-        if (els.couponInput) els.couponInput.value = body.code;
-        showCouponMsg('הוחל קוד ' + body.code, 'ok');
-        if (typeof done === 'function') done(body);
-      })
-      .catch(function (err) {
-        clearCoupon();
-        if (els.discountRow) els.discountRow.hidden = true;
-        showCouponMsg(err.message || 'קוד הקופון לא תקין', 'error');
-        if (els.total) els.total.textContent = '₪' + cartTotal(loadCart());
-        if (typeof done === 'function') done(null);
-      });
-  }
-
   function renderWidget() {
     if (!els.root) return;
     var cart = loadCart();
     var count = cartCount(cart);
     var total = cartTotal(cart);
-    var coupon = loadCoupon();
 
     els.count.textContent = String(count);
     els.count.hidden = count === 0;
     els.total.textContent = '₪' + total;
     els.empty.hidden = count > 0;
     els.checkout.classList.toggle('is-ready', count > 0);
-    if (els.couponBox) els.couponBox.hidden = count === 0;
     if (count === 0) {
       els.checkout.setAttribute('aria-disabled', 'true');
-      if (els.discountRow) els.discountRow.hidden = true;
-      showCouponMsg('');
     } else {
       els.checkout.removeAttribute('aria-disabled');
-      if (coupon && els.couponInput && !els.couponInput.value) {
-        els.couponInput.value = coupon.code;
-      }
     }
     els.lines.innerHTML = '';
 
@@ -789,12 +696,6 @@
         '</div>';
       els.lines.appendChild(li);
     });
-
-    if (count > 0 && coupon) {
-      refreshCouponDiscount();
-    } else if (els.discountRow) {
-      els.discountRow.hidden = true;
-    }
   }
 
   window.StoreCart = {
@@ -919,29 +820,6 @@
     giftInput.addEventListener('input', syncGiftAmountUi);
     giftInput.addEventListener('change', syncGiftAmountUi);
     syncGiftAmountUi();
-  }
-
-  if (els.couponApply) {
-    els.couponApply.addEventListener('click', function () {
-      var code = els.couponInput ? String(els.couponInput.value || '').trim() : '';
-      if (!code) {
-        showCouponMsg('יש להזין קוד קופון', 'error');
-        return;
-      }
-      saveCoupon({ code: code, discount: 0 });
-      showCouponMsg('בודקת…', 'info');
-      refreshCouponDiscount(function (body) {
-        if (body) renderWidget();
-      });
-    });
-  }
-  if (els.couponInput) {
-    els.couponInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (els.couponApply) els.couponApply.click();
-      }
-    });
   }
 
   renderWidget();

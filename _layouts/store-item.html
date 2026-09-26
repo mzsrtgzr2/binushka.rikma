@@ -6,15 +6,23 @@ layout: default
 {% if page.out_of_stock or page.stock == 0 %}
   {% assign sold_out = true %}
 {% endif %}
+{% assign slug = page.slug | default: page.basename %}
+{% assign cart_meta = site.data.catalog[slug] %}
+{% assign has_variants = false %}
+{% if cart_meta.variants or page.variants %}
+  {% assign has_variants = true %}
+{% endif %}
 
-<div class="container" data-product-id="{{ page.slug | default: page.basename }}">
+<div class="container" data-product-id="{{ slug }}">
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
     {% if sold_out %}
       <div class="out-of-stock-text">אזל מהמלאי</div>
     {% elsif page.limited_stock %}
-      <div class="limited-stock-text">מלאי מוגבל</div>
+      {% unless has_variants %}
+      <div class="limited-stock-text">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+      {% endunless %}
     {% endif %}
 
     {% if page.subtitle %}
@@ -22,9 +30,7 @@ layout: default
     {% endif %}
 
     {% if page.price %}
-      {% assign price_slug = page.slug | default: page.basename %}
-      {% assign price_meta = site.data.catalog[price_slug] %}
-      <div class="store-item-price"{% unless price_meta.variable or price_meta.variants %} data-product-price="{{ price_slug }}"{% endunless %}>{{ page.price }}</div>
+      <div class="store-item-price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ page.price }}</div>
     {% endif %}
   </div>
 
@@ -38,8 +44,6 @@ layout: default
     <div class="row">
       <div class="col-12">
         <div class="section__navigation store-item__cart-actions">
-          {% assign slug = page.slug | default: page.basename %}
-          {% assign cart_meta = site.data.catalog[slug] %}
           {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false %}
             {% if cart_meta.variable %}
             <div class="gift-amount">
@@ -74,6 +78,15 @@ layout: default
               {% for variant in cart_meta.variants %}
               {% assign vid = variant[0] %}
               {% assign v = variant[1] %}
+              {% assign v_sold_out = false %}
+              {% assign v_limited = false %}
+              {% if v.stock != nil and v.stock != blank %}
+                {% if v.stock == 0 %}
+                  {% assign v_sold_out = true %}
+                {% elsif v.stock <= 3 %}
+                  {% assign v_limited = true %}
+                {% endif %}
+              {% endif %}
               {% assign v_images = '' | split: '' %}
               {% if v.image and v.image != blank %}
                 {% assign v_images = v_images | push: v.image %}
@@ -85,7 +98,7 @@ layout: default
                   {% endunless %}
                 {% endfor %}
               {% endif %}
-              <article class="store-variant">
+              <article class="store-variant" data-variant-id="{{ vid }}">
                 {% if v_images.size > 0 %}
                 {% assign v_main = v_images | first %}
                 <div class="product-gallery product-gallery--variant" data-product-gallery>
@@ -124,6 +137,11 @@ layout: default
                   <p class="store-variant__desc">{{ v.description }}</p>
                   {% endif %}
                   <div class="store-variant__price">₪{{ v.price }}</div>
+                  {% if v_sold_out %}
+                  <div class="store-variant__stock out-of-stock-text">אזל מהמלאי</div>
+                  {% elsif v_limited %}
+                  <div class="store-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+                  {% endif %}
                 </div>
                 <button type="button" class="button button--primary" data-cart-add="{{ slug }}" data-cart-variant="{{ vid }}">
                   הוסיפי לסל
@@ -183,7 +201,9 @@ layout: default
         {% if sold_out %}
           <div class="out-of-stock">אזל מהמלאי</div>
         {% elsif page.limited_stock %}
-          <div class="limited-stock">מלאי מוגבל</div>
+          {% unless has_variants %}
+          <div class="limited-stock">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+          {% endunless %}
         {% endif %}
         {% if gallery_images.size > 1 %}
         <button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>

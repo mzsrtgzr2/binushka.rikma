@@ -1041,15 +1041,36 @@
       .join('');
   }
 
+  function limitedStockCopy(stock) {
+    return Number(stock) === 1 ? 'אחרון במלאי' : 'מלאי מוגבל';
+  }
+
   function stockOverlay(p) {
     if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock">אזל מהמלאי</div>';
-    if (p.limited_stock) return '<div class="limited-stock">מלאי מוגבל</div>';
+    if (p.limited_stock && p.kind !== 'variants') {
+      return '<div class="limited-stock">' + limitedStockCopy(p.stock) + '</div>';
+    }
     return '';
   }
 
   function stockText(p) {
     if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
-    if (p.limited_stock) return '<div class="limited-stock-text">מלאי מוגבל</div>';
+    if (p.limited_stock && p.kind !== 'variants') {
+      return '<div class="limited-stock-text">' + limitedStockCopy(p.stock) + '</div>';
+    }
+    return '';
+  }
+
+  function variantStockLabel(v, className) {
+    var stock = v && v.stock;
+    var cls = className || 'store-variant__stock';
+    if (stock === 0 || stock === '0') {
+      return '<div class="' + cls + ' out-of-stock-text">אזל מהמלאי</div>';
+    }
+    var n = Number(stock);
+    if (Number.isInteger(n) && n > 0 && n <= 3) {
+      return '<div class="' + cls + ' limited-stock-text">' + limitedStockCopy(n) + '</div>';
+    }
     return '';
   }
 
@@ -1122,6 +1143,7 @@
               ? '<p class="scrunchies-variant__desc">' + escapeHtml(v.description) + '</p>'
               : '') +
             (v.price ? '<div class="scrunchies-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
+            variantStockLabel(v, 'scrunchies-variant__stock') +
             fakeButton('הוסיפי לסל') +
             '</article>'
           );
@@ -1135,6 +1157,7 @@
           '</h3>' +
           (v.description ? '<p class="store-variant__desc">' + escapeHtml(v.description) + '</p>' : '') +
           (v.price ? '<div class="store-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
+          variantStockLabel(v) +
           '</div>' +
           fakeButton('הוסיפי לסל') +
           '</article>'

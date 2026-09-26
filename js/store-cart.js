@@ -194,6 +194,22 @@
     });
   }
 
+  /** Shop products with types (not workshop packs). Limited stock is per type. */
+  function isMultiTypeProduct(p) {
+    return Boolean(p && p.kind !== 'workshop' && p.variants && Object.keys(p.variants).length);
+  }
+
+  function isLowStock(stock) {
+    return typeof stock === 'number' && stock > 0 && stock <= 3;
+  }
+
+  /** Customer-facing limited-stock copy: last unit vs low stock. */
+  function limitedStockLabel(stock, workshop) {
+    if (workshop) return 'מקומות אחרונים';
+    if (stock === 1) return 'אחרון במלאי';
+    return 'מלאי מוגבל';
+  }
+
   function availableStock(p, variantId) {
     if (!p) return 0;
     if (hasPerVariantStock(p)) {
@@ -347,29 +363,49 @@
     container.appendChild(el);
   }
 
-  function ensureStockText(host, soldOut, limited) {
+  function ensureStockText(host, soldOut, limited, stock) {
     if (!host) return;
     var existing = host.querySelector('.out-of-stock-text, .limited-stock-text');
     if (existing) existing.parentNode.removeChild(existing);
     if (!soldOut && !limited) return;
+    var workshop = Boolean(host.closest('[data-product-kind="workshop"]'));
     var el = document.createElement('div');
     el.className = soldOut ? 'out-of-stock-text' : 'limited-stock-text';
     el.textContent = soldOut
-      ? host && host.closest('[data-product-kind="workshop"]')
+      ? workshop
         ? 'אין מקומות פנויים'
         : 'אזל מהמלאי'
-      : host && host.closest('[data-product-kind="workshop"]')
-        ? 'מקומות אחרונים'
-        : 'מלאי מוגבל';
+      : limitedStockLabel(stock, workshop);
     var price = host.querySelector('.store-item-price, [data-product-price]');
     if (price && price.parentNode === host) host.insertBefore(el, price);
     else host.appendChild(el);
+  }
+
+  function ensureVariantStockText(host, soldOut, limited, stock) {
+    if (!host) return;
+    var existing = host.querySelector('.store-variant__stock, .scrunchies-variant__stock');
+    if (existing) existing.parentNode.removeChild(existing);
+    if (!soldOut && !limited) return;
+    var el = document.createElement('div');
+    var onScrunchie = Boolean(host.closest('.scrunchies-variant'));
+    el.className =
+      (onScrunchie ? 'scrunchies-variant__stock ' : 'store-variant__stock ') +
+      (soldOut ? 'out-of-stock-text' : 'limited-stock-text');
+    el.textContent = soldOut ? 'אזל מהמלאי' : limitedStockLabel(stock, false);
+    var price = host.querySelector('.store-variant__price, .scrunchies-variant__price');
+    if (price && price.parentNode === host) {
+      if (price.nextSibling) host.insertBefore(el, price.nextSibling);
+      else host.appendChild(el);
+    } else {
+      host.appendChild(el);
+    }
   }
 
   function updateStockUi() {
     Object.keys(byId).forEach(function (id) {
       var p = byId[id];
       var perVariant = hasPerVariantStock(p);
+      var multiType = isMultiTypeProduct(p);
       var soldOut = perVariant
         ? Object.keys(p.variants).every(function (vid) {
             return typeof p.variants[vid].stock === 'number' && p.variants[vid].stock <= 0;
@@ -378,19 +414,18 @@
       var limited = Boolean(p.limitedStock) && !soldOut;
       if (perVariant && !soldOut) {
         limited = Object.keys(p.variants).some(function (vid) {
-          var s = p.variants[vid].stock;
-          return typeof s === 'number' && s > 0 && s <= 3;
+          return isLowStock(p.variants[vid].stock);
         });
       }
+      /* Multi-type: never badge the shop card / page hero — only each type. */
+      var showLimitedBadge = limited && !multiType;
       var workshop = p.kind === 'workshop';
       var overlayLabel = soldOut
         ? workshop
           ? 'אין מקומות פנויים'
           : 'אזל מהמלאי'
-        : limited
-          ? workshop
-            ? 'מקומות אחרונים'
-            : 'מלאי מוגבל'
+        : showLimitedBadge
+          ? limitedStockLabel(p.stock, workshop)
           : '';
       var overlayClass = soldOut ? 'out-of-stock' : 'limited-stock';
 
@@ -398,7 +433,7 @@
         root.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
         ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
         if (root.querySelector('.page-head')) {
-          ensureStockText(root.querySelector('.page-head'), soldOut, limited);
+          ensureStockText(root.querySelector('.page-head'), soldOut, showLimitedBadge, p.stock);
           var pageActions = root.querySelector('.store-item__cart-actions');
           if (pageActions) pageActions.hidden = soldOut;
         }
@@ -417,6 +452,15 @@
         btn.disabled = disabled;
         if (disabled) btn.setAttribute('aria-disabled', 'true');
         else btn.removeAttribute('aria-disabled');
+
+        if (multiType && variantId && p.variants[variantId]) {
+          var vStock = p.variants[variantId].stock;
+          var vSoldOut = typeof vStock === 'number' && vStock <= 0;
+          var vLimited = isLowStock(vStock);
+          var card = btn.closest('.store-variant, .scrunchies-variant');
+          var info = card && (card.querySelector('.store-variant__info') || card);
+          ensureVariantStockText(info, vSoldOut, vLimited, vStock);
+        }
       });
     });
   }

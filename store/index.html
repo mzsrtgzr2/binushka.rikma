@@ -132,7 +132,13 @@ layout: default
             {% if sold_out %}
               <div class="out-of-stock">אזל מהמלאי</div>
             {% elsif item.limited_stock %}
-              <div class="limited-stock">מלאי מוגבל</div>
+              {% comment %}
+                Multi-type products show limited stock next to each type on the
+                product page — not as a card overlay on the shop grid.
+              {% endcomment %}
+              {% unless cart_meta.variants or item.variants %}
+              <div class="limited-stock">{% if item.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+              {% endunless %}
             {% endif %}
           </a>
           <div class="store-item__info">

@@ -20,12 +20,24 @@
   var valueHint = document.getElementById('coupon-value-hint');
   var noteInput = document.getElementById('coupon-note');
   var expiresInput = document.getElementById('coupon-expires');
+  var minPurchaseInput = document.getElementById('coupon-min-purchase');
+  var appliesToInput = document.getElementById('coupon-applies-to');
+  var categoryGroup = document.getElementById('coupon-category-group');
+  var categoryInput = document.getElementById('coupon-category');
+  var productGroup = document.getElementById('coupon-product-group');
+  var productInput = document.getElementById('coupon-product');
   var activeInput = document.getElementById('coupon-active');
   var cancelBtn = document.getElementById('coupon-cancel');
   if (!loginForm || !board || !form) return;
 
   var coupons = [];
+  var products = [];
   var editing = null;
+
+  var CATEGORY_LABELS = {
+    'embroidery-supplies': 'ציוד רקמה',
+    'works-for-sale': 'עבודות למכירה'
+  };
 
   function escapeHtml(value) {
     var holder = document.createElement('div');
@@ -55,8 +67,13 @@
       code_immutable: 'אי אפשר לשנות את הקוד אחרי יצירה — מחקי וצרי חדש',
       type_invalid: 'סוג הנחה לא תקין',
       value_required: 'צריך למלא את שדה הערך (סכום או אחוז ההנחה)',
-      value_invalid: 'ערך לא תקין — לסכום קבוע יש להזין מספר שלם בשקלים, ולאחוזים מספר בין 1 ל־100',
+      value_invalid:
+        'ערך לא תקין — לסכום קבוע יש להזין מספר שלם בשקלים, ולאחוזים מספר בין 1 ל־99 (לא 100%)',
       expires_invalid: 'תאריך תפוגה לא תקין',
+      min_purchase_invalid: 'מינימום רכישה לא תקין (מספר שלם בשקלים)',
+      applies_to_invalid: 'בחרי על מה הקופון חל',
+      category_invalid: 'בחרי קטגוריה',
+      product_invalid: 'בחרי מוצר',
       invalid_request: 'הבקשה לא תקינה'
     };
     return messages[code] || '';
@@ -67,6 +84,10 @@
     if (name === 'type') return typeInput;
     if (name === 'value') return valueInput;
     if (name === 'expires') return expiresInput;
+    if (name === 'min_purchase') return minPurchaseInput;
+    if (name === 'applies_to') return appliesToInput;
+    if (name === 'category') return categoryInput;
+    if (name === 'product') return productInput;
     return null;
   }
 
@@ -79,6 +100,46 @@
     if (!raw) return NaN;
     var n = Number(raw);
     return Number.isFinite(n) ? n : NaN;
+  }
+
+  function readMinPurchase() {
+    if (!minPurchaseInput) return 0;
+    var raw = String(minPurchaseInput.value || '').trim();
+    if (!raw) return 0;
+    var n = Number(raw);
+    if (!Number.isFinite(n) || n < 0) return NaN;
+    return Math.round(n);
+  }
+
+  function syncScopeFields() {
+    var scope = appliesToInput ? appliesToInput.value : 'all';
+    if (categoryGroup) categoryGroup.hidden = scope !== 'category';
+    if (productGroup) productGroup.hidden = scope !== 'product';
+  }
+
+  function fillProductOptions(selected) {
+    if (!productInput) return;
+    var current = selected || productInput.value || '';
+    var options =
+      '<option value="">בחרי מוצר</option>' +
+      products
+        .slice()
+        .sort(function (a, b) {
+          return String(a.title || a.slug).localeCompare(String(b.title || b.slug), 'he');
+        })
+        .map(function (p) {
+          return (
+            '<option value="' +
+            escapeHtml(p.slug) +
+            '"' +
+            (p.slug === current ? ' selected' : '') +
+            '>' +
+            escapeHtml(p.title || p.slug) +
+            '</option>'
+          );
+        })
+        .join('');
+    productInput.innerHTML = options;
   }
 
   function validateBeforeSave() {
@@ -100,7 +161,7 @@
       valueInput.focus();
       return null;
     }
-    if (value <= 0 || (type === 'percent' && value > 100)) {
+    if (value <= 0 || (type === 'percent' && value >= 100)) {
       show(formMessage, errorText('value_invalid'), 'error');
       valueInput.focus();
       return null;
@@ -108,6 +169,30 @@
     if (type === 'amount' && Math.abs(value - Math.round(value)) > 0.001) {
       show(formMessage, errorText('value_invalid'), 'error');
       valueInput.focus();
+      return null;
+    }
+    var minPurchase = readMinPurchase();
+    if (!Number.isFinite(minPurchase)) {
+      show(formMessage, errorText('min_purchase_invalid'), 'error');
+      if (minPurchaseInput) minPurchaseInput.focus();
+      return null;
+    }
+    var appliesTo = appliesToInput ? appliesToInput.value : 'all';
+    if (appliesTo !== 'all' && appliesTo !== 'category' && appliesTo !== 'product') {
+      show(formMessage, errorText('applies_to_invalid'), 'error');
+      if (appliesToInput) appliesToInput.focus();
+      return null;
+    }
+    var category = categoryInput ? categoryInput.value : '';
+    var product = productInput ? productInput.value : '';
+    if (appliesTo === 'category' && !category) {
+      show(formMessage, errorText('category_invalid'), 'error');
+      if (categoryInput) categoryInput.focus();
+      return null;
+    }
+    if (appliesTo === 'product' && !product) {
+      show(formMessage, errorText('product_invalid'), 'error');
+      if (productInput) productInput.focus();
       return null;
     }
     return {
@@ -119,6 +204,10 @@
         value: type === 'percent' ? value : Math.round(value),
         note: noteInput.value,
         expires: expiresInput ? expiresInput.value : '',
+        min_purchase: minPurchase,
+        applies_to: appliesTo,
+        category: appliesTo === 'category' ? category : '',
+        product: appliesTo === 'product' ? product : '',
         active: activeInput.checked
       }
     };
@@ -162,9 +251,31 @@
     return request('/api/admin/', method, payload);
   }
 
+  function loadProducts() {
+    return request('/api/admin/', 'GET').then(function (data) {
+      products = (data.products || []).filter(function (p) {
+        return p && p.slug && p.in_cart !== false && p.kind !== 'content';
+      });
+      fillProductOptions();
+    });
+  }
+
   function formatDiscount(row) {
     if (row.type === 'percent') return row.value + '%';
     return '₪' + row.value;
+  }
+
+  function formatScope(row) {
+    if (row.applies_to === 'category' && row.category) {
+      return 'קטגוריה: ' + (CATEGORY_LABELS[row.category] || row.category);
+    }
+    if (row.applies_to === 'product' && row.product) {
+      var match = products.find(function (p) {
+        return p.slug === row.product;
+      });
+      return 'מוצר: ' + (match ? match.title || match.slug : row.product);
+    }
+    return '';
   }
 
   function isExpiredRow(row) {
@@ -188,9 +299,9 @@
     if (!valueHint) return;
     valueHint.textContent =
       typeInput.value === 'percent'
-        ? 'מספר בין 1 ל־100 (אחוז הנחה מסכום המוצרים).'
+        ? 'מספר בין 1 ל־99 (אחוז הנחה מסכום המוצרים). אי אפשר 100%.'
         : 'סכום בשקלים שלמים שיופחת מסכום המוצרים.';
-    valueInput.max = typeInput.value === 'percent' ? '100' : '100000';
+    valueInput.max = typeInput.value === 'percent' ? '99' : '100000';
     // step=any avoids browsers clearing .value on step mismatch when switching
     // between percent (decimals) and amount (whole shekels).
     valueInput.step = 'any';
@@ -201,11 +312,16 @@
     form.reset();
     activeInput.checked = true;
     if (expiresInput) expiresInput.value = '';
+    if (minPurchaseInput) minPurchaseInput.value = '';
+    if (appliesToInput) appliesToInput.value = 'all';
+    if (categoryInput) categoryInput.value = '';
+    fillProductOptions('');
     codeInput.readOnly = false;
     if (formLegend) formLegend.textContent = 'קוד חדש';
     if (cancelBtn) cancelBtn.hidden = true;
     show(formMessage, '');
     syncValueHint();
+    syncScopeFields();
   }
 
   function fillForm(row) {
@@ -216,11 +332,18 @@
     valueInput.value = row.value;
     noteInput.value = row.note || '';
     if (expiresInput) expiresInput.value = row.expires || '';
+    if (minPurchaseInput) {
+      minPurchaseInput.value = row.min_purchase > 0 ? row.min_purchase : '';
+    }
+    if (appliesToInput) appliesToInput.value = row.applies_to || 'all';
+    if (categoryInput) categoryInput.value = row.category || '';
+    fillProductOptions(row.product || '');
     activeInput.checked = row.active !== false;
     if (formLegend) formLegend.textContent = 'עריכת ' + row.code;
     if (cancelBtn) cancelBtn.hidden = false;
     show(formMessage, '');
     syncValueHint();
+    syncScopeFields();
     codeInput.focus();
   }
 
@@ -242,6 +365,9 @@
         var status = statusLabel(row);
         var live = row.active !== false && !isExpiredRow(row);
         var meta = formatDiscount(row);
+        if (row.min_purchase > 0) meta += ' · מ־₪' + row.min_purchase;
+        var scope = formatScope(row);
+        if (scope) meta += ' · ' + scope;
         if (row.expires) meta += ' · בתוקף עד ' + row.expires;
         if (row.note) meta += ' · ' + row.note;
         return (
@@ -273,7 +399,10 @@
   }
 
   function loadBoard() {
-    return api('GET').then(function (data) {
+    return Promise.all([api('GET'), loadProducts().catch(function () {
+      products = [];
+    })]).then(function (results) {
+      var data = results[0];
       coupons = data.coupons || [];
       board.hidden = false;
       loginForm.hidden = true;
@@ -316,6 +445,9 @@
   }
 
   typeInput.addEventListener('change', syncValueHint);
+  if (appliesToInput) {
+    appliesToInput.addEventListener('change', syncScopeFields);
+  }
 
   if (cancelBtn) {
     cancelBtn.addEventListener('click', function () {
@@ -373,6 +505,7 @@
   });
 
   syncValueHint();
+  syncScopeFields();
   // Real form POST for login keeps the HttpOnly session cookie; an existing
   // session skips the password prompt.
   loadBoard().catch(function (err) {

@@ -26,9 +26,10 @@ variants:
     name: 380 רקמות חתולים
     price: 195
     stock: 1
-    image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-28-35-muei03el.jpg
+    image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-35-mui9x0mx.png
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-23-at-22-29-44-muei03em.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-43-mui9x0mx.jpg
     description: "הספר האחרון שקניתי והוא פשוט מטריף.\nהרבה השראה ורקמות מצחיקות של חתולים בכל מיני תנוחות של חתולים.\nתהנו. יש רק אחד :)\nאת הרקמה בתמונה השנייה רקמה נעמה בחוג לרוקמות מנוסות אצלי ברחובות."
   paintwiththread:
     name: paint with thread

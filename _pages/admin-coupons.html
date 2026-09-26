@@ -19,16 +19,16 @@ noindex: true
   {% include admin-login.html %}
 
   <div class="admin-board" id="admin-board" hidden>
-    <div class="admin-toolbar">
-      <p class="admin-message" id="admin-board-message" hidden></p>
-    </div>
+    <p class="admin-message" id="admin-board-message" hidden></p>
 
     <form class="admin-editor admin-editor--inline" id="admin-coupon-form" novalidate>
-      <fieldset class="admin-fieldset">
-        <legend id="admin-form-legend">קוד חדש</legend>
-        <p class="admin-message" id="admin-form-message" hidden></p>
+      <div class="admin-editor__fields">
+        <div class="admin-editor__top">
+          <h2 class="admin-editor__title" id="admin-form-legend">קוד חדש</h2>
+          <p class="admin-message" id="admin-form-message" hidden></p>
+        </div>
 
-        <div class="admin-grid">
+        <div class="admin-grid admin-grid--coupons">
           <div class="form__group">
             <label class="form__label" for="coupon-code">קוד</label>
             <input
@@ -73,18 +73,16 @@ noindex: true
           <input class="form__input" type="text" id="coupon-note" maxlength="200" placeholder="למשל: מבצע פתיחה">
         </div>
 
-        <div class="form__group form__group--checkbox">
-          <label class="checkbox-label" for="coupon-active">
-            <input type="checkbox" id="coupon-active" checked>
-            <span>פעיל</span>
-          </label>
-        </div>
+        <label class="admin-check" for="coupon-active">
+          <input type="checkbox" id="coupon-active" checked>
+          פעיל
+        </label>
 
-        <div class="admin-toolbar__actions">
+        <div class="admin-editor__actions">
           <button type="submit" class="button button--primary" id="coupon-save">שמירה</button>
           <button type="button" class="button" id="coupon-cancel" hidden>ביטול עריכה</button>
         </div>
-      </fieldset>
+      </div>
     </form>
 
     <p class="admin-hint" id="admin-stats"></p>

@@ -162,7 +162,9 @@
           '<strong class="admin-input--ltr" dir="ltr">' +
           escapeHtml(row.code) +
           '</strong>' +
-          '<span class="admin-card__badge">' +
+          '<span class="admin-card__badge' +
+          (row.active !== false ? ' admin-card__badge--sent' : ' admin-card__badge--draft') +
+          '">' +
           status +
           '</span>' +
           '</div>' +

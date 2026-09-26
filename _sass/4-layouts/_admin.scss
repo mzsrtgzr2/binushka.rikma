@@ -153,6 +153,33 @@
   }
 }
 
+/* Inline editors (coupons) sit on the board without a preview column. The
+   fields card must be full-width — a bare fieldset shrinks to min-content in
+   Chrome and collapses percentage/grid children into a thin strip. */
+.admin-editor--inline {
+  margin-bottom: 28px;
+
+  .admin-editor__fields {
+    max-width: 720px;
+  }
+
+  .admin-check {
+    margin: 4px 0 20px;
+  }
+
+  .admin-editor__actions {
+    margin-top: 0;
+  }
+}
+
+.admin-grid--coupons {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  .form__group {
+    min-width: 0;
+  }
+}
+
 .admin-card__order {
   display: grid;
   gap: 4px;
@@ -290,6 +317,10 @@
 .admin-message {
   margin: 0;
   font-size: 14px;
+}
+
+.admin-board > .admin-message:not([hidden]) {
+  margin-bottom: 16px;
 }
 
 .admin-message--info {
@@ -722,8 +753,15 @@
   border: 0;
   margin: 0 0 20px;
   padding: 0;
+  /* Chrome defaults fieldset to min-inline-size: min-content, which collapses
+     nested grids/percentage inputs when the parent has no definite width. */
+  min-width: 0;
+  min-inline-size: 0;
 
   legend {
+    display: block;
+    float: none;
+    width: 100%;
     font-weight: 700;
     margin-bottom: 12px;
   }
@@ -1072,6 +1110,7 @@
   .admin-toolbar,
   .admin-editor__top,
   .admin-grid,
+  .admin-grid--coupons,
   .admin-editor__split {
     flex-direction: column;
     grid-template-columns: 1fr;

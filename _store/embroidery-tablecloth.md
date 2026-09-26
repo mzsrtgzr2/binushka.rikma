@@ -8,15 +8,17 @@ out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
+gallery:
+  - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui9azth.jpg
 variants:
   type-1:
     name: דוגמא פרחונית מונוכרמטית כחולה
     price: 160
     stock: 1
-    image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
+    image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg
     gallery:
+      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
       - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg
-      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg
     description: "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח."
   type-2:
     name: דוגמת סתיו שלכת

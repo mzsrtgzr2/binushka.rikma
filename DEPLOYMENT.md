@@ -14,15 +14,16 @@ settings; there is nothing to type in the Vercel dashboard.
 `cleanUrls` and `trailingSlash` keep URL shapes matching what GitHub Pages used (`/terms/`,
 `/store/`, `/thanks/`).
 
-A serverless function at `/api/checkout` creates the Green Invoice / Morning payment form.
-`vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308 the
-function. The browser posts to `/api/checkout/`.
+Checkout, prices, admin, newsletter, and the Morning payment callback are one
+serverless function, `api/[...path].mjs`. Hobby deployments reject more than 12
+functions, and every file under `api/` counts, so the handlers live in `lib/routes/`
+and the function routes on the path. Public URLs are unchanged: the browser still
+posts to `/api/checkout/`. Coupon preview and coupon admin reuse `/api/checkout`
+and `/api/admin` so the deploy stays at one function.
 
-Every file uploaded under `api/` becomes its own function, and Hobby deployments reject
-more than 12. `.vercelignore` therefore drops `api/*.test.js`: those are `node:test` files
-with no handler, so they only ever deployed as broken endpoints. Tests still run from the
-repo with `node --test`. Coupon preview and coupon admin reuse `/api/checkout` and
-`/api/admin` so the deploy stays under the cap.
+`vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308
+that function. Tests live under `test/` and run with `node --test`; they are not
+uploaded as functions.
 
 ## Store cart
 

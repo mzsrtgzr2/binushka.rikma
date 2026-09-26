@@ -1,8 +1,8 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const store = require('../../api/admin-store');
-const { fromCatalogFile, PRODUCTS } = require('../../api/catalog');
+const store = require('../../lib/store');
+const { fromCatalogFile, PRODUCTS } = require('../../lib/catalog');
 
 /*
  * Spots in the real `_projects` pages go down every time someone books, so

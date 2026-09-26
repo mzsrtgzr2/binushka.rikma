@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
-const { installFixtureWorkshops } = require('../test/fixtures/workshops');
-const store = require('./admin-store');
+const { installFixtureWorkshops } = require('./fixtures/workshops');
+const store = require('../lib/store');
 const {
   buildOrder,
   fallbackPriceBook,
@@ -11,7 +11,7 @@ const {
   applyWorkshopNote,
   applyGiftPacking,
   PRODUCTS,
-} = require('./catalog');
+} = require('../lib/catalog');
 
 const FIXTURES = installFixtureWorkshops();
 
@@ -43,7 +43,7 @@ test('checkout catalog is built from store markdown', () => {
 });
 
 test('generated catalog snapshots stay in sync with each other', () => {
-  const apiCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, 'catalog-data.json'), 'utf8'));
+  const apiCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'api', 'catalog-data.json'), 'utf8'));
   const dataCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '_data', 'catalog.json'), 'utf8'));
   assert.deepEqual(apiCatalog, dataCatalog);
 });
@@ -53,7 +53,7 @@ test('generated inventory snapshot matches store and workshop markdown', () => {
     path.join(__dirname, '..', '_store'),
     path.join(__dirname, '..', '_projects')
   );
-  const saved = JSON.parse(fs.readFileSync(path.join(__dirname, 'inventory-data.json'), 'utf8'));
+  const saved = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'api', 'inventory-data.json'), 'utf8'));
   assert.deepEqual(saved.products, built);
   assert.ok(saved.products.fox);
 });
@@ -202,7 +202,7 @@ test('gift message without pack flag is ignored; long messages are trimmed', () 
 });
 
 test('generated workshop snapshots stay in sync with each other', () => {
-  const apiWorkshops = JSON.parse(fs.readFileSync(path.join(__dirname, 'workshops-data.json'), 'utf8'));
+  const apiWorkshops = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'api', 'workshops-data.json'), 'utf8'));
   const dataWorkshops = JSON.parse(
     fs.readFileSync(path.join(__dirname, '..', '_data', 'workshops.json'), 'utf8')
   );
@@ -344,8 +344,8 @@ test('participant names are appended only to workshop lines', () => {
 });
 
 test('every visible workshop is in the cart at the page price', () => {
-  const store = require('./admin-store');
-  const { installFixtureWorkshops } = require('../test/fixtures/workshops');
+  const store = require('../lib/store');
+  const { installFixtureWorkshops } = require('./fixtures/workshops');
   const dir = path.join(__dirname, '..', '_projects');
   const files = fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
   const visible = [];

@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const store = require('./admin-store');
+const store = require('../lib/store');
 
 test('formatYamlScalar quotes values that contain newlines', () => {
   assert.equal(store.formatYamlScalar('שורה אחת'), 'שורה אחת');

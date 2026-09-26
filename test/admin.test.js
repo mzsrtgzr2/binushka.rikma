@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const admin = require('./admin');
+const admin = require('../lib/routes/admin');
 
 const FOX = `---
 title: רקמת שועל משמח
@@ -389,7 +389,7 @@ body
     { id: 'workshop-rehovot-04-12', quantity: 1 },
   ]);
   assert.deepEqual(result.changed, ['workshop-rehovot-04-12']);
-  const page = require('./admin-store').parseWorkshopPage(
+  const page = require('../lib/store').parseWorkshopPage(
     'rehovot-04-12',
     fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
   );
@@ -397,7 +397,7 @@ body
   assert.equal(page.registration_full, false);
 
   await admin.decrementInventory(authEnv(root), [{ id: 'workshop-rehovot-04-12', quantity: 1 }]);
-  const full = require('./admin-store').parseWorkshopPage(
+  const full = require('../lib/store').parseWorkshopPage(
     'rehovot-04-12',
     fs.readFileSync(path.join(root, '_projects', '2022-01-25-rehovot-04-12.md'), 'utf8')
   );
@@ -424,7 +424,7 @@ body
     { id: 'workshop-bar-14-10', quantity: 2 },
   ]);
   assert.deepEqual(result.changed, ['workshop-bar-14-10']);
-  const page = require('./admin-store').parseWorkshopPage(
+  const page = require('../lib/store').parseWorkshopPage(
     'bar-14-10',
     fs.readFileSync(path.join(root, '_projects', '2022-01-09-bar-14-10.md'), 'utf8')
   );
@@ -1136,7 +1136,7 @@ test('variants product stores stock per type', async () => {
   assert.match(md, /small:[\s\S]*stock: 2/);
   assert.match(md, /large:[\s\S]*stock: 0/);
   assert.doesNotMatch(md, /^stock:/m);
-  const page = require('./admin-store').parsePage('hoops', md);
+  const page = require('../lib/store').parsePage('hoops', md);
   assert.equal(page.variants[0].stock, 2);
   assert.equal(page.variants[1].stock, 0);
   assert.equal(page.out_of_stock, false);
@@ -1149,7 +1149,7 @@ test('variants product stores stock per type', async () => {
 
 test('decrementInventory and assertInventory honor per-type stock', async () => {
   const root = foxRoot();
-  const store = require('./admin-store');
+  const store = require('../lib/store');
   fs.writeFileSync(
     path.join(root, '_store', 'hoops.md'),
     `---

@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildOrder, applyVariantNote, applyWorkshopNote, applyGiftPacking } = require('./catalog');
-const checkout = require('./checkout');
+const { buildOrder, applyVariantNote, applyWorkshopNote, applyGiftPacking } = require('../lib/catalog');
+const checkout = require('../lib/routes/checkout');
 const { installFixtureWorkshops } = require('../test/fixtures/workshops');
 
 installFixtureWorkshops();

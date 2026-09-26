@@ -16,7 +16,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 
-import handler from '../api/admin-workshops.mjs';
+import handler from '../lib/routes/admin-workshops.mjs';
 import * as workshops from '../lib/admin/workshops.mjs';
 
 const PASSWORD = 'test-password';

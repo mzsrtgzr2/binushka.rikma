@@ -205,6 +205,11 @@
   @media only screen and (max-width: $mobile) {
     margin-bottom: 48px;
   }
+
+  // Keep single newlines from the admin product-body textarea (same as variant desc).
+  > p {
+    white-space: pre-line;
+  }
 }
 
 .store-item-subtitle {

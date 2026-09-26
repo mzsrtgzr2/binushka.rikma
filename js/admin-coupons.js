@@ -19,6 +19,7 @@
   var valueInput = document.getElementById('coupon-value');
   var valueHint = document.getElementById('coupon-value-hint');
   var noteInput = document.getElementById('coupon-note');
+  var expiresInput = document.getElementById('coupon-expires');
   var activeInput = document.getElementById('coupon-active');
   var cancelBtn = document.getElementById('coupon-cancel');
   if (!loginForm || !board || !form) return;
@@ -54,6 +55,7 @@
       code_immutable: 'אי אפשר לשנות את הקוד אחרי יצירה — מחקי וצרי חדש',
       type_invalid: 'סוג הנחה לא תקין',
       value_invalid: 'ערך לא תקין',
+      expires_invalid: 'תאריך תפוגה לא תקין',
       invalid_request: 'הבקשה לא תקינה'
     };
     return messages[code] || '';
@@ -101,6 +103,23 @@
     return '₪' + row.value;
   }
 
+  function isExpiredRow(row) {
+    if (!row || !row.expires) return false;
+    var iso = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Jerusalem',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+    return iso > String(row.expires);
+  }
+
+  function statusLabel(row) {
+    if (row.active === false) return 'כבוי';
+    if (isExpiredRow(row)) return 'פג תוקף';
+    return 'פעיל';
+  }
+
   function syncValueHint() {
     if (!valueHint) return;
     valueHint.textContent =
@@ -115,6 +134,7 @@
     editing = null;
     form.reset();
     activeInput.checked = true;
+    if (expiresInput) expiresInput.value = '';
     codeInput.readOnly = false;
     if (formLegend) formLegend.textContent = 'קוד חדש';
     if (cancelBtn) cancelBtn.hidden = true;
@@ -129,6 +149,7 @@
     typeInput.value = row.type;
     valueInput.value = row.value;
     noteInput.value = row.note || '';
+    if (expiresInput) expiresInput.value = row.expires || '';
     activeInput.checked = row.active !== false;
     if (formLegend) formLegend.textContent = 'עריכת ' + row.code;
     if (cancelBtn) cancelBtn.hidden = false;
@@ -146,13 +167,17 @@
     }
     if (statsEl) {
       var active = coupons.filter(function (row) {
-        return row.active !== false;
+        return row.active !== false && !isExpiredRow(row);
       }).length;
       statsEl.textContent = coupons.length + ' קודים · ' + active + ' פעילים';
     }
     listEl.innerHTML = coupons
       .map(function (row) {
-        var status = row.active !== false ? 'פעיל' : 'כבוי';
+        var status = statusLabel(row);
+        var live = row.active !== false && !isExpiredRow(row);
+        var meta = formatDiscount(row);
+        if (row.expires) meta += ' · בתוקף עד ' + row.expires;
+        if (row.note) meta += ' · ' + row.note;
         return (
           '<li class="admin-card admin-card--plain" data-code="' +
           escapeHtml(row.code) +
@@ -163,14 +188,13 @@
           escapeHtml(row.code) +
           '</strong>' +
           '<span class="admin-card__badge' +
-          (row.active !== false ? ' admin-card__badge--sent' : ' admin-card__badge--draft') +
+          (live ? ' admin-card__badge--sent' : ' admin-card__badge--draft') +
           '">' +
           status +
           '</span>' +
           '</div>' +
           '<p class="admin-card__meta">' +
-          escapeHtml(formatDiscount(row)) +
-          (row.note ? ' · ' + escapeHtml(row.note) : '') +
+          escapeHtml(meta) +
           '</p>' +
           '<div class="admin-card__actions">' +
           '<button type="button" class="admin-card__edit" data-action="edit">עריכה</button>' +
@@ -243,6 +267,7 @@
         type: typeInput.value,
         value: Number(valueInput.value),
         note: noteInput.value,
+        expires: expiresInput ? expiresInput.value : '',
         active: activeInput.checked
       }
     };

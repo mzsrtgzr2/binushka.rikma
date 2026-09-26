@@ -14,6 +14,7 @@ noindex: true
   <p class="admin-lead">
     כאן מגדירים קודי קופון מראש. הלקוחות מזינים אותם בעמוד התשלום לפני המעבר ל־Grow.
     אפשר להגדיר הנחה באחוזים או בסכום קבוע בשקלים — ההנחה חלה על המוצרים, לא על המשלוח.
+    אפשר גם לשים תאריך תפוגה לקוד.
   </p>
 
   {% include admin-login.html %}
@@ -66,6 +67,17 @@ noindex: true
             >
             <p class="admin-hint" id="coupon-value-hint">למשל 10 לאחוזים, או 50 לסכום בשקלים.</p>
           </div>
+        </div>
+
+        <div class="form__group">
+          <label class="form__label" for="coupon-expires">תאריך תפוגה (אופציונלי)</label>
+          <input
+            class="form__input admin-input--ltr"
+            type="date"
+            id="coupon-expires"
+            dir="ltr"
+          >
+          <p class="admin-hint">הקוד תקף עד סוף היום הזה (שעון ישראל). ריק = בלי תפוגה.</p>
         </div>
 
         <div class="form__group">

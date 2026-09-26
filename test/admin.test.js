@@ -132,6 +132,25 @@ test('form login redirects back to the admin page with a session cookie', async 
   assert.match(String(result.headers['set-cookie']), /binushka-admin-v2=v2\./);
 });
 
+test('form login accepts the password as it was stored in the env var', async () => {
+  const headers = {
+    'content-type': 'application/x-www-form-urlencoded',
+    'x-forwarded-for': '203.0.113.50',
+  };
+  const stored = ['"secret-pass"', 'secret-pass\n', 'secret-pass ', "'secret-pass'"];
+  for (const [i, password] of stored.entries()) {
+    const result = await request(admin, {
+      method: 'POST',
+      headers: { ...headers, 'x-forwarded-for': `203.0.113.${50 + i}` },
+      body: { action: 'login', password, next: '/admin/store/' },
+      env: { ADMIN_PASSWORD: password },
+    });
+    assert.equal(result.status, 303, password);
+    assert.equal(result.headers.location, '/admin/store/');
+    assert.match(String(result.headers['set-cookie']), /binushka-admin-v2=v2\./);
+  }
+});
+
 test('form login with a wrong password redirects with login=error', async () => {
   const result = await request(admin, {
     method: 'POST',

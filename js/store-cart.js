@@ -17,6 +17,7 @@
   });
 
   var STORAGE_KEY = 'binushka-store-cart-v1';
+  var COUPON_KEY = 'binushka-coupon-v1';
 
   function track(method, a, b, c) {
     if (!window.Analytics || typeof Analytics[method] !== 'function') return;
@@ -52,6 +53,43 @@
 
   function saveCart(cart) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  }
+
+  function loadCoupon() {
+    try {
+      var raw = localStorage.getItem(COUPON_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      if (!data || !data.code) return null;
+      return {
+        code: String(data.code).trim().toUpperCase(),
+        discount: Number(data.discount) || 0,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveCoupon(coupon) {
+    try {
+      if (!coupon || !coupon.code) {
+        localStorage.removeItem(COUPON_KEY);
+        return;
+      }
+      localStorage.setItem(
+        COUPON_KEY,
+        JSON.stringify({
+          code: String(coupon.code).trim().toUpperCase(),
+          discount: Number(coupon.discount) || 0,
+        })
+      );
+    } catch (e) {
+      /* private mode / quota */
+    }
+  }
+
+  function clearCoupon() {
+    saveCoupon(null);
   }
 
   function parseCartKey(key) {
@@ -662,8 +700,12 @@
 
   window.StoreCart = {
     STORAGE_KEY: STORAGE_KEY,
+    COUPON_KEY: COUPON_KEY,
     load: loadCart,
     save: saveCart,
+    loadCoupon: loadCoupon,
+    saveCoupon: saveCoupon,
+    clearCoupon: clearCoupon,
     add: function (id, triggerEl, extra) {
       var p = byId[id];
       if (p && p.variable && (extra == null || extra === '')) {
@@ -694,6 +736,7 @@
     catalog: byId,
     clear: function () {
       localStorage.removeItem(STORAGE_KEY);
+      clearCoupon();
       renderWidget();
     },
   };

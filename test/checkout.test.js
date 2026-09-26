@@ -68,7 +68,7 @@ test('payment form payload for sandbox uses the sandbox plugin and no catalog it
   assert.equal(payload.client.country, 'IL');
   assert.equal(payload.vatType, 0);
   assert.ok(payload.income.every((row) => !row.itemId));
-  assert.ok(payload.income.every((row) => row.price > 0));
+  assert.ok(payload.income.every((row) => Number(row.price) !== 0));
   assert.equal(payload.income.length, 1);
   assert.equal(payload.amount, 220);
   assert.equal(payload.maxPayments, 1);
@@ -100,6 +100,27 @@ test('zero-price shipping is omitted from income rows', () => {
     rows.map((row) => row.description),
     ['fox']
   );
+});
+
+test('coupon discount appears as a negative income row', () => {
+  const { applyCoupon } = require('../lib/coupons');
+  const order = applyCoupon(buildOrder([{ id: 'fox', quantity: 1 }], 'pickup'), 'TEN', {
+    TEN: { code: 'TEN', type: 'percent', value: 10, active: true },
+  });
+  const rows = checkout.buildIncomeRows(order.lines, 1);
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].price, 220);
+  assert.equal(rows[1].price, -22);
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'sandbox',
+    envVars: {},
+    successUrl: 'https://example.com/thanks/',
+    failureUrl: 'https://example.com/checkout/',
+  });
+  assert.equal(payload.amount, 198);
 });
 
 test('empty Morning 404 maps to a Hebrew sandbox hint', () => {
@@ -307,4 +328,27 @@ test('workshop places become income lines without shipping', () => {
   assert.match(payload.income[0].description, /משתתפות: נועה כהן, מיכל לוי$/);
   assert.equal(payload.amount, 660);
   assert.ok(payload.income.every((row) => !row.kind));
+});
+
+test('checkout preview-coupon rejects an empty code without opening Grow', async () => {
+  const saved = { SITE_URL: process.env.SITE_URL };
+  process.env.SITE_URL = 'https://rikma.binushka.com';
+  const req = {
+    method: 'POST',
+    headers: { origin: 'https://rikma.binushka.com' },
+    body: {
+      action: 'preview-coupon',
+      code: '   ',
+      items: [{ id: 'fox', quantity: 1 }],
+      shipping: 'pickup',
+    },
+  };
+  const res = mockRes();
+  try {
+    await checkout(req, res);
+  } finally {
+    process.env.SITE_URL = saved.SITE_URL;
+  }
+  assert.equal(res.statusCode, 400);
+  assert.match(res.body.error, /קופון/);
 });

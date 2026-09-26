@@ -22,6 +22,8 @@ permalink: /checkout/
       </p>
       <ul class="checkout-lines" id="checkout-lines"></ul>
       <p class="checkout-subtotal" id="checkout-subtotal-row" hidden>סה״כ מוצרים: <strong id="checkout-subtotal">₪0</strong></p>
+      <p class="checkout-discount" id="checkout-discount-row" hidden>הנחה: <strong id="checkout-discount">−₪0</strong></p>
+      <p class="checkout-after-discount" id="checkout-after-discount-row" hidden>סה״כ לאחר ההנחה: <strong id="checkout-after-discount">₪0</strong></p>
     </section>
 
     <section class="checkout-form-section" id="checkout-form-section">
@@ -195,6 +197,25 @@ permalink: /checkout/
             <span>שליח עד הבית — ₪40</span>
           </label>
         </fieldset>
+
+        <div class="checkout-coupon" id="checkout-coupon">
+          <label class="form__label" for="checkout-coupon-code">קוד קופון</label>
+          <div class="checkout-coupon__row">
+            <input
+              type="text"
+              id="checkout-coupon-code"
+              name="couponCode"
+              class="form__input checkout-coupon__input"
+              dir="ltr"
+              autocomplete="off"
+              maxlength="32"
+              placeholder="אם יש לך קוד"
+            >
+            <button type="button" class="button" id="checkout-coupon-apply">החלי</button>
+            <button type="button" class="button checkout-coupon__clear" id="checkout-coupon-clear" hidden>הסירי</button>
+          </div>
+          <p class="checkout-coupon__message" id="checkout-coupon-message" hidden></p>
+        </div>
 
         <p class="checkout-grand-total">לתשלום: <strong id="checkout-grand-total">₪0</strong></p>
 

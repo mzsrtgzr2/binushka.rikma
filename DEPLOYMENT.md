@@ -18,7 +18,8 @@ Checkout, prices, admin, newsletter, and the Morning payment callback are one
 serverless function, `api/[...path].mjs`. Hobby deployments reject more than 12
 functions, and every file under `api/` counts, so the handlers live in `lib/routes/`
 and the function routes on the path. Public URLs are unchanged: the browser still
-posts to `/api/checkout/`.
+posts to `/api/checkout/`. Coupon preview and coupon admin reuse `/api/checkout`
+and `/api/admin` so the deploy stays at one function.
 
 `vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308
 that function. Tests live under `test/` and run with `node --test`; they are not

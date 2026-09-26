@@ -12,8 +12,18 @@
   var emptyEl = document.getElementById('checkout-empty');
   var subtotalRow = document.getElementById('checkout-subtotal-row');
   var subtotalEl = document.getElementById('checkout-subtotal');
+  var discountRow = document.getElementById('checkout-discount-row');
+  var discountEl = document.getElementById('checkout-discount');
+  var afterDiscountRow = document.getElementById('checkout-after-discount-row');
+  var afterDiscountEl = document.getElementById('checkout-after-discount');
   var grandEl = document.getElementById('checkout-grand-total');
   var formSection = document.getElementById('checkout-form-section');
+  var couponInput = document.getElementById('checkout-coupon-code');
+  var couponApply = document.getElementById('checkout-coupon-apply');
+  var couponClear = document.getElementById('checkout-coupon-clear');
+  var couponMessage = document.getElementById('checkout-coupon-message');
+
+  var appliedCoupon = null;
 
   var shippingConfig = { methods: {} };
   var shippingEl = document.getElementById('store-cart-shipping');
@@ -111,6 +121,97 @@
     if (text) messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  function showCouponMessage(text, type) {
+    if (!couponMessage) return;
+    if (!text) {
+      couponMessage.hidden = true;
+      couponMessage.textContent = '';
+      return;
+    }
+    couponMessage.hidden = false;
+    couponMessage.textContent = text;
+    couponMessage.className =
+      'checkout-coupon__message checkout-coupon__message--' + (type || 'info');
+  }
+
+  function persistCoupon(coupon) {
+    appliedCoupon = coupon;
+    if (window.StoreCart) {
+      if (coupon) StoreCart.saveCoupon(coupon);
+      else StoreCart.clearCoupon();
+    }
+    if (couponClear) couponClear.hidden = !coupon;
+    if (couponInput && coupon) couponInput.value = coupon.code;
+  }
+
+  function loadPersistedCoupon() {
+    if (window.StoreCart && StoreCart.loadCoupon) {
+      var saved = StoreCart.loadCoupon();
+      if (saved && saved.code) {
+        appliedCoupon = saved;
+        if (couponInput) couponInput.value = saved.code;
+        if (couponClear) couponClear.hidden = false;
+      }
+    }
+  }
+
+  function couponPayloadItems(items) {
+    return items.map(function (item) {
+      var row = { id: item.id, quantity: item.quantity };
+      if (item.amount) row.amount = item.amount;
+      if (item.variant) row.variant = item.variant;
+      return row;
+    });
+  }
+
+  function applyCouponCode(code, items) {
+    var clean = String(code || '').trim();
+    if (!clean) {
+      showCouponMessage('יש להזין קוד קופון', 'error');
+      return Promise.resolve(null);
+    }
+    showCouponMessage('בודקת…', 'info');
+    var shipping = needsShipping(items) ? selectedShipping() : 'none';
+    return fetch('/api/checkout/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'preview-coupon',
+        code: clean,
+        items: couponPayloadItems(items),
+        shipping: shipping,
+      }),
+    })
+      .then(function (res) {
+        return res.text().then(function (text) {
+          var body = {};
+          if (text) {
+            try {
+              body = JSON.parse(text);
+            } catch (e) {
+              body = {};
+            }
+          }
+          if (!res.ok || !body.ok) {
+            throw new Error(body.error || 'קוד הקופון לא תקין');
+          }
+          return body;
+        });
+      })
+      .then(function (body) {
+        persistCoupon({ code: body.code, discount: body.discount });
+        showCouponMessage('הוחל קוד ' + body.code + ' (−₪' + body.discount + ')', 'ok');
+        renderSummary();
+        return body;
+      })
+      .catch(function (err) {
+        persistCoupon(null);
+        showCouponMessage(err.message || 'קוד הקופון לא תקין', 'error');
+        renderSummary();
+        return null;
+      });
+  }
+
   function shippingCost(method, subtotal) {
     var methods = shippingConfig.methods || {};
     var row = methods[method];
@@ -165,6 +266,8 @@
     if (!items.length) {
       if (emptyEl) emptyEl.hidden = false;
       if (subtotalRow) subtotalRow.hidden = true;
+      if (discountRow) discountRow.hidden = true;
+      if (afterDiscountRow) afterDiscountRow.hidden = true;
       if (formSection) formSection.hidden = true;
       if (linesEl) linesEl.innerHTML = '';
       var emptyNote = document.getElementById('checkout-variant-note-group');
@@ -212,7 +315,18 @@
     syncParticipantsVisibility(items);
     var shipping = syncShippingVisibility(items);
     var ship = shipping ? shippingCost(selectedShipping(), subtotal) : 0;
-    if (grandEl) grandEl.textContent = '₪' + (subtotal + ship);
+    var discount = appliedCoupon && appliedCoupon.discount ? Number(appliedCoupon.discount) : 0;
+    if (discountRow) {
+      discountRow.hidden = !(discount > 0);
+      if (discountEl && discount > 0) discountEl.textContent = '−₪' + discount;
+    }
+    if (afterDiscountRow) {
+      afterDiscountRow.hidden = !(discount > 0);
+      if (afterDiscountEl && discount > 0) {
+        afterDiscountEl.textContent = '₪' + Math.max(0, subtotal - discount);
+      }
+    }
+    if (grandEl) grandEl.textContent = '₪' + Math.max(0, subtotal + ship - discount);
     return items;
   }
 
@@ -306,6 +420,30 @@
 
   restoreCustomer();
   syncGiftMessageVisibility();
+  loadPersistedCoupon();
+
+  if (couponApply) {
+    couponApply.addEventListener('click', function () {
+      var items = renderSummary();
+      applyCouponCode(couponInput && couponInput.value, items);
+    });
+  }
+  if (couponClear) {
+    couponClear.addEventListener('click', function () {
+      persistCoupon(null);
+      if (couponInput) couponInput.value = '';
+      showCouponMessage('');
+      renderSummary();
+    });
+  }
+  if (couponInput) {
+    couponInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (couponApply) couponApply.click();
+      }
+    });
+  }
 
   /* Drop-off state: what the visitor reached before leaving the page. */
   var formStarted = false;
@@ -338,6 +476,9 @@
     var items = renderSummary();
     if (event.target && event.target.name === 'shipping') {
       reportShipping(items, event.target.value);
+      if (appliedCoupon && appliedCoupon.code) {
+        applyCouponCode(appliedCoupon.code, items);
+      }
     }
   });
 
@@ -388,6 +529,7 @@
     var subtotal = window.StoreCart ? StoreCart.subtotal() : 0;
     var shipping = needsShipping(items);
     var ship = shipping ? shippingCost(data.shipping, subtotal) : 0;
+    var discount = appliedCoupon && appliedCoupon.discount ? Number(appliedCoupon.discount) : 0;
     var payload = {
       items: items.map(function (item) {
         var row = { id: item.id, quantity: item.quantity };
@@ -405,6 +547,8 @@
       zip: data.zip || '',
       country: data.country,
     };
+    if (appliedCoupon && appliedCoupon.code) payload.couponCode = appliedCoupon.code;
+    else if (data.couponCode) payload.couponCode = String(data.couponCode).trim();
     if (data.variantNote) payload.variantNote = String(data.variantNote).trim();
     if (data.participantsNote) payload.participantsNote = String(data.participantsNote).trim();
     if (data.packAsGift) {
@@ -417,7 +561,7 @@
     /* Mixpanel dedupes purchase by this ref ($insert_id), so it must stay stable. */
     var orderRef =
       'BNK-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-    track('addPaymentInfo', items, subtotal + ship, 'grow');
+    track('addPaymentInfo', items, Math.max(0, subtotal + ship - discount), 'grow');
 
     var submitBtn = form.querySelector('[type="submit"]');
     if (submitBtn) {
@@ -458,7 +602,9 @@
               shipping: data.shipping,
               shippingCost: ship,
               subtotal: subtotal,
-              total: subtotal + ship,
+              discount: discount,
+              couponCode: (appliedCoupon && appliedCoupon.code) || '',
+              total: Math.max(0, subtotal + ship - discount),
               email: data.email,
               packAsGift: Boolean(data.packAsGift),
               giftMessage: data.packAsGift && data.giftMessage
@@ -479,7 +625,7 @@
           reason: 'payment_form_failed',
           error_message: String((err && err.message) || 'unknown').slice(0, 100),
           currency: 'ILS',
-          value: subtotal + ship,
+          value: Math.max(0, subtotal + ship - discount),
         });
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -489,6 +635,9 @@
   });
 
     var initialItems = renderSummary();
+    if (appliedCoupon && appliedCoupon.code && initialItems.length) {
+      applyCouponCode(appliedCoupon.code, initialItems);
+    }
     if (initialItems.length) {
       track('beginCheckout', initialItems, window.StoreCart ? StoreCart.subtotal() : 0);
     } else {

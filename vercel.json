@@ -8,7 +8,8 @@
   "trailingSlash": true,
   "functions": {
     "api/*.mjs": {
-      "includeFiles": "{_store,_projects,_coupons}/**"
+      "includeFiles": "{_store,_projects,_coupons}/**",
+      "excludeFiles": "{images,_site,vendor,.git,js,_sass,_layouts,_includes,_pages,_posts,css,test}/**"
     }
   },
   "rewrites": [

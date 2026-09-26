@@ -1458,16 +1458,26 @@
     go();
   }
 
-  function showLoginError(message) {
-    showLogin();
-    show(loginMessage, message, 'error');
+  function loginQueryMessage(login) {
+    if (!login) return '';
+    if (login.kind === 'locked') return 'יותר מדי ניסיונות שגויים. נסי שוב בעוד כמה דקות';
+    if (login.kind === 'ok') {
+      return 'הסיסמה נכונה, אבל הדפדפן לא שמר את החיבור. נסי שוב מאותו חלון, בלי מצב פרטי.';
+    }
+    if (login.kind !== 'error') return '';
+    var message = 'סיסמה שגויה';
+    if (login.envName && login.envName !== 'production') {
+      message += '. ב-Preview הסיסמה היא ADMIN_PASSWORD של סביבת Preview, לא של Production. אחרי שינוי צריך Redeploy.';
+    }
+    return message;
   }
 
-  function consumeLoginQuery() {
-    var match = /[?&]login=(error|locked)\b/.exec(window.location.search);
-    if (!match) return;
-    show(loginMessage, match[1] === 'locked' ? 'יותר מדי ניסיונות. נסי שוב בעוד כמה דקות' : 'סיסמה שגויה', 'error');
-    if (history.replaceState) history.replaceState({}, '', window.location.pathname);
+  function takeLoginQuery() {
+    var params = new URLSearchParams(window.location.search);
+    var kind = params.get('login');
+    var login = kind === 'error' || kind === 'locked' || kind === 'ok' ? { kind: kind, envName: params.get('env') || '' } : null;
+    if (login && history.replaceState) history.replaceState({}, '', window.location.pathname);
+    return login;
   }
 
   listEl.addEventListener('change', function (event) {
@@ -1766,9 +1776,16 @@
   });
 
   loadBoard().catch(function (err) {
-    showLogin();
-    consumeLoginQuery();
-    if (err && err.status === 401) return;
-    showLoginError((err && err.message) || 'לא הצלחנו לטעון את הניהול. נסי לרענן.');
+    var login = takeLoginQuery();
+    if (!err || err.status === 401) {
+      showLogin();
+      var message = loginQueryMessage(login);
+      if (message) show(loginMessage, message, login.kind === 'ok' ? 'info' : 'error');
+      return;
+    }
+    showBoard();
+    var boardText = (err && err.message) || 'לא הצלחנו לטעון את הניהול. נסי לרענן.';
+    if (login && login.kind === 'ok') boardText = 'התחברת. ' + boardText;
+    show(boardMessage, boardText, 'error');
   });
 })();

@@ -128,7 +128,7 @@ test('form login redirects back to the admin page with a session cookie', async 
     env: { ADMIN_PASSWORD: 'secret-pass' },
   });
   assert.equal(result.status, 303);
-  assert.equal(result.headers.location, '/admin/newsletter/');
+  assert.equal(result.headers.location, '/admin/newsletter/?login=ok');
   assert.match(String(result.headers['set-cookie']), /binushka-admin-v2=v2\./);
 });
 
@@ -146,7 +146,7 @@ test('form login accepts the password as it was stored in the env var', async ()
       env: { ADMIN_PASSWORD: password },
     });
     assert.equal(result.status, 303, password);
-    assert.equal(result.headers.location, '/admin/store/');
+    assert.equal(result.headers.location, '/admin/store/?login=ok');
     assert.match(String(result.headers['set-cookie']), /binushka-admin-v2=v2\./);
   }
 });
@@ -171,7 +171,7 @@ test('form login rejects an open redirect', async () => {
     env: { ADMIN_PASSWORD: 'secret-pass' },
   });
   assert.equal(result.status, 303);
-  assert.equal(result.headers.location, '/admin/store/');
+  assert.equal(result.headers.location, '/admin/store/?login=ok');
 });
 
 test('legacy v1 session cookie still authorizes', async () => {
@@ -1335,30 +1335,40 @@ test('a position that is not a count is refused', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
-test('login locks an IP after repeated failures, even for the right password', async () => {
-  const headers = { 'x-forwarded-for': '203.0.113.77' };
-  const env = { ADMIN_PASSWORD: 'secret-pass' };
+test('login lockout blocks further guesses but still accepts the right password', async () => {
+  const headers = { 'x-forwarded-for': '203.0.113.91' };
+  const env = { ADMIN_PASSWORD: 'secret-pass', VERCEL_ENV: 'preview' };
   for (let i = 0; i < 5; i += 1) {
     const miss = await request(admin, { method: 'POST', headers, body: { action: 'login', password: `guess-${i}` }, env });
     assert.equal(miss.status, 401);
   }
-  const locked = await request(admin, { method: 'POST', headers, body: { action: 'login', password: 'secret-pass' }, env });
+  const locked = await request(admin, { method: 'POST', headers, body: { action: 'login', password: 'guess-again' }, env });
   assert.equal(locked.status, 429);
   assert.equal(locked.headers['set-cookie'], undefined);
 
   const form = await request(admin, {
     method: 'POST',
     headers: { ...headers, 'content-type': 'application/x-www-form-urlencoded' },
-    body: { action: 'login', password: 'secret-pass', next: '/admin/store/' },
+    body: { action: 'login', password: 'still-wrong', next: '/admin/store/' },
     env,
   });
   assert.equal(form.status, 303);
-  assert.equal(form.headers.location, '/admin/store/?login=locked');
+  assert.equal(form.headers.location, '/admin/store/?login=locked&env=preview');
   assert.equal(form.headers['set-cookie'], undefined);
+
+  const recovered = await request(admin, {
+    method: 'POST',
+    headers: { ...headers, 'content-type': 'application/x-www-form-urlencoded' },
+    body: { action: 'login', password: 'secret-pass', next: '/admin/store/' },
+    env,
+  });
+  assert.equal(recovered.status, 303);
+  assert.equal(recovered.headers.location, '/admin/store/?login=ok&env=preview');
+  assert.match(String(recovered.headers['set-cookie']), /binushka-admin-v2=v2\./);
 
   const other = await request(admin, {
     method: 'POST',
-    headers: { 'x-forwarded-for': '203.0.113.78' },
+    headers: { 'x-forwarded-for': '203.0.113.92' },
     body: { action: 'login', password: 'secret-pass' },
     env,
   });

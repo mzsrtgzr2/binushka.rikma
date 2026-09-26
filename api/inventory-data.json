@@ -315,6 +315,17 @@
       "limitedStock": false,
       "name": "מחט לרקמה",
       "price": 2
+    },
+    "embroidery-tablecloth": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכת רקמה  שהיא מפה רקומה",
+      "variants": {
+        "type-1": {
+          "stock": 1
+        }
+      }
     }
   }
 }

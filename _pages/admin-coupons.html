@@ -1,0 +1,92 @@
+---
+layout: admin
+admin_script: admin-coupons.js
+admin_section: coupons
+title: קודי קופון
+description: הגדרת קודי הנחה לאחוזים או לסכום קבוע
+permalink: /admin/coupons/
+sitemap: false
+noindex: true
+---
+
+{% include admin-link-index.html %}
+
+  <p class="admin-lead">
+    כאן מגדירים קודי קופון מראש. הלקוחות מזינים אותם בעמוד התשלום לפני המעבר ל־Grow.
+    אפשר להגדיר הנחה באחוזים או בסכום קבוע בשקלים — ההנחה חלה על המוצרים, לא על המשלוח.
+  </p>
+
+  {% include admin-login.html %}
+
+  <div class="admin-board" id="admin-board" hidden>
+    <div class="admin-toolbar">
+      <p class="admin-message" id="admin-board-message" hidden></p>
+    </div>
+
+    <form class="admin-editor admin-editor--inline" id="admin-coupon-form" novalidate>
+      <fieldset class="admin-fieldset">
+        <legend id="admin-form-legend">קוד חדש</legend>
+        <p class="admin-message" id="admin-form-message" hidden></p>
+
+        <div class="admin-grid">
+          <div class="form__group">
+            <label class="form__label" for="coupon-code">קוד</label>
+            <input
+              class="form__input admin-input--ltr"
+              type="text"
+              id="coupon-code"
+              dir="ltr"
+              autocomplete="off"
+              maxlength="32"
+              required
+              placeholder="WELCOME10"
+            >
+            <p class="admin-hint">אותיות באנגלית, ספרות, מקף או קו תחתון.</p>
+          </div>
+
+          <div class="form__group">
+            <label class="form__label" for="coupon-type">סוג הנחה</label>
+            <select class="form__input" id="coupon-type" required>
+              <option value="percent">אחוזים</option>
+              <option value="amount">סכום קבוע (₪)</option>
+            </select>
+          </div>
+
+          <div class="form__group">
+            <label class="form__label" for="coupon-value">ערך</label>
+            <input
+              class="form__input admin-input--ltr"
+              type="number"
+              id="coupon-value"
+              dir="ltr"
+              min="1"
+              step="1"
+              required
+              placeholder="10"
+            >
+            <p class="admin-hint" id="coupon-value-hint">למשל 10 לאחוזים, או 50 לסכום בשקלים.</p>
+          </div>
+        </div>
+
+        <div class="form__group">
+          <label class="form__label" for="coupon-note">הערה פנימית (אופציונלי)</label>
+          <input class="form__input" type="text" id="coupon-note" maxlength="200" placeholder="למשל: מבצע פתיחה">
+        </div>
+
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label" for="coupon-active">
+            <input type="checkbox" id="coupon-active" checked>
+            <span>פעיל</span>
+          </label>
+        </div>
+
+        <div class="admin-toolbar__actions">
+          <button type="submit" class="button button--primary" id="coupon-save">שמירה</button>
+          <button type="button" class="button" id="coupon-cancel" hidden>ביטול עריכה</button>
+        </div>
+      </fieldset>
+    </form>
+
+    <p class="admin-hint" id="admin-stats"></p>
+    <ul class="admin-list" id="admin-list"></ul>
+  </div>

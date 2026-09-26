@@ -19,7 +19,24 @@
     </div>
     <ul class="store-cart__lines" id="store-cart-lines"></ul>
     <p class="store-cart__empty" id="store-cart-empty">הסל ריק</p>
+    <div class="store-cart__coupon" id="store-cart-coupon" hidden>
+      <label class="store-cart__coupon-label" for="store-cart-coupon-code">קוד קופון</label>
+      <div class="store-cart__coupon-row">
+        <input
+          type="text"
+          id="store-cart-coupon-code"
+          class="form__input store-cart__coupon-input"
+          dir="ltr"
+          autocomplete="off"
+          maxlength="32"
+          placeholder="קוד"
+        >
+        <button type="button" class="button store-cart__coupon-apply" id="store-cart-coupon-apply">החלי</button>
+      </div>
+      <p class="store-cart__coupon-msg" id="store-cart-coupon-msg" hidden></p>
+    </div>
     <div class="store-cart__footer">
+      <p class="store-cart__discount" id="store-cart-discount" hidden><span>הנחה:</span> <strong id="store-cart-discount-val">−₪0</strong></p>
       <p class="store-cart__total"><span>סה״כ:</span> <strong id="store-cart-total">₪0</strong></p>
       <a class="button button--primary store-cart__checkout" id="store-cart-checkout" href="{{ '/checkout/' | relative_url }}">
         לתשלום

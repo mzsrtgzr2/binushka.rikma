@@ -12,6 +12,7 @@ const {
   applyWorkshopNote,
   applyGiftPacking,
 } = require('./catalog');
+const coupons = require('../lib/coupons');
 const { resolveMorningEnv, morningHosts, getMorningToken } = require('./morning');
 const admin = require('./admin');
 const {
@@ -157,7 +158,7 @@ function readCustomer(body) {
 
 function buildIncomeRows(lines, incomeVatType) {
   return (lines || [])
-    .filter((line) => Number(line.price) > 0)
+    .filter((line) => Number(line.price) !== 0)
     .map((line) => ({
       description: line.description,
       quantity: line.quantity,
@@ -282,13 +283,18 @@ async function handler(req, res) {
   const env = resolveMorningEnv(process.env.MORNING_ENV);
 
   const body = req.body || {};
-  const order = applyGiftPacking(
+  let order = applyGiftPacking(
     applyWorkshopNote(
       applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),
       body.participantsNote
     ),
     body
   );
+  if (order.error) {
+    return res.status(400).json({ error: order.error });
+  }
+
+  order = coupons.applyCoupon(order, body.couponCode, coupons.loadFromDir());
   if (order.error) {
     return res.status(400).json({ error: order.error });
   }
@@ -305,6 +311,30 @@ async function handler(req, res) {
 
   const { successUrl, failureUrl } = checkoutReturnUrls(process.env);
 
+  // A coupon can zero the payable total (e.g. 100% off + pickup). Grow cannot
+  // open a ₪0 form, so stock is taken here and the shopper goes straight to thanks.
+  const freeDraft = buildPaymentFormPayload({
+    order,
+    customer: customerResult.customer,
+    env,
+    envVars: process.env,
+    successUrl,
+    failureUrl,
+  });
+  if (Number(freeDraft.amount) <= 0) {
+    const reserved = await reserveInventory(process.env, order);
+    if (reserved.error) {
+      return res.status(409).json({ error: reserved.error });
+    }
+    return res.status(200).json({
+      url: successUrl,
+      skipped: true,
+      free: true,
+      amount: 0,
+      coupon: order.coupon || null,
+    });
+  }
+
   if (!keyId || !keySecret) {
     return res.status(503).json({
       error: 'סליקה עדיין לא הוגדרה. צריך MORNING_API_KEY_ID ו-MORNING_API_KEY_SECRET ב-Vercel.',
@@ -317,14 +347,7 @@ async function handler(req, res) {
         error: 'דילוג על תשלום אסור בפרודקשן.',
       });
     }
-    const skipPayload = buildPaymentFormPayload({
-      order,
-      customer: customerResult.customer,
-      env,
-      envVars: process.env,
-      successUrl,
-      failureUrl,
-    });
+    const skipPayload = freeDraft;
     const reserved = await reserveInventory(process.env, order);
     if (reserved.error) {
       return res.status(409).json({ error: reserved.error });
@@ -342,14 +365,7 @@ async function handler(req, res) {
     return res.status(502).json({ error: 'לא הצלחנו להתחבר לסליקה. נסי שוב בעוד רגע.' });
   }
 
-  const draft = buildPaymentFormPayload({
-    order,
-    customer: customerResult.customer,
-    env,
-    envVars: process.env,
-    successUrl,
-    failureUrl,
-  });
+  const draft = freeDraft;
   const orderToken = signOrder(process.env, {
     orderId: newOrderId(),
     purchases: inventoryPurchases(order),

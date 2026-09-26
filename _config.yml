@@ -100,4 +100,6 @@ exclude:
   - lib/
   - test/
   - scripts/
+  # Coupon codes are admin-only; checkout loads them from the function bundle.
+  - _coupons/
   - .env.example

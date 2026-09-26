@@ -142,6 +142,10 @@
   &.is-dragging {
     opacity: 0.4;
   }
+
+  &.admin-card--plain {
+    grid-template-columns: 1fr;
+  }
 }
 
 .admin-card__order {

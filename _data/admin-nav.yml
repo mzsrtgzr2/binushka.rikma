@@ -11,3 +11,7 @@
 - id: newsletter
   label: הניוזלטר
   url: /admin/newsletter/
+
+- id: coupons
+  label: קופונים
+  url: /admin/coupons/

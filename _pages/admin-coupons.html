@@ -14,7 +14,8 @@ noindex: true
   <p class="admin-lead">
     כאן מגדירים קודי קופון מראש. הלקוחות מזינים אותם בעמוד התשלום לפני המעבר ל־Grow.
     אפשר להגדיר הנחה באחוזים או בסכום קבוע בשקלים — ההנחה חלה על המוצרים, לא על המשלוח.
-    אפשר גם לשים תאריך תפוגה לקוד.
+    אפשר להגביל למינימום רכישה, לקטגוריה או למוצר ספציפי, ולשים תאריך תפוגה.
+    אי אפשר ליצור קופון של 100% הנחה על הסל.
   </p>
 
   {% include admin-login.html %}
@@ -67,6 +68,50 @@ noindex: true
               placeholder="למשל 10"
             >
             <p class="admin-hint" id="coupon-value-hint">למשל 10 לאחוזים, או 50 לסכום בשקלים.</p>
+          </div>
+        </div>
+
+        <div class="admin-grid admin-grid--coupons">
+          <div class="form__group">
+            <label class="form__label" for="coupon-min-purchase">מינימום רכישה (אופציונלי)</label>
+            <input
+              class="form__input admin-input--ltr"
+              type="number"
+              id="coupon-min-purchase"
+              dir="ltr"
+              min="0"
+              step="1"
+              inputmode="numeric"
+              placeholder="למשל 200"
+            >
+            <p class="admin-hint">סכום מוצרים מינימלי בשקלים (בלי משלוח). ריק = בלי מינימום.</p>
+          </div>
+
+          <div class="form__group">
+            <label class="form__label" for="coupon-applies-to">חל על</label>
+            <select class="form__input" id="coupon-applies-to">
+              <option value="all">כל המוצרים בסל</option>
+              <option value="category">קטגוריה</option>
+              <option value="product">מוצר ספציפי</option>
+            </select>
+          </div>
+
+          <div class="form__group" id="coupon-category-group" hidden>
+            <label class="form__label" for="coupon-category">קטגוריה</label>
+            <select class="form__input" id="coupon-category">
+              <option value="">בחרי קטגוריה</option>
+              <option value="embroidery-supplies">ציוד רקמה</option>
+              <option value="works-for-sale">עבודות למכירה</option>
+              <option value="workshops">סדנאות</option>
+            </select>
+          </div>
+
+          <div class="form__group" id="coupon-product-group" hidden>
+            <label class="form__label" for="coupon-product">מוצר</label>
+            <select class="form__input" id="coupon-product">
+              <option value="">בחרי מוצר</option>
+            </select>
+            <p class="admin-hint">ההנחה תחול רק על המוצר הזה בסל.</p>
           </div>
         </div>
 

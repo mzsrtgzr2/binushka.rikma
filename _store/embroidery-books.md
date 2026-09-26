@@ -5,7 +5,7 @@ subtitle: השראה מיוחדת
 image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-21-39-muehtzc1.jpg
 price: ₪195
 out_of_stock: false
-limited_stock: false
+limited_stock: true
 hide: false
 category: embroidery-supplies
 variants:
@@ -92,11 +92,11 @@ variants:
     name: רקמות בוטניות של יומיקו
     price: 195
     stock: 2
-    image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-16-mui8fy5k.jpg
+    image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-46-mui8gwqe.jpg
     gallery:
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-16-mui8fy5k.jpg
       - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-40-mui8fy5k.jpg
       - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-40-mui8gwqe.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-46-mui8gwqe.jpg
       - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-53-mui8gwqf.jpg
     description: "ספר יפהפה של Yumiko Higuchi, שמחבר בין אהבתה למוטיבים מהטבע לבין משחק בחומר ובטקסטורה.\n\nבספר תמצאי 39 פרויקטים של פרחים, עלים ומוטיבים בוטניים, שנרקמו בסוגים שונים של חוטים – מצמר וכותנה ועד פרל קוטון וחוטים מטאליים. כל סוג חוט נותן לרקמה אופי אחר, והספר מראה איך לעבוד איתם ולנצל את התכונות שלהם לטובת התוצאה הסופית.\n\nההסברים ברורים ומלווים בתצלומים, תרשימים והוראות שלב־אחר־שלב, כך שהוא מתאים גם למי שרק מתחילה להתנסות ברקמה וגם למי שכבר רוקמת ורוצה להכניס קצת יותר עומק, חומריות וטקסטורה לעבודות שלה.\n\nספר שכיף לפתוח בשביל פרויקט אחד – ולהישאר בו עוד קצת רק בשביל להסתכל."
 ---

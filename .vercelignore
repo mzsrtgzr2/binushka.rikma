@@ -6,9 +6,6 @@ node_modules
 .sass-cache
 
 # Vercel turns every uploaded file under api/ into a Serverless Function, and
-# Hobby deployments cap out at 12. These are node:test files that export no
-# handler, so they only ever deployed as broken endpoints and consumed slots.
-# `node --test` reads the repo, not the deployment, so it is unaffected.
-# Library modules belong in lib/. A non-handler file here is deployed as a
-# function and uses one of those slots.
+# Hobby deployments cap out at 12. Handlers live in lib/routes/ and api/ holds
+# only the catch-all plus generated JSON snapshots. Tests live under test/.
 api/*.test.js

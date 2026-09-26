@@ -13,7 +13,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
 
-import handler, { delivery } from '../api/admin-newsletter.mjs';
+import handler, { delivery } from '../lib/routes/admin-newsletter.mjs';
 import { COOKIE, issueSession } from '../lib/admin/auth.mjs';
 import * as repo from '../lib/admin/repo.mjs';
 import * as issues from '../lib/newsletter/issues.mjs';

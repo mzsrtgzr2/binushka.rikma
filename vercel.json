@@ -7,7 +7,7 @@
   "cleanUrls": true,
   "trailingSlash": true,
   "functions": {
-    "api/*.js": {
+    "api/*.mjs": {
       "includeFiles": "{_store,_projects}/**"
     }
   },

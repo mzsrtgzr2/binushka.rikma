@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const prices = require('./prices');
-const admin = require('./admin');
+const prices = require('../lib/routes/prices');
+const admin = require('../lib/routes/admin');
 
 function mockRes() {
   return {

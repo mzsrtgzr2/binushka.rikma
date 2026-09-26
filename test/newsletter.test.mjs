@@ -13,8 +13,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
 
-import subscribe from '../api/newsletter/subscribe.mjs';
-import unsubscribe from '../api/newsletter/unsubscribe.mjs';
+import subscribe from '../lib/routes/newsletter/subscribe.mjs';
+import unsubscribe from '../lib/routes/newsletter/unsubscribe.mjs';
 import * as store from '../lib/newsletter/subscribers.mjs';
 import * as tokens from '../lib/newsletter/tokens.mjs';
 import { buildSubject, markdownToHtml, renderIssueEmail, sendIssue } from '../lib/newsletter/mailer.mjs';

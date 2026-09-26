@@ -3,9 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const notify = require('../api/payment-notify');
-const checkout = require('../api/checkout');
-const admin = require('../api/admin');
+const notify = require('../lib/routes/payment-notify');
+const checkout = require('../lib/routes/checkout');
+const admin = require('../lib/routes/admin');
 const { signOrder, verifyOrder, newOrderId } = require('../lib/order-token');
 
 const SECRET = 'order-secret-for-tests';

@@ -668,10 +668,11 @@
       if (typeof done === 'function') done(null);
       return;
     }
-    fetch('/api/coupon/', {
+    fetch('/api/checkout/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        action: 'preview-coupon',
         code: coupon.code,
         items: items.map(function (item) {
           var row = { id: item.id, quantity: item.quantity };

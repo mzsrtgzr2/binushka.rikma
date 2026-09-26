@@ -329,3 +329,26 @@ test('workshop places become income lines without shipping', () => {
   assert.equal(payload.amount, 660);
   assert.ok(payload.income.every((row) => !row.kind));
 });
+
+test('checkout preview-coupon rejects an empty code without opening Grow', async () => {
+  const saved = { SITE_URL: process.env.SITE_URL };
+  process.env.SITE_URL = 'https://rikma.binushka.com';
+  const req = {
+    method: 'POST',
+    headers: { origin: 'https://rikma.binushka.com' },
+    body: {
+      action: 'preview-coupon',
+      code: '   ',
+      items: [{ id: 'fox', quantity: 1 }],
+      shipping: 'pickup',
+    },
+  };
+  const res = mockRes();
+  try {
+    await checkout(req, res);
+  } finally {
+    process.env.SITE_URL = saved.SITE_URL;
+  }
+  assert.equal(res.statusCode, 400);
+  assert.match(res.body.error, /קופון/);
+});

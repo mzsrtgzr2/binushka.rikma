@@ -1,6 +1,7 @@
 /**
  * Coupon backoffice: list, create, edit, delete codes.
- * Login posts to /api/admin/ (shared session); this endpoint only verifies it.
+ * Login and coupon CRUD both go through /api/admin/ (shared session + Hobby
+ * function budget — a dedicated /api/admin-coupons would exceed the 12-function cap).
  */
 (function () {
   var loginForm = document.getElementById('admin-login');
@@ -86,7 +87,13 @@
   }
 
   function api(method, body) {
-    return request('/api/admin-coupons', method, body);
+    if (method === 'GET') {
+      return request('/api/admin/?resource=coupons', 'GET');
+    }
+    var payload = Object.assign({}, body || {});
+    if (payload.action === 'save') payload.action = 'coupon-save';
+    if (payload.action === 'delete') payload.action = 'coupon-delete';
+    return request('/api/admin/', method, payload);
   }
 
   function formatDiscount(row) {

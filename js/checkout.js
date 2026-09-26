@@ -170,10 +170,11 @@
     }
     showCouponMessage('בודקת…', 'info');
     var shipping = needsShipping(items) ? selectedShipping() : 'none';
-    return fetch('/api/coupon/', {
+    return fetch('/api/checkout/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        action: 'preview-coupon',
         code: clean,
         items: couponPayloadItems(items),
         shipping: shipping,

@@ -21,7 +21,8 @@ function. The browser posts to `/api/checkout/`.
 Every file uploaded under `api/` becomes its own function, and Hobby deployments reject
 more than 12. `.vercelignore` therefore drops `api/*.test.js`: those are `node:test` files
 with no handler, so they only ever deployed as broken endpoints. Tests still run from the
-repo with `node --test`. The deployment is at 9 functions.
+repo with `node --test`. Coupon preview and coupon admin reuse `/api/checkout` and
+`/api/admin` so the deploy stays under the cap.
 
 ## Store cart
 

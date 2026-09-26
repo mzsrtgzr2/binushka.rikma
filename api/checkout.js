@@ -45,6 +45,47 @@ const MORNING_ERROR_HE = {
 };
 
 const checkoutLimiter = createRateLimiter({ windowMs: 60 * 1000, max: 20 });
+// Coupon preview shares this function so Hobby stays under the 12-function cap
+// (a dedicated /api/coupon.js would push the deploy over the limit).
+const couponLimiter = createRateLimiter({ windowMs: 60 * 1000, max: 30 });
+
+function previewCoupon(req, res, body) {
+  if (couponLimiter(clientIp(req))) {
+    return res.status(429).json({ error: 'יותר מדי ניסיונות. נסי שוב בעוד רגע.' });
+  }
+
+  const code = coupons.normalizeCode(body.code);
+  if (!code) {
+    return res.status(400).json({ error: 'יש להזין קוד קופון' });
+  }
+
+  const order = applyGiftPacking(
+    applyWorkshopNote(
+      applyVariantNote(buildOrder(body.items, body.shipping || 'none'), body.variantNote),
+      body.participantsNote
+    ),
+    body
+  );
+  if (order.error) {
+    return res.status(400).json({ error: order.error });
+  }
+
+  const next = coupons.applyCoupon(order, code, coupons.loadFromDir());
+  if (next.error) {
+    return res.status(400).json({ error: next.error });
+  }
+
+  return res.status(200).json({
+    ok: true,
+    code: next.coupon.code,
+    type: next.coupon.type,
+    value: next.coupon.value,
+    discount: next.discount,
+    subtotal: next.subtotal,
+    shipping: next.shipping,
+    total: next.total,
+  });
+}
 
 function resolvePluginId(env, envVars) {
   const vars = envVars || {};
@@ -274,6 +315,11 @@ async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const body = req.body || {};
+  if (body.action === 'preview-coupon') {
+    return previewCoupon(req, res, body);
+  }
+
   if (checkoutLimiter(clientIp(req))) {
     return res.status(429).json({ error: 'יותר מדי ניסיונות תשלום. נסי שוב בעוד רגע.' });
   }
@@ -282,7 +328,6 @@ async function handler(req, res) {
   const keySecret = process.env.MORNING_API_KEY_SECRET;
   const env = resolveMorningEnv(process.env.MORNING_ENV);
 
-  const body = req.body || {};
   let order = applyGiftPacking(
     applyWorkshopNote(
       applyVariantNote(buildOrder(body.items, body.shipping), body.variantNote),

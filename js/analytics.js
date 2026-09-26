@@ -5,9 +5,10 @@
  * store-sort.js to report the shop funnel. Every call is a no-op when Mixpanel
  * is missing, so the shop keeps working with analytics disabled or blocked.
  *
- * Page views are Mixpanel's automatic page-view event (track_pageview).
- * Autocapture stays off so those page views, and the explicit events below,
- * are not recorded twice.
+ * Page views and clicks are Mixpanel Autocapture. track_pageview stays off
+ * so those page views are not recorded a second time. The explicit events
+ * below are the shop funnel. Session replay is on so the Mixpanel setup
+ * check, and later visits, can show a recording.
  *
  * Add ?analytics_debug=1 to any URL to log events to the console.
  */

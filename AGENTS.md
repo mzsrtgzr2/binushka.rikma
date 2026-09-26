@@ -7,9 +7,9 @@ Mixpanel is the analytics tool for this site. Google Analytics is not used.
 - Platform: Jekyll, browser JavaScript. There is no frontend bundler, so the SDK is the official snippet in `_includes/mixpanel.html` (library from `https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js`).
 - Token: `_data/settings.yml` key `mixpanel-token`. The snippet is included from `_layouts/default.html` and `_layouts/retreat.html` only when that key is set.
 - `_layouts/admin.html` does not load Mixpanel. Keep it that way so admin work stays out of the project.
-- Init options: `track_pageview: true`, `autocapture: false`, `persistence: "localStorage"`. A super property `platform: "web"` is registered immediately after init.
-- Do not set `autocapture: true` together with `track_pageview: true`. Autocapture already records page views, and the combination duplicates them. Do not add manual `page_view` events either.
-- Session replay is off. Microsoft Clarity remains the optional recording tool (`clarity` in `_data/settings.yml`).
+- Init options: `autocapture: true`, `persistence: "localStorage"`, `record_sessions_percent: 100`, `record_heatmap_data: true`. A super property `platform: "web"` is registered immediately after init.
+- Do not set `track_pageview: true` while Autocapture is on, and do not add manual `page_view` events. Autocapture already records page views, and the combination duplicates them.
+- Session replay records every session. Mixpanel masks text inputs by default. Microsoft Clarity is still the optional extra recorder (`clarity` in `_data/settings.yml`).
 
 ## Events
 

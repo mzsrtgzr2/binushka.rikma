@@ -320,9 +320,12 @@
       "stock": null,
       "outOfStock": false,
       "limitedStock": true,
-      "name": "ערכת רקמה  שהיא מפה רקומה",
+      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
       "variants": {
         "type-1": {
+          "stock": 1
+        },
+        "type-2": {
           "stock": 1
         }
       }

@@ -47,13 +47,29 @@ layout: default
 {% endif %}
 
 <div class="projects-page container animate">
-  <div class="workshop-filters" id="workshop-filters" role="group" aria-label="סינון לפי קטגוריה">
-    <span class="workshop-filters__label">בחירת סוג:</span>
-    <div class="workshop-filters__pills">
-      <button type="button" class="workshop-filter is-active" data-workshop-category="" aria-pressed="true">הכל</button>
-      {% for category in site.data.workshop-categories %}
-      <button type="button" class="workshop-filter" data-workshop-category="{{ category[0] }}" aria-pressed="false">{{ category[1] }}</button>
-      {% endfor %}
+  <div class="workshop-filters" id="workshop-filters" aria-label="סינון סדנאות">
+    <div class="workshop-filters__row" role="group" aria-label="סינון לפי קטגוריה">
+      <span class="workshop-filters__label">בחירת סוג:</span>
+      <div class="workshop-filters__pills">
+        <button type="button" class="workshop-filter is-active" data-workshop-category="" aria-pressed="true">הכל</button>
+        {% for category in site.data.workshop-categories %}
+        <button type="button" class="workshop-filter" data-workshop-category="{{ category[0] }}" aria-pressed="false">{{ category[1] }}</button>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="workshop-filters__row workshop-filters__dates" role="group" aria-label="סינון לפי טווח תאריכים">
+      <span class="workshop-filters__label">טווח תאריכים:</span>
+      <div class="workshop-filters__date-fields">
+        <label class="workshop-filters__date" for="workshop-date-from">
+          <span class="workshop-filters__date-label">מ־</span>
+          <input class="workshop-filters__date-input" type="date" id="workshop-date-from" name="workshop-date-from" dir="ltr">
+        </label>
+        <label class="workshop-filters__date" for="workshop-date-to">
+          <span class="workshop-filters__date-label">עד</span>
+          <input class="workshop-filters__date-input" type="date" id="workshop-date-to" name="workshop-date-to" dir="ltr">
+        </label>
+        <button type="button" class="workshop-filters__clear-dates" id="workshop-date-clear" hidden>ניקוי תאריכים</button>
+      </div>
     </div>
   </div>
 
@@ -83,6 +99,6 @@ layout: default
       {% include project-card.html project=project %}
     {% endfor %}
   </div>
-  <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות בקטגוריה הזו כרגע.</p>
+  <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות שמתאימות לסינון כרגע.</p>
 </div>
 <script src="{{ site.baseurl }}/js/workshop-filter.js" defer></script>

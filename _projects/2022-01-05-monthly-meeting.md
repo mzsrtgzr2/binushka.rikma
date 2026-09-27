@@ -2,6 +2,7 @@
 title: מפגש רקמה ברחובות
 date: 2025-10-21 11:00:00 +0300
 subtitle: רביעי בבוקר אחת לחודש
+category: advanced
 image: '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
 permalink: /projects/monthly-meeting/
 form_url: https://pages.greeninvoice.co.il/payments/links/59988810-26f7-4902-9e5d-0d9a5cb1d8ac

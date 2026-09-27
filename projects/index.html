@@ -47,7 +47,17 @@ layout: default
 {% endif %}
 
 <div class="projects-page container animate">
-  <div class="row">
+  <div class="workshop-filters" id="workshop-filters" role="group" aria-label="סינון לפי קטגוריה">
+    <span class="workshop-filters__label">בחירת סוג:</span>
+    <div class="workshop-filters__pills">
+      <button type="button" class="workshop-filter is-active" data-workshop-category="" aria-pressed="true">הכל</button>
+      {% for category in site.data.workshop-categories %}
+      <button type="button" class="workshop-filter" data-workshop-category="{{ category[0] }}" aria-pressed="false">{{ category[1] }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="row" id="workshops-grid">
     {% comment %}
       A workshop only carries `order` once it has been placed by hand in the
       backoffice. Anything not placed yet keeps falling back to its date, so a
@@ -73,4 +83,6 @@ layout: default
       {% include project-card.html project=project %}
     {% endfor %}
   </div>
+  <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות בקטגוריה הזו כרגע.</p>
 </div>
+<script src="{{ site.baseurl }}/js/workshop-filter.js" defer></script>

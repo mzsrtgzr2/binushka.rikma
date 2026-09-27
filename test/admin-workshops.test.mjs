@@ -132,6 +132,35 @@ test('a workshop survives a write and read unchanged', () => {
   assert.equal(after.body, before.body);
 });
 
+test('workshop category is read, written and rejected when unknown', () => {
+  const withCategory = workshops.serialize(
+    workshops.normalize({
+      title: 'סדנה',
+      date: '2026-05-01T18:30',
+      slug: 'cat',
+      category: 'beginners',
+    })
+  );
+  assert.match(withCategory, /^category: beginners$/m);
+  assert.equal(workshops.parse('2026-05-01-cat.md', withCategory).category, 'beginners');
+
+  const cleared = workshops.serialize(
+    workshops.normalize({
+      title: 'סדנה',
+      date: '2026-05-01T18:30',
+      slug: 'cat',
+      category: '',
+    }),
+    withCategory
+  );
+  assert.doesNotMatch(cleared, /^category:/m);
+
+  assert.throws(
+    () => workshops.normalize({ title: 'סדנה', date: '2026-05-01T18:30', slug: 'cat', category: 'nope' }),
+    (err) => err instanceof workshops.WorkshopError && err.code === 'category_invalid'
+  );
+});
+
 // Every workshop page in the repository has a bare timestamp. Quoting it here
 // would still parse, but the editor should not be the one file that reads
 // differently from the twenty written by hand.

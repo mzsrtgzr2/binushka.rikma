@@ -369,6 +369,14 @@
     return '₪' + row.value;
   }
 
+  function formatUses(row) {
+    var n = Number(row && row.uses);
+    if (!Number.isFinite(n) || n < 0) n = 0;
+    n = Math.floor(n);
+    if (n === 1) return 'מימוש אחד';
+    return n + ' מימושים';
+  }
+
   function formatScope(row) {
     if (row.applies_to === 'category' && row.category) {
       if (row.category === 'workshops' && row.products && row.products.length) {
@@ -490,6 +498,7 @@
         var scope = formatScope(row);
         if (scope) meta += ' · ' + scope;
         if (row.expires) meta += ' · בתוקף עד ' + row.expires;
+        meta += ' · ' + formatUses(row);
         if (row.note) meta += ' · ' + row.note;
         return (
           '<li class="admin-card admin-card--plain" data-code="' +

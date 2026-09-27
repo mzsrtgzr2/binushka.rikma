@@ -2,6 +2,7 @@
  * Coupon backoffice: list, create, edit, delete codes.
  * Login and coupon CRUD both go through /api/admin/ (shared session + Hobby
  * function budget — a dedicated /api/admin-coupons would exceed the 12-function cap).
+ * Workshop list for scoped coupons comes from /api/admin-workshops.
  */
 (function () {
   var loginForm = document.getElementById('admin-login');
@@ -26,12 +27,17 @@
   var categoryInput = document.getElementById('coupon-category');
   var productGroup = document.getElementById('coupon-product-group');
   var productInput = document.getElementById('coupon-product');
+  var workshopsGroup = document.getElementById('coupon-workshops-group');
+  var workshopScopeInput = document.getElementById('coupon-workshop-scope');
+  var workshopsList = document.getElementById('coupon-workshops-list');
+  var workshopsHint = document.getElementById('coupon-workshops-hint');
   var activeInput = document.getElementById('coupon-active');
   var cancelBtn = document.getElementById('coupon-cancel');
   if (!loginForm || !board || !form) return;
 
   var coupons = [];
   var products = [];
+  var workshops = [];
   var editing = null;
 
   var CATEGORY_LABELS = {
@@ -75,6 +81,7 @@
       applies_to_invalid: 'בחרי על מה הקופון חל',
       category_invalid: 'בחרי קטגוריה',
       product_invalid: 'בחרי מוצר',
+      products_invalid: 'בחרי לפחות סדנה אחת',
       invalid_request: 'הבקשה לא תקינה'
     };
     return messages[code] || '';
@@ -89,6 +96,7 @@
     if (name === 'applies_to') return appliesToInput;
     if (name === 'category') return categoryInput;
     if (name === 'product') return productInput;
+    if (name === 'products') return workshopScopeInput;
     return null;
   }
 
@@ -112,10 +120,31 @@
     return Math.round(n);
   }
 
+  function isWorkshopsCategory() {
+    return (
+      appliesToInput &&
+      appliesToInput.value === 'category' &&
+      categoryInput &&
+      categoryInput.value === 'workshops'
+    );
+  }
+
   function syncScopeFields() {
     var scope = appliesToInput ? appliesToInput.value : 'all';
     if (categoryGroup) categoryGroup.hidden = scope !== 'category';
     if (productGroup) productGroup.hidden = scope !== 'product';
+    if (workshopsGroup) workshopsGroup.hidden = !isWorkshopsCategory();
+    syncWorkshopScope();
+  }
+
+  function syncWorkshopScope() {
+    var selected = workshopScopeInput && workshopScopeInput.value === 'selected';
+    if (workshopsList) workshopsList.hidden = !selected || !isWorkshopsCategory();
+    if (workshopsHint) {
+      workshopsHint.textContent = selected
+        ? 'סמני את הסדנאות שעליהן יחול הקופון (אחת או יותר).'
+        : 'ההנחה תחול על כל הסדנאות בסל. אפשר לצמצם לסדנאות ספציפיות.';
+    }
   }
 
   function fillProductOptions(selected) {
@@ -141,6 +170,58 @@
         })
         .join('');
     productInput.innerHTML = options;
+  }
+
+  function workshopLabel(row) {
+    var title = row.title || row.slug || row.id || '';
+    if (row.date) return title + ' · ' + row.date;
+    return title;
+  }
+
+  function fillWorkshopOptions(selectedIds) {
+    if (!workshopsList) return;
+    var selected = {};
+    (selectedIds || []).forEach(function (id) {
+      selected[id] = true;
+    });
+    if (!workshops.length) {
+      workshopsList.innerHTML = '<p class="admin-hint">אין סדנאות להצגה.</p>';
+      return;
+    }
+    workshopsList.innerHTML = workshops
+      .slice()
+      .sort(function (a, b) {
+        var da = String(a.date || '');
+        var db = String(b.date || '');
+        if (da !== db) return db.localeCompare(da);
+        return String(a.title || a.slug || '').localeCompare(String(b.title || b.slug || ''), 'he');
+      })
+      .map(function (w) {
+        var id = w.id || '';
+        if (!id) return '';
+        return (
+          '<label class="admin-check">' +
+          '<input type="checkbox" name="coupon-workshop" value="' +
+          escapeHtml(id) +
+          '"' +
+          (selected[id] ? ' checked' : '') +
+          '> ' +
+          escapeHtml(workshopLabel(w)) +
+          '</label>'
+        );
+      })
+      .filter(Boolean)
+      .join('');
+  }
+
+  function readSelectedWorkshops() {
+    if (!workshopsList) return [];
+    return Array.prototype.slice
+      .call(workshopsList.querySelectorAll('input[name="coupon-workshop"]:checked'))
+      .map(function (el) {
+        return el.value;
+      })
+      .filter(Boolean);
   }
 
   function validateBeforeSave() {
@@ -186,6 +267,7 @@
     }
     var category = categoryInput ? categoryInput.value : '';
     var product = productInput ? productInput.value : '';
+    var selectedWorkshops = [];
     if (appliesTo === 'category' && !category) {
       show(formMessage, errorText('category_invalid'), 'error');
       if (categoryInput) categoryInput.focus();
@@ -195,6 +277,16 @@
       show(formMessage, errorText('product_invalid'), 'error');
       if (productInput) productInput.focus();
       return null;
+    }
+    if (appliesTo === 'category' && category === 'workshops') {
+      if (workshopScopeInput && workshopScopeInput.value === 'selected') {
+        selectedWorkshops = readSelectedWorkshops();
+        if (!selectedWorkshops.length) {
+          show(formMessage, errorText('products_invalid'), 'error');
+          if (workshopScopeInput) workshopScopeInput.focus();
+          return null;
+        }
+      }
     }
     return {
       action: 'save',
@@ -209,6 +301,8 @@
         applies_to: appliesTo,
         category: appliesTo === 'category' ? category : '',
         product: appliesTo === 'product' ? product : '',
+        products:
+          appliesTo === 'category' && category === 'workshops' ? selectedWorkshops : [],
         active: activeInput.checked
       }
     };
@@ -261,6 +355,15 @@
     });
   }
 
+  function loadWorkshops() {
+    return request('/api/admin-workshops', 'GET').then(function (data) {
+      workshops = (data.workshops || []).filter(function (w) {
+        return w && w.id;
+      });
+      fillWorkshopOptions([]);
+    });
+  }
+
   function formatDiscount(row) {
     if (row.type === 'percent') return row.value + '%';
     return '₪' + row.value;
@@ -268,6 +371,16 @@
 
   function formatScope(row) {
     if (row.applies_to === 'category' && row.category) {
+      if (row.category === 'workshops' && row.products && row.products.length) {
+        var labels = row.products.map(function (id) {
+          var match = workshops.find(function (w) {
+            return w.id === id;
+          });
+          return match ? match.title || match.slug || id : id;
+        });
+        if (labels.length === 1) return 'סדנה: ' + labels[0];
+        return 'סדנאות: ' + labels.join(', ');
+      }
       return 'קטגוריה: ' + (CATEGORY_LABELS[row.category] || row.category);
     }
     if (row.applies_to === 'product' && row.product) {
@@ -316,7 +429,9 @@
     if (minPurchaseInput) minPurchaseInput.value = '';
     if (appliesToInput) appliesToInput.value = 'all';
     if (categoryInput) categoryInput.value = '';
+    if (workshopScopeInput) workshopScopeInput.value = 'all';
     fillProductOptions('');
+    fillWorkshopOptions([]);
     codeInput.readOnly = false;
     if (formLegend) formLegend.textContent = 'קוד חדש';
     if (cancelBtn) cancelBtn.hidden = true;
@@ -339,6 +454,11 @@
     if (appliesToInput) appliesToInput.value = row.applies_to || 'all';
     if (categoryInput) categoryInput.value = row.category || '';
     fillProductOptions(row.product || '');
+    var selected = Array.isArray(row.products) ? row.products : [];
+    if (workshopScopeInput) {
+      workshopScopeInput.value = selected.length ? 'selected' : 'all';
+    }
+    fillWorkshopOptions(selected);
     activeInput.checked = row.active !== false;
     if (formLegend) formLegend.textContent = 'עריכת ' + row.code;
     if (cancelBtn) cancelBtn.hidden = false;
@@ -400,9 +520,16 @@
   }
 
   function loadBoard() {
-    return Promise.all([api('GET'), loadProducts().catch(function () {
-      products = [];
-    })]).then(function (results) {
+    return Promise.all([
+      api('GET'),
+      loadProducts().catch(function () {
+        products = [];
+      }),
+      loadWorkshops().catch(function () {
+        workshops = [];
+        fillWorkshopOptions([]);
+      })
+    ]).then(function (results) {
       var data = results[0];
       coupons = data.coupons || [];
       board.hidden = false;
@@ -448,6 +575,12 @@
   typeInput.addEventListener('change', syncValueHint);
   if (appliesToInput) {
     appliesToInput.addEventListener('change', syncScopeFields);
+  }
+  if (categoryInput) {
+    categoryInput.addEventListener('change', syncScopeFields);
+  }
+  if (workshopScopeInput) {
+    workshopScopeInput.addEventListener('change', syncWorkshopScope);
   }
 
   if (cancelBtn) {

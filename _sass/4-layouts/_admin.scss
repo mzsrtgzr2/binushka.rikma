@@ -180,6 +180,22 @@
   }
 }
 
+.admin-coupon-workshops {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  max-height: 240px;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--background-alt-color);
+
+  .admin-check {
+    margin: 0;
+  }
+}
+
 .admin-card__order {
   display: grid;
   gap: 4px;

@@ -33,12 +33,25 @@
     return months.indexOf(activeMonth) !== -1;
   }
 
+  // Beginners / advanced filters also include "all levels" workshops.
+  function matchesCategory(el) {
+    if (!activeCategory) return true;
+    var category = el.getAttribute('data-category') || '';
+    if (category === activeCategory) return true;
+    if (
+      (activeCategory === 'beginners' || activeCategory === 'advanced') &&
+      category === 'all-levels'
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   function applyFilter() {
     var items = grid.querySelectorAll('.project');
     var visible = 0;
     items.forEach(function (el) {
-      var categoryMatch = !activeCategory || el.getAttribute('data-category') === activeCategory;
-      var match = categoryMatch && matchesMonth(el);
+      var match = matchesCategory(el) && matchesMonth(el);
       if (match) {
         el.removeAttribute('hidden');
         visible += 1;

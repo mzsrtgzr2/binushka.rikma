@@ -22,8 +22,11 @@ posts to `/api/checkout/`. Coupon preview and coupon admin reuse `/api/checkout`
 and `/api/admin` so the deploy stays at one function.
 
 `vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308
-that function. Tests live under `test/` and run with `node --test`; they are not
-uploaded as functions.
+that function. Vercel still only invokes the catch-all for a single segment, so
+`/api/newsletter/subscribe` and `/api/newsletter/unsubscribe` (the signup form and
+the links already sent in mail) are rewritten first to `/api/newsletter-subscribe`
+and `/api/newsletter-unsubscribe`. The `?t=` token stays on the request. Tests
+live under `test/` and run with `node --test`; they are not uploaded as functions.
 
 ## Store cart
 

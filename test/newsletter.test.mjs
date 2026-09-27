@@ -455,6 +455,18 @@ test('unsubscribe reports itself unavailable when unconfigured', async () => {
   assert.equal(res.statusCode, 503);
 });
 
+test('a one-click POST reads the token from the query object', async () => {
+  configure();
+
+  const res = makeResponse();
+  const request = makeRequest({ method: 'POST', url: '/api/newsletter-unsubscribe' });
+  request.query = { t: 'forged.0123456789abcdef0123456789abcdef' };
+  await unsubscribe(request, res);
+
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.code, 'invalid_token');
+});
+
 test('a one-click POST with an unsigned token is refused', async () => {
   configure();
 

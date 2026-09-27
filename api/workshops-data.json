@@ -64,7 +64,7 @@
     "price": 300,
     "kind": "workshop",
     "shipping": false,
-    "stock": 4,
+    "stock": 5,
     "variants": {
       "pack-1": {
         "name": "שתי משתתפות ביחד",

@@ -61,10 +61,17 @@
   },
   "workshop-rehovot-09-10": {
     "name": "סדנת קרושה למתחילות — 9.10 שישי בבוקר",
-    "price": 330,
+    "price": 600,
     "kind": "workshop",
     "shipping": false,
-    "stock": 5
+    "stock": 5,
+    "variants": {
+      "pack-1": {
+        "name": "שתי משתתפות ביחד",
+        "price": 600,
+        "places": 2
+      }
+    }
   },
   "workshop-rehovot-29-10": {
     "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",

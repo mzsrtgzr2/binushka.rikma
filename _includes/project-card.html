@@ -15,7 +15,7 @@
 {%- if project.category and site.data.workshop-categories[project.category] -%}
 {%- assign category_label = site.data.workshop-categories[project.category] -%}
 {%- endif -%}
-<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ project.category }}"{% if project.date %} data-date="{{ project.date | date: '%Y-%m-%d' }}"{% endif %}>
+<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ project.category }}"{% if project.date %} data-month="{{ project.date | date: '%m' }}"{% endif %}>
   <div class="project__content">
     <a href="{{ project.url }}" class="project__image">
       <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">

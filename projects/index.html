@@ -57,18 +57,13 @@ layout: default
         {% endfor %}
       </div>
     </div>
-    <div class="workshop-filters__row workshop-filters__dates" role="group" aria-label="סינון לפי טווח תאריכים">
-      <span class="workshop-filters__label">טווח תאריכים:</span>
-      <div class="workshop-filters__date-fields">
-        <label class="workshop-filters__date" for="workshop-date-from">
-          <span class="workshop-filters__date-label">מ־</span>
-          <input class="workshop-filters__date-input" type="date" id="workshop-date-from" name="workshop-date-from" dir="ltr">
-        </label>
-        <label class="workshop-filters__date" for="workshop-date-to">
-          <span class="workshop-filters__date-label">עד</span>
-          <input class="workshop-filters__date-input" type="date" id="workshop-date-to" name="workshop-date-to" dir="ltr">
-        </label>
-        <button type="button" class="workshop-filters__clear-dates" id="workshop-date-clear" hidden>ניקוי תאריכים</button>
+    <div class="workshop-filters__row" role="group" aria-label="סינון לפי חודש">
+      <span class="workshop-filters__label">בחירת חודש:</span>
+      <div class="workshop-filters__pills">
+        <button type="button" class="workshop-filter is-active" data-workshop-month="" aria-pressed="true">הכל</button>
+        {% for month in site.data.months %}
+        <button type="button" class="workshop-filter" data-workshop-month="{{ month[0] }}" aria-pressed="false">{{ month[1] }}</button>
+        {% endfor %}
       </div>
     </div>
   </div>

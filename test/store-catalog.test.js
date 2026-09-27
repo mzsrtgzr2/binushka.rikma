@@ -316,6 +316,32 @@ variants:
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test('catalog price stays the per-participant fare when only a pair pack exists', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-pair-only-'));
+  writePage(
+    dir,
+    '2026-10-09-crochet',
+    `title: סדנת קרושה
+subtitle: שישי בבוקר
+cart_price: 330
+spots: 5
+variants:
+  pair:
+    name: שתי משתתפות ביחד
+    price: 600
+    places: 2
+`
+  );
+  const catalog = store.buildWorkshopCatalogFromDir(dir);
+  const row = catalog['workshop-crochet'];
+  assert.equal(row.price, 330);
+  assert.equal(row.variants.one.price, 330);
+  assert.equal(row.variants.one.places, 1);
+  assert.equal(row.variants.pair.price, 600);
+  assert.equal(row.variants.pair.places, 2);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test('applyWorkshopStock writes spots, full, and hide', () => {
   const raw = `---
 title: סדנת רקמה

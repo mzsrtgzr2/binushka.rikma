@@ -2,6 +2,7 @@
 title: סדנת רקמה פרטית
 date: 2025-12-30 19:00:00 +0300
 subtitle: בזמן שמתאים לכם
+category: all-levels
 image: '/images/gallery/6A0F9AB8-9045-4401-BF34-5DA77DA4C596_1_105_c.jpeg'
 permalink: /projects/private-workshop/
 form_url: https://pay.grow.link/5994080e6dac0eaf4b84f20b39568868-MjYyODg5NQ

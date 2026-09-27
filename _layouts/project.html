@@ -29,6 +29,10 @@ layout: default
       <div class="registration-full-text">מקומות אחרונים</div>
     {% endif %}
 
+    {% if page.category and site.data.workshop-categories[page.category] %}
+      <p class="project-category">{{ site.data.workshop-categories[page.category] }}</p>
+    {% endif %}
+
     {% if page.subtitle %}
       <p class="project-subtitle">{{ page.subtitle }}</p>
     {% endif %}

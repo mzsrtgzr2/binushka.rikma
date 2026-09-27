@@ -1,0 +1,6 @@
+# Audience filters on /projects/. Keys must match WORKSHOP_CATEGORIES in
+# lib/store/constants.js.
+beginners: למתחילות
+advanced: למתקדמות
+mothers: לאמהות בחל״ד
+all-levels: לכל הרמות

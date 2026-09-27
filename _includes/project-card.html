@@ -11,7 +11,21 @@
 {%- endunless -%}
 {%- assign booking_in_cart = false -%}
 {%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
-<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop">
+{%- assign category_label = '' -%}
+{%- if project.category and site.data.workshop-categories[project.category] -%}
+{%- assign category_label = site.data.workshop-categories[project.category] -%}
+{%- endif -%}
+{%- assign filter_month_keys = '' | split: '' -%}
+{%- if project.filter_months and project.filter_months.size > 0 -%}
+  {%- for month in project.filter_months -%}
+    {%- assign padded_month = month | plus: 0 | plus: 100 | append: '' | slice: 1, 2 -%}
+    {%- assign filter_month_keys = filter_month_keys | push: padded_month -%}
+  {%- endfor -%}
+{%- elsif project.date -%}
+  {%- assign date_month = project.date | date: '%m' -%}
+  {%- assign filter_month_keys = filter_month_keys | push: date_month -%}
+{%- endif -%}
+<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ project.category }}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
   <div class="project__content">
     <a href="{{ project.url }}" class="project__image">
       <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
@@ -24,6 +38,9 @@
       {% endif %}
     </a>
     <div class="project__info">
+      {% if category_label != '' %}
+      <div class="project__category">{{ category_label }}</div>
+      {% endif %}
       <h3 class="project__title"><a href="{{ project.url }}">{{ project.title }}</a></h3>
       {% if project.subtitle %}
       <div class="project__subtitle">{{ project.subtitle }}</div>

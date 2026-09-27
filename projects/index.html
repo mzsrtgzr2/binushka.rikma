@@ -47,7 +47,37 @@ layout: default
 {% endif %}
 
 <div class="projects-page container animate">
-  <div class="row">
+  <div class="workshop-filters" id="workshop-filters" aria-label="סינון סדנאות">
+    <div class="workshop-filters__row" role="group" aria-label="סינון לפי קטגוריה">
+      <span class="workshop-filters__label">בחירת סוג:</span>
+      <div class="workshop-filters__pills">
+        <button type="button" class="workshop-filter is-active" data-workshop-category="" aria-pressed="true">הכל</button>
+        {% for category in site.data.workshop-categories %}
+        <button type="button" class="workshop-filter" data-workshop-category="{{ category[0] }}" aria-pressed="false">{{ category[1] }}</button>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="workshop-filters__row" role="group" aria-label="סינון לפי חודש">
+      <span class="workshop-filters__label">בחירת חודש:</span>
+      <div class="workshop-filters__pills">
+        <button type="button" class="workshop-filter is-active" data-workshop-month="" aria-pressed="true">הכל</button>
+        {% comment %}
+          Show only the next 4 months (current + 3), wrapping past December.
+        {% endcomment %}
+        {% assign current_month = 'now' | date: '%m' | plus: 0 %}
+        {% for offset in (0..3) %}
+          {% assign month_num = current_month | plus: offset %}
+          {% if month_num > 12 %}
+            {% assign month_num = month_num | minus: 12 %}
+          {% endif %}
+          {% assign month_key = month_num | plus: 100 | append: '' | slice: 1, 2 %}
+          <button type="button" class="workshop-filter" data-workshop-month="{{ month_key }}" aria-pressed="false">{{ site.data.months[month_key] }}</button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="workshops-grid">
     {% comment %}
       A workshop only carries `order` once it has been placed by hand in the
       backoffice. Anything not placed yet keeps falling back to its date, so a
@@ -73,4 +103,6 @@ layout: default
       {% include project-card.html project=project %}
     {% endfor %}
   </div>
+  <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות שמתאימות לסינון כרגע.</p>
 </div>
+<script src="{{ site.baseurl }}/js/workshop-filter.js" defer></script>

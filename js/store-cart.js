@@ -420,6 +420,46 @@
     }
   }
 
+  function addToCartLabel(preorder) {
+    return preorder ? 'הזמיני מראש' : 'הוסיפי לסל';
+  }
+
+  /* Shop cards built as sold-out have no CTA. When live stock flips to
+     preorder, inject the same yellow button the liquid would have rendered. */
+  function ensureStoreCardCta(root, p, soldOut, preorder) {
+    if (!root || !root.classList.contains('store-item')) return;
+    var footer = root.querySelector('.store-item__footer');
+    if (!footer) return;
+    var existing = footer.querySelector('.store-item__add');
+    if (soldOut) {
+      if (existing) existing.parentNode.removeChild(existing);
+      return;
+    }
+    if (existing) return;
+    if (p.variable || p.variants) {
+      var pick = document.createElement('a');
+      pick.href = p.url || '#';
+      pick.className = 'button button--primary store-item__add';
+      pick.textContent = p.variable ? 'בחרי סכום' : 'בחרי סוג';
+      footer.appendChild(pick);
+      return;
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'button button--primary store-item__add';
+    btn.setAttribute('data-cart-add', p.id);
+    btn.textContent = addToCartLabel(preorder);
+    footer.appendChild(btn);
+  }
+
+  function setCartAddLabel(btn, preorder) {
+    if (!btn || btn.tagName !== 'BUTTON') return;
+    if (btn.classList.contains('is-stock-limit') || btn.classList.contains('is-added')) return;
+    var label = addToCartLabel(preorder);
+    btn.textContent = label;
+    btn.setAttribute('data-label-orig', label);
+  }
+
   function updateStockUi() {
     Object.keys(byId).forEach(function (id) {
       var p = byId[id];
@@ -466,6 +506,7 @@
         root.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
         root.setAttribute('data-preorder', preorder ? 'true' : 'false');
         ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
+        ensureStoreCardCta(root, p, soldOut, preorder);
         if (root.querySelector('.page-head')) {
           ensureStockText(root.querySelector('.page-head'), soldOut, preorder, showLimitedBadge, p.stock);
           var pageActions = root.querySelector('.store-item__cart-actions');
@@ -496,6 +537,9 @@
           var card = btn.closest('.store-variant, .scrunchies-variant');
           var info = card && (card.querySelector('.store-variant__info') || card);
           ensureVariantStockText(info, vSoldOut, vPreorder, vLimited, vStock);
+          if (p.kind !== 'workshop') setCartAddLabel(btn, vPreorder);
+        } else if (p.kind !== 'workshop') {
+          setCartAddLabel(btn, preorder);
         }
       });
     });

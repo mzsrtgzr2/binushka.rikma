@@ -174,12 +174,12 @@ layout: default
             </a>
               {% else %}
             <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}">
-              הוסיפי לסל
+              {% if preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
             </button>
               {% endif %}
             {% elsif item.form_url and sold_out != true %}
             <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener">
-              הזמיני עכשיו
+              {% if preorder %}הזמיני מראש{% else %}הזמיני עכשיו{% endif %}
             </a>
             {% endif %}
             </div>

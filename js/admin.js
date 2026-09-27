@@ -1107,11 +1107,19 @@
     return (p.out_of_stock || p.stock === 0) && !p.preorder;
   }
 
+  function isPreorder(p) {
+    return (p.out_of_stock || p.stock === 0) && Boolean(p.preorder);
+  }
+
+  function addToCartLabel(preorder) {
+    return preorder ? 'הזמיני מראש' : 'הוסיפי לסל';
+  }
+
   function storeCardCta(p) {
     if (isUnavailable(p) || p.kind === 'content') return '';
     if (p.kind === 'variable') return fakeButton('בחרי סכום', 'store-item__add');
     if (p.kind === 'variants') return fakeButton('בחרי סוג', 'store-item__add');
-    return fakeButton('הוסיפי לסל', 'store-item__add');
+    return fakeButton(addToCartLabel(isPreorder(p)), 'store-item__add');
   }
 
   function variantCardsHtml(p, scrunchie) {
@@ -1156,6 +1164,9 @@
           }
         }
         if (scrunchie) {
+          var scrunchiePreorder =
+            (Number(v.stock) === 0 || v.stock === '0') &&
+            (Boolean(p.preorder) || Boolean(v.preorder));
           return (
             '<article class="scrunchies-variant">' +
             img +
@@ -1167,10 +1178,13 @@
               : '') +
             (v.price ? '<div class="scrunchies-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
             variantStockLabel(v, 'scrunchies-variant__stock', p.preorder) +
-            fakeButton('הוסיפי לסל') +
+            fakeButton(addToCartLabel(scrunchiePreorder)) +
             '</article>'
           );
         }
+        var variantPreorder =
+          (Number(v.stock) === 0 || v.stock === '0') &&
+          (Boolean(p.preorder) || Boolean(v.preorder));
         return (
           '<article class="store-variant">' +
           img +
@@ -1182,7 +1196,7 @@
           (v.price ? '<div class="store-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
           variantStockLabel(v, null, p.preorder) +
           '</div>' +
-          fakeButton('הוסיפי לסל') +
+          fakeButton(addToCartLabel(variantPreorder)) +
           '</article>'
         );
       })
@@ -1210,7 +1224,7 @@
             ')'
           : 'או סכום אחר') +
         '</span><input class="form__input gift-amount__input" disabled placeholder="₪"></label>' +
-        fakeButton('הוסיפי לסל', 'section-button is-preview-disabled') +
+        fakeButton(addToCartLabel(isPreorder(p)), 'section-button is-preview-disabled') +
         '</div>'
       );
     }
@@ -1230,7 +1244,7 @@
       }
       return '<div class="store-variants">' + rows + '</div>';
     }
-    return fakeButton('הוסיפי לסל', 'section-button');
+    return fakeButton(addToCartLabel(isPreorder(p)), 'section-button');
   }
 
   function galleryHtml(paths, scrunchie) {

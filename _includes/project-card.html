@@ -45,16 +45,22 @@
       {% if project.subtitle %}
       <div class="project__subtitle">{{ project.subtitle }}</div>
       {% endif %}
-      {% if booking_in_cart and sold_out != true %}
-      <div class="project__footer">
-        {% if workshop.variants %}
-        <a href="{{ project.url }}" class="button button--primary project__add">הרשמה לסדנה</a>
-        {% else %}
-        <button type="button" class="button button--primary project__add" data-cart-add="{{ workshop_id }}">
-          {% if project.price_per == 'workshop' %}הזמנת סדנה{% else %}הרשמה לסדנה{% endif %}
-        </button>
+      {% if project.registration_not_open != true %}
+        {% if sold_out %}
+        <div class="project__footer">
+          {% include workshop-waitlist-button.html title=project.title class="project__add" %}
+        </div>
+        {% elsif booking_in_cart %}
+        <div class="project__footer">
+          {% if workshop.variants %}
+          <a href="{{ project.url }}" class="button button--primary project__add">הרשמה לסדנה</a>
+          {% else %}
+          <button type="button" class="button button--primary project__add" data-cart-add="{{ workshop_id }}">
+            {% if project.price_per == 'workshop' %}הזמנת סדנה{% else %}הרשמה לסדנה{% endif %}
+          </button>
+          {% endif %}
+        </div>
         {% endif %}
-      </div>
       {% endif %}
     </div>
   </div>

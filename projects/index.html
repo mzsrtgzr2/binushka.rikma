@@ -61,8 +61,17 @@ layout: default
       <span class="workshop-filters__label">בחירת חודש:</span>
       <div class="workshop-filters__pills">
         <button type="button" class="workshop-filter is-active" data-workshop-month="" aria-pressed="true">הכל</button>
-        {% for month in site.data.months %}
-        <button type="button" class="workshop-filter" data-workshop-month="{{ month[0] }}" aria-pressed="false">{{ month[1] }}</button>
+        {% comment %}
+          Show only the next 4 months (current + 3), wrapping past December.
+        {% endcomment %}
+        {% assign current_month = 'now' | date: '%m' | plus: 0 %}
+        {% for offset in (0..3) %}
+          {% assign month_num = current_month | plus: offset %}
+          {% if month_num > 12 %}
+            {% assign month_num = month_num | minus: 12 %}
+          {% endif %}
+          {% assign month_key = month_num | plus: 100 | append: '' | slice: 1, 2 %}
+          <button type="button" class="workshop-filter" data-workshop-month="{{ month_key }}" aria-pressed="false">{{ site.data.months[month_key] }}</button>
         {% endfor %}
       </div>
     </div>

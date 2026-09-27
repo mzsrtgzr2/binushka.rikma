@@ -1213,6 +1213,51 @@ test('variants product stores stock per type', async () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('variants product stores preorder per type', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'hoops',
+        title: 'חישוקים',
+        kind: 'variants',
+        variants: [
+          { id: 'small', name: 'קטן', price: 35, stock: 0, preorder: true },
+          { id: 'large', name: 'גדול', price: 45, stock: 0 },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const md = fs.readFileSync(path.join(root, '_store', 'hoops.md'), 'utf8');
+  assert.match(md, /small:[\s\S]*preorder: true/);
+  assert.doesNotMatch(md, /large:[\s\S]*preorder: true/);
+  const page = require('../lib/store').parsePage('hoops', md);
+  assert.equal(page.variants.find((v) => v.id === 'small').preorder, true);
+  assert.equal(page.variants.find((v) => v.id === 'large').preorder, undefined);
+
+  const allowed = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'small', quantity: 3 },
+  ]);
+  assert.equal(allowed.ok, true);
+
+  const blocked = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'large', quantity: 1 },
+  ]);
+  assert.match(blocked.error, /מלאי/);
+
+  const book = await admin.publicInventory(authEnv(root));
+  assert.equal(book.products.hoops.variants.small.preorder, true);
+  assert.equal(book.products.hoops.variants.large.preorder, undefined);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('decrementInventory and assertInventory honor per-type stock', async () => {
   const root = foxRoot();
   const store = require('../lib/store');

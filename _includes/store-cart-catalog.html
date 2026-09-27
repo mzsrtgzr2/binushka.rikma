@@ -47,6 +47,9 @@
               {%- if variant[1].stock != nil and variant[1].stock != blank -%}
               ,"stock": {{ variant[1].stock }}
               {%- endif -%}
+              {%- if variant[1].preorder -%}
+              ,"preorder": true
+              {%- endif -%}
             }
             {%- assign vfirst = false -%}
           {%- endfor -%}

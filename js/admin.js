@@ -619,6 +619,10 @@
       (row.stock != null && row.stock !== '' ? escapeHtml(row.stock) : '') +
       '">' +
       '<p class="admin-hint">כמות מהסוג הזה שאפשר לקנות.</p>' +
+      '<label class="admin-check"><input type="checkbox" data-v="preorder"' +
+      (row.preorder ? ' checked' : '') +
+      '> הזמיני מראש</label>' +
+      '<p class="admin-hint">מאפשר לקנות גם כשאין מלאי מהסוג הזה.</p>' +
       '</div>' +
       '<div class="form__group">' +
       '<label class="form__label">מזהה פנימי</label>' +
@@ -714,6 +718,7 @@
         name: (row.querySelector('[data-v="name"]') || {}).value,
         price: (row.querySelector('[data-v="price"]') || {}).value,
         stock: stockRaw === '' ? null : stockRaw,
+        preorder: Boolean((row.querySelector('[data-v="preorder"]') || {}).checked),
         images: images,
         image: images[0] || '',
         gallery: images.slice(1),
@@ -1074,8 +1079,9 @@
   function variantStockLabel(v, className, allowPreorder) {
     var stock = v && v.stock;
     var cls = className || 'store-variant__stock';
+    var preorder = Boolean(allowPreorder) || Boolean(v && v.preorder);
     if (stock === 0 || stock === '0') {
-      if (allowPreorder) {
+      if (preorder) {
         return '<div class="' + cls + ' preorder-text">הזמיני מראש</div>';
       }
       return '<div class="' + cls + ' out-of-stock-text">אזל מהמלאי</div>';

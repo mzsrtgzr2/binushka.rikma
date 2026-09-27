@@ -345,6 +345,39 @@ test('preorder products can be sold when out of stock', () => {
   }
 });
 
+test('preorder on a single variant allows that type when stock is zero', () => {
+  const { BUNDLED_INVENTORY, PRODUCTS } = require('../lib/catalog/load');
+  const prevInv = BUNDLED_INVENTORY.scissors;
+  const prevProduct = PRODUCTS.scissors;
+  assert.ok(prevInv && prevProduct && prevProduct.variants);
+  BUNDLED_INVENTORY.scissors = {
+    ...prevInv,
+    variants: {
+      ...(prevInv.variants || {}),
+      singer: { stock: 0, preorder: true },
+    },
+  };
+  PRODUCTS.scissors = {
+    ...prevProduct,
+    variants: {
+      ...prevProduct.variants,
+      singer: { ...prevProduct.variants.singer, stock: 0, preorder: true },
+    },
+  };
+  try {
+    const blocked = buildOrder([{ id: 'scissors', variant: 'type-3', quantity: 3 }], 'pickup');
+    assert.match(blocked.error, /מלאי/);
+
+    const order = buildOrder([{ id: 'scissors', variant: 'singer', quantity: 2 }], 'pickup');
+    assert.equal(order.error, undefined);
+    assert.equal(order.lines[0].variant, 'singer');
+    assert.equal(order.subtotal, 160);
+  } finally {
+    BUNDLED_INVENTORY.scissors = prevInv;
+    PRODUCTS.scissors = prevProduct;
+  }
+});
+
 test('participant names are appended only to workshop lines', () => {
   const order = applyWorkshopNote(
     buildOrder(

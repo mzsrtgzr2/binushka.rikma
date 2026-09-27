@@ -90,7 +90,7 @@ layout: default
               {% assign v_limited = false %}
               {% if v.stock != nil and v.stock != blank %}
                 {% if v.stock == 0 %}
-                  {% if page.preorder %}
+                  {% if page.preorder or v.preorder %}
                     {% assign v_preorder = true %}
                   {% else %}
                     {% assign v_sold_out = true %}

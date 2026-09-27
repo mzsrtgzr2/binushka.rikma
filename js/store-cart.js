@@ -216,7 +216,7 @@
       if (!variantId || !p.variants[variantId]) return 0;
       var row = p.variants[variantId];
       if (typeof row.stock === 'number') {
-        if (row.stock <= 0 && p.preorder) return Infinity;
+        if (row.stock <= 0 && (p.preorder || row.preorder)) return Infinity;
         return row.stock;
       }
       return Infinity;
@@ -430,7 +430,17 @@
             return typeof p.variants[vid].stock === 'number' && p.variants[vid].stock <= 0;
           })
         : Boolean(p.outOfStock) || p.stock === 0;
-      var preorder = Boolean(p.preorder) && stockGone && p.kind !== 'workshop';
+      var preorder =
+        stockGone &&
+        p.kind !== 'workshop' &&
+        (Boolean(p.preorder) ||
+          (perVariant &&
+            Object.keys(p.variants).length > 0 &&
+            Object.keys(p.variants).every(function (vid) {
+              var row = p.variants[vid];
+              if (!(typeof row.stock === 'number' && row.stock <= 0)) return true;
+              return Boolean(row.preorder) || Boolean(p.preorder);
+            })));
       var soldOut = stockGone && !preorder;
       var limited = Boolean(p.limitedStock) && !stockGone;
       if (perVariant && !stockGone) {
@@ -480,7 +490,7 @@
         if (multiType && variantId && p.variants[variantId]) {
           var vStock = p.variants[variantId].stock;
           var vStockGone = typeof vStock === 'number' && vStock <= 0;
-          var vPreorder = Boolean(p.preorder) && vStockGone;
+          var vPreorder = vStockGone && (Boolean(p.preorder) || Boolean(p.variants[variantId].preorder));
           var vSoldOut = vStockGone && !vPreorder;
           var vLimited = isLowStock(vStock);
           var card = btn.closest('.store-variant, .scrunchies-variant');
@@ -931,6 +941,7 @@
             if (!vLive) return;
             if (typeof vLive.stock === 'number') byId[id].variants[vid].stock = vLive.stock;
             else if (vLive.stock === null) delete byId[id].variants[vid].stock;
+            if (typeof vLive.preorder === 'boolean') byId[id].variants[vid].preorder = vLive.preorder;
           });
         }
         if (byId[id].stock === 0) byId[id].outOfStock = true;

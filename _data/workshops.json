@@ -61,14 +61,19 @@
   },
   "workshop-rehovot-09-10": {
     "name": "סדנת קרושה למתחילות — 9.10 שישי בבוקר",
-    "price": 300,
+    "price": 330,
     "kind": "workshop",
     "shipping": false,
     "stock": 5,
     "variants": {
-      "pack-1": {
+      "one": {
+        "name": "משתתפת אחת",
+        "price": 330,
+        "places": 1
+      },
+      "pair": {
         "name": "שתי משתתפות ביחד",
-        "price": 300,
+        "price": 600,
         "places": 2
       }
     }

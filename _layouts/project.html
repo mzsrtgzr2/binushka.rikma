@@ -37,7 +37,7 @@ layout: default
       <p class="project-subtitle">{{ page.subtitle }}</p>
     {% endif %}
 
-    {% if booking_in_cart %}
+    {% if booking_in_cart and sold_out == false and page.registration_not_open != true %}
       {% if workshop.variants %}
       <div class="project-price">מ־₪{{ workshop.price }} {{ price_unit }}</div>
       {% else %}
@@ -122,13 +122,6 @@ layout: default
       <div class="page-image animate">
         <div class="project-image-container">
           <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
-          {% if page.registration_not_open %}
-            <div class="registration-full">ההרשמה תיפתח בקרוב</div>
-          {% elsif sold_out %}
-            <div class="registration-full">אין מקומות פנויים</div>
-          {% elsif last_places %}
-            <div class="registration-full">מקומות אחרונים</div>
-          {% endif %}
         </div>
       </div>
     </div>

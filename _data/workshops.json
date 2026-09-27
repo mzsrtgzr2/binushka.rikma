@@ -64,12 +64,12 @@
     "price": 600,
     "kind": "workshop",
     "shipping": false,
-    "stock": 5,
+    "stock": 4,
     "variants": {
       "pack-1": {
         "name": "שתי משתתפות ביחד",
         "price": 600,
-        "places": 2
+        "places": 1
       }
     }
   },

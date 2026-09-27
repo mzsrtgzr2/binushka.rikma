@@ -27,6 +27,9 @@
   var subtitleInput = document.getElementById('workshop-subtitle');
   var categorySelect = document.getElementById('workshop-category');
   var dateInput = document.getElementById('workshop-date');
+  var filterMonthsGroup = document.getElementById('workshop-filter-months-group');
+  var filterMonthsAllBtn = document.getElementById('workshop-filter-months-all');
+  var filterMonthsClearBtn = document.getElementById('workshop-filter-months-clear');
   var imageInput = document.getElementById('workshop-image');
   var imagePick = document.getElementById('workshop-image-pick');
   var imageFile = document.getElementById('workshop-image-file');
@@ -111,6 +114,7 @@
       packs_need_per_participant: 'חבילות אפשריות רק כשגובים מחיר למשתתפת',
       too_many_packs: 'אפשר עד ' + MAX_PACKS + ' חבילות',
       category_invalid: 'קטגוריה לא מוכרת',
+      filter_months_invalid: 'חודש סינון לא תקין',
       invalid_request: 'הבקשה לא תקינה'
     };
     return messages[code] || '';
@@ -907,6 +911,26 @@
 
   /* ------------------------------------------------------------------ editor */
 
+  function filterMonthInputs() {
+    return filterMonthsGroup
+      ? Array.prototype.slice.call(filterMonthsGroup.querySelectorAll('input[name="workshop-filter-month"]'))
+      : [];
+  }
+
+  function readFilterMonths() {
+    return filterMonthInputs()
+      .filter(function (input) { return input.checked; })
+      .map(function (input) { return input.value; });
+  }
+
+  function setFilterMonths(months) {
+    var selected = {};
+    (months || []).forEach(function (month) { selected[String(month)] = true; });
+    filterMonthInputs().forEach(function (input) {
+      input.checked = Boolean(selected[input.value]);
+    });
+  }
+
   function blankWorkshop() {
     var now = new Date();
     now.setMinutes(0, 0, 0);
@@ -915,6 +939,7 @@
       title: '',
       subtitle: '',
       category: '',
+      filter_months: [],
       date: now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':00',
       image: '',
       body: '',
@@ -994,6 +1019,7 @@
     subtitleInput.value = data.subtitle || '';
     if (categorySelect) categorySelect.value = data.category || '';
     dateInput.value = toLocalInput(data.date);
+    setFilterMonths(data.filter_months || []);
     imageInput.value = data.image || '';
     bodyInput.value = data.body || '';
     pricePerSelect.value = data.price_per === 'workshop' ? 'workshop' : 'participant';
@@ -1025,6 +1051,7 @@
       title: titleInput.value.trim(),
       subtitle: subtitleInput.value.trim(),
       category: categorySelect ? categorySelect.value : '',
+      filter_months: readFilterMonths(),
       date: dateInput.value,
       image: imageInput.value.trim(),
       body: bodyInput.value,
@@ -1091,6 +1118,7 @@
         title: titleInput.value,
         subtitle: subtitleInput.value,
         category: categorySelect ? categorySelect.value : '',
+        filter_months: readFilterMonths(),
         date: dateInput.value,
         slug: slugInput.value,
         image: imageInput.value,
@@ -1117,6 +1145,7 @@
     titleInput.value = fields.title;
     subtitleInput.value = fields.subtitle;
     if (categorySelect) categorySelect.value = fields.category || '';
+    setFilterMonths(fields.filter_months || []);
     dateInput.value = fields.date;
     slugInput.value = fields.slug;
     imageInput.value = fields.image;
@@ -1523,7 +1552,9 @@
     if (!el || !el.tagName || el.type === 'file') return;
 
     var inPack = el.closest && el.closest('.admin-pack');
-    var label = inPack ? 'חבילות הרשמה' : FIELD_LABELS[el.id];
+    var label = inPack
+      ? 'חבילות הרשמה'
+      : (el.name === 'workshop-filter-month' ? 'חודשי סינון' : FIELD_LABELS[el.id]);
     if (!label) return;
 
     record(label, typing && isTyping(el) ? (inPack ? 'packs' : el.id) : '');
@@ -1538,6 +1569,22 @@
     schedulePreview();
     recordFromEvent(event, false);
   });
+
+  if (filterMonthsAllBtn) {
+    filterMonthsAllBtn.addEventListener('click', function () {
+      setFilterMonths(['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']);
+      schedulePreview();
+      record('חודשי סינון', '');
+    });
+  }
+
+  if (filterMonthsClearBtn) {
+    filterMonthsClearBtn.addEventListener('click', function () {
+      setFilterMonths([]);
+      schedulePreview();
+      record('חודשי סינון', '');
+    });
+  }
 
   if (historyEl) {
     historyEl.addEventListener('click', function (event) {

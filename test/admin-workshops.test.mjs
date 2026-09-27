@@ -161,6 +161,44 @@ test('workshop category is read, written and rejected when unknown', () => {
   );
 });
 
+test('filter_months are read, written, sorted and rejected when invalid', () => {
+  const withMonths = workshops.serialize(
+    workshops.normalize({
+      title: 'מפגש חודשי',
+      date: '2026-10-21T11:00',
+      slug: 'monthly',
+      filter_months: ['11', 10, '10', '12'],
+    })
+  );
+  assert.match(withMonths, /^filter_months:\n {2}- "10"\n {2}- "11"\n {2}- "12"$/m);
+  assert.deepEqual(
+    workshops.parse('2026-10-21-monthly.md', withMonths).filter_months,
+    ['10', '11', '12']
+  );
+
+  const cleared = workshops.serialize(
+    workshops.normalize({
+      title: 'מפגש חודשי',
+      date: '2026-10-21T11:00',
+      slug: 'monthly',
+      filter_months: [],
+    }),
+    withMonths
+  );
+  assert.doesNotMatch(cleared, /^filter_months:/m);
+  assert.deepEqual(workshops.parse('2026-10-21-monthly.md', cleared).filter_months, []);
+
+  assert.throws(
+    () => workshops.normalize({
+      title: 'מפגש חודשי',
+      date: '2026-10-21T11:00',
+      slug: 'monthly',
+      filter_months: ['13'],
+    }),
+    (err) => err instanceof workshops.WorkshopError && err.code === 'filter_months_invalid'
+  );
+});
+
 // Every workshop page in the repository has a bare timestamp. Quoting it here
 // would still parse, but the editor should not be the one file that reads
 // differently from the twenty written by hand.

@@ -29,7 +29,8 @@
 
   function matchesMonth(el) {
     if (!activeMonth) return true;
-    return (el.getAttribute('data-month') || '') === activeMonth;
+    var months = (el.getAttribute('data-month') || '').trim().split(/\s+/).filter(Boolean);
+    return months.indexOf(activeMonth) !== -1;
   }
 
   function applyFilter() {

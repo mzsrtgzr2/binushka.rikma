@@ -83,6 +83,31 @@ noindex: true
               </div>
             </div>
 
+            <div class="form__group" id="workshop-filter-months-group">
+              <div class="admin-label-row">
+                <p class="form__label" id="workshop-filter-months-label">חודשים בסינון בעמוד הסדנאות</p>
+                <span class="admin-label-row__actions">
+                  <button type="button" class="button admin-upload-btn admin-upload-btn--compact" id="workshop-filter-months-all">כל החודשים</button>
+                  <button type="button" class="button admin-upload-btn admin-upload-btn--compact" id="workshop-filter-months-clear">ניקוי</button>
+                </span>
+              </div>
+              <div class="admin-month-flags" role="group" aria-labelledby="workshop-filter-months-label">
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="01"> ינואר</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="02"> פברואר</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="03"> מרץ</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="04"> אפריל</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="05"> מאי</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="06"> יוני</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="07"> יולי</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="08"> אוגוסט</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="09"> ספטמבר</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="10"> אוקטובר</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="11"> נובמבר</label>
+                <label class="admin-check"><input type="checkbox" name="workshop-filter-month" value="12"> דצמבר</label>
+              </div>
+              <p class="admin-hint">ריק = רק החודש של תאריך הסדנה. סמנו כמה חודשים לסדנה שחוזרת (למשל מפגש אחת לחודש).</p>
+            </div>
+
             <div class="form__group">
               <label class="form__label" for="workshop-image">תמונה ראשית</label>
               <div class="admin-upload-row">

@@ -617,9 +617,10 @@
     return CATEGORY_LABELS[workshop && workshop.category] || '';
   }
 
-  function fakeButton(label, extraClass) {
+  function fakeButton(label, extraClass, variant) {
+    var tone = variant === 'waitlist' ? 'button--waitlist' : 'button--primary';
     return (
-      '<button type="button" class="button button--primary' + (extraClass ? ' ' + extraClass : '') +
+      '<button type="button" class="button ' + tone + (extraClass ? ' ' + extraClass : '') +
       '" tabindex="-1" aria-hidden="true">' + escapeHtml(label) + '</button>'
     );
   }
@@ -631,7 +632,9 @@
     var soldOut = isSoldOut(workshop);
 
     var footer = '';
-    if (price > 0 && !workshop.registration_not_open && !soldOut) {
+    if (!workshop.registration_not_open && soldOut) {
+      footer = fakeButton('הרשמי לרשימת המתנה', 'project__add', 'waitlist');
+    } else if (price > 0 && !workshop.registration_not_open && !soldOut) {
       footer = fakeButton(
         workshop.price_per === 'workshop' ? 'הזמנת סדנה' : 'הרשמה לסדנה',
         'project__add'
@@ -723,6 +726,19 @@
       ? '<p>פרטי הסדנה יפורסמו בקרוב.</p>'
       : renderMarkdown(workshop.body);
 
+    var booking = '';
+    if (!workshop.registration_not_open) {
+      if (soldOut) {
+        booking =
+          '<div class="workshop-booking workshop-booking--waitlist">' +
+          fakeButton('הרשמי לרשימת המתנה', 'section-button', 'waitlist') +
+          '<p class="workshop-booking__note">הסדנה מלאה כרגע. שלחי הודעה בוואטסאפ ואעדכן אותך אם מתפנה מקום.</p>' +
+          '</div>';
+      } else {
+        booking = bookingHtml(workshop);
+      }
+    }
+
     return (
       '<div class="page-head">' +
       '<h1 class="page-title">' + escapeHtml(workshop.title || 'שם הסדנה') + '</h1>' +
@@ -732,7 +748,7 @@
       priceLine +
       '</div>' +
       '<div class="admin-preview__markdown">' + content + '</div>' +
-      (soldOut || workshop.registration_not_open ? '' : bookingHtml(workshop)) +
+      booking +
       (image
         ? '<div class="page-image"><div class="project-image-container">' +
           '<img src="' + escapeHtml(image) + '" alt="">' +

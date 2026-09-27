@@ -211,8 +211,8 @@ permalink: /checkout/
               maxlength="32"
               placeholder="אם יש לך קוד"
             >
-            <button type="button" class="button" id="checkout-coupon-apply">החלי</button>
-            <button type="button" class="button checkout-coupon__clear" id="checkout-coupon-clear" hidden>הסירי</button>
+            <button type="button" class="button" id="checkout-coupon-apply" data-analytics="checkout_coupon_apply">החלי</button>
+            <button type="button" class="button checkout-coupon__clear" id="checkout-coupon-clear" data-analytics="checkout_coupon_clear" hidden>הסירי</button>
           </div>
           <p class="checkout-coupon__message" id="checkout-coupon-message" hidden></p>
         </div>
@@ -249,7 +249,7 @@ permalink: /checkout/
           </label>
         </div>
 
-        <button type="submit" class="button button--primary button--big checkout-form__submit">
+        <button type="submit" class="button button--primary button--big checkout-form__submit" data-analytics="checkout_submit">
           המשך לתשלום מאובטח
         </button>
 

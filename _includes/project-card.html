@@ -25,9 +25,9 @@
   {%- assign date_month = project.date | date: '%m' -%}
   {%- assign filter_month_keys = filter_month_keys | push: date_month -%}
 {%- endif -%}
-<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ project.category }}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
+<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-analytics="workshop_card" data-category="{{ project.category }}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
   <div class="project__content">
-    <a href="{{ project.url }}" class="project__image">
+    <a href="{{ project.url }}" class="project__image" data-analytics="workshop_card_image">
       <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
       {% if project.registration_not_open %}
         <div class="registration-full">ההרשמה תיפתח בקרוב</div>
@@ -41,16 +41,16 @@
       {% if category_label != '' %}
       <div class="project__category">{{ category_label }}</div>
       {% endif %}
-      <h3 class="project__title"><a href="{{ project.url }}">{{ project.title }}</a></h3>
+      <h3 class="project__title"><a href="{{ project.url }}" data-analytics="workshop_card_title">{{ project.title }}</a></h3>
       {% if project.subtitle %}
       <div class="project__subtitle">{{ project.subtitle }}</div>
       {% endif %}
       {% if booking_in_cart and sold_out != true %}
       <div class="project__footer">
         {% if workshop.variants %}
-        <a href="{{ project.url }}" class="button button--primary project__add">הרשמה לסדנה</a>
+        <a href="{{ project.url }}" class="button button--primary project__add" data-analytics="workshop_choose_pack">הרשמה לסדנה</a>
         {% else %}
-        <button type="button" class="button button--primary project__add" data-cart-add="{{ workshop_id }}">
+        <button type="button" class="button button--primary project__add" data-cart-add="{{ workshop_id }}" data-analytics="workshop_register">
           {% if project.price_per == 'workshop' %}הזמנת סדנה{% else %}הרשמה לסדנה{% endif %}
         </button>
         {% endif %}

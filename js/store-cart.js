@@ -462,6 +462,7 @@
       var pick = document.createElement('a');
       pick.href = p.url || '#';
       pick.className = 'button button--primary store-item__add';
+      pick.setAttribute('data-analytics', p.variable ? 'product_choose_amount' : 'product_choose_variant');
       pick.textContent = p.variable ? 'בחרי סכום' : 'בחרי סוג';
       footer.appendChild(pick);
       return;
@@ -470,6 +471,7 @@
     btn.type = 'button';
     btn.className = 'button button--primary store-item__add';
     btn.setAttribute('data-cart-add', p.id);
+    btn.setAttribute('data-analytics', 'add_to_cart');
     btn.textContent = addToCartLabel(preorder);
     footer.appendChild(btn);
   }
@@ -829,12 +831,12 @@
         '</div>' +
         '<div class="store-cart__line-actions' + (atMax ? ' is-at-max' : '') + '">' +
         '<div class="store-cart__qty-row">' +
-        '<button type="button" class="store-cart__qty" data-action="dec" data-id="' + escapeHtml(item.key) + '" aria-label="הפחתה">−</button>' +
+        '<button type="button" class="store-cart__qty" data-action="dec" data-analytics="cart_qty_dec" data-id="' + escapeHtml(item.key) + '" aria-label="הפחתה">−</button>' +
         '<span class="store-cart__qty-val">' + item.quantity + '</span>' +
-        '<button type="button" class="store-cart__qty" data-action="inc" data-id="' + escapeHtml(item.key) + '"' +
+        '<button type="button" class="store-cart__qty" data-action="inc" data-analytics="cart_qty_inc" data-id="' + escapeHtml(item.key) + '"' +
         (atMax ? ' disabled title="' + escapeHtml(stockHintText) + '"' : '') +
         ' aria-label="' + (atMax ? escapeHtml(stockHintText) : 'הוספה') + '">+</button>' +
-        '<button type="button" class="store-cart__remove" data-action="remove" data-id="' + escapeHtml(item.key) + '" aria-label="הסרה">×</button>' +
+        '<button type="button" class="store-cart__remove" data-action="remove" data-analytics="cart_remove" data-id="' + escapeHtml(item.key) + '" aria-label="הסרה">×</button>' +
         '</div>' +
         (atMax
           ? '<span class="store-cart__stock-hint">' + escapeHtml(stockHintText) + '</span>'

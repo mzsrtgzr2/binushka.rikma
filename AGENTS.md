@@ -7,13 +7,14 @@ Mixpanel is the analytics tool for this site. Google Analytics is not used.
 - Platform: Jekyll, browser JavaScript. There is no frontend bundler, so the SDK is the official snippet in `_includes/mixpanel.html` (library from `https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js`).
 - Token: `_data/settings.yml` key `mixpanel-token`. The snippet is included from `_layouts/default.html` and `_layouts/retreat.html` only when that key is set.
 - `_layouts/admin.html` does not load Mixpanel. Keep it that way so admin work stays out of the project.
-- Init options: `autocapture: true`, `persistence: "localStorage"`, `record_sessions_percent: 100`, `record_heatmap_data: true`. A super property `platform: "web"` is registered immediately after init.
+- Init options: Autocapture is an object (`pageview: "full-url"`, clicks/inputs/scroll/submit on, `capture_text_content: true`) plus `persistence: "localStorage"`, `record_sessions_percent: 100`, `record_heatmap_data: true`. Extra HTML attrs go to Mixpanel via `capture_extra_attrs` (`data-analytics`, `data-product-id`, `data-cart-add`, workshop filter attrs, etc.). A super property `platform: "web"` is registered immediately after init.
 - Do not set `track_pageview: true` while Autocapture is on, and do not add manual `page_view` events. Autocapture already records page views, and the combination duplicates them.
+- Primary CTAs carry a stable `data-analytics` label (snake_case) so Live View / `[Auto] Element Click` can be filtered by which button was used. Button Hebrew text is also captured.
 - Session replay records every session. Mixpanel masks text inputs by default. Microsoft Clarity is still the optional extra recorder (`clarity` in `_data/settings.yml`).
 
 ## Events
 
-`js/analytics.js` owns the schema and exposes `window.Analytics`. `store-cart.js`, `checkout.js`, `thanks.js`, and `store-sort.js` call it. Calls are a no-op when `window.mixpanel` is missing.
+`js/analytics.js` owns the schema and exposes `window.Analytics`. `store-cart.js`, `checkout.js`, `thanks.js`, `store-sort.js`, `workshop-filter.js`, and `newsletter.js` call it. Calls are a no-op when `window.mixpanel` is missing.
 
 | Event | Trigger |
 | --- | --- |
@@ -34,7 +35,10 @@ Mixpanel is the analytics tool for this site. Google Analytics is not used.
 | `checkout_abandoned` | Leave `/checkout/` with items, before payment |
 | `store_filter` | Store category filter |
 | `store_sort` | Store sort |
+| `workshop_filter` | Workshop list category or month filter (`filter_type`, `category`, `month`, `results`) |
 | `contact_click` | WhatsApp, email, or phone link |
+| `newsletter_signup` | Newsletter form succeeds (`source`) |
+| `newsletter_signup_error` | Newsletter form fails (`reason`, `source`) |
 | `purchase_untracked` | `/thanks/` with no order in the session |
 
 `purchase` is the value moment: a completed shop order.

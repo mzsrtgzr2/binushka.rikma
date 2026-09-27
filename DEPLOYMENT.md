@@ -7,7 +7,7 @@ settings; there is nothing to type in the Vercel dashboard.
 | --- | --- | --- |
 | Framework preset | Jekyll | `vercel.json` → `framework` |
 | Install command | `bundle install` | `vercel.json` → `installCommand` |
-| Build command | `node scripts/build-catalog.js && JEKYLL_ENV=production bundle exec jekyll build` | `vercel.json` → `buildCommand` |
+| Build command | `node scripts/build-catalog.js && node scripts/write-sentry-data.js && JEKYLL_ENV=production bundle exec jekyll build` | `vercel.json` → `buildCommand` |
 | Output directory | `_site` | `vercel.json` → `outputDirectory` |
 | Production branch | `master` | Vercel project settings |
 
@@ -27,6 +27,24 @@ that function. Vercel still only invokes the catch-all for a single segment, so
 the links already sent in mail) are rewritten first to `/api/newsletter-subscribe`
 and `/api/newsletter-unsubscribe`. The `?t=` token stays on the request. Tests
 live under `test/` and run with `node --test`; they are not uploaded as functions.
+
+## Error reporting (Sentry)
+
+Set `SENTRY_DSN` in Vercel → Project → Settings → Environment Variables
+(Project Settings → Client Keys in Sentry). The same variable covers the
+browser and the API function. Leave it empty and both stay off: local
+`jekyll build` and a deploy without the variable do not load the SDK.
+
+The build writes `_data/sentry.yml` from that variable. The file is
+gitignored. It only contains the public DSN, the environment
+(`production` / `preview` / `development`), and the git SHA when Vercel
+provides one.
+
+Browser errors load from `browser.sentry-cdn.com` (SDK 11.0.0, errors only,
+no session replay). The API function reports unexpected failures that
+already go through `console.error` (Morning, stock, admin, newsletter) and
+anything the handler itself throws. Request bodies, cookies, and shopper
+details are not attached.
 
 ## Store cart
 

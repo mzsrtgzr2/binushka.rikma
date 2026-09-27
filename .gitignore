@@ -11,3 +11,5 @@ vendor/
 .env
 .env.*
 !.env.example
+# Written at build time from SENTRY_DSN. See scripts/write-sentry-data.js.
+_data/sentry.yml

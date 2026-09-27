@@ -124,6 +124,77 @@ stock: 2
   assert.equal(store.catalogRowFromParsed(last).stock, undefined);
 });
 
+test('preorder is stored on the page and exposed in public inventory', () => {
+  const raw = `---
+title: שועל
+price: ₪220
+out_of_stock: true
+preorder: true
+stock: 0
+---
+`;
+  const page = store.parsePage('fox', raw);
+  assert.equal(page.preorder, true);
+  assert.equal(page.out_of_stock, true);
+
+  const next = store.applyPage(raw, { ...page, preorder: false });
+  assert.match(next, /preorder: false/);
+  assert.equal(store.parsePage('fox', next).preorder, false);
+
+  const withFlag = store.applyPage(raw, { ...page, preorder: true });
+  const inv = store.inventoryRowFromStore('fox', withFlag);
+  assert.equal(inv.preorder, true);
+  assert.equal(inv.outOfStock, true);
+  assert.equal(inv.stock, 0);
+
+  const without = store.inventoryRowFromStore('fox', store.applyPage(raw, { ...page, preorder: false }));
+  assert.equal(without.preorder, undefined);
+});
+
+test('preorder can be set per variant on multi-type products', () => {
+  const raw = `---
+title: מספריים
+price: ₪70 – ₪80
+out_of_stock: false
+variants:
+  singer:
+    name: Singer
+    price: 80
+    stock: 0
+    preorder: true
+  round:
+    name: עגולות
+    price: 70
+    stock: 0
+---
+`;
+  const page = store.parsePage('scissors-preorder', raw);
+  const singer = page.variants.find((v) => v.id === 'singer');
+  const round = page.variants.find((v) => v.id === 'round');
+  assert.equal(singer.preorder, true);
+  assert.equal(singer.stock, 0);
+  assert.equal(round.preorder, undefined);
+  assert.equal(round.stock, 0);
+
+  const inv = store.inventoryRowFromStore('scissors-preorder', raw);
+  assert.equal(inv.variants.singer.preorder, true);
+  assert.equal(inv.variants.singer.stock, 0);
+  assert.equal(inv.variants.round.preorder, undefined);
+
+  const next = store.applyPage(raw, {
+    ...page,
+    kind: 'variants',
+    variants: page.variants.map((v) =>
+      v.id === 'round' ? { ...v, preorder: true } : { ...v, preorder: false }
+    ),
+  });
+  assert.match(next, /round:\n(?:    .*\n)*    preorder: true/);
+  assert.doesNotMatch(next, /singer:\n(?:    .*\n)*    preorder: true/);
+  const catalog = store.catalogRowFromParsed(store.parsePage('scissors-preorder', next));
+  assert.equal(catalog.variants.round.preorder, true);
+  assert.equal(catalog.variants.singer.preorder, undefined);
+});
+
 test('workshop catalog uses filename slugs and treats spots as stock', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-workshops-'));
   writePage(

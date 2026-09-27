@@ -116,7 +116,7 @@ noindex: true
 
       <fieldset class="admin-fieldset" data-kind-fields="variants" hidden>
         <legend>סוגים ומחירים</legend>
-        <p class="admin-hint">כל סוג הוא טופס רגיל כמו שאר השדות למעלה: שם, מחיר, מלאי ומזהה, תיאור ארוך נוח לעריכה, והעלאת תמונה מהמחשב כמו בתמונות הראשיות.</p>
+        <p class="admin-hint">כל סוג הוא טופס רגיל כמו שאר השדות למעלה: שם, מחיר, מלאי, הזמנה מראש ומזהה, תיאור ארוך נוח לעריכה, והעלאת תמונה מהמחשב כמו בתמונות הראשיות.</p>
         <div class="admin-variants" id="admin-variants"></div>
         <button type="button" class="button" id="admin-add-variant">הוסיפי סוג</button>
       </fieldset>
@@ -135,10 +135,12 @@ noindex: true
 
       <div class="admin-flags">
         <label class="admin-check"><input type="checkbox" id="admin-out-of-stock"> אזל מהמלאי</label>
+        <label class="admin-check"><input type="checkbox" id="admin-preorder"> הזמיני מראש</label>
         <label class="admin-check"><input type="checkbox" id="admin-limited-stock"> מלאי מוגבל</label>
         <label class="admin-check"><input type="checkbox" id="admin-hide"> הסתר מהחנות</label>
       </div>
       <p class="admin-hint">כמות במלאי יורדת אוטומטית אחרי שהתשלום אושר. כשמתאפסת — המוצר מסומן כאזל. השאירי ריק למוצרים בלי מעקב מלאי (למשל גיפט קארד).</p>
+      <p class="admin-hint">«הזמיני מראש» מחליף את «אזל מהמלאי» בחנות ומאפשר לקנות גם כשאין מלאי — מתאים למוצרים שאפשר להכין אחרי הזמנה. במוצר עם כמה סוגים אפשר לסמן גם לכל סוג בנפרד.</p>
       <p class="admin-hint">הסתרה מורידה את המוצר מרשימת החנות ומגוגל. הדף נשאר בכתובת /store/המזהה/ ואפשר לקנות משם — מתאים לבדיקת תשלום.</p>
 
       <div class="admin-editor__actions">

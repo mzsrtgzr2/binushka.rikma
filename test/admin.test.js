@@ -40,6 +40,21 @@ test('applyFlags updates booleans and adds missing keys', () => {
   assert.match(next, /body/);
 });
 
+test('applyFlags writes preorder so sold-out items stay orderable', () => {
+  const next = admin.applyFlags(FOX, {
+    out_of_stock: true,
+    limited_stock: false,
+    hide: false,
+    preorder: true,
+    stock: 0,
+  });
+  const product = admin.parseProduct('fox', next);
+  assert.equal(product.out_of_stock, true);
+  assert.equal(product.preorder, true);
+  assert.equal(product.stock, 0);
+  assert.match(next, /preorder: true/);
+});
+
 test('setYamlBool appends a missing key', () => {
   const yaml = admin.setYamlBool('title: fox\n', 'hide', true);
   assert.match(yaml, /hide: true/);
@@ -478,6 +493,27 @@ body
   );
   const result = await admin.assertInventory(authEnv(root), [{ id: 'fox', quantity: 2 }]);
   assert.match(result.error, /מלאי/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('assertInventory allows preorder when stock is zero', async () => {
+  const root = foxRoot();
+  fs.writeFileSync(
+    path.join(root, '_store', 'fox.md'),
+    `---
+title: רקמת שועל משמח
+price: ₪220
+out_of_stock: true
+preorder: true
+stock: 0
+---
+
+body
+`
+  );
+  const result = await admin.assertInventory(authEnv(root), [{ id: 'fox', quantity: 1 }]);
+  assert.equal(result.error, undefined);
+  assert.equal(result.ok, true);
   fs.rmSync(root, { recursive: true, force: true });
 });
 
@@ -1174,6 +1210,51 @@ test('variants product stores stock per type', async () => {
   const catalog = JSON.parse(fs.readFileSync(path.join(root, 'api', 'catalog-data.json'), 'utf8'));
   assert.equal(catalog.hoops.variants.small.stock, 2);
   assert.equal(catalog.hoops.variants.large.stock, 0);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('variants product stores preorder per type', async () => {
+  const root = foxRoot();
+  const cookie = await loginCookie(root);
+  const created = await request(admin, {
+    method: 'POST',
+    headers: { cookie },
+    body: {
+      action: 'upsert',
+      isNew: true,
+      product: {
+        slug: 'hoops',
+        title: 'חישוקים',
+        kind: 'variants',
+        variants: [
+          { id: 'small', name: 'קטן', price: 35, stock: 0, preorder: true },
+          { id: 'large', name: 'גדול', price: 45, stock: 0 },
+        ],
+      },
+    },
+    env: authEnv(root),
+  });
+  assert.equal(created.status, 200);
+  const md = fs.readFileSync(path.join(root, '_store', 'hoops.md'), 'utf8');
+  assert.match(md, /small:[\s\S]*preorder: true/);
+  assert.doesNotMatch(md, /large:[\s\S]*preorder: true/);
+  const page = require('../lib/store').parsePage('hoops', md);
+  assert.equal(page.variants.find((v) => v.id === 'small').preorder, true);
+  assert.equal(page.variants.find((v) => v.id === 'large').preorder, undefined);
+
+  const allowed = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'small', quantity: 3 },
+  ]);
+  assert.equal(allowed.ok, true);
+
+  const blocked = await admin.assertInventory(authEnv(root), [
+    { id: 'hoops', variant: 'large', quantity: 1 },
+  ]);
+  assert.match(blocked.error, /מלאי/);
+
+  const book = await admin.publicInventory(authEnv(root));
+  assert.equal(book.products.hoops.variants.small.preorder, true);
+  assert.equal(book.products.hoops.variants.large.preorder, undefined);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

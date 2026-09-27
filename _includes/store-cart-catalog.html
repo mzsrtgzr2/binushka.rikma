@@ -30,6 +30,7 @@
         "stock": {{ item.stock }},
         {%- endif -%}
         "limitedStock": {% if item.limited_stock %}true{% else %}false{% endif %},
+        "preorder": {% if item.preorder %}true{% else %}false{% endif %},
         "variable": {% if meta.variable %}true{% else %}false{% endif %},
         "minPrice": {{ meta.min_price | default: 0 }},
         "maxPrice": {{ meta.max_price | default: 0 }}
@@ -45,6 +46,9 @@
               "image": {{ variant[1].image | relative_url | jsonify }}
               {%- if variant[1].stock != nil and variant[1].stock != blank -%}
               ,"stock": {{ variant[1].stock }}
+              {%- endif -%}
+              {%- if variant[1].preorder -%}
+              ,"preorder": true
               {%- endif -%}
             }
             {%- assign vfirst = false -%}

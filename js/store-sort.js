@@ -28,8 +28,9 @@
       var id = el.getAttribute('data-product-id');
       var p = StoreCart.catalog[id];
       if (!p) return;
-      var soldOut = Boolean(p.outOfStock) || p.stock === 0;
+      var soldOut = (Boolean(p.outOfStock) || p.stock === 0) && !p.preorder;
       el.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
+      el.setAttribute('data-preorder', p.preorder && (Boolean(p.outOfStock) || p.stock === 0) ? 'true' : 'false');
       if (!p.variable && !p.variants && typeof p.price === 'number' && p.price > 0) {
         el.setAttribute('data-price', String(p.price));
       }

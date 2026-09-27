@@ -6,6 +6,7 @@ const path = require('path');
 const notify = require('../lib/routes/payment-notify');
 const checkout = require('../lib/routes/checkout');
 const admin = require('../lib/routes/admin');
+const coupons = require('../lib/coupons');
 const { signOrder, verifyOrder, newOrderId } = require('../lib/order-token');
 
 const SECRET = 'order-secret-for-tests';
@@ -229,4 +230,40 @@ test('Morning is asked to retry when this deploy has no API key', async () => {
 test('expired order tokens are refused', () => {
   const token = orderToken({ issuedAt: Date.now() - 8 * 24 * 60 * 60 * 1000 });
   assert.equal(verifyOrder(process.env, token), null);
+});
+
+test('a paid order with a coupon bumps uses once', async () => {
+  fs.mkdirSync(path.join(root, '_coupons'));
+  fs.writeFileSync(
+    path.join(root, '_coupons', 'save10.md'),
+    coupons.serialize({ code: 'SAVE10', type: 'percent', value: 10, active: true })
+  );
+  notify.morning.fetchDocument = async (id) => ({
+    id,
+    amount: 198,
+    creationDate: Math.floor(Date.now() / 1000),
+  });
+  const token = orderToken({ amount: 198, coupon: 'save10' });
+  assert.equal(verifyOrder(process.env, token).coupon, 'SAVE10');
+
+  const first = await callNotify(token, { documentId: 'doc-coupon12' });
+  assert.equal(first.statusCode, 200);
+  const after = coupons.parse(
+    'save10',
+    fs.readFileSync(path.join(root, '_coupons', 'save10.md'), 'utf8')
+  );
+  assert.equal(after.uses, 1);
+
+  const retry = await callNotify(token, { documentId: 'doc-coupon12' });
+  assert.equal(retry.statusCode, 200);
+  assert.equal(retry.body.duplicate, true);
+  const again = coupons.parse(
+    'save10',
+    fs.readFileSync(path.join(root, '_coupons', 'save10.md'), 'utf8')
+  );
+  assert.equal(again.uses, 1);
+
+  const { orderId } = verifyOrder(process.env, token);
+  const marker = JSON.parse(fs.readFileSync(path.join(root, admin.paidOrderPath(orderId)), 'utf8'));
+  assert.equal(marker.coupon, 'SAVE10');
 });

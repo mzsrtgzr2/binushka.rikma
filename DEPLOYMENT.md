@@ -40,11 +40,12 @@ gitignored. It only contains the public DSN, the environment
 (`production` / `preview` / `development`), and the git SHA when Vercel
 provides one.
 
-Browser errors load from `browser.sentry-cdn.com` (SDK 11.0.0, errors only,
-no session replay). The API function reports unexpected failures that
-already go through `console.error` (Morning, stock, admin, newsletter) and
-anything the handler itself throws. Request bodies, cookies, and shopper
-details are not attached.
+Browser errors and logs load from `browser.sentry-cdn.com` (SDK 11.0.0,
+no session replay). `console.log`, `console.warn`, and `console.error` in
+the browser are Sentry Logs. The API function does the same, and a
+`console.error` is also an Issue (Morning, stock, admin, newsletter, and
+anything the handler itself throws). Request bodies, cookies, and shopper
+details are not attached. Analytics debug lines are dropped.
 
 ## Store cart
 

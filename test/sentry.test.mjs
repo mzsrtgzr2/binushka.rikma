@@ -10,6 +10,7 @@ import {
   eventsFromConsoleArgs,
   isSentryDsn,
   sanitizeEvent,
+  sanitizeLog,
   scrubText,
 } from '../lib/sentry-scrub.js';
 import { writeSentryDataFile } from '../scripts/write-sentry-data.js';
@@ -93,6 +94,29 @@ test('events sent to Sentry lose the request and shopper fields', () => {
   assert.match(event.breadcrumbs[0].message, /\[email\]/);
 });
 
+test('logs drop shopper fields and analytics debug lines', () => {
+  const log = sanitizeLog({
+    level: 'error',
+    message: 'Morning auth failed for a@b.co https://idp.example/token',
+    attributes: {
+      route: 'checkout',
+      'user.email': 'a@b.co',
+      'user.name': 'Binushka',
+      'sentry.message.parameter.0': { orderId: 'BNK-100', email: 'a@b.co', error: 'call 0544247753' },
+    },
+  });
+  assert.equal(log.level, 'error');
+  assert.equal(log.message.includes('a@b.co'), false);
+  assert.equal(log.message.includes('idp.example'), false);
+  assert.equal(log.attributes.route, 'checkout');
+  assert.equal(log.attributes['user.email'], undefined);
+  assert.equal(log.attributes['user.name'], undefined);
+  assert.equal(log.attributes['sentry.message.parameter.0'].orderId, 'BNK-100');
+  assert.equal(log.attributes['sentry.message.parameter.0'].email, undefined);
+  assert.match(log.attributes['sentry.message.parameter.0'].error, /\[phone\]/);
+  assert.equal(sanitizeLog({ message: '[analytics] add_to_cart' }), null);
+});
+
 test('the build writes the browser config only for a real DSN', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sentry-data-'));
   const dest = path.join(dir, '_data', 'sentry.yml');
@@ -135,9 +159,12 @@ test('the browser snippet is gated and pins the checked SDK bundle', () => {
   const admin = fs.readFileSync(path.join(root, '_layouts/admin.html'), 'utf8');
   assert.match(head, /site\.data\.sentry\.dsn/);
   assert.match(head, /include sentry\.html/);
-  assert.match(snippet, /browser\.sentry-cdn\.com\/11\.0\.0\/bundle\.min\.js/);
-  assert.match(snippet, /sha384-cTwnmuJw67fRv\/Ws36NuepJXTeiXQoGMQhNG7I4FFULN\+r3iQuVQewCbuMzb\/3Us/);
+  assert.match(snippet, /browser\.sentry-cdn\.com\/11\.0\.0\/bundle\.logs\.metrics\.min\.js/);
+  assert.match(snippet, /sha384-ihqaHYcM8YpPw6uEoSGHFu7Hfp25ahDdKeIklLUC\/crg07V1HUkvU52j6B9x3Fvo/);
   assert.match(snippet, /sendDefaultPii: false/);
+  assert.match(snippet, /enableLogs: true/);
+  assert.match(snippet, /consoleLoggingIntegration/);
+  assert.match(snippet, /beforeSendLog/);
   assert.match(admin, /include head\.html/);
   assert.equal(admin.includes('mixpanel'), false);
 });

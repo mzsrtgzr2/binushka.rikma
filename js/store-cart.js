@@ -375,18 +375,40 @@
     if (!host) return;
     var existing = host.querySelector('.out-of-stock-text, .limited-stock-text, .preorder-text');
     if (existing) existing.parentNode.removeChild(existing);
-    if (!soldOut && !preorder && !limited) return;
     var workshop = Boolean(host.closest('[data-product-kind="workshop"]'));
+    /* Workshop pages already show one .registration-full-text line from Liquid.
+       Sync that line — never stack a second sold-out message under the subtitle. */
+    if (workshop) {
+      var badge = host.querySelector('.registration-full-text');
+      if (badge && /תיפתח/.test(badge.textContent || '')) return;
+      var workshopLabel = soldOut ? 'אין מקומות פנויים' : limited ? 'מקומות אחרונים' : '';
+      if (!workshopLabel) {
+        if (badge) badge.parentNode.removeChild(badge);
+        return;
+      }
+      if (badge) {
+        badge.textContent = workshopLabel;
+        return;
+      }
+      var sold = document.createElement('div');
+      sold.className = 'registration-full-text';
+      sold.textContent = workshopLabel;
+      var title = host.querySelector('.page-title');
+      if (title) host.insertBefore(sold, title.nextSibling);
+      else host.insertBefore(sold, host.firstChild);
+      return;
+    }
+    if (!soldOut && !preorder && !limited) return;
     var el = document.createElement('div');
     if (soldOut) {
       el.className = 'out-of-stock-text';
-      el.textContent = workshop ? 'אין מקומות פנויים' : 'אזל מהמלאי';
+      el.textContent = 'אזל מהמלאי';
     } else if (preorder) {
       el.className = 'preorder-text';
       el.textContent = 'הזמיני מראש';
     } else {
       el.className = 'limited-stock-text';
-      el.textContent = limitedStockLabel(stock, workshop);
+      el.textContent = limitedStockLabel(stock, false);
     }
     var price = host.querySelector('.store-item-price, [data-product-price]');
     if (price && price.parentNode === host) host.insertBefore(el, price);

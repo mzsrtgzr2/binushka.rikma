@@ -551,11 +551,21 @@
       .filter(function (n) { return n > 0; });
   }
 
-  /** What the cart would charge: the cheapest pack, or the plain price. */
+  /** Per-participant fare: cart_price wins; packs are optional discounts on top. */
   function effectivePrice(workshop) {
+    if (Number(workshop.cart_price) > 0) return Number(workshop.cart_price);
     var prices = packPrices(workshop.packs);
     if (prices.length) return Math.min.apply(null, prices);
-    return Number(workshop.cart_price) > 0 ? Number(workshop.cart_price) : 0;
+    return 0;
+  }
+
+  function packsForBooking(workshop) {
+    var packs = (workshop.packs || []).filter(function (pack) { return Number(pack.price) > 0; });
+    var unit = effectivePrice(workshop);
+    if (!packs.length || !(unit > 0)) return packs;
+    var hasSingle = packs.some(function (pack) { return Number(pack.places) === 1; });
+    if (hasSingle) return packs;
+    return [{ id: 'one', name: 'משתתפת אחת', price: unit, places: 1 }].concat(packs);
   }
 
   function priceUnit(workshop) {
@@ -621,13 +631,11 @@
     var soldOut = isSoldOut(workshop);
 
     var footer = '';
-    if (price > 0 && !workshop.registration_not_open) {
-      footer = soldOut
-        ? '<span class="project__sold-out">אין מקומות פנויים</span>'
-        : fakeButton(
-            workshop.price_per === 'workshop' ? 'הזמנת סדנה' : 'הרשמה לסדנה',
-            'project__add'
-          );
+    if (price > 0 && !workshop.registration_not_open && !soldOut) {
+      footer = fakeButton(
+        workshop.price_per === 'workshop' ? 'הזמנת סדנה' : 'הרשמה לסדנה',
+        'project__add'
+      );
     }
 
     return (
@@ -653,7 +661,7 @@
       return '<div class="section__navigation">' + fakeButton('הרשמי לסדנה זו', 'section-button') + '</div>';
     }
 
-    var packs = (workshop.packs || []).filter(function (pack) { return Number(pack.price) > 0; });
+    var packs = packsForBooking(workshop);
     var spots = spotsOf(workshop);
     var showSpots = spots != null && workshop.price_per !== 'workshop';
 
@@ -702,11 +710,12 @@
     var badge = badgeText(workshop);
     var price = effectivePrice(workshop);
     var image = workshop.image ? previewSrc(workshop.image) : '';
+    var soldOut = isSoldOut(workshop);
     var priceLine = '';
-    if (price > 0) {
+    if (price > 0 && !soldOut && !workshop.registration_not_open) {
       priceLine =
         '<div class="project-price">' +
-        ((workshop.packs || []).length ? 'מ־' : '') + '₪' + escapeHtml(price) + ' ' + priceUnit(workshop) +
+        (packsForBooking(workshop).length ? 'מ־' : '') + '₪' + escapeHtml(price) + ' ' + priceUnit(workshop) +
         '</div>';
     }
 
@@ -723,11 +732,10 @@
       priceLine +
       '</div>' +
       '<div class="admin-preview__markdown">' + content + '</div>' +
-      (isSoldOut(workshop) || workshop.registration_not_open ? '' : bookingHtml(workshop)) +
+      (soldOut || workshop.registration_not_open ? '' : bookingHtml(workshop)) +
       (image
         ? '<div class="page-image"><div class="project-image-container">' +
           '<img src="' + escapeHtml(image) + '" alt="">' +
-          (badge ? '<div class="registration-full">' + escapeHtml(badge) + '</div>' : '') +
           '</div></div>'
         : '')
     );

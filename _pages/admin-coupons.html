@@ -14,7 +14,7 @@ noindex: true
   <p class="admin-lead">
     כאן מגדירים קודי קופון מראש. הלקוחות מזינים אותם בעמוד התשלום לפני המעבר ל־Grow.
     אפשר להגדיר הנחה באחוזים או בסכום קבוע בשקלים — ההנחה חלה על המוצרים, לא על המשלוח.
-    אפשר להגביל למינימום רכישה, לקטגוריה או למוצר ספציפי, ולשים תאריך תפוגה.
+    אפשר להגביל למינימום רכישה, לקטגוריה, למוצר ספציפי או לסדנאות נבחרות, ולשים תאריך תפוגה.
     אי אפשר ליצור קופון של 100% הנחה על הסל.
   </p>
 
@@ -113,6 +113,18 @@ noindex: true
             </select>
             <p class="admin-hint">ההנחה תחול רק על המוצר הזה בסל.</p>
           </div>
+        </div>
+
+        <div class="form__group" id="coupon-workshops-group" hidden>
+          <label class="form__label" for="coupon-workshop-scope">סדנאות</label>
+          <select class="form__input" id="coupon-workshop-scope">
+            <option value="all">כל הסדנאות</option>
+            <option value="selected">סדנאות נבחרות</option>
+          </select>
+          <div class="admin-coupon-workshops" id="coupon-workshops-list" hidden></div>
+          <p class="admin-hint" id="coupon-workshops-hint">
+            ההנחה תחול על כל הסדנאות בסל. אפשר לצמצם לסדנאות ספציפיות.
+          </p>
         </div>
 
         <div class="form__group">

@@ -246,6 +246,27 @@
       "name": "רקמת בטטה מושרשת",
       "price": 300
     },
+    "needle": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "מחט לרקמה",
+      "price": 2
+    },
+    "embroidery-tablecloth": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
+      "variants": {
+        "type-1": {
+          "stock": 1
+        },
+        "type-2": {
+          "stock": 1
+        }
+      }
+    },
     "workshop-monthly-meeting": {
       "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",
       "price": 110,
@@ -308,27 +329,6 @@
       "stock": 0,
       "outOfStock": true,
       "limitedStock": false
-    },
-    "needle": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "מחט לרקמה",
-      "price": 2
-    },
-    "embroidery-tablecloth": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
-      "variants": {
-        "type-1": {
-          "stock": 1
-        },
-        "type-2": {
-          "stock": 1
-        }
-      }
     }
   }
 }

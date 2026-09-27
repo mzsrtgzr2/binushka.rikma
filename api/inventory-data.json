@@ -74,6 +74,7 @@
       "stock": null,
       "outOfStock": true,
       "limitedStock": false,
+      "preorder": true,
       "name": "זר פרחים רקום",
       "price": 300
     },

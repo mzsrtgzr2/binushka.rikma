@@ -55,8 +55,20 @@
     return 0;
   }
 
+  // mouseover on the homepage can target a text node (or the document).
+  // Those nodes have no closest(), and the listener used to throw.
+  function eventElement(event) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node;
+  }
+
   document.addEventListener('click', function (event) {
-    var nav = event.target.closest('[data-gallery-prev], [data-gallery-next]');
+    var el = eventElement(event);
+    if (!el) return;
+    var nav = el.closest('[data-gallery-prev], [data-gallery-next]');
     if (nav) {
       var gallery = nav.closest('[data-product-gallery]');
       if (!gallery) return;
@@ -66,7 +78,7 @@
       return;
     }
 
-    var thumb = event.target.closest('.product-gallery__thumb');
+    var thumb = el.closest('.product-gallery__thumb');
     if (!thumb) return;
     event.preventDefault();
     activateThumb(thumb);
@@ -74,13 +86,17 @@
 
   document.addEventListener('mouseover', function (event) {
     if (!canHoverPreview()) return;
-    var thumb = event.target.closest('.product-gallery__thumb');
+    var el = eventElement(event);
+    if (!el) return;
+    var thumb = el.closest('.product-gallery__thumb');
     if (!thumb) return;
     activateThumb(thumb);
   });
 
   document.addEventListener('keydown', function (event) {
-    var thumb = event.target.closest('.product-gallery__thumb');
+    var el = eventElement(event);
+    if (!el) return;
+    var thumb = el.closest('.product-gallery__thumb');
     if (thumb) {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
@@ -88,7 +104,7 @@
       return;
     }
 
-    var nav = event.target.closest('[data-gallery-prev], [data-gallery-next]');
+    var nav = el.closest('[data-gallery-prev], [data-gallery-next]');
     if (!nav) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     var gallery = nav.closest('[data-product-gallery]');

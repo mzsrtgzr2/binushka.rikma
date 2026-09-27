@@ -30,6 +30,7 @@
         "stock": {{ item.stock }},
         {%- endif -%}
         "limitedStock": {% if item.limited_stock %}true{% else %}false{% endif %},
+        "preorder": {% if item.preorder %}true{% else %}false{% endif %},
         "variable": {% if meta.variable %}true{% else %}false{% endif %},
         "minPrice": {{ meta.min_price | default: 0 }},
         "maxPrice": {{ meta.max_price | default: 0 }}

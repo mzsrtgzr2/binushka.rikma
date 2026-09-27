@@ -330,6 +330,21 @@ test('shop out_of_stock products cannot be sold', () => {
   assert.match(buildOrder([{ id: 'yam', quantity: 1 }], 'pickup').error, /אין מספיק מלאי/);
 });
 
+test('preorder products can be sold when out of stock', () => {
+  const { BUNDLED_INVENTORY } = require('../lib/catalog/load');
+  const prev = BUNDLED_INVENTORY.yam;
+  assert.ok(prev);
+  BUNDLED_INVENTORY.yam = { ...prev, outOfStock: true, stock: 0, preorder: true };
+  try {
+    const order = buildOrder([{ id: 'yam', quantity: 1 }], 'pickup');
+    assert.equal(order.error, undefined);
+    assert.equal(order.lines[0].id, 'yam');
+    assert.equal(order.subtotal, 300);
+  } finally {
+    BUNDLED_INVENTORY.yam = prev;
+  }
+});
+
 test('participant names are appended only to workshop lines', () => {
   const order = applyWorkshopNote(
     buildOrder(

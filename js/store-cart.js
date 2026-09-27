@@ -215,10 +215,16 @@
     if (hasPerVariantStock(p)) {
       if (!variantId || !p.variants[variantId]) return 0;
       var row = p.variants[variantId];
-      if (typeof row.stock === 'number') return row.stock;
+      if (typeof row.stock === 'number') {
+        if (row.stock <= 0 && p.preorder) return Infinity;
+        return row.stock;
+      }
       return Infinity;
     }
-    if (p.outOfStock || p.stock === 0) return 0;
+    if (p.outOfStock || p.stock === 0) {
+      if (p.preorder) return Infinity;
+      return 0;
+    }
     if (typeof p.stock === 'number') return p.stock;
     return Infinity;
   }
@@ -266,7 +272,9 @@
   function addToCart(id, delta, extra) {
     var p = byId[id];
     if (!p) return false;
-    if (!hasPerVariantStock(p) && (p.outOfStock || p.stock === 0)) return blocked(id, extra, 'out_of_stock');
+    if (!hasPerVariantStock(p) && (p.outOfStock || p.stock === 0) && !p.preorder) {
+      return blocked(id, extra, 'out_of_stock');
+    }
     if (p.variable && !validGiftAmount(p, extra)) return blocked(id, extra, 'invalid_amount');
     if (p.variants && !validVariant(p, extra)) return blocked(id, extra, 'no_variant_selected');
     if (hasPerVariantStock(p) && availableStock(p, extra) <= 0) return blocked(id, extra, 'out_of_stock');
@@ -354,7 +362,7 @@
 
   function ensureOverlay(container, className, text) {
     if (!container) return;
-    var existing = container.querySelector('.out-of-stock, .limited-stock');
+    var existing = container.querySelector('.out-of-stock, .limited-stock, .preorder');
     if (existing) existing.parentNode.removeChild(existing);
     if (!text) return;
     var el = document.createElement('div');
@@ -363,35 +371,46 @@
     container.appendChild(el);
   }
 
-  function ensureStockText(host, soldOut, limited, stock) {
+  function ensureStockText(host, soldOut, preorder, limited, stock) {
     if (!host) return;
-    var existing = host.querySelector('.out-of-stock-text, .limited-stock-text');
+    var existing = host.querySelector('.out-of-stock-text, .limited-stock-text, .preorder-text');
     if (existing) existing.parentNode.removeChild(existing);
-    if (!soldOut && !limited) return;
+    if (!soldOut && !preorder && !limited) return;
     var workshop = Boolean(host.closest('[data-product-kind="workshop"]'));
     var el = document.createElement('div');
-    el.className = soldOut ? 'out-of-stock-text' : 'limited-stock-text';
-    el.textContent = soldOut
-      ? workshop
-        ? 'אין מקומות פנויים'
-        : 'אזל מהמלאי'
-      : limitedStockLabel(stock, workshop);
+    if (soldOut) {
+      el.className = 'out-of-stock-text';
+      el.textContent = workshop ? 'אין מקומות פנויים' : 'אזל מהמלאי';
+    } else if (preorder) {
+      el.className = 'preorder-text';
+      el.textContent = 'הזמיני מראש';
+    } else {
+      el.className = 'limited-stock-text';
+      el.textContent = limitedStockLabel(stock, workshop);
+    }
     var price = host.querySelector('.store-item-price, [data-product-price]');
     if (price && price.parentNode === host) host.insertBefore(el, price);
     else host.appendChild(el);
   }
 
-  function ensureVariantStockText(host, soldOut, limited, stock) {
+  function ensureVariantStockText(host, soldOut, preorder, limited, stock) {
     if (!host) return;
     var existing = host.querySelector('.store-variant__stock, .scrunchies-variant__stock');
     if (existing) existing.parentNode.removeChild(existing);
-    if (!soldOut && !limited) return;
+    if (!soldOut && !preorder && !limited) return;
     var el = document.createElement('div');
     var onScrunchie = Boolean(host.closest('.scrunchies-variant'));
-    el.className =
-      (onScrunchie ? 'scrunchies-variant__stock ' : 'store-variant__stock ') +
-      (soldOut ? 'out-of-stock-text' : 'limited-stock-text');
-    el.textContent = soldOut ? 'אזל מהמלאי' : limitedStockLabel(stock, false);
+    var base = onScrunchie ? 'scrunchies-variant__stock ' : 'store-variant__stock ';
+    if (soldOut) {
+      el.className = base + 'out-of-stock-text';
+      el.textContent = 'אזל מהמלאי';
+    } else if (preorder) {
+      el.className = base + 'preorder-text';
+      el.textContent = 'הזמיני מראש';
+    } else {
+      el.className = base + 'limited-stock-text';
+      el.textContent = limitedStockLabel(stock, false);
+    }
     var price = host.querySelector('.store-variant__price, .scrunchies-variant__price');
     if (price && price.parentNode === host) {
       if (price.nextSibling) host.insertBefore(el, price.nextSibling);
@@ -406,13 +425,15 @@
       var p = byId[id];
       var perVariant = hasPerVariantStock(p);
       var multiType = isMultiTypeProduct(p);
-      var soldOut = perVariant
+      var stockGone = perVariant
         ? Object.keys(p.variants).every(function (vid) {
             return typeof p.variants[vid].stock === 'number' && p.variants[vid].stock <= 0;
           })
         : Boolean(p.outOfStock) || p.stock === 0;
-      var limited = Boolean(p.limitedStock) && !soldOut;
-      if (perVariant && !soldOut) {
+      var preorder = Boolean(p.preorder) && stockGone && p.kind !== 'workshop';
+      var soldOut = stockGone && !preorder;
+      var limited = Boolean(p.limitedStock) && !stockGone;
+      if (perVariant && !stockGone) {
         limited = Object.keys(p.variants).some(function (vid) {
           return isLowStock(p.variants[vid].stock);
         });
@@ -424,16 +445,19 @@
         ? workshop
           ? 'אין מקומות פנויים'
           : 'אזל מהמלאי'
-        : showLimitedBadge
-          ? limitedStockLabel(p.stock, workshop)
-          : '';
-      var overlayClass = soldOut ? 'out-of-stock' : 'limited-stock';
+        : preorder
+          ? 'הזמיני מראש'
+          : showLimitedBadge
+            ? limitedStockLabel(p.stock, workshop)
+            : '';
+      var overlayClass = soldOut ? 'out-of-stock' : preorder ? 'preorder' : 'limited-stock';
 
       document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
         root.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
+        root.setAttribute('data-preorder', preorder ? 'true' : 'false');
         ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
         if (root.querySelector('.page-head')) {
-          ensureStockText(root.querySelector('.page-head'), soldOut, showLimitedBadge, p.stock);
+          ensureStockText(root.querySelector('.page-head'), soldOut, preorder, showLimitedBadge, p.stock);
           var pageActions = root.querySelector('.store-item__cart-actions');
           if (pageActions) pageActions.hidden = soldOut;
         }
@@ -448,18 +472,20 @@
           ? !Number.isFinite(max)
             ? false
             : max < need
-          : soldOut || (typeof p.stock === 'number' && p.stock < need);
+          : soldOut || (typeof p.stock === 'number' && p.stock < need && !p.preorder);
         btn.disabled = disabled;
         if (disabled) btn.setAttribute('aria-disabled', 'true');
         else btn.removeAttribute('aria-disabled');
 
         if (multiType && variantId && p.variants[variantId]) {
           var vStock = p.variants[variantId].stock;
-          var vSoldOut = typeof vStock === 'number' && vStock <= 0;
+          var vStockGone = typeof vStock === 'number' && vStock <= 0;
+          var vPreorder = Boolean(p.preorder) && vStockGone;
+          var vSoldOut = vStockGone && !vPreorder;
           var vLimited = isLowStock(vStock);
           var card = btn.closest('.store-variant, .scrunchies-variant');
           var info = card && (card.querySelector('.store-variant__info') || card);
-          ensureVariantStockText(info, vSoldOut, vLimited, vStock);
+          ensureVariantStockText(info, vSoldOut, vPreorder, vLimited, vStock);
         }
       });
     });
@@ -897,6 +923,7 @@
         else if (live.stock === null) delete byId[id].stock;
         if (typeof live.outOfStock === 'boolean') byId[id].outOfStock = live.outOfStock;
         if (typeof live.limitedStock === 'boolean') byId[id].limitedStock = live.limitedStock;
+        if (typeof live.preorder === 'boolean') byId[id].preorder = live.preorder;
         if (live.variants && byId[id].variants) {
           Object.keys(live.variants).forEach(function (vid) {
             if (!byId[id].variants[vid]) return;

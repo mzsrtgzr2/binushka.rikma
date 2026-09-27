@@ -100,10 +100,15 @@ layout: default
     {% assign vid = variant[0] %}
     {% assign v = variant[1] %}
     {% assign v_sold_out = false %}
+    {% assign v_preorder = false %}
     {% assign v_limited = false %}
     {% if v.stock != nil and v.stock != blank %}
       {% if v.stock == 0 %}
-        {% assign v_sold_out = true %}
+        {% if page.preorder %}
+          {% assign v_preorder = true %}
+        {% else %}
+          {% assign v_sold_out = true %}
+        {% endif %}
       {% elsif v.stock <= 3 %}
         {% assign v_limited = true %}
       {% endif %}
@@ -128,6 +133,8 @@ layout: default
       <div class="scrunchies-variant__price">₪{{ v.price }}</div>
       {% if v_sold_out %}
       <div class="scrunchies-variant__stock out-of-stock-text">אזל מהמלאי</div>
+      {% elsif v_preorder %}
+      <div class="scrunchies-variant__stock preorder-text">הזמיני מראש</div>
       {% elsif v_limited %}
       <div class="scrunchies-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
       {% endif %}

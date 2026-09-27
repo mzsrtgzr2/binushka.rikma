@@ -3,8 +3,13 @@ layout: default
 ---
 
 {% assign sold_out = false %}
+{% assign preorder = false %}
 {% if page.out_of_stock or page.stock == 0 %}
-  {% assign sold_out = true %}
+  {% if page.preorder %}
+    {% assign preorder = true %}
+  {% else %}
+    {% assign sold_out = true %}
+  {% endif %}
 {% endif %}
 {% assign slug = page.slug | default: page.basename %}
 {% assign cart_meta = site.data.catalog[slug] %}
@@ -13,12 +18,14 @@ layout: default
   {% assign has_variants = true %}
 {% endif %}
 
-<div class="container" data-product-id="{{ slug }}">
+<div class="container" data-product-id="{{ slug }}" data-preorder="{% if preorder %}true{% else %}false{% endif %}">
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
     {% if sold_out %}
       <div class="out-of-stock-text">אזל מהמלאי</div>
+    {% elsif preorder %}
+      <div class="preorder-text">הזמיני מראש</div>
     {% elsif page.limited_stock %}
       {% unless has_variants %}
       <div class="limited-stock-text">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
@@ -79,10 +86,15 @@ layout: default
               {% assign vid = variant[0] %}
               {% assign v = variant[1] %}
               {% assign v_sold_out = false %}
+              {% assign v_preorder = false %}
               {% assign v_limited = false %}
               {% if v.stock != nil and v.stock != blank %}
                 {% if v.stock == 0 %}
-                  {% assign v_sold_out = true %}
+                  {% if page.preorder %}
+                    {% assign v_preorder = true %}
+                  {% else %}
+                    {% assign v_sold_out = true %}
+                  {% endif %}
                 {% elsif v.stock <= 3 %}
                   {% assign v_limited = true %}
                 {% endif %}
@@ -139,6 +151,8 @@ layout: default
                   <div class="store-variant__price">₪{{ v.price }}</div>
                   {% if v_sold_out %}
                   <div class="store-variant__stock out-of-stock-text">אזל מהמלאי</div>
+                  {% elsif v_preorder %}
+                  <div class="store-variant__stock preorder-text">הזמיני מראש</div>
                   {% elsif v_limited %}
                   <div class="store-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
                   {% endif %}
@@ -200,6 +214,8 @@ layout: default
         >
         {% if sold_out %}
           <div class="out-of-stock">אזל מהמלאי</div>
+        {% elsif preorder %}
+          <div class="preorder">הזמיני מראש</div>
         {% elsif page.limited_stock %}
           {% unless has_variants %}
           <div class="limited-stock">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>

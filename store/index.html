@@ -61,13 +61,18 @@ layout: default
     {% comment %}
       Sold out sinks last whatever the chosen order says: what is in stock
       changes on its own as things sell, and the top of the shop should not be
-      spent on something nobody can buy.
+      spent on something nobody can buy. Preorder stays with available — customers
+      can still order.
     {% endcomment %}
     {% assign store_available = '' | split: '' %}
     {% assign store_sold_out = '' | split: '' %}
     {% for item in store_ordered %}
       {% if item.out_of_stock or item.stock == 0 %}
-        {% assign store_sold_out = store_sold_out | push: item %}
+        {% if item.preorder %}
+          {% assign store_available = store_available | push: item %}
+        {% else %}
+          {% assign store_sold_out = store_sold_out | push: item %}
+        {% endif %}
       {% else %}
         {% assign store_available = store_available | push: item %}
       {% endif %}
@@ -76,8 +81,13 @@ layout: default
 
     {% for item in store_display %}
       {% assign sold_out = false %}
+      {% assign preorder = false %}
       {% if item.out_of_stock or item.stock == 0 %}
-        {% assign sold_out = true %}
+        {% if item.preorder %}
+          {% assign preorder = true %}
+        {% else %}
+          {% assign sold_out = true %}
+        {% endif %}
       {% endif %}
       {% assign slug = item.slug | default: item.basename %}
       {% assign cart_meta = site.data.catalog[slug] %}
@@ -122,6 +132,7 @@ layout: default
         data-category="{{ item.category }}"
         data-price="{{ sort_price }}"
         data-sold-out="{% if sold_out %}true{% else %}false{% endif %}"
+        data-preorder="{% if preorder %}true{% else %}false{% endif %}"
         data-order="{{ forloop.index }}"
       >
         <div class="store-item__content">
@@ -131,6 +142,8 @@ layout: default
             {% endif %}
             {% if sold_out %}
               <div class="out-of-stock">אזל מהמלאי</div>
+            {% elsif preorder %}
+              <div class="preorder">הזמיני מראש</div>
             {% elsif item.limited_stock %}
               {% comment %}
                 Multi-type products show limited stock next to each type on the

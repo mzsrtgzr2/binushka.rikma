@@ -303,6 +303,7 @@
       map[p.slug] = {
         out_of_stock: Boolean(p.out_of_stock),
         limited_stock: Boolean(p.limited_stock),
+        preorder: Boolean(p.preorder),
         hide: Boolean(p.hide),
         stock: p.stock == null || p.stock === '' ? null : Number(p.stock),
       };
@@ -324,6 +325,7 @@
       return (
         Boolean(p.out_of_stock) !== Boolean(orig.out_of_stock) ||
         Boolean(p.limited_stock) !== Boolean(orig.limited_stock) ||
+        Boolean(p.preorder) !== Boolean(orig.preorder) ||
         Boolean(p.hide) !== Boolean(orig.hide) ||
         stock !== origStock
       );
@@ -332,6 +334,7 @@
 
   function statusLabel(p) {
     if (p.hide) return 'מוסתר';
+    if ((p.out_of_stock || p.stock === 0) && p.preorder) return 'הזמנה מראש';
     if (p.out_of_stock || p.stock === 0) return 'אזל';
     if (p.kind === 'variants' && p.variants && p.variants.length) {
       var tracked = p.variants.filter(function (v) {
@@ -453,6 +456,9 @@
           '<label class="admin-check"><input type="checkbox" data-flag="out_of_stock"' +
           (p.out_of_stock ? ' checked' : '') +
           '> אזל מהמלאי</label>' +
+          '<label class="admin-check"><input type="checkbox" data-flag="preorder"' +
+          (p.preorder ? ' checked' : '') +
+          '> הזמיני מראש</label>' +
           '<label class="admin-check"><input type="checkbox" data-flag="limited_stock"' +
           (p.limited_stock ? ' checked' : '') +
           '> מלאי מוגבל</label>' +
@@ -897,6 +903,7 @@
       product.kind === 'variants' ||
       product.slug === 'gift-card';
     syncEditorOutOfStock(product.stock, Boolean(product.out_of_stock));
+    document.getElementById('admin-preorder').checked = Boolean(product.preorder);
     document.getElementById('admin-limited-stock').checked = Boolean(product.limited_stock);
     document.getElementById('admin-hide').checked = Boolean(product.hide);
     renderVariants(product.variants);
@@ -969,6 +976,7 @@
       stock: stock,
       out_of_stock: outOfStock,
       limited_stock: document.getElementById('admin-limited-stock').checked,
+      preorder: document.getElementById('admin-preorder').checked,
       hide: document.getElementById('admin-hide').checked,
     };
   }
@@ -1046,6 +1054,7 @@
   }
 
   function stockOverlay(p) {
+    if ((p.out_of_stock || p.stock === 0) && p.preorder) return '<div class="preorder">הזמיני מראש</div>';
     if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock">אזל מהמלאי</div>';
     if (p.limited_stock && p.kind !== 'variants') {
       return '<div class="limited-stock">' + limitedStockCopy(p.stock) + '</div>';
@@ -1054,6 +1063,7 @@
   }
 
   function stockText(p) {
+    if ((p.out_of_stock || p.stock === 0) && p.preorder) return '<div class="preorder-text">הזמיני מראש</div>';
     if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
     if (p.limited_stock && p.kind !== 'variants') {
       return '<div class="limited-stock-text">' + limitedStockCopy(p.stock) + '</div>';
@@ -1061,10 +1071,13 @@
     return '';
   }
 
-  function variantStockLabel(v, className) {
+  function variantStockLabel(v, className, allowPreorder) {
     var stock = v && v.stock;
     var cls = className || 'store-variant__stock';
     if (stock === 0 || stock === '0') {
+      if (allowPreorder) {
+        return '<div class="' + cls + ' preorder-text">הזמיני מראש</div>';
+      }
       return '<div class="' + cls + ' out-of-stock-text">אזל מהמלאי</div>';
     }
     var n = Number(stock);
@@ -1084,8 +1097,12 @@
     );
   }
 
+  function isUnavailable(p) {
+    return (p.out_of_stock || p.stock === 0) && !p.preorder;
+  }
+
   function storeCardCta(p) {
-    if (p.out_of_stock || p.stock === 0 || p.kind === 'content') return '';
+    if (isUnavailable(p) || p.kind === 'content') return '';
     if (p.kind === 'variable') return fakeButton('בחרי סכום', 'store-item__add');
     if (p.kind === 'variants') return fakeButton('בחרי סוג', 'store-item__add');
     return fakeButton('הוסיפי לסל', 'store-item__add');
@@ -1143,7 +1160,7 @@
               ? '<p class="scrunchies-variant__desc">' + escapeHtml(v.description) + '</p>'
               : '') +
             (v.price ? '<div class="scrunchies-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
-            variantStockLabel(v, 'scrunchies-variant__stock') +
+            variantStockLabel(v, 'scrunchies-variant__stock', p.preorder) +
             fakeButton('הוסיפי לסל') +
             '</article>'
           );
@@ -1157,7 +1174,7 @@
           '</h3>' +
           (v.description ? '<p class="store-variant__desc">' + escapeHtml(v.description) + '</p>' : '') +
           (v.price ? '<div class="store-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
-          variantStockLabel(v) +
+          variantStockLabel(v, null, p.preorder) +
           '</div>' +
           fakeButton('הוסיפי לסל') +
           '</article>'
@@ -1167,7 +1184,7 @@
   }
 
   function productCartHtml(p) {
-    if (p.out_of_stock || p.stock === 0 || p.kind === 'content') return '';
+    if (isUnavailable(p) || p.kind === 'content') return '';
     if (p.kind === 'variable') {
       var chips = (p.presets || [])
         .map(function (n) {
@@ -1445,6 +1462,7 @@
         stock: p.stock,
         out_of_stock: p.out_of_stock,
         limited_stock: p.limited_stock,
+        preorder: p.preorder,
         hide: p.hide,
         order: index + 1
       };

@@ -40,6 +40,21 @@ test('applyFlags updates booleans and adds missing keys', () => {
   assert.match(next, /body/);
 });
 
+test('applyFlags writes preorder so sold-out items stay orderable', () => {
+  const next = admin.applyFlags(FOX, {
+    out_of_stock: true,
+    limited_stock: false,
+    hide: false,
+    preorder: true,
+    stock: 0,
+  });
+  const product = admin.parseProduct('fox', next);
+  assert.equal(product.out_of_stock, true);
+  assert.equal(product.preorder, true);
+  assert.equal(product.stock, 0);
+  assert.match(next, /preorder: true/);
+});
+
 test('setYamlBool appends a missing key', () => {
   const yaml = admin.setYamlBool('title: fox\n', 'hide', true);
   assert.match(yaml, /hide: true/);
@@ -478,6 +493,27 @@ body
   );
   const result = await admin.assertInventory(authEnv(root), [{ id: 'fox', quantity: 2 }]);
   assert.match(result.error, /מלאי/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('assertInventory allows preorder when stock is zero', async () => {
+  const root = foxRoot();
+  fs.writeFileSync(
+    path.join(root, '_store', 'fox.md'),
+    `---
+title: רקמת שועל משמח
+price: ₪220
+out_of_stock: true
+preorder: true
+stock: 0
+---
+
+body
+`
+  );
+  const result = await admin.assertInventory(authEnv(root), [{ id: 'fox', quantity: 1 }]);
+  assert.equal(result.error, undefined);
+  assert.equal(result.ok, true);
   fs.rmSync(root, { recursive: true, force: true });
 });
 

@@ -15,6 +15,84 @@ test('formatYamlScalar quotes values that contain newlines', () => {
   assert.equal(store.formatYamlScalar('a\nb').includes('\n'), false);
 });
 
+test('multi-type variants are ordered cheapest first', () => {
+  const sortedMap = store.sortVariantsByPrice({
+    pricey: { name: 'יקר', price: 240 },
+    cheap: { name: 'זול', price: 170 },
+    mid: { name: 'בינוני', price: 200 },
+  });
+  assert.deepEqual(Object.keys(sortedMap), ['cheap', 'mid', 'pricey']);
+
+  const sortedRows = store.variantsToArray({
+    pricey: { name: 'יקר', price: 240 },
+    cheap: { name: 'זול', price: 170 },
+  });
+  assert.deepEqual(
+    sortedRows.map((row) => row.id),
+    ['cheap', 'pricey']
+  );
+
+  const fromAdmin = store.variantsFromArray([
+    { name: 'יקר', price: 280 },
+    { name: 'זול', price: 170 },
+    { name: 'בינוני', price: 200 },
+  ]);
+  assert.deepEqual(Object.keys(fromAdmin), ['type-1', 'type-2', 'type-3']);
+  assert.deepEqual(
+    Object.values(fromAdmin).map((row) => row.price),
+    [170, 200, 280]
+  );
+
+  // Numeric-looking ids cannot rely on JSON object key order.
+  assert.deepEqual(store.variantIdsInPriceOrder({
+    22: { name: 'גדול', price: 40 },
+    oval: { name: 'אובאלי', price: 35 },
+    13: { name: 'קטן', price: 35 },
+    fancy: { name: 'מיוחד', price: 45 },
+  }), ['13', 'oval', '22', 'fancy']);
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-variant-sort-'));
+  writePage(
+    dir,
+    'bags',
+    `title: תיקים
+price: ₪170 – ₪240
+variants:
+  type-1:
+    name: יקר
+    price: 240
+  type-2:
+    name: זול
+    price: 170
+`
+  );
+  writePage(
+    dir,
+    'hoops',
+    `title: חישוקים
+price: ₪35 – ₪45
+variants:
+  22:
+    name: גדול
+    price: 40
+  oval:
+    name: אובאלי
+    price: 35
+  13:
+    name: קטן
+    price: 35
+`
+  );
+  const catalog = store.buildCatalogFromDir(dir);
+  assert.deepEqual(catalog.bags.variant_order, ['type-2', 'type-1']);
+  assert.equal(catalog.bags.variants['type-2'].price, 170);
+  assert.equal(catalog.bags.variants['type-1'].price, 240);
+  assert.deepEqual(catalog.hoops.variant_order, ['13', 'oval', '22']);
+  const hoopPrices = catalog.hoops.variant_order.map((id) => catalog.hoops.variants[id].price);
+  assert.deepEqual(hoopPrices, [35, 35, 40]);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function writePage(dir, slug, yaml, body = 'body') {
   fs.writeFileSync(
     path.join(dir, `${slug}.md`),

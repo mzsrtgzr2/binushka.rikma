@@ -96,9 +96,16 @@ layout: default
   <h2 class="scrunchies-variants-section__title">בחרי סוג</h2>
   <p class="scrunchies-variants-section__subtitle">כל סקראנצ'י תפורה בעבודת יד — בצבע ובדגם שתבחרי. בקופה אפשר לרשום איזו דוגמא אהבת.</p>
   <div class="scrunchies-variants">
-    {% for variant in cart_meta.variants %}
-    {% assign vid = variant[0] %}
-    {% assign v = variant[1] %}
+    {% assign variant_ids = cart_meta.variant_order %}
+    {% if variant_ids == nil or variant_ids.size == 0 %}
+      {% assign variant_ids = '' | split: '' %}
+      {% for variant in cart_meta.variants %}
+        {% assign variant_ids = variant_ids | push: variant[0] %}
+      {% endfor %}
+    {% endif %}
+    {% for vid in variant_ids %}
+    {% assign v = cart_meta.variants[vid] %}
+    {% if v %}
     {% assign v_sold_out = false %}
     {% assign v_preorder = false %}
     {% assign v_limited = false %}
@@ -142,6 +149,7 @@ layout: default
         {% if v_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
       </button>
     </article>
+    {% endif %}
     {% endfor %}
   </div>
 </div>

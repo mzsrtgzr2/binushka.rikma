@@ -5,6 +5,15 @@
  * Workshop list for scoped coupons comes from /api/admin-workshops.
  */
 (function () {
+  // Clicks can target a text node or the document. Those have no closest().
+  function eventClosest(event, selector) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node.closest(selector);
+  }
+
   var loginForm = document.getElementById('admin-login');
   var loginMessage = document.getElementById('admin-login-message');
   var board = document.getElementById('admin-board');
@@ -616,7 +625,7 @@
   });
 
   listEl.addEventListener('click', function (event) {
-    var btn = event.target.closest('[data-action]');
+    var btn = eventClosest(event, '[data-action]');
     if (!btn) return;
     var item = btn.closest('[data-code]');
     if (!item) return;

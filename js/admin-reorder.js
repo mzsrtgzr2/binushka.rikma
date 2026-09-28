@@ -7,6 +7,15 @@
  * rather not drag — so both are wired to the same move.
  */
 (function () {
+  // Clicks and drags can target a text node or the document. Those have no closest().
+  function eventClosest(event, selector) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node.closest(selector);
+  }
+
   function AdminReorder() {}
 
   /**
@@ -61,7 +70,7 @@
     }
 
     list.addEventListener('click', function (event) {
-      var button = event.target.closest('[data-move]');
+      var button = eventClosest(event, '[data-move]');
       if (!button || button.disabled) return;
 
       var row = button.closest(itemSelector);
@@ -81,7 +90,7 @@
     var dragging = null;
 
     list.addEventListener('dragstart', function (event) {
-      var handle = event.target.closest('[data-drag-handle]');
+      var handle = eventClosest(event, '[data-drag-handle]');
       if (!handle) return;
 
       dragging = handle.closest(itemSelector);
@@ -101,7 +110,7 @@
       event.preventDefault();
       event.dataTransfer.dropEffect = 'move';
 
-      var over = event.target.closest(itemSelector);
+      var over = eventClosest(event, itemSelector);
       if (!over || over === dragging) return;
 
       // Past the middle of the row under the pointer means the dragged row

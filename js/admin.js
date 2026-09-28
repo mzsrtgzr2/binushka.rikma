@@ -3,6 +3,15 @@
  * Workshops have their own section at /admin/workshops/.
  */
 (function () {
+  // Clicks can target a text node or the document. Those have no closest().
+  function eventClosest(event, selector) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node.closest(selector);
+  }
+
   var loginForm = document.getElementById('admin-login');
   var loginMessage = document.getElementById('admin-login-message');
   var board = document.getElementById('admin-board');
@@ -1558,7 +1567,7 @@
   }
 
   listEl.addEventListener('change', function (event) {
-    var stockInput = event.target.closest('input[data-stock]');
+    var stockInput = eventClosest(event, 'input[data-stock]');
     if (stockInput) {
       var stockCard = stockInput.closest('[data-slug]');
       var stockProduct = products.find(function (p) {
@@ -1581,7 +1590,7 @@
       render();
       return;
     }
-    var input = event.target.closest('input[data-flag]');
+    var input = eventClosest(event, 'input[data-flag]');
     if (!input) return;
     var card = input.closest('[data-slug]');
     var product = products.find(function (p) {
@@ -1593,7 +1602,7 @@
   });
 
   listEl.addEventListener('click', function (event) {
-    var btn = event.target.closest('[data-edit]');
+    var btn = eventClosest(event, '[data-edit]');
     if (!btn) return;
     var product = products.find(function (p) {
       return p.slug === btn.getAttribute('data-edit');
@@ -1651,10 +1660,10 @@
   });
 
   variantsEl.addEventListener('click', function (event) {
-    var mainPhoto = event.target.closest('[data-variant-photo-main]');
-    var upPhoto = event.target.closest('[data-variant-photo-up]');
-    var downPhoto = event.target.closest('[data-variant-photo-down]');
-    var removePhoto = event.target.closest('[data-variant-photo-remove]');
+    var mainPhoto = eventClosest(event, '[data-variant-photo-main]');
+    var upPhoto = eventClosest(event, '[data-variant-photo-up]');
+    var downPhoto = eventClosest(event, '[data-variant-photo-down]');
+    var removePhoto = eventClosest(event, '[data-variant-photo-remove]');
     if (mainPhoto || upPhoto || downPhoto || removePhoto) {
       var photoRow = (mainPhoto || upPhoto || downPhoto || removePhoto).closest('.admin-variant');
       if (!photoRow) return;
@@ -1677,7 +1686,7 @@
       schedulePreview();
       return;
     }
-    var btn = event.target.closest('[data-remove-variant]');
+    var btn = eventClosest(event, '[data-remove-variant]');
     if (!btn) return;
     var row = btn.closest('.admin-variant');
     if (row) row.remove();
@@ -1690,7 +1699,7 @@
   });
 
   variantsEl.addEventListener('change', function (event) {
-    var fileInput = event.target.closest('[data-v-image-file]');
+    var fileInput = eventClosest(event, '[data-v-image-file]');
     if (!fileInput) return;
     var row = fileInput.closest('.admin-variant');
     var files = Array.prototype.slice.call(fileInput.files || []);
@@ -1717,10 +1726,10 @@
   });
 
   photosEl.addEventListener('click', function (event) {
-    var main = event.target.closest('[data-photo-main]');
-    var up = event.target.closest('[data-photo-up]');
-    var down = event.target.closest('[data-photo-down]');
-    var remove = event.target.closest('[data-photo-remove]');
+    var main = eventClosest(event, '[data-photo-main]');
+    var up = eventClosest(event, '[data-photo-up]');
+    var down = eventClosest(event, '[data-photo-down]');
+    var remove = eventClosest(event, '[data-photo-remove]');
     if (main) {
       movePhoto(Number(main.getAttribute('data-photo-main')), 0);
       return;

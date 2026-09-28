@@ -92,7 +92,7 @@
       "name": "ריבועי בד לרקמה",
       "variants": {
         "type-1": {
-          "stock": 100
+          "stock": 99
         },
         "type-2": {
           "stock": 100
@@ -108,17 +108,17 @@
       "limitedStock": true,
       "name": "חוטי מולינה dmc",
       "variants": {
-        "custom-25": {
-          "stock": 20
+        "dmc": {
+          "stock": null
         },
-        "set-30": {
-          "stock": 1
+        "custom-25": {
+          "stock": 19
         },
         "original-27": {
           "stock": 1
         },
-        "dmc": {
-          "stock": null
+        "set-30": {
+          "stock": 1
         }
       }
     },

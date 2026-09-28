@@ -1,0 +1,27 @@
+{
+  "orderId": "e55b5d88401ca4e0092b7b9e",
+  "documentId": "e3d042e4-2bde-4701-bdcd-ba0be48732e1",
+  "amount": 146.6,
+  "purchases": [
+    {
+      "slug": "needle",
+      "quantity": 1
+    },
+    {
+      "slug": "pencil-case",
+      "quantity": 2
+    },
+    {
+      "slug": "fabrics",
+      "quantity": 1,
+      "variant": "type-1"
+    },
+    {
+      "slug": "floss-25-set",
+      "quantity": 1,
+      "variant": "custom-25"
+    }
+  ],
+  "paidAt": "2026-09-28T13:01:21.002Z",
+  "coupon": "FEEDBACK20"
+}

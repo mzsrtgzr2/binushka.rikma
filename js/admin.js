@@ -1127,6 +1127,12 @@
       .filter(function (v) {
         return v.name || v.price || v.id;
       })
+      .slice()
+      .sort(function (a, b) {
+        var pa = Number(a && a.price) || 0;
+        var pb = Number(b && b.price) || 0;
+        return pa - pb;
+      })
       .map(function (v) {
         var name = v.name || v.id || '';
         var sources = [];

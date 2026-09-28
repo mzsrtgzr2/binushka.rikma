@@ -123,10 +123,18 @@
       }
     },
     "flower-bag": {
-      "stock": 1,
+      "stock": null,
       "outOfStock": false,
       "limitedStock": true,
-      "name": "תיק בד לזר פרחים"
+      "name": "תיק בד לזר פרחים",
+      "variants": {
+        "type-2": {
+          "stock": 1
+        },
+        "type-1": {
+          "stock": 1
+        }
+      }
     },
     "flowers-yumiko-1": {
       "stock": null,

@@ -281,9 +281,10 @@
     "variants": {
       "type-2": {
         "name": "פרחוני גווני צהוב וירוק",
-        "price": 170,
+        "price": 240,
         "image": "/images/store/flower-bag/screenshot-2026-09-22-at-14-54-13-mucouc2f.jpg",
-        "description": "יפהיפה, עם פספוס בתפירה, לכן נמכר בהנחה של 30%.\nמושלם לשימוש :)",
+        "description": "יפהיפה, בד שמזכיר לי את הסדינים והמפות של סבתא רוזה.\nשימוש כיפי, מועיל לעולם, בלי לבזבז שקיות.\nניתן לכבס בקלות במכונה.",
+        "stock": 1,
         "gallery": [
           "/images/store/flower-bag/screenshot-2026-09-22-at-12-05-46-mucouc2g.jpg"
         ]
@@ -292,7 +293,8 @@
         "name": "בד פרחוני תכלת אפרסק",
         "price": 240,
         "image": "/images/store/flower-bag/flower-bag-mucouc2e.jpg",
-        "description": "",
+        "description": "עוד בד יפהיפה שהתגלגל לידיי והיה ברור שצריך להפוך לתיק מנשא לפרחים.\nשילוב צבעים נעים ובגדול זה חתיכת פיס אופנתי.",
+        "stock": 1,
         "gallery": [
           "/images/store/flower-bag/screenshot-2026-09-21-at-21-21-45-mucouc2f.jpg"
         ]

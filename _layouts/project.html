@@ -89,7 +89,7 @@ layout: default
               {%- assign pack_full = workshop.price | times: pack_places -%}
               {%- assign pack_save = pack_full | minus: pack_each -%}
             {%- endif -%}
-            <button type="button" class="button button--primary workshop-booking__pack" data-cart-add="{{ workshop_id }}" data-cart-variant="{{ pack[0] }}">
+            <button type="button" class="button button--primary workshop-booking__pack" data-cart-add="{{ workshop_id }}" data-cart-variant="{{ pack[0] }}" data-analytics="workshop_register_pack">
               <span class="workshop-booking__pack-name">{{ pack[1].name }}</span>
               <span class="workshop-booking__pack-price">₪{{ pack[1].price }}</span>
               {% if pack_places > 1 and pack_save > 0 %}
@@ -99,7 +99,7 @@ layout: default
             {% endfor %}
           </div>
           {% else %}
-          <button type="button" class="button button--primary section-button" data-cart-add="{{ workshop_id }}">
+          <button type="button" class="button button--primary section-button" data-cart-add="{{ workshop_id }}" data-analytics="workshop_register">
             {% if page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
           </button>
           {% endif %}
@@ -109,7 +109,7 @@ layout: default
         </div>
         {% elsif page.form_url %}
         <div class="section__navigation">
-            <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank" rel="noopener">
+            <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank" rel="noopener" data-analytics="workshop_external_register">
             הרשמי לסדנה זו
           </a>
         </div>
@@ -174,7 +174,7 @@ layout: default
             {% assign prev_project = visible_projects[prev_index] %}
             {% assign next_project = visible_projects[next_index] %}
             
-            <a href="{{ prev_project.permalink }}" class="project-navigation__button project-navigation__button--prev">
+            <a href="{{ prev_project.permalink }}" class="project-navigation__button project-navigation__button--prev" data-analytics="workshop_nav_prev">
               <div class="project-navigation__thumbnail">
                 <img src="{{ prev_project.image }}" alt="{{ prev_project.title }}">
               </div>
@@ -182,7 +182,7 @@ layout: default
               <span class="project-navigation__text">{{ prev_project.title }}</span>
             </a>
             
-            <a href="{{ next_project.permalink }}" class="project-navigation__button project-navigation__button--next">
+            <a href="{{ next_project.permalink }}" class="project-navigation__button project-navigation__button--next" data-analytics="workshop_nav_next">
               <span class="project-navigation__text">{{ next_project.title }}</span>
               <span class="project-navigation__arrow">←</span>
               <div class="project-navigation__thumbnail">

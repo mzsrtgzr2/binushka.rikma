@@ -18,7 +18,7 @@ layout: default
 <div class="container">
   {% assign is_fully_booked = retreat_page.fully_booked | default: false %}
   <div class="retreat-banner animate {% if is_fully_booked %}retreat-banner--fully-booked{% endif %}">
-    <a href="/retreat/" class="retreat-banner__link">
+    <a href="/retreat/" class="retreat-banner__link" data-analytics="retreat_banner">
       <div class="retreat-banner__image-wrapper">
         <img src="/images/retreat-banner.png" alt="ריטריט אומנות" class="retreat-banner__image">
       </div>
@@ -51,16 +51,16 @@ layout: default
     <div class="workshop-filters__row" role="group" aria-label="סינון לפי קטגוריה">
       <span class="workshop-filters__label">בחירת סוג:</span>
       <div class="workshop-filters__pills">
-        <button type="button" class="workshop-filter is-active" data-workshop-category="" aria-pressed="true">הכל</button>
+        <button type="button" class="workshop-filter is-active" data-workshop-category="" data-analytics="workshop_filter_category" aria-pressed="true">הכל</button>
         {% for category in site.data.workshop-categories %}
-        <button type="button" class="workshop-filter" data-workshop-category="{{ category[0] }}" aria-pressed="false">{{ category[1] }}</button>
+        <button type="button" class="workshop-filter" data-workshop-category="{{ category[0] }}" data-analytics="workshop_filter_category" aria-pressed="false">{{ category[1] }}</button>
         {% endfor %}
       </div>
     </div>
     <div class="workshop-filters__row" role="group" aria-label="סינון לפי חודש">
       <span class="workshop-filters__label">בחירת חודש:</span>
       <div class="workshop-filters__pills">
-        <button type="button" class="workshop-filter is-active" data-workshop-month="" aria-pressed="true">הכל</button>
+        <button type="button" class="workshop-filter is-active" data-workshop-month="" data-analytics="workshop_filter_month" aria-pressed="true">הכל</button>
         {% comment %}
           Show only the next 4 months (current + 3), wrapping past December.
         {% endcomment %}
@@ -71,7 +71,7 @@ layout: default
             {% assign month_num = month_num | minus: 12 %}
           {% endif %}
           {% assign month_key = month_num | plus: 100 | append: '' | slice: 1, 2 %}
-          <button type="button" class="workshop-filter" data-workshop-month="{{ month_key }}" aria-pressed="false">{{ site.data.months[month_key] }}</button>
+          <button type="button" class="workshop-filter" data-workshop-month="{{ month_key }}" data-analytics="workshop_filter_month" aria-pressed="false">{{ site.data.months[month_key] }}</button>
         {% endfor %}
       </div>
     </div>

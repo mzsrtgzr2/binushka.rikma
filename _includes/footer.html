@@ -43,7 +43,7 @@
                   <ul class="footer__nav-list list-reset">
                     {% for item in site.data.settings.footer_menu__settings.menu__items %}
                     <li class="footer__nav-item">
-                      <a href="{{ item.url | relative_url }}" class="footer__nav-link">{{ item.title }}</a>
+                      <a href="{{ item.url | relative_url }}" class="footer__nav-link" data-analytics="footer_nav" data-nav-path="{{ item.url }}">{{ item.title }}</a>
                     </li>
                     {% endfor %}
                   </ul>
@@ -60,7 +60,7 @@
                     {% for item in site.data.settings.footer_legal__settings.menu__items %}
                     {% unless item.url == '/newsletter/' and site.data.settings.newsletter.enabled == false %}
                     <li class="footer__nav-item">
-                      <a href="{{ item.url | relative_url }}" class="footer__nav-link">{{ item.title }}</a>
+                      <a href="{{ item.url | relative_url }}" class="footer__nav-link" data-analytics="footer_legal" data-nav-path="{{ item.url }}">{{ item.title }}</a>
                     </li>
                     {% endunless %}
                     {% endfor %}
@@ -83,14 +83,14 @@
         <div class="footer__info">
           <div class="footer__info-box">
             <div class="footer__info-start">
-              <div class="copyright">{{site.time | date: '%Y'}} &copy; <a href="/">{{site.data.settings.title}}</a></div>
+              <div class="copyright">{{site.time | date: '%Y'}} &copy; <a href="/" data-analytics="logo_home">{{site.data.settings.title}}</a></div>
               {% if site.data.settings.footer_legal__settings.menu__items %}
               <nav class="footer__legal" aria-label="מסמכי האתר">
                 <ul class="footer__legal-list list-reset">
                   {% for item in site.data.settings.footer_legal__settings.menu__items %}
                   {% unless item.url == '/newsletter/' and site.data.settings.newsletter.enabled == false %}
                   <li class="footer__legal-item">
-                    <a href="{{ item.url | relative_url }}" class="footer__legal-link">{{ item.title }}</a>
+                    <a href="{{ item.url | relative_url }}" class="footer__legal-link" data-analytics="footer_legal" data-nav-path="{{ item.url }}">{{ item.title }}</a>
                   </li>
                   {% endunless %}
                   {% endfor %}

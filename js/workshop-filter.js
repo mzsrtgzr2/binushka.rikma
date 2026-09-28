@@ -9,6 +9,10 @@
   var activeCategory = '';
   var activeMonth = '';
 
+  function track(name, params) {
+    if (window.Analytics) Analytics.track(name, params);
+  }
+
   function setActiveCategory(category) {
     activeCategory = category || '';
     categoryButtons.forEach(function (btn) {
@@ -60,20 +64,33 @@
       }
     });
     if (empty) empty.hidden = visible > 0;
+    return visible;
   }
 
   filters.addEventListener('click', function (event) {
     var categoryBtn = event.target.closest('[data-workshop-category]');
     if (categoryBtn && filters.contains(categoryBtn)) {
       setActiveCategory(categoryBtn.getAttribute('data-workshop-category') || '');
-      applyFilter();
+      var categoryResults = applyFilter();
+      track('workshop_filter', {
+        filter_type: 'category',
+        category: activeCategory || 'all',
+        month: activeMonth || 'all',
+        results: categoryResults,
+      });
       return;
     }
 
     var monthBtn = event.target.closest('[data-workshop-month]');
     if (monthBtn && filters.contains(monthBtn)) {
       setActiveMonth(monthBtn.getAttribute('data-workshop-month') || '');
-      applyFilter();
+      var monthResults = applyFilter();
+      track('workshop_filter', {
+        filter_type: 'month',
+        category: activeCategory || 'all',
+        month: activeMonth || 'all',
+        results: monthResults,
+      });
     }
   });
 

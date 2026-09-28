@@ -4,7 +4,7 @@
 
 האתר שולח אירועים ל-Mixpanel (פרויקט טוקן ב-`_data/settings.yml`, מפתח `mixpanel-token`). Google Analytics הוסר.
 
-צפיות בעמוד ולחיצות נשלחות אוטומטית (Autocapture). אין `track_pageview` בנוסף, כדי שצפייה בעמוד לא תיספר פעמיים. פעולות החנות (הוספה לסל, קופה, רכישה) נשלחות גם כאירועים מפורשים. Session Replay דלוק על כל הגלישות, ושדות טקסט מוסתרים בהקלטה.
+צפיות בעמוד ולחיצות נשלחות אוטומטית (Autocapture). אין `track_pageview` בנוסף, כדי שצפייה בעמוד לא תיספר פעמיים. Autocapture קולט גם את טקסט הכפתור ואת `data-analytics` (תווית יציבה באנגלית, למשל `add_to_cart`, `workshop_register`) כדי שב-Live View יהיה ברור על מה לחצו. פעולות החנות (הוספה לסל, קופה, רכישה) נשלחות גם כאירועים מפורשים. Session Replay דלוק על כל הגלישות, ושדות טקסט מוסתרים בהקלטה.
 
 ## 1. האירועים שנשלחים
 
@@ -38,7 +38,10 @@
 | `checkout_abandoned` | יצאו מ-`/checkout/` עם סל מלא בלי להגיע לתשלום | `last_field` (השדה האחרון שנגעו בו), `fields_filled`, `value` |
 | `store_filter` | סוננה קטגוריה בחנות | `category`, `results` |
 | `store_sort` | שונה סדר המיון | `sort_by` |
+| `workshop_filter` | סוננו סדנאות לפי קטגוריה או חודש | `filter_type`, `category`, `month`, `results` |
 | `contact_click` | לחיצה על וואטסאפ / מייל / טלפון | `method` |
+| `newsletter_signup` | הרשמה לניוזלטר הצליחה | `source` |
+| `newsletter_signup_error` | הרשמה לניוזלטר נכשלה | `reason`, `source` |
 | `purchase_untracked` | הגיעו ל-`/thanks/` בלי הזמנה שמורה בדפדפן | `reason` |
 
 השדות בעברית (`first_invalid_field: "טלפון"`) כדי שהדוחות יהיו קריאים בלי תרגום.
@@ -114,7 +117,7 @@ Live View, כמו בסעיף 2א. אירועים בדוחות הרגילים מ�
 
 ## 5. הערות טכניות
 
-- **מבנה הקוד**: `js/analytics.js` מגדיר את `window.Analytics`. `store-cart.js`, `checkout.js`, `thanks.js` ו-`store-sort.js` קוראים לו. כל קריאה היא no-op כשאין `mixpanel` (חוסם פרסומות, או שהטוקן ריק) — האתר והעגלה ממשיכים לעבוד.
+- **מבנה הקוד**: `js/analytics.js` מגדיר את `window.Analytics`. `store-cart.js`, `checkout.js`, `thanks.js`, `store-sort.js`, `workshop-filter.js` ו-`newsletter.js` קוראים לו. כל קריאה היא no-op כשאין `mixpanel` (חוסם פרסומות, או שהטוקן ריק) — האתר והעגלה ממשיכים לעבוד.
 - **זהות**: אין חשבון משתמשת בחנות. Mixpanel מזהה דפדפן אנונימי (`distinct_id` ב-`localStorage`). לא נשלחים מייל, טלפון, שם או כתובת, ואין `identify`. עמוד הניהול (`/admin/`) לא טוען את Mixpanel.
 - **`transaction_id`**: נוצר בצד הלקוח בזמן המעבר לתשלום (`BNK-...`). Mixpanel מסנן כפילות של `purchase` לפי `$insert_id` שזהה למזהה הזה, ו-`localStorage` מונע ספירה כפולה אם רועננו את `/thanks/`.
 - **דיוק של `purchase`**: האירוע נשלח כשהגולשת חוזרת ל-`/thanks/` אחרי התשלום. אם היא סוגרת את הדפדפן בדף של Grow מיד אחרי חיוב מוצלח, הרכישה לא תיספר. ספירה מהשרת (webhook של Grow) דורשת את אותו `distinct_id` של הדפדפן, אחרת Mixpanel יפתח משתמשת נפרדת.

@@ -5,4 +5,4 @@
   include.class  — extra button classes (e.g. project__add, section-button)
 {%- endcomment -%}
 {%- assign waitlist_text = 'הי בינושקה :) אשמח להצטרף לרשימת המתנה לסדנה "' | append: include.title | append: '"' -%}
-<a href="https://wa.me/972544247753?text={{ waitlist_text | url_encode }}" class="button button--waitlist{% if include.class %} {{ include.class }}{% endif %}" target="_blank" rel="noopener">הרשמי לרשימת המתנה</a>
+<a href="https://wa.me/972544247753?text={{ waitlist_text | url_encode }}" class="button button--waitlist{% if include.class %} {{ include.class }}{% endif %}" target="_blank" rel="noopener" data-analytics="workshop_waitlist">הרשמי לרשימת המתנה</a>

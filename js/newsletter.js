@@ -46,6 +46,10 @@
     });
   }
 
+  function track(name, params) {
+    if (window.Analytics) Analytics.track(name, params);
+  }
+
   function bindForm(form, options) {
     var status = form.querySelector('[data-newsletter-status]');
     var button = form.querySelector('button[type="submit"]');
@@ -60,6 +64,12 @@
       var email = emailInput.value.trim();
       if (!email) {
         setStatus(status, text.invalidEmail, 'error');
+        if (options.trackName) {
+          track(options.trackName + '_error', {
+            reason: 'invalid_email',
+            source: options.source || undefined,
+          });
+        }
         return;
       }
 
@@ -80,13 +90,28 @@
           if (result.body && result.body.ok) {
             setStatus(status, options.successMessage(result.body, email), 'success');
             form.reset();
+            if (options.trackName) {
+              track(options.trackName, { source: options.source || undefined });
+            }
             return;
           }
 
           setStatus(status, messageForFailure(result.status, result.body && result.body.code), 'error');
+          if (options.trackName) {
+            track(options.trackName + '_error', {
+              reason: (result.body && result.body.code) || 'request_failed',
+              source: options.source || undefined,
+            });
+          }
         })
         .catch(function () {
           setStatus(status, text.error, 'error');
+          if (options.trackName) {
+            track(options.trackName + '_error', {
+              reason: 'network',
+              source: options.source || undefined,
+            });
+          }
         })
         .then(function () {
           busy = false;
@@ -106,6 +131,7 @@
         url: endpoints.subscribe,
         busyLabel: text.sending,
         source: form.getAttribute('data-newsletter-source') || 'website',
+        trackName: 'newsletter_signup',
         successMessage: function () { return text.success; }
       });
     });

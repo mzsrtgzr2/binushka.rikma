@@ -3,12 +3,13 @@ title: חוטי מולינה dmc
 date: 2026-09-24 12:23:00 +0000
 subtitle: סטים במבחר גוונים
 image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
-price: ₪100 – ₪130
+price: ₪5 – ₪130
 out_of_stock: false
-limited_stock: true
+limited_stock: false
 hide: false
 category: embroidery-supplies
 order: 1
+preorder: false
 variants:
   custom-25:
     name: סט של 25 — שאני מרכיבה לך
@@ -34,8 +35,13 @@ variants:
     gallery:
       - /images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-12-mue250c9.png
     description: "חוטים של חברת dmc הצרפתית עשויים מ100% כותנה.\nיכולים לשמש לרקמה על בגדים, תיקים, נעליים וכו.\nתהנו :)"
+  dmc:
+    name: דוללה בודדת של dmc
+    price: 5
+    image: /images/store/floss-25-set/screenshot-2026-09-28-at-10-54-17-mukyl4x4.jpg
+    description: "בקופה כיתבי לי את הצבע שתירצי, לפי גוון או מספר מדוייק."
 ---
 
 חוטים של חברת dmc הצרפתית עשויים מ100% כותנה.
 יכולים לשמש לרקמה על בגדים, תיקים, נעליים וכו.
-בחרי את הסט שמתאים לך :)
+בחרי את הסט שמתאים לך או לפי יחידות בודדות:)

@@ -113,3 +113,28 @@ test('mouseover on text inside a thumb still switches the image', () => {
   assert.equal(second.getAttribute('aria-pressed'), 'true');
   assert.equal(first.getAttribute('aria-pressed'), 'false');
 });
+
+test('mouseover still works when closest is missing or throws', () => {
+  const listeners = loadGallery();
+  const main = element({ src: 'one.jpg' });
+  const thumb = element({ 'data-gallery-src': 'two.jpg', 'aria-pressed': 'false' });
+  thumb.className = 'product-gallery__thumb';
+  thumb.closest = function () {
+    throw new TypeError('closest is not a function');
+  };
+  const gallery = element({ 'data-product-gallery': '' });
+  gallery.main = main;
+  gallery.thumbs = [thumb];
+  thumb.parentElement = gallery;
+  main.parentElement = gallery;
+
+  assert.doesNotThrow(() => listeners.mouseover({ target: thumb }));
+  assert.equal(main.getAttribute('src'), 'two.jpg');
+});
+
+test('a text node whose parent is only on parentNode does not throw', () => {
+  const listeners = loadGallery();
+  const outside = element({});
+  const text = { nodeType: 3, parentElement: null, parentNode: outside };
+  assert.doesNotThrow(() => listeners.mouseover({ target: text }));
+});

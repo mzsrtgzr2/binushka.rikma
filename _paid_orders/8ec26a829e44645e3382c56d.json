@@ -1,0 +1,19 @@
+{
+  "orderId": "8ec26a829e44645e3382c56d",
+  "documentId": "f5cde2f3-0da6-4632-ac17-46142acdfeef",
+  "amount": 212,
+  "purchases": [
+    {
+      "slug": "scissors",
+      "quantity": 1,
+      "variant": "9-2"
+    },
+    {
+      "slug": "embroidery-books",
+      "quantity": 1,
+      "variant": "365"
+    }
+  ],
+  "paidAt": "2026-09-28T17:17:20.220Z",
+  "coupon": "FEEDBACK20"
+}

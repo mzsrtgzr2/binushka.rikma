@@ -5,6 +5,15 @@
  * newsletter endpoint only verifies it. One password, both screens.
  */
 (function () {
+  // Clicks can target a text node or the document. Those have no closest().
+  function eventClosest(event, selector) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node.closest(selector);
+  }
+
   var loginForm = document.getElementById('admin-login');
   var loginMessage = document.getElementById('admin-login-message');
   var board = document.getElementById('admin-board');
@@ -811,7 +820,7 @@
   });
 
   linkResults.addEventListener('click', function (event) {
-    var button = event.target.closest('[data-link-index]');
+    var button = eventClosest(event, '[data-link-index]');
     if (!button) return;
 
     var entry = linkMatches[Number(button.getAttribute('data-link-index'))];
@@ -976,7 +985,7 @@
 
   if (recipientsEl) {
     recipientsEl.addEventListener('click', function (event) {
-      var button = event.target.closest('button');
+      var button = eventClosest(event, 'button');
       if (!button) return;
       var drop = button.getAttribute('data-omit');
       var restore = button.getAttribute('data-restore');

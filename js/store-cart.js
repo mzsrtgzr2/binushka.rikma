@@ -24,6 +24,15 @@
     Analytics[method](a, b, c);
   }
 
+  // Document clicks can target a text node or the document. Those have no closest().
+  function eventElement(event) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node;
+  }
+
   /* Describes one cart line for analytics, independent of what is in the cart. */
   function lineForAnalytics(id, extra, quantity) {
     var p = byId[id];
@@ -928,7 +937,9 @@
   };
 
   document.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-cart-add]');
+    var el = eventElement(e);
+    if (!el) return;
+    var btn = el.closest('[data-cart-add]');
     if (btn) {
       e.preventDefault();
       StoreCart.add(btn.getAttribute('data-cart-add'), btn);
@@ -937,7 +948,9 @@
 
   if (els.lines) {
     els.lines.addEventListener('click', function (e) {
-      var t = e.target.closest('[data-action]');
+      var lineEl = eventElement(e);
+      if (!lineEl) return;
+      var t = lineEl.closest('[data-action]');
       if (!t) return;
       var key = t.getAttribute('data-id');
       var parsed = parseCartKey(key);
@@ -992,7 +1005,9 @@
   }
 
   document.addEventListener('click', function (e) {
-    var chip = e.target.closest('[data-gift-amount]');
+    var chipEl = eventElement(e);
+    if (!chipEl) return;
+    var chip = chipEl.closest('[data-gift-amount]');
     if (!chip) return;
     e.preventDefault();
     var input = document.getElementById('gift-card-amount');

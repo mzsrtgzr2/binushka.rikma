@@ -67,8 +67,18 @@
     return visible;
   }
 
+  // A click inside the filter bar can target a text node or the document.
+  // Those nodes have no closest(), and calling it threw an unhandled TypeError.
+  function eventClosest(event, selector) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node.closest(selector);
+  }
+
   filters.addEventListener('click', function (event) {
-    var categoryBtn = event.target.closest('[data-workshop-category]');
+    var categoryBtn = eventClosest(event, '[data-workshop-category]');
     if (categoryBtn && filters.contains(categoryBtn)) {
       setActiveCategory(categoryBtn.getAttribute('data-workshop-category') || '');
       var categoryResults = applyFilter();
@@ -81,7 +91,7 @@
       return;
     }
 
-    var monthBtn = event.target.closest('[data-workshop-month]');
+    var monthBtn = eventClosest(event, '[data-workshop-month]');
     if (monthBtn && filters.contains(monthBtn)) {
       setActiveMonth(monthBtn.getAttribute('data-workshop-month') || '');
       var monthResults = applyFilter();

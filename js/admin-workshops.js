@@ -5,6 +5,15 @@
  * workshop endpoint only verifies it. One password, every screen.
  */
 (function () {
+  // Clicks can target a text node or the document. Those have no closest().
+  function eventClosest(event, selector) {
+    var node = event && event.target;
+    if (!node) return null;
+    if (node.nodeType === 3) node = node.parentElement;
+    if (!node || typeof node.closest !== 'function') return null;
+    return node.closest(selector);
+  }
+
   var loginForm = document.getElementById('admin-login');
   var loginMessage = document.getElementById('admin-login-message');
   var board = document.getElementById('admin-board');
@@ -1394,12 +1403,12 @@
   });
 
   listEl.addEventListener('change', function (event) {
-    var card = event.target.closest('[data-slug]');
+    var card = eventClosest(event, '[data-slug]');
     if (!card) return;
     var workshop = findWorkshop(card.getAttribute('data-slug'));
     if (!workshop) return;
 
-    var spots = event.target.closest('input[data-spots]');
+    var spots = eventClosest(event, 'input[data-spots]');
     if (spots) {
       var raw = spots.value.trim();
       if (raw === '') {
@@ -1417,14 +1426,14 @@
       return;
     }
 
-    var flag = event.target.closest('input[data-flag]');
+    var flag = eventClosest(event, 'input[data-flag]');
     if (!flag) return;
     workshop[flag.getAttribute('data-flag')] = flag.checked;
     render();
   });
 
   listEl.addEventListener('click', function (event) {
-    var copy = event.target.closest('[data-duplicate]');
+    var copy = eventClosest(event, '[data-duplicate]');
     if (copy) {
       var source = findWorkshop(copy.getAttribute('data-duplicate'));
       if (!source) return;
@@ -1439,7 +1448,7 @@
       });
     }
 
-    var button = event.target.closest('[data-edit]');
+    var button = eventClosest(event, '[data-edit]');
     if (!button) return;
 
     var workshop = findWorkshop(button.getAttribute('data-edit'));
@@ -1515,7 +1524,7 @@
   });
 
   linkResults.addEventListener('click', function (event) {
-    var button = event.target.closest('[data-link-index]');
+    var button = eventClosest(event, '[data-link-index]');
     if (!button) return;
 
     var entry = linkMatches[Number(button.getAttribute('data-link-index'))];
@@ -1555,7 +1564,7 @@
   });
 
   packsEl.addEventListener('click', function (event) {
-    var remove = event.target.closest('[data-remove-pack]');
+    var remove = eventClosest(event, '[data-remove-pack]');
     if (!remove) return;
     var row = remove.closest('.admin-pack');
     if (row) row.remove();
@@ -1612,7 +1621,7 @@
 
   if (historyEl) {
     historyEl.addEventListener('click', function (event) {
-      var button = event.target.closest('[data-version]');
+      var button = eventClosest(event, '[data-version]');
       if (button) goToVersion(Number(button.getAttribute('data-version')));
     });
   }

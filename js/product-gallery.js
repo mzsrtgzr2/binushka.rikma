@@ -33,7 +33,7 @@
 
   function activateThumb(thumb) {
     if (!thumb) return;
-    var gallery = thumb.closest('[data-product-gallery]');
+    var gallery = closest(thumb, '[data-product-gallery]');
     var src = thumb.getAttribute('data-gallery-src');
     if (!gallery || !src) return;
     setActiveThumb(gallery, thumb);
@@ -55,22 +55,30 @@
     return 0;
   }
 
-  // mouseover on the homepage can target a text node (or the document).
-  // Those nodes have no closest(), and the listener used to throw.
-  function eventElement(event) {
-    var node = event && event.target;
-    if (!node) return null;
-    if (node.nodeType === 3) node = node.parentElement;
-    if (!node || typeof node.closest !== 'function') return null;
-    return node;
+  // mouseover on the homepage can target a text node. Those nodes have no
+  // closest(), and some in-app browsers keep the previous file cached, so
+  // this walk never calls closest at all.
+  function closest(node, selector) {
+    var guard = 0;
+    try {
+      while (node && guard < 40) {
+        guard += 1;
+        if (node.nodeType === 1) {
+          var fn = node.matches || node.webkitMatchesSelector || node.msMatchesSelector;
+          if (typeof fn === 'function' && fn.call(node, selector)) return node;
+        }
+        var next = node.parentElement || node.parentNode;
+        if (!next || next === node) break;
+        node = next;
+      }
+    } catch (ignore) {}
+    return null;
   }
 
   document.addEventListener('click', function (event) {
-    var el = eventElement(event);
-    if (!el) return;
-    var nav = el.closest('[data-gallery-prev], [data-gallery-next]');
+    var nav = closest(event && event.target, '[data-gallery-prev], [data-gallery-next]');
     if (nav) {
-      var gallery = nav.closest('[data-product-gallery]');
+      var gallery = closest(nav, '[data-product-gallery]');
       if (!gallery) return;
       event.preventDefault();
       var step = nav.hasAttribute('data-gallery-next') ? 1 : -1;
@@ -78,7 +86,7 @@
       return;
     }
 
-    var thumb = el.closest('.product-gallery__thumb');
+    var thumb = closest(event && event.target, '.product-gallery__thumb');
     if (!thumb) return;
     event.preventDefault();
     activateThumb(thumb);
@@ -86,17 +94,13 @@
 
   document.addEventListener('mouseover', function (event) {
     if (!canHoverPreview()) return;
-    var el = eventElement(event);
-    if (!el) return;
-    var thumb = el.closest('.product-gallery__thumb');
+    var thumb = closest(event && event.target, '.product-gallery__thumb');
     if (!thumb) return;
     activateThumb(thumb);
   });
 
   document.addEventListener('keydown', function (event) {
-    var el = eventElement(event);
-    if (!el) return;
-    var thumb = el.closest('.product-gallery__thumb');
+    var thumb = closest(event && event.target, '.product-gallery__thumb');
     if (thumb) {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
@@ -104,10 +108,10 @@
       return;
     }
 
-    var nav = el.closest('[data-gallery-prev], [data-gallery-next]');
+    var nav = closest(event && event.target, '[data-gallery-prev], [data-gallery-next]');
     if (!nav) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
-    var gallery = nav.closest('[data-product-gallery]');
+    var gallery = closest(nav, '[data-product-gallery]');
     if (!gallery) return;
     event.preventDefault();
     var step = nav.hasAttribute('data-gallery-next') ? 1 : -1;

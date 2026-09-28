@@ -55,12 +55,19 @@ layout: default
     {% endif %}
   </div>
 
-  {% unless sold_out or page.registration_not_open %}
+  {% unless page.registration_not_open %}
   <div class="project-content animate">
   <div class="container">
     <div class="row">
       <div class="col-12">
-        {% if booking_in_cart %}
+        {% if sold_out %}
+        <div class="workshop-booking workshop-booking--waitlist">
+          {% include workshop-waitlist-button.html title=page.title class="section-button" %}
+          <p class="workshop-booking__note">
+            הסדנה מלאה כרגע. שלחי הודעה בוואטסאפ ואעדכן אותך אם מתפנה מקום.
+          </p>
+        </div>
+        {% elsif booking_in_cart %}
         <div class="workshop-booking">
           {% unless workshop.variants %}
           <div class="workshop-booking__head">

@@ -566,6 +566,44 @@
           setCartAddLabel(btn, preorder);
         }
       });
+
+      if (multiType) reorderVariantCards(id, p);
+    });
+  }
+
+  /* In-stock types first (by price), sold-out last — same rule as catalog
+     variant_order, applied again when live stock changes mid-session. */
+  function reorderVariantCards(productId, p) {
+    if (!p || !p.variants) return;
+    document.querySelectorAll('[data-product-id="' + productId + '"]').forEach(function (root) {
+      var container = root.querySelector('.store-variants, .scrunchies-variants');
+      if (!container) return;
+      var cards = Array.prototype.slice.call(
+        container.querySelectorAll('.store-variant[data-variant-id], .scrunchies-variant[data-variant-id]')
+      );
+      if (cards.length < 2) return;
+      cards.sort(function (a, b) {
+        var aRow = p.variants[a.getAttribute('data-variant-id')] || {};
+        var bRow = p.variants[b.getAttribute('data-variant-id')] || {};
+        function unavailable(row) {
+          return (
+            typeof row.stock === 'number' &&
+            row.stock <= 0 &&
+            !row.preorder &&
+            !p.preorder
+          );
+        }
+        var aOut = unavailable(aRow);
+        var bOut = unavailable(bRow);
+        if (aOut !== bOut) return aOut ? 1 : -1;
+        var pa = Number(aRow.price) || 0;
+        var pb = Number(bRow.price) || 0;
+        if (pa !== pb) return pa - pb;
+        return 0;
+      });
+      cards.forEach(function (card) {
+        container.appendChild(card);
+      });
     });
   }
 

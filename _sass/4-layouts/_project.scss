@@ -45,6 +45,10 @@
   text-align: center;
   background: var(--background-color);
 
+  &.workshop-booking--waitlist .button {
+    margin-top: 0;
+  }
+
   .workshop-booking__head {
     display: flex;
     align-items: baseline;

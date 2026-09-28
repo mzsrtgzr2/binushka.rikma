@@ -1,19 +1,23 @@
 {
   "birth-hoop": {
     "name": "תעודת לידה רקומה",
-    "price": 450
+    "price": 450,
+    "category": "works-for-sale"
   },
   "dmc-etoile-set": {
     "name": "סט חוטים מנצנצים",
-    "price": 330
+    "price": 330,
+    "category": "embroidery-supplies"
   },
   "dmc-kit-flowers": {
     "name": "ערכת רקמה עם 2 דוגמאות",
-    "price": 100
+    "price": 100,
+    "category": "embroidery-supplies"
   },
   "dmc-kit-pearl": {
     "name": "ערכת רקמה עם חוטי פנינה",
-    "price": 120
+    "price": 120,
+    "category": "embroidery-supplies"
   },
   "embroidery-books": {
     "name": "ספרי רקמה",
@@ -127,15 +131,29 @@
           "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-34-mui8ne4o.jpg"
         ]
       }
-    }
+    },
+    "variant_order": [
+      "365",
+      "380",
+      "paintwiththread",
+      "type-3",
+      "type-4",
+      "type-6",
+      "type-7",
+      "type-8",
+      "type-9"
+    ],
+    "category": "embroidery-supplies"
   },
   "embroidery-case": {
     "name": "קלמר פשתן עם רקמת כותנה",
-    "price": 160
+    "price": 160,
+    "category": "works-for-sale"
   },
   "embroidery-flowers": {
     "name": "זר פרחים רקום",
-    "price": 300
+    "price": 300,
+    "category": "works-for-sale"
   },
   "embroidery-tablecloth": {
     "name": "ערכת רקמה  שהיא מפה יפהיפיה",
@@ -163,11 +181,17 @@
           "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg"
         ]
       }
-    }
+    },
+    "variant_order": [
+      "type-1",
+      "type-2"
+    ],
+    "category": "embroidery-supplies"
   },
   "embroidery-tshirt": {
     "name": "רקמה בהזמנה אישית",
-    "price": 100
+    "price": 100,
+    "category": "works-for-sale"
   },
   "fabrics": {
     "name": "ריבועי בד לרקמה",
@@ -196,11 +220,23 @@
           "/images/store/fabrics/screenshot-2026-09-25-at-20-20-30-muh89n5i.jpg"
         ]
       }
-    }
+    },
+    "variant_order": [
+      "type-1",
+      "type-2",
+      "type-3"
+    ],
+    "category": "embroidery-supplies"
   },
   "floss-25-set": {
     "name": "חוטי מולינה dmc",
     "variants": {
+      "dmc": {
+        "name": "דוללה בודדת של dmc",
+        "price": 5,
+        "image": "/images/store/floss-25-set/screenshot-2026-09-28-at-10-54-17-mukyl4x4.jpg",
+        "description": "בקופה כיתבי לי את הצבע שתירצי, לפי גוון או מספר מדוייק."
+      },
       "custom-25": {
         "name": "סט של 25 — שאני מרכיבה לך",
         "price": 100,
@@ -209,16 +245,6 @@
         "stock": 20,
         "gallery": [
           "/images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg"
-        ]
-      },
-      "set-30": {
-        "name": "סט 30 גוונים",
-        "price": 130,
-        "image": "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg",
-        "description": "חוטי כותנה 100% של חברת dmc הצרפתית, סט גוונים שימושי ויפה לרקמת צמחים, טבע, יום יום ובגדול הכל :)",
-        "stock": 1,
-        "gallery": [
-          "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg"
         ]
       },
       "original-27": {
@@ -230,39 +256,65 @@
         "gallery": [
           "/images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-12-mue250c9.png"
         ]
+      },
+      "set-30": {
+        "name": "סט 30 גוונים",
+        "price": 130,
+        "image": "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg",
+        "description": "חוטי כותנה 100% של חברת dmc הצרפתית, סט גוונים שימושי ויפה לרקמת צמחים, טבע, יום יום ובגדול הכל :)",
+        "stock": 1,
+        "gallery": [
+          "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg"
+        ]
       }
-    }
+    },
+    "variant_order": [
+      "dmc",
+      "custom-25",
+      "original-27",
+      "set-30"
+    ],
+    "category": "embroidery-supplies"
   },
   "flower-bag": {
     "name": "תיק בד לזר פרחים",
     "variants": {
+      "type-2": {
+        "name": "פרחוני גווני צהוב וירוק",
+        "price": 240,
+        "image": "/images/store/flower-bag/screenshot-2026-09-22-at-14-54-13-mucouc2f.jpg",
+        "description": "יפהיפה, בד שמזכיר לי את הסדינים והמפות של סבתא רוזה.\nשימוש כיפי, מועיל לעולם, בלי לבזבז שקיות.\nניתן לכבס בקלות במכונה.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/flower-bag/screenshot-2026-09-22-at-12-05-46-mucouc2g.jpg"
+        ]
+      },
       "type-1": {
         "name": "בד פרחוני תכלת אפרסק",
         "price": 240,
         "image": "/images/store/flower-bag/flower-bag-mucouc2e.jpg",
-        "description": "",
+        "description": "עוד בד יפהיפה שהתגלגל לידיי והיה ברור שצריך להפוך לתיק מנשא לפרחים.\nשילוב צבעים נעים ובגדול זה חתיכת פיס אופנתי.",
+        "stock": 1,
         "gallery": [
           "/images/store/flower-bag/screenshot-2026-09-21-at-21-21-45-mucouc2f.jpg"
         ]
-      },
-      "type-2": {
-        "name": "פרחוני גווני צהוב וירוק",
-        "price": 170,
-        "image": "/images/store/flower-bag/screenshot-2026-09-22-at-14-54-13-mucouc2f.jpg",
-        "description": "יפהיפה, עם פספוס בתפירה, לכן נמכר בהנחה של 30%.\nמושלם לשימוש :)",
-        "gallery": [
-          "/images/store/flower-bag/screenshot-2026-09-22-at-12-05-46-mucouc2g.jpg"
-        ]
       }
-    }
+    },
+    "variant_order": [
+      "type-2",
+      "type-1"
+    ],
+    "category": "works-for-sale"
   },
   "flowers-yumiko-1": {
     "name": "פרחים בהשראת הטבע ויומיקו",
-    "price": 300
+    "price": 300,
+    "category": "works-for-sale"
   },
   "fox": {
     "name": "רקמת שועל משמח",
-    "price": 220
+    "price": 220,
+    "category": "works-for-sale"
   },
   "gift-card": {
     "name": "גיפט קארד",
@@ -335,23 +387,37 @@
           "/images/store/hoops/screenshot-2026-09-24-at-23-01-17-mufyyrij.jpg"
         ]
       }
-    }
+    },
+    "variant_order": [
+      "13",
+      "16",
+      "oval-16x10cm",
+      "oval-21x13cm",
+      "19",
+      "22",
+      "type-6"
+    ],
+    "category": "embroidery-supplies"
   },
   "kit": {
     "name": "ערכת רקמה מפנקת",
-    "price": 210
+    "price": 210,
+    "category": "embroidery-supplies"
   },
   "needle": {
     "name": "מחט לרקמה",
-    "price": 2
+    "price": 2,
+    "category": "embroidery-supplies"
   },
   "pencil-case": {
     "name": "קלמר קנבס לרקמה",
-    "price": 20
+    "price": 20,
+    "category": "embroidery-supplies"
   },
   "portrait": {
     "name": "מסגרת רקומה",
-    "price": 250
+    "price": 250,
+    "category": "works-for-sale"
   },
   "prym-marker-purple": {
     "name": "טוש לבדים",
@@ -375,7 +441,12 @@
           "/images/store/prym-marker-purple/screenshot-2026-09-23-at-23-02-36-muej5m4e.jpg"
         ]
       }
-    }
+    },
+    "variant_order": [
+      "water",
+      "disappearing"
+    ],
+    "category": "embroidery-supplies"
   },
   "scissors": {
     "name": "מספרי רקמה איכותיות",
@@ -409,7 +480,14 @@
         "description": "איך אפשר שלא להתאהב בך\nגודל 10.1 cm",
         "stock": 1
       }
-    }
+    },
+    "variant_order": [
+      "9",
+      "9-2",
+      "type-3",
+      "singer"
+    ],
+    "category": "embroidery-supplies"
   },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",
@@ -432,11 +510,23 @@
         "image": "/images/scrunchies/01.jpeg",
         "description": "תחרה ופרטים מיוחדים"
       }
-    }
+    },
+    "variant_order": [
+      "regular",
+      "large",
+      "fancy"
+    ],
+    "category": "works-for-sale"
   },
   "stickers": {
     "name": "מדבקות לרקמה",
     "variants": {
+      "type-4": {
+        "name": "דף מדבקה לרקמה - ריק, להדפסה בבית",
+        "price": 25,
+        "image": "",
+        "description": "הדפים מתאימים לשימוש במדפסת הביתית.\nגודל הדף letter - 21.59 × 27.94 cm."
+      },
       "type-1": {
         "name": "דף מדבקות חיות ים",
         "price": 50,
@@ -465,14 +555,15 @@
           "/images/store/stickers/screenshot-2026-09-25-at-18-49-53-muh7vdxb.jpg",
           "/images/store/stickers/screenshot-2026-09-25-at-18-54-03-muh7vdxb.jpg"
         ]
-      },
-      "type-4": {
-        "name": "דף מדבקה לרקמה - ריק, להדפסה בבית",
-        "price": 25,
-        "image": "",
-        "description": "הדפים מתאימים לשימוש במדפסת הביתית.\nגודל הדף letter - 21.59 × 27.94 cm."
       }
-    }
+    },
+    "variant_order": [
+      "type-4",
+      "type-1",
+      "type-2",
+      "type-3"
+    ],
+    "category": "embroidery-supplies"
   },
   "voucher-gift": {
     "name": "שובר מתנה - בוקר פינוק לאמהות",
@@ -480,6 +571,7 @@
   },
   "yam": {
     "name": "רקמת בטטה מושרשת",
-    "price": 300
+    "price": 300,
+    "category": "works-for-sale"
   }
 }

@@ -7,7 +7,7 @@ settings; there is nothing to type in the Vercel dashboard.
 | --- | --- | --- |
 | Framework preset | Jekyll | `vercel.json` → `framework` |
 | Install command | `bundle install` | `vercel.json` → `installCommand` |
-| Build command | `node scripts/build-catalog.js && JEKYLL_ENV=production bundle exec jekyll build` | `vercel.json` → `buildCommand` |
+| Build command | `node scripts/build-catalog.js && node scripts/write-sentry-data.js && JEKYLL_ENV=production bundle exec jekyll build` | `vercel.json` → `buildCommand` |
 | Output directory | `_site` | `vercel.json` → `outputDirectory` |
 | Production branch | `master` | Vercel project settings |
 
@@ -22,8 +22,30 @@ posts to `/api/checkout/`. Coupon preview and coupon admin reuse `/api/checkout`
 and `/api/admin` so the deploy stays at one function.
 
 `vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308
-that function. Tests live under `test/` and run with `node --test`; they are not
-uploaded as functions.
+that function. Vercel still only invokes the catch-all for a single segment, so
+`/api/newsletter/subscribe` and `/api/newsletter/unsubscribe` (the signup form and
+the links already sent in mail) are rewritten first to `/api/newsletter-subscribe`
+and `/api/newsletter-unsubscribe`. The `?t=` token stays on the request. Tests
+live under `test/` and run with `node --test`; they are not uploaded as functions.
+
+## Error reporting (Sentry)
+
+Set `SENTRY_DSN` in Vercel → Project → Settings → Environment Variables
+(Project Settings → Client Keys in Sentry). The same variable covers the
+browser and the API function. Leave it empty and both stay off: local
+`jekyll build` and a deploy without the variable do not load the SDK.
+
+The build writes `_data/sentry.yml` from that variable. The file is
+gitignored. It only contains the public DSN, the environment
+(`production` / `preview` / `development`), and the git SHA when Vercel
+provides one.
+
+Browser errors and logs load from `browser.sentry-cdn.com` (SDK 11.0.0,
+no session replay). `console.log`, `console.warn`, and `console.error` in
+the browser are Sentry Logs. The API function does the same, and a
+`console.error` is also an Issue (Morning, stock, admin, newsletter, and
+anything the handler itself throws). Request bodies, cookies, and shopper
+details are not attached. Analytics debug lines are dropped.
 
 ## Store cart
 

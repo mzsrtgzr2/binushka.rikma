@@ -35,7 +35,7 @@
       "name": "ספרי רקמה",
       "variants": {
         "365": {
-          "stock": 1
+          "stock": 0
         },
         "380": {
           "stock": 1
@@ -92,7 +92,7 @@
       "name": "ריבועי בד לרקמה",
       "variants": {
         "type-1": {
-          "stock": 100
+          "stock": 99
         },
         "type-2": {
           "stock": 100
@@ -108,22 +108,33 @@
       "limitedStock": true,
       "name": "חוטי מולינה dmc",
       "variants": {
-        "custom-25": {
-          "stock": 20
+        "dmc": {
+          "stock": null
         },
-        "set-30": {
-          "stock": 1
+        "custom-25": {
+          "stock": 19
         },
         "original-27": {
+          "stock": 1
+        },
+        "set-30": {
           "stock": 1
         }
       }
     },
     "flower-bag": {
-      "stock": 1,
+      "stock": null,
       "outOfStock": false,
       "limitedStock": true,
-      "name": "תיק בד לזר פרחים"
+      "name": "תיק בד לזר פרחים",
+      "variants": {
+        "type-2": {
+          "stock": 1
+        },
+        "type-1": {
+          "stock": 1
+        }
+      }
     },
     "flowers-yumiko-1": {
       "stock": null,
@@ -311,11 +322,11 @@
       "limitedStock": false
     },
     "workshop-rehovot-09-10": {
-      "name": "בוקר קרושה ומאפה — 9.10 שישי בבוקר",
+      "name": "בוקר קרושה ומאפה — 30.10 שישי בבוקר",
       "price": 330,
-      "stock": 5,
+      "stock": 1,
       "outOfStock": false,
-      "limitedStock": false
+      "limitedStock": true
     },
     "workshop-rehovot-29-10": {
       "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",

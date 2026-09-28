@@ -208,6 +208,11 @@ disqus-identifier: anvodstudio-demo # Add your shortname for Disqus Comment. For
 
 
 #-------------------------------
+# Sentry
+# Not stored here. Set SENTRY_DSN on Vercel; the build writes _data/sentry.yml
+# from it and the browser SDK loads only then. See DEPLOYMENT.md.
+
+#-------------------------------
 # Mixpanel
 # Project token (public, same role as the old GA measurement id).
 # See ANALYTICS.md

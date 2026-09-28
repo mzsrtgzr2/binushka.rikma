@@ -1,0 +1,98 @@
+<!-- Sentry. Loaded only when the build had a SENTRY_DSN. Errors and logs, no replay. -->
+<script
+  src="https://browser.sentry-cdn.com/11.0.0/bundle.logs.metrics.min.js"
+  integrity="sha384-ihqaHYcM8YpPw6uEoSGHFu7Hfp25ahDdKeIklLUC/crg07V1HUkvU52j6B9x3Fvo"
+  crossorigin="anonymous"
+></script>
+<script>
+  (function () {
+    function scrub(value) {
+      return String(value)
+        .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]")
+        .replace(/https?:\/\/\S+/gi, "[url]")
+        .replace(/\+\d{8,15}\b/g, "[phone]")
+        .replace(/\b05\d{8}\b/g, "[phone]")
+        .replace(/\b0\d{1,2}[-\s]\d{3}[-\s]?\d{4}\b/g, "[phone]");
+    }
+    function sensitive(key) {
+      return /(^|\.)(email|e-mail|phone|tel|name|username|ip_address|address|cookie|authorization|password|secret|token|body|customer)s?$/i.test(key);
+    }
+    function clean(value, depth) {
+      if (depth > 4) return undefined;
+      if (typeof value === "string") return scrub(value);
+      if (typeof value === "number") return isFinite(value) ? value : undefined;
+      if (typeof value === "boolean") return value;
+      if (Object.prototype.toString.call(value) === "[object Array]") {
+        return value.slice(0, 20).map(function (item) { return clean(item, depth + 1); }).filter(function (item) { return item !== undefined; });
+      }
+      if (value && typeof value === "object") {
+        var out = {};
+        Object.keys(value).slice(0, 30).forEach(function (key) {
+          if (sensitive(key)) return;
+          var next = clean(value[key], depth + 1);
+          if (next !== undefined) out[key] = next;
+        });
+        return out;
+      }
+    }
+    Sentry.init({
+      dsn: "{{ site.data.sentry.dsn }}",
+      environment: "{{ site.data.sentry.environment | default: "production" }}",
+      {% if site.data.sentry.release %}
+      release: "{{ site.data.sentry.release }}",
+      {% endif %}
+      sendDefaultPii: false,
+      enableLogs: true,
+      integrations: typeof Sentry.consoleLoggingIntegration === "function"
+        ? [Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] })]
+        : [],
+      ignoreErrors: [
+        "ResizeObserver loop limit exceeded",
+        "ResizeObserver loop completed with undelivered notifications",
+        /^Script error\.?$/
+      ],
+      denyUrls: [
+        /^chrome-extension:\/\//i,
+        /^moz-extension:\/\//i,
+        /^safari-extension:\/\//i
+      ],
+      beforeSend: function (event) {
+        try {
+          if (typeof event.message === "string") event.message = scrub(event.message);
+          var values = event.exception && event.exception.values;
+          if (values) {
+            for (var i = 0; i < values.length; i++) {
+              if (values[i] && typeof values[i].value === "string") values[i].value = scrub(values[i].value);
+            }
+          }
+          if (event.request) {
+            delete event.request.cookies;
+            delete event.request.headers;
+            delete event.request.data;
+            if (typeof event.request.url === "string") {
+              var parsed = new URL(event.request.url, window.location.origin);
+              event.request.url = parsed.origin + parsed.pathname;
+            }
+          }
+          if (event.user) {
+            delete event.user.email;
+            delete event.user.ip_address;
+            delete event.user.username;
+            delete event.user.name;
+          }
+        } catch (ignore) {}
+        return event;
+      },
+      beforeSendLog: function (log) {
+        try {
+          if (typeof log.message === "string") {
+            if (log.message.indexOf("[analytics]") === 0) return null;
+            log.message = scrub(log.message);
+          }
+          if (log.attributes) log.attributes = clean(log.attributes, 0) || {};
+        } catch (ignore) {}
+        return log;
+      }
+    });
+  })();
+</script>

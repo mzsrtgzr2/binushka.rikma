@@ -1127,6 +1127,22 @@
       .filter(function (v) {
         return v.name || v.price || v.id;
       })
+      .slice()
+      .sort(function (a, b) {
+        function unavailable(v) {
+          return (
+            (Number(v.stock) === 0 || v.stock === '0') &&
+            !v.preorder &&
+            !p.preorder
+          );
+        }
+        var aOut = unavailable(a);
+        var bOut = unavailable(b);
+        if (aOut !== bOut) return aOut ? 1 : -1;
+        var pa = Number(a && a.price) || 0;
+        var pb = Number(b && b.price) || 0;
+        return pa - pb;
+      })
       .map(function (v) {
         var name = v.name || v.id || '';
         var sources = [];

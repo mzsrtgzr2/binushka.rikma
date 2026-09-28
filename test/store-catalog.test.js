@@ -93,6 +93,65 @@ variants:
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
+test('multi-type sold-out variants sink after in-stock ones', () => {
+  assert.deepEqual(
+    store.variantIdsInPriceOrder({
+      cheapSold: { name: 'זול אזל', price: 50, stock: 0 },
+      mid: { name: 'בינוני', price: 100, stock: 2 },
+      priceySold: { name: 'יקר אזל', price: 200, stock: 0 },
+      cheap: { name: 'זול', price: 80, stock: 1 },
+    }),
+    ['cheap', 'mid', 'cheapSold', 'priceySold']
+  );
+
+  // Preorder on the type stays with available — customers can still order.
+  assert.deepEqual(
+    store.variantIdsInPriceOrder({
+      sold: { name: 'אזל', price: 50, stock: 0 },
+      preorder: { name: 'הזמנה מראש', price: 90, stock: 0, preorder: true },
+      ready: { name: 'במלאי', price: 120, stock: 3 },
+    }),
+    ['preorder', 'ready', 'sold']
+  );
+
+  // Product-level preorder keeps every type with the available group.
+  assert.deepEqual(
+    store.variantIdsInPriceOrder(
+      {
+        sold: { name: 'אזל', price: 50, stock: 0 },
+        ready: { name: 'במלאי', price: 120, stock: 3 },
+      },
+      true
+    ),
+    ['sold', 'ready']
+  );
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-variant-oos-'));
+  writePage(
+    dir,
+    'scissors',
+    `title: מספריים
+price: ₪70 – ₪90
+variants:
+  round:
+    name: עגולות
+    price: 70
+    stock: 0
+  singer:
+    name: Singer
+    price: 90
+    stock: 2
+  mid:
+    name: בינוני
+    price: 80
+    stock: 0
+`
+  );
+  const catalog = store.buildCatalogFromDir(dir);
+  assert.deepEqual(catalog.scissors.variant_order, ['singer', 'round', 'mid']);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function writePage(dir, slug, yaml, body = 'body') {
   fs.writeFileSync(
     path.join(dir, `${slug}.md`),

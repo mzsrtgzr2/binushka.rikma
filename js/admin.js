@@ -795,7 +795,10 @@
         return;
       }
       var reader = new FileReader();
-      reader.onerror = function () {
+      reader.onerror = function (event) {
+        // Stop the browser from also reporting NotReadableError on window.
+        if (event && event.preventDefault) event.preventDefault();
+        if (event && event.stopPropagation) event.stopPropagation();
         reject(new Error('לא הצלחנו לקרוא את הקובץ'));
       };
       reader.onload = function () {
@@ -849,8 +852,34 @@
         };
         img.src = dataUrl;
       };
-      reader.readAsDataURL(file);
+      try {
+        reader.readAsDataURL(file);
+      } catch (ignore) {
+        reject(new Error('לא הצלחנו לקרוא את הקובץ'));
+      }
     });
+  }
+
+  // Clearing the picker revokes the File on Safari. Do that only after the
+  // read settles, and only if a newer pick has not started.
+  var fileReadGeneration = new WeakMap();
+
+  function readPickedPhotos(input, files) {
+    var generation = (fileReadGeneration.get(input) || 0) + 1;
+    fileReadGeneration.set(input, generation);
+    function release() {
+      if (fileReadGeneration.get(input) === generation) input.value = '';
+    }
+    return Promise.all(files.map(readFileAsPhoto)).then(
+      function (items) {
+        release();
+        return items;
+      },
+      function (err) {
+        release();
+        throw err;
+      }
+    );
   }
 
   function syncKindFields() {
@@ -1694,17 +1723,20 @@
     if (!fileInput) return;
     var row = fileInput.closest('.admin-variant');
     var files = Array.prototype.slice.call(fileInput.files || []);
-    fileInput.value = '';
-    if (!row || !files.length) return;
+    if (!row || !files.length) {
+      fileInput.value = '';
+      return;
+    }
     var items = getVariantPhotoItems(row);
     var room = MAX_VARIANT_PHOTOS - items.length;
     if (room <= 0) {
+      fileInput.value = '';
       show(editorMessage, 'אפשר עד ' + MAX_VARIANT_PHOTOS + ' תמונות לכל סוג', 'error');
       return;
     }
     files = files.slice(0, room);
     show(editorMessage, 'טוענת תמונות…', 'info');
-    Promise.all(files.map(readFileAsPhoto))
+    readPickedPhotos(fileInput, files)
       .then(function (added) {
         variantPhotos.set(row, items.concat(added));
         renderVariantPhotos(row);
@@ -1743,16 +1775,16 @@
 
   photoFiles.addEventListener('change', function () {
     var files = Array.prototype.slice.call(photoFiles.files || []);
-    photoFiles.value = '';
     if (!files.length) return;
     var room = 8 - photoItems.length;
     if (room <= 0) {
+      photoFiles.value = '';
       show(photosMessage || editorMessage, 'אפשר עד 8 תמונות', 'error');
       return;
     }
     files = files.slice(0, room);
     show(photosMessage || editorMessage, 'טוענת תמונות…', 'info');
-    Promise.all(files.map(readFileAsPhoto))
+    readPickedPhotos(photoFiles, files)
       .then(function (items) {
         photoItems = photoItems.concat(items);
         renderPhotos();

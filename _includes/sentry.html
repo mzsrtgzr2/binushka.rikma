@@ -49,7 +49,9 @@
       ignoreErrors: [
         "ResizeObserver loop limit exceeded",
         "ResizeObserver loop completed with undelivered notifications",
-        /^Script error\.?$/
+        /^Script error\.?$/,
+        // File or blob the browser could not read (iCloud photo, revoked picker).
+        "The I/O read operation failed"
       ],
       denyUrls: [
         /^chrome-extension:\/\//i,

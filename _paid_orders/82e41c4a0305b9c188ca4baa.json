@@ -1,0 +1,18 @@
+{
+  "orderId": "82e41c4a0305b9c188ca4baa",
+  "documentId": "0b01894e-5403-49fd-b979-b4a299a11423",
+  "amount": 240,
+  "purchases": [
+    {
+      "slug": "scrunchies",
+      "quantity": 2,
+      "variant": "fancy"
+    },
+    {
+      "slug": "scrunchies",
+      "quantity": 1,
+      "variant": "regular"
+    }
+  ],
+  "paidAt": "2026-09-29T20:41:34.570Z"
+}

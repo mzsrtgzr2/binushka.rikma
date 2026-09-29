@@ -165,6 +165,7 @@ test('the browser snippet is gated and pins the checked SDK bundle', () => {
   assert.match(snippet, /enableLogs: true/);
   assert.match(snippet, /consoleLoggingIntegration/);
   assert.match(snippet, /beforeSendLog/);
+  assert.match(snippet, /The I\/O read operation failed/);
   assert.match(admin, /include head\.html/);
   assert.equal(admin.includes('mixpanel'), false);
 });

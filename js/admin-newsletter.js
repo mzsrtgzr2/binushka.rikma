@@ -141,7 +141,11 @@
       }
 
       var reader = new FileReader();
-      reader.onerror = function () { reject(new Error('לא הצלחנו לקרוא את הקובץ')); };
+      reader.onerror = function (event) {
+        if (event && event.preventDefault) event.preventDefault();
+        if (event && event.stopPropagation) event.stopPropagation();
+        reject(new Error('לא הצלחנו לקרוא את הקובץ'));
+      };
       reader.onload = function () {
         var dataUrl = String(reader.result || '');
 
@@ -193,7 +197,11 @@
         img.src = dataUrl;
       };
 
-      reader.readAsDataURL(file);
+      try {
+        reader.readAsDataURL(file);
+      } catch (ignore) {
+        reject(new Error('לא הצלחנו לקרוא את הקובץ'));
+      }
     });
   }
 

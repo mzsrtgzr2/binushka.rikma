@@ -26,7 +26,7 @@ layout: default
     {% elsif sold_out %}
       <div class="registration-full-text">אין מקומות פנויים</div>
     {% elsif last_places %}
-      <div class="registration-full-text">מקומות אחרונים</div>
+      <div class="registration-full-text">{% if spots == 1 %}מקום אחרון{% else %}מקומות אחרונים{% endif %}</div>
     {% endif %}
 
     {% if page.category and site.data.workshop-categories[page.category] %}
@@ -77,7 +77,7 @@ layout: default
           {% endunless %}
           <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' %} hidden{% endif %}>
             {%- if spots != nil and page.price_per != 'workshop' -%}
-              {%- if spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
+              {%- if spots == 1 -%}מקום אחרון — נותר 1{%- elsif spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
             {%- endif -%}
           </p>
           {% if workshop.variants %}

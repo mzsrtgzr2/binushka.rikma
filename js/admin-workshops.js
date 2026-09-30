@@ -602,7 +602,10 @@
   function badgeText(workshop) {
     if (workshop.registration_not_open) return 'ההרשמה תיפתח בקרוב';
     if (isSoldOut(workshop)) return 'אין מקומות פנויים';
-    if (isLastPlaces(workshop)) return 'מקומות אחרונים';
+    if (isLastPlaces(workshop)) {
+      var spots = spotsOf(workshop);
+      return spots === 1 ? 'מקום אחרון' : 'מקומות אחרונים';
+    }
     return '';
   }
 
@@ -680,7 +683,11 @@
     if (showSpots) {
       body +=
         '<p class="workshop-booking__spots">' +
-        (spots <= 3 ? 'מקומות אחרונים — נותרו ' + spots : 'נותרו ' + spots + ' מקומות') +
+        (spots === 1
+          ? 'מקום אחרון — נותר 1'
+          : spots <= 3
+            ? 'מקומות אחרונים — נותרו ' + spots
+            : 'נותרו ' + spots + ' מקומות') +
         '</p>';
     }
 

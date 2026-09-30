@@ -205,7 +205,7 @@
 
   /** Customer-facing limited-stock copy: last unit vs low stock. */
   function limitedStockLabel(stock, workshop) {
-    if (workshop) return 'מקומות אחרונים';
+    if (workshop) return stock === 1 ? 'מקום אחרון' : 'מקומות אחרונים';
     if (stock === 1) return 'אחרון במלאי';
     return 'מלאי מוגבל';
   }
@@ -381,7 +381,11 @@
     if (workshop) {
       var badge = host.querySelector('.registration-full-text');
       if (badge && /תיפתח/.test(badge.textContent || '')) return;
-      var workshopLabel = soldOut ? 'אין מקומות פנויים' : limited ? 'מקומות אחרונים' : '';
+      var workshopLabel = soldOut
+        ? 'אין מקומות פנויים'
+        : limited
+          ? limitedStockLabel(stock, true)
+          : '';
       if (!workshopLabel) {
         if (badge) badge.parentNode.removeChild(badge);
         return;

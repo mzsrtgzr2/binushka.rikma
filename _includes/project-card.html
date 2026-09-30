@@ -34,7 +34,7 @@
       {% elsif sold_out %}
         <div class="registration-full">אין מקומות פנויים</div>
       {% elsif last_places %}
-        <div class="registration-full">מקומות אחרונים</div>
+        <div class="registration-full">{% if spots == 1 %}מקום אחרון{% else %}מקומות אחרונים{% endif %}</div>
       {% endif %}
     </a>
     <div class="project__info">

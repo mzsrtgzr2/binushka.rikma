@@ -2,7 +2,7 @@
 title: סט חוטים מנצנצים
 date: 2026-09-23 18:49:00 +0000
 subtitle: מהדורה מיוחדת של dmc
-image: /images/store/dmc-etoile-set/screenshot-2026-09-23-at-22-32-12-muei676m.jpg
+image: /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-00-muegj9ev.png
 price: ₪330
 out_of_stock: false
 limited_stock: true
@@ -11,12 +11,12 @@ category: embroidery-supplies
 stock: 1
 cart_price: 330
 order: 7
+preorder: false
 gallery:
-  - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-00-muegj9ev.png
+  - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-22-32-12-muei676m.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-21-49-05-muegj9ev.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-11-muegj9ew.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-26-muegj9ex.png
-preorder: false
 ---
 
 סוף סוף חוטים מנצנצים שגם נוח לעבוד איתם!!!

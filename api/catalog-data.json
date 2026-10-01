@@ -27,7 +27,7 @@
         "price": 195,
         "image": "/images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg",
         "description": "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)",
-        "stock": 1,
+        "stock": 0,
         "gallery": [
           "/images/store/embroidery-books/screenshot-2026-09-25-at-23-29-18-muhf0vew.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg",
@@ -133,7 +133,6 @@
       }
     },
     "variant_order": [
-      "365",
       "380",
       "paintwiththread",
       "type-3",
@@ -141,7 +140,8 @@
       "type-6",
       "type-7",
       "type-8",
-      "type-9"
+      "type-9",
+      "365"
     ],
     "category": "embroidery-supplies"
   },
@@ -201,7 +201,7 @@
         "price": 10,
         "image": "/images/store/fabrics/screenshot-2026-09-24-at-15-38-17-mufir18h.jpg",
         "description": "גודל ריבוע לפחות 25*25 ס״מ",
-        "stock": 100
+        "stock": 99
       },
       "type-2": {
         "name": "דריל צבע טבעי - קרם",
@@ -242,7 +242,7 @@
         "price": 100,
         "image": "/images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg",
         "description": "הצבעים שאני משתמשת בהם הכי הרבה בסט מעולה למתחילות, מתקדמות.\nכולל שחור, לבן, ecru, ירוקים, כחולים, צהובים, אדומים. ועוד :)",
-        "stock": 20,
+        "stock": 19,
         "gallery": [
           "/images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg"
         ]

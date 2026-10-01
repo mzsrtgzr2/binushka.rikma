@@ -2,16 +2,17 @@
 title: טוש לבדים
 date: 2026-09-23 12:13:00 +0000
 subtitle: מתנדף או יורד במים
-image: /images/store/prym-marker-purple/screenshot-2026-10-01-at-11-56-27-mupavvq2.jpg
+image: /images/store/prym-marker-purple/screenshot-2026-10-01-at-11-57-39-mupaxdek.jpg
 price: ₪30
 out_of_stock: false
 limited_stock: false
 hide: false
 category: embroidery-supplies
 order: 3
-gallery:
-  - /images/store/water-marker/screenshot-2026-09-23-at-22-22-56-muejch5n.jpg
 preorder: false
+gallery:
+  - /images/store/prym-marker-purple/screenshot-2026-10-01-at-11-56-27-mupavvq2.jpg
+  - /images/store/water-marker/screenshot-2026-09-23-at-22-22-56-muejch5n.jpg
 variants:
   water:
     name: יורד במים

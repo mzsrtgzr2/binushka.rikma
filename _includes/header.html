@@ -34,7 +34,12 @@
                 </li>
                 {% else %}
                 <li class="nav__item">
-                  <a href="{{ item.url | relative_url }}" class="nav__link{% if page.url == item.url %} active-link{% endif %}" data-analytics="nav" data-nav-path="{{ item.url }}">{{ item.title }}</a>
+                  <a href="{{ item.url | relative_url }}" class="nav__link{% if item.icon %} nav__link--icon{% endif %}{% if page.url == item.url %} active-link{% endif %}" data-analytics="nav" data-nav-path="{{ item.url }}">
+                    {% if item.icon %}
+                    <img class="nav__item-icon" src="{{ item.icon | relative_url }}" alt="" width="28" height="28" decoding="async">
+                    {% endif %}
+                    <span>{{ item.title }}</span>
+                  </a>
                 </li>
                 {% endif %}
               {% endfor %}

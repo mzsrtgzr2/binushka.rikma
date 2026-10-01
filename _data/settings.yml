@@ -19,6 +19,7 @@ menu__settings:
       url: '/store/'
     - title: 'הסקראנצ׳י'
       url: '/store/scrunchies/'
+      icon: '/images/scrunchies/nav-icon.png'
     # - url: '/about/'
       #   title: 'קצת עלי'
     - title: 'צרו קשר'

@@ -360,9 +360,9 @@
   }
 
   function categoryLabel(p) {
-    if (p.category === 'embroidery-supplies') return 'ציוד רקמה';
-    if (p.category === 'works-for-sale') return 'עבודות למכירה';
     var labels = {
+      'embroidery-supplies': 'ציוד רקמה',
+      'works-for-sale': 'עבודות למכירה',
       threads: 'חוטים',
       hoops: 'חישוקים',
       needles: 'מחטים',
@@ -376,8 +376,40 @@
       'birth-gifts': 'מתנות ללידה',
       'embroidered-works': 'עבודות רקומות',
     };
-    if (p.category && labels[p.category]) return labels[p.category];
-    return '';
+    var cats =
+      p.categories && p.categories.length
+        ? p.categories
+        : p.category
+          ? [p.category]
+          : [];
+    return cats
+      .map(function (cat) {
+        return labels[cat] || '';
+      })
+      .filter(Boolean)
+      .join(' · ');
+  }
+
+  function categoryCheckboxes() {
+    return document.querySelectorAll('#admin-category input[type="checkbox"][name="category"]');
+  }
+
+  function readSelectedCategories() {
+    return Array.prototype.map
+      .call(categoryCheckboxes(), function (box) {
+        return box.checked ? box.value : '';
+      })
+      .filter(Boolean);
+  }
+
+  function setSelectedCategories(categories) {
+    var selected = Object.create(null);
+    (categories || []).forEach(function (cat) {
+      if (cat) selected[cat] = true;
+    });
+    categoryCheckboxes().forEach(function (box) {
+      box.checked = Boolean(selected[box.value]);
+    });
   }
 
   function priceLabel(p) {
@@ -909,7 +941,13 @@
     renderPhotos();
     kindSelect.value = product.kind || 'fixed';
     kindSelect.disabled = product.slug === 'gift-card' || product.slug === 'scrunchies';
-    document.getElementById('admin-category').value = product.category || '';
+    setSelectedCategories(
+      product.categories && product.categories.length
+        ? product.categories
+        : product.category
+          ? [product.category]
+          : []
+    );
     document.getElementById('admin-cart-price').value = product.cart_price > 0 ? product.cart_price : '';
     document.getElementById('admin-min-price').value = product.min_price > 0 ? product.min_price : '';
     document.getElementById('admin-max-price').value = product.max_price > 0 ? product.max_price : '';
@@ -986,7 +1024,7 @@
         return { path: item.path };
       }),
       kind: kind,
-      category: document.getElementById('admin-category').value,
+      categories: readSelectedCategories(),
       cart_price: document.getElementById('admin-cart-price').value,
       min_price: document.getElementById('admin-min-price').value,
       max_price: document.getElementById('admin-max-price').value,

@@ -71,11 +71,24 @@ layout: default
           {% comment %}Skip hidden items and broken front matter (empty title husks).{% endcomment %}
           {% unless item.hide or item.title == blank %}
             {% assign item_slug = item.slug | default: item.basename %}
+            {% if item.categories and item.categories.size > 0 %}
+              {% assign item_cats = item.categories %}
+            {% elsif item.category and item.category != blank %}
+              {% assign item_cats = item.category | split: ',' %}
+            {% else %}
+              {% assign item_cats = '' | split: '' %}
+            {% endif %}
+            {% assign is_supplies = false %}
+            {% for cat in item_cats %}
+              {% if supplies_cats contains cat %}
+                {% assign is_supplies = true %}
+              {% endif %}
+            {% endfor %}
             {% if item.order %}
               {% assign store_placed = store_placed | push: item %}
             {% elsif item_slug == 'gift-card' %}
               {% assign store_gift_card = store_gift_card | push: item %}
-            {% elsif supplies_cats contains item.category %}
+            {% elsif is_supplies %}
               {% assign store_embroidery = store_embroidery | push: item %}
             {% else %}
               {% assign store_other = store_other | push: item %}
@@ -154,12 +167,19 @@ layout: default
             {% assign sort_price = price_token | plus: 0 %}
           {% endif %}
           {% assign item_date = item.date | date: '%Y-%m-%d' %}
+          {% if item.categories and item.categories.size > 0 %}
+            {% assign card_cats = item.categories %}
+          {% elsif item.category and item.category != blank %}
+            {% assign card_cats = item.category | split: ',' %}
+          {% else %}
+            {% assign card_cats = '' | split: '' %}
+          {% endif %}
           <article
             class="store-item col col-4 col-d-6 col-t-12"
             data-product-id="{{ slug }}"
             data-product-kind="product"
             data-analytics="product_card"
-            data-category="{{ item.category }}"
+            data-category="{{ card_cats | join: ' ' }}"
             data-price="{{ sort_price }}"
             data-sold-out="{% if sold_out %}true{% else %}false{% endif %}"
             data-preorder="{% if preorder %}true{% else %}false{% endif %}"

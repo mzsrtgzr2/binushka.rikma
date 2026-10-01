@@ -77,29 +77,25 @@ noindex: true
           </select>
         </div>
         <div class="form__group">
-          <label class="form__label" for="admin-category">קטגוריה בחנות</label>
-          <select class="form__input" id="admin-category" name="category">
-            <option value="">ללא קטגוריה</option>
-            <optgroup label="ציוד לרקמה">
-              <option value="threads">חוטים</option>
-              <option value="hoops">חישוקים</option>
-              <option value="needles">מחטים</option>
-              <option value="tools">כלי עבודה</option>
-              <option value="markers-stickers">טושים ומדבקות</option>
-              <option value="fabrics">בדים</option>
-            </optgroup>
-            <optgroup label="ערכות וספרים">
-              <option value="kits">ערכות רקמה</option>
-              <option value="books">ספרי רקמה</option>
-              <option value="beginners">למתחילות</option>
-            </optgroup>
-            <optgroup label="מתנות">
-              <option value="gift-card">גיפט קארד</option>
-              <option value="birth-gifts">מתנות ללידה</option>
-              <option value="embroidered-works">עבודות רקומות</option>
-            </optgroup>
-          </select>
-          <p class="admin-hint">לפי הקטגוריה הלקוחות יכולות לנווט בתפריט בחנות.</p>
+          <span class="form__label" id="admin-category-label">קטגוריות בחנות</span>
+          <div class="admin-category-list" id="admin-category" role="group" aria-labelledby="admin-category-label" tabindex="-1">
+            <p class="admin-category-list__group-label">ציוד לרקמה</p>
+            <label class="admin-check"><input type="checkbox" name="category" value="threads"> חוטים</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="hoops"> חישוקים</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="needles"> מחטים</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="tools"> כלי עבודה</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="markers-stickers"> טושים ומדבקות</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="fabrics"> בדים</label>
+            <p class="admin-category-list__group-label">ערכות וספרים</p>
+            <label class="admin-check"><input type="checkbox" name="category" value="kits"> ערכות רקמה</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="books"> ספרי רקמה</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="beginners"> למתחילות</label>
+            <p class="admin-category-list__group-label">מתנות</p>
+            <label class="admin-check"><input type="checkbox" name="category" value="gift-card"> גיפט קארד</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="birth-gifts"> מתנות ללידה</label>
+            <label class="admin-check"><input type="checkbox" name="category" value="embroidered-works"> עבודות רקומות</label>
+          </div>
+          <p class="admin-hint">אפשר לבחור כמה קטגוריות — המוצר יופיע בכל אחת מהן בתפריט החנות.</p>
         </div>
       </div>
 

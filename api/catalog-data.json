@@ -329,7 +329,11 @@
       300,
       500
     ],
-    "category": "gift-card"
+    "category": "gift-card",
+    "categories": [
+      "gift-card",
+      "birth-gifts"
+    ]
   },
   "hoops": {
     "name": "חישוקי רקמה מעץ",

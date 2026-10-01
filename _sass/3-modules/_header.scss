@@ -145,13 +145,13 @@
           &.nav__link--icon {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.2em;
           }
         }
 
         .nav__item-icon {
-          width: 32px;
-          height: 32px;
+          width: 1em;
+          height: 1em;
         }
       }
     }
@@ -280,14 +280,14 @@
       &.nav__link--icon {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.2em;
       }
     }
 
     .nav__item-icon {
       display: block;
-      width: 28px;
-      height: 28px;
+      width: 1em;
+      height: 1em;
       flex-shrink: 0;
       object-fit: contain;
     }

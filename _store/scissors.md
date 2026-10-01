@@ -5,10 +5,11 @@ subtitle: "של dmc, singer ועוד"
 image: /images/store/scissors/screenshot-2026-09-23-at-22-36-13-mueib4k5.jpg
 price: ₪70 – ₪80
 out_of_stock: false
-limited_stock: false
+limited_stock: true
 hide: false
 category: embroidery-supplies
 order: 6
+preorder: false
 variants:
   9:
     name: עגולות גודל 9 ס״מ
@@ -18,6 +19,7 @@ variants:
   9-2:
     name: מספרי ציפור 9 ס״מ
     price: 70
+    stock: 3
     image: /images/store/scissors/screenshot-2026-09-23-at-21-58-39-mueib4k6.jpg
     description: "חביבות הקהל ללא ספק, זהובות יפות מדוייקות."
   type-3:

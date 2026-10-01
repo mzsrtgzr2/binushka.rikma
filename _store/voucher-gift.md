@@ -7,10 +7,15 @@ price: ₪330
 out_of_stock: false
 limited_stock: false
 hide: false
-category: gift-card
 form_url: https://pay.grow.link/65997fae6f0da07374ea72c89464965c-MjczNTM1OQ
 order: 23
 cart_price: 330
+category: gift-card
+categories:
+  - gift-card
+  - birth-gifts
+limited_edition: false
+preorder: false
 ---
 
 ## שובר מתנה - בוקר פינוק לאמהות

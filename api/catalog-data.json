@@ -582,7 +582,11 @@
   "voucher-gift": {
     "name": "שובר מתנה - בוקר פינוק לאמהות",
     "price": 330,
-    "category": "gift-card"
+    "category": "gift-card",
+    "categories": [
+      "gift-card",
+      "birth-gifts"
+    ]
   },
   "yam": {
     "name": "רקמת בטטה מושרשת",

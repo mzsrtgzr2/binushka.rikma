@@ -7,7 +7,7 @@ price: ₪10
 out_of_stock: false
 limited_stock: false
 hide: false
-category: embroidery-supplies
+category: fabrics
 order: 5
 preorder: false
 variants:

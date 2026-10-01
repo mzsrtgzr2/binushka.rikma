@@ -7,7 +7,7 @@ price: ₪25 – ₪80
 out_of_stock: false
 limited_stock: false
 hide: false
-category: embroidery-supplies
+category: markers-stickers
 order: 7
 preorder: false
 gallery:

@@ -7,7 +7,7 @@ price: ₪70 – ₪80
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidery-supplies
+category: tools
 order: 6
 preorder: false
 variants:

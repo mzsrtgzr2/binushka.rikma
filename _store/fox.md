@@ -6,8 +6,9 @@ image: /images/gallery/fox.png
 price: ₪220
 out_of_stock: false
 limited_stock: true
+limited_edition: true
 hide: false
-category: works-for-sale
+category: embroidered-works
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 order: 22
 cart_price: 220

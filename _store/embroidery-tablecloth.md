@@ -7,7 +7,7 @@ price: ₪160
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidery-supplies
+category: kits
 order: 11
 gallery:
   - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg

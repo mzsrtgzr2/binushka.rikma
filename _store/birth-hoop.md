@@ -6,8 +6,9 @@ image: /images/gallery/birthhoop.jpeg
 price: ₪450
 out_of_stock: false
 limited_stock: false
+limited_edition: true
 hide: false
-category: works-for-sale
+category: birth-gifts
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 order: 25
 cart_price: 450

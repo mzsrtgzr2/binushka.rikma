@@ -7,6 +7,7 @@ price: כל סכום לבחירתך
 out_of_stock: false
 limited_stock: false
 hide: false
+category: gift-card
 variable: true
 min_price: 50
 max_price: 2000

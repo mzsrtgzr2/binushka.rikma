@@ -7,7 +7,7 @@ price: ₪120
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidery-supplies
+category: kits
 stock: 2
 cart_price: 120
 order: 14

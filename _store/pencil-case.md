@@ -7,7 +7,7 @@ price: ₪20
 out_of_stock: false
 limited_stock: false
 hide: false
-category: embroidery-supplies
+category: tools
 cart_price: 20
 order: 10
 gallery:

@@ -1,0 +1,95 @@
+# Right-hand store menu on /store/.
+# `id` is the filter key (analytics store_filter.category).
+# `categories` lists PRODUCT_CATEGORIES leaf keys that match.
+# `slugs` lists product ids that also match (cross-cutting filters).
+# `flag` is a special card attribute: limited_stock | limited_edition | new.
+
+- id: all
+  label: כל המוצרים
+
+- id: supplies
+  label: ציוד לרקמה
+  icon: "🧵"
+  categories:
+    - threads
+    - hoops
+    - needles
+    - tools
+    - markers-stickers
+    - fabrics
+  children:
+    - id: threads
+      label: חוטים
+      categories: [threads]
+    - id: hoops
+      label: חישוקים
+      categories: [hoops]
+    - id: needles
+      label: מחטים
+      categories: [needles]
+    - id: tools
+      label: כלי עבודה
+      categories: [tools]
+    - id: markers-stickers
+      label: טושים ומדבקות
+      categories: [markers-stickers]
+    - id: fabrics
+      label: בדים
+      categories: [fabrics]
+
+- id: kits-books
+  label: ערכות וספרים
+  icon: "🎨"
+  categories:
+    - kits
+    - books
+  children:
+    - id: kits
+      label: ערכות רקמה
+      categories: [kits]
+    - id: books
+      label: ספרי רקמה
+      categories: [books]
+
+- id: beginners
+  label: למתחילות
+  icon: "🌱"
+  categories: [beginners]
+  slugs:
+    - embroidery-kit-beginners
+
+- id: gifts
+  label: מתנות
+  icon: "🎁"
+  categories:
+    - gift-card
+    - birth-gifts
+    - embroidered-works
+  children:
+    - id: gift-card
+      label: גיפט קארד
+      categories: [gift-card]
+    - id: birth-gifts
+      label: מתנות ללידה
+      categories: [birth-gifts]
+    - id: embroidered-works
+      label: עבודות רקומות
+      categories: [embroidered-works]
+
+- id: specials
+  label: מיוחדים
+  icon: "✨"
+  flags:
+    - limited_edition
+    - limited_stock
+    - new
+  children:
+    - id: limited-edition
+      label: מהדורות מוגבלות
+      flag: limited_edition
+    - id: limited-stock
+      label: מלאי מוגבל
+      flag: limited_stock
+    - id: new
+      label: חדש
+      flag: new

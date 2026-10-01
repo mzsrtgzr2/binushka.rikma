@@ -2,22 +2,22 @@
   "birth-hoop": {
     "name": "תעודת לידה רקומה",
     "price": 450,
-    "category": "works-for-sale"
+    "category": "birth-gifts"
   },
   "dmc-etoile-set": {
     "name": "סט חוטים מנצנצים",
     "price": 330,
-    "category": "embroidery-supplies"
+    "category": "threads"
   },
   "dmc-kit-flowers": {
     "name": "ערכת רקמה עם 2 דוגמאות",
     "price": 100,
-    "category": "embroidery-supplies"
+    "category": "kits"
   },
   "dmc-kit-pearl": {
     "name": "ערכת רקמה עם חוטי פנינה",
     "price": 120,
-    "category": "embroidery-supplies"
+    "category": "kits"
   },
   "embroidery-books": {
     "name": "ספרי רקמה",
@@ -143,17 +143,17 @@
       "type-9",
       "365"
     ],
-    "category": "embroidery-supplies"
+    "category": "books"
   },
   "embroidery-case": {
     "name": "קלמר פשתן עם רקמת כותנה",
     "price": 160,
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "embroidery-flowers": {
     "name": "זר פרחים רקום",
     "price": 300,
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "embroidery-tablecloth": {
     "name": "ערכת רקמה  שהיא מפה יפהיפיה",
@@ -186,12 +186,12 @@
       "type-1",
       "type-2"
     ],
-    "category": "embroidery-supplies"
+    "category": "kits"
   },
   "embroidery-tshirt": {
     "name": "רקמה בהזמנה אישית",
     "price": 100,
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "fabrics": {
     "name": "ריבועי בד לרקמה",
@@ -226,7 +226,7 @@
       "type-2",
       "type-3"
     ],
-    "category": "embroidery-supplies"
+    "category": "fabrics"
   },
   "floss-25-set": {
     "name": "חוטי מולינה dmc",
@@ -274,7 +274,7 @@
       "original-27",
       "set-30"
     ],
-    "category": "embroidery-supplies"
+    "category": "threads"
   },
   "flower-bag": {
     "name": "תיק בד לזר פרחים",
@@ -304,17 +304,17 @@
       "type-2",
       "type-1"
     ],
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "flowers-yumiko-1": {
     "name": "פרחים בהשראת הטבע ויומיקו",
     "price": 300,
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "fox": {
     "name": "רקמת שועל משמח",
     "price": 220,
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "gift-card": {
     "name": "גיפט קארד",
@@ -328,7 +328,8 @@
       250,
       300,
       500
-    ]
+    ],
+    "category": "gift-card"
   },
   "hoops": {
     "name": "חישוקי רקמה מעץ",
@@ -397,27 +398,27 @@
       "22",
       "type-6"
     ],
-    "category": "embroidery-supplies"
+    "category": "hoops"
   },
   "kit": {
     "name": "ערכת רקמה מפנקת",
     "price": 210,
-    "category": "embroidery-supplies"
+    "category": "kits"
   },
   "needle": {
     "name": "מחט לרקמה",
     "price": 2,
-    "category": "embroidery-supplies"
+    "category": "needles"
   },
   "pencil-case": {
     "name": "קלמר קנבס לרקמה",
     "price": 20,
-    "category": "embroidery-supplies"
+    "category": "tools"
   },
   "portrait": {
     "name": "מסגרת רקומה",
     "price": 250,
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "prym-marker-purple": {
     "name": "טוש לבדים",
@@ -446,7 +447,7 @@
       "water",
       "disappearing"
     ],
-    "category": "embroidery-supplies"
+    "category": "markers-stickers"
   },
   "scissors": {
     "name": "מספרי רקמה איכותיות",
@@ -488,7 +489,7 @@
       "type-3",
       "singer"
     ],
-    "category": "embroidery-supplies"
+    "category": "tools"
   },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",
@@ -517,7 +518,7 @@
       "large",
       "fancy"
     ],
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   },
   "stickers": {
     "name": "מדבקות לרקמה",
@@ -564,15 +565,16 @@
       "type-2",
       "type-3"
     ],
-    "category": "embroidery-supplies"
+    "category": "markers-stickers"
   },
   "voucher-gift": {
     "name": "שובר מתנה - בוקר פינוק לאמהות",
-    "price": 330
+    "price": 330,
+    "category": "gift-card"
   },
   "yam": {
     "name": "רקמת בטטה מושרשת",
     "price": 300,
-    "category": "works-for-sale"
+    "category": "embroidered-works"
   }
 }

@@ -7,7 +7,7 @@ price: ₪330
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidery-supplies
+category: threads
 stock: 1
 cart_price: 330
 order: 8

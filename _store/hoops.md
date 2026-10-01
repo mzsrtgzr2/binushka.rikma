@@ -7,7 +7,7 @@ price: ₪35 – ₪45
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidery-supplies
+category: hoops
 order: 2
 gallery:
   - /images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg

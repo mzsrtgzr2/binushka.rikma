@@ -9,11 +9,11 @@ limited_stock: false
 hide: false
 category: embroidery-supplies
 form_url: https://pay.grow.link/fd01f222f818c6613104d886733c4e24-MjcxNjcwOA
-order: 10
+order: 12
 cart_price: 210
+preorder: false
 gallery:
   - /images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg
-preorder: false
 ---
 
 ## ערכת רקמה מפנקת בהתאמה אישית

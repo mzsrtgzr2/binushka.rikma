@@ -10,7 +10,7 @@ hide: false
 category: embroidery-supplies
 stock: 1
 cart_price: 330
-order: 7
+order: 8
 preorder: false
 gallery:
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-22-32-12-muei676m.jpg

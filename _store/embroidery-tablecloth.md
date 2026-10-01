@@ -8,9 +8,10 @@ out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
-order: 9
+order: 11
 gallery:
   - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
+preorder: false
 variants:
   type-1:
     name: דוגמא פרחונית מונוכרמטית כחולה

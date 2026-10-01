@@ -10,10 +10,11 @@ hide: false
 category: embroidery-supplies
 stock: 3
 cart_price: 100
+order: 13
 gallery:
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg
-order: 11
+preorder: false
 ---
 
 עוד ערכת רקמה כיפית שהבאתי איתי מלונדון.

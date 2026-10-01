@@ -8,7 +8,7 @@ out_of_stock: false
 limited_stock: false
 hide: false
 category: embroidery-supplies
-order: 14
+order: 5
 preorder: false
 variants:
   type-1:

@@ -9,11 +9,11 @@ limited_stock: false
 hide: false
 category: embroidery-supplies
 cart_price: 2
-order: 5
+order: 4
+preorder: false
 gallery:
   - /images/store/needle/screenshot-2026-09-25-at-20-15-47-muh86vqh.jpg
   - /images/store/needle/screenshot-2026-09-25-at-20-15-20-muh86vqq.jpg
-preorder: false
 ---
 
 מחט איכותית עם קוף גדול במיוחד למתחילות ולמי שלא רוצה לסבול.

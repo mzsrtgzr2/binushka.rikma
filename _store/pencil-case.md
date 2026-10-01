@@ -9,10 +9,11 @@ limited_stock: false
 hide: false
 category: embroidery-supplies
 cart_price: 20
+order: 10
 gallery:
   - /images/store/pencil-case/screenshot-2026-09-23-at-18-52-54-mueaerl2.jpg
   - /images/store/pencil-case/screenshot-2026-09-23-at-18-53-15-mueaerl2.jpg
-order: 13
+preorder: false
 ---
 
 קלמר פשתן נהדר לרקמה, הפרוייקט הקבוע שלי כשאני מחפשת לתת מתנה בעבודת יד.

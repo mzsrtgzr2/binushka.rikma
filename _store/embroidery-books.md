@@ -8,21 +8,9 @@ out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
-order: 8
+order: 9
 preorder: false
 variants:
-  365:
-    name: "רקמה בכל יום! 365 רקמות פרקטיות"
-    price: 195
-    stock: 0
-    image: /images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg
-    gallery:
-      - /images/store/embroidery-books/screenshot-2026-09-25-at-23-29-18-muhf0vew.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-50-33-mufplh69.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-06-mufplh6b.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-16-mufplh6c.png
-    description: "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)"
   380:
     name: 380 רקמות חתולים
     price: 195
@@ -102,5 +90,17 @@ variants:
       - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-53-mui8gwqf.jpg
       - /images/store/embroidery-books/screenshot-2026-09-26-at-13-11-34-mui8ne4o.jpg
     description: "ספר יפהפה של Yumiko Higuchi, שמחבר בין אהבתה למוטיבים מהטבע לבין משחק בחומר ובטקסטורה.\n\nבספר תמצאי 39 פרויקטים של פרחים, עלים ומוטיבים בוטניים, שנרקמו בסוגים שונים של חוטים – מצמר וכותנה ועד פרל קוטון וחוטים מטאליים. כל סוג חוט נותן לרקמה אופי אחר, והספר מראה איך לעבוד איתם ולנצל את התכונות שלהם לטובת התוצאה הסופית.\n\nההסברים ברורים ומלווים בתצלומים, תרשימים והוראות שלב־אחר־שלב, כך שהוא מתאים גם למי שרק מתחילה להתנסות ברקמה וגם למי שכבר רוקמת ורוצה להכניס קצת יותר עומק, חומריות וטקסטורה לעבודות שלה.\n\nספר שכיף לפתוח בשביל פרויקט אחד – ולהישאר בו עוד קצת רק בשביל להסתכל."
+  365:
+    name: "רקמה בכל יום! 365 רקמות פרקטיות"
+    price: 195
+    stock: 0
+    image: /images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg
+    gallery:
+      - /images/store/embroidery-books/screenshot-2026-09-25-at-23-29-18-muhf0vew.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-50-33-mufplh69.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-06-mufplh6b.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-16-mufplh6c.png
+    description: "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)"
 ---
 

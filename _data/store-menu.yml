@@ -1,4 +1,4 @@
-# Right-hand store menu on /store/.
+# Right-hand store menu on /store/ (desktop sidebar; mobile side drawer).
 # `id` is the filter key (analytics store_filter.category).
 # `categories` lists PRODUCT_CATEGORIES leaf keys that match.
 # `slugs` lists product ids that also match (cross-cutting filters).

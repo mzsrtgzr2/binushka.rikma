@@ -12,16 +12,23 @@
   flex-direction: row;
   align-items: flex-start;
   gap: 36px;
-
-  @media only screen and (max-width: $tablet) {
-    flex-direction: column;
-    gap: 24px;
-  }
 }
 
 .store-layout__main {
   flex: 1;
   min-width: 0;
+}
+
+.store-menu-backdrop {
+  display: none;
+}
+
+.store-menu-backdrop[hidden] {
+  display: none !important;
+}
+
+.store-menu__header {
+  display: none;
 }
 
 .store-menu {
@@ -30,14 +37,6 @@
   top: 100px;
   padding: 8px 0 16px;
   text-align: right;
-
-  @media only screen and (max-width: $tablet) {
-    position: static;
-    flex-basis: auto;
-    width: 100%;
-    padding: 0 0 4px;
-    border-bottom: 1px solid var(--border-color);
-  }
 }
 
 .store-menu__group {
@@ -45,6 +44,100 @@
 
   &:last-child {
     margin-bottom: 0;
+  }
+}
+
+/* Tablet / mobile: products first; category nav slides in from the side. */
+@media only screen and (max-width: $tablet) {
+  .store-menu-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    /* Above sticky .header (1202) so the drawer is not clipped under the logo. */
+    z-index: 1210;
+    background: rgba(0, 0, 0, .35);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .25s ease, visibility .25s ease;
+
+    &:not([hidden]) {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+
+  .store-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    z-index: 1211;
+    flex-basis: auto;
+    width: min(300px, 86vw);
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-color, var(--background-color));
+    border-left: 1px solid var(--border-color);
+    box-shadow: -12px 0 32px rgba(0, 0, 0, .14);
+    overflow: hidden;
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform .28s ease, visibility .28s ease;
+
+    &.is-open {
+      transform: translateX(0);
+      visibility: visible;
+    }
+  }
+
+  .store-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .store-menu__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--heading-font-color);
+  }
+
+  .store-menu__close {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--text-color);
+  }
+
+  .store-menu__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 18px 24px;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+body.store-menu-open {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-menu-backdrop,
+  .store-menu {
+    transition: none;
   }
 }
 
@@ -131,9 +224,41 @@
   gap: 20px 28px;
   margin-bottom: 28px;
 
+  @media only screen and (max-width: $tablet) {
+    justify-content: space-between;
+    gap: 14px 16px;
+  }
+
   @media only screen and (max-width: $mobile) {
     margin-bottom: 20px;
-    gap: 14px 20px;
+  }
+}
+
+.store-toolbar__filters {
+  display: none;
+  appearance: none;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 10px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--background-alt-color);
+  color: var(--heading-font-color);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-color);
+    outline-offset: 2px;
+  }
+
+  @media only screen and (max-width: $tablet) {
+    display: inline-flex;
   }
 }
 
@@ -146,8 +271,13 @@
   font-weight: 700;
   color: var(--heading-font-color);
 
+  @media only screen and (max-width: $tablet) {
+    flex: 1;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+
   @media only screen and (max-width: $mobile) {
-    width: 100%;
     justify-content: space-between;
   }
 }

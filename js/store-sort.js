@@ -2,6 +2,9 @@
   var grid = document.getElementById('store-grid');
   var select = document.getElementById('store-sort');
   var menu = document.getElementById('store-menu');
+  var menuToggle = document.getElementById('store-menu-toggle');
+  var menuClose = document.getElementById('store-menu-close');
+  var menuBackdrop = document.getElementById('store-menu-backdrop');
   var empty = document.getElementById('store-filter-empty');
   if (!grid || !select) return;
 
@@ -9,6 +12,33 @@
   var filterButtons = menu ? menu.querySelectorAll('[data-store-filter]') : [];
   var activeFilter = 'all';
   var menuIndex = buildMenuIndex();
+  var menuOpen = false;
+  var drawerMq = window.matchMedia('(max-width: 768px)');
+
+  function syncMenuInert() {
+    if (!menu || !('inert' in menu)) return;
+    menu.inert = drawerMq.matches && !menuOpen;
+  }
+
+  function openMenu() {
+    if (!menu || menuOpen) return;
+    menuOpen = true;
+    menu.classList.add('is-open');
+    if (menuBackdrop) menuBackdrop.hidden = false;
+    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('store-menu-open');
+    syncMenuInert();
+  }
+
+  function closeMenu() {
+    if (!menu || !menuOpen) return;
+    menuOpen = false;
+    menu.classList.remove('is-open');
+    if (menuBackdrop) menuBackdrop.hidden = true;
+    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('store-menu-open');
+    syncMenuInert();
+  }
 
   function buildMenuIndex() {
     var index = Object.create(null);
@@ -216,8 +246,39 @@
       setActiveFilter(btn.getAttribute('data-store-filter') || 'all');
       var visible = applyCategoryFilter();
       track('store_filter', { category: activeFilter || 'all', results: visible });
+      closeMenu();
     });
   }
+
+  if (menuToggle) {
+    menuToggle.addEventListener('click', function () {
+      if (menuOpen) closeMenu();
+      else openMenu();
+    });
+  }
+
+  if (menuClose) {
+    menuClose.addEventListener('click', closeMenu);
+  }
+
+  if (menuBackdrop) {
+    menuBackdrop.addEventListener('click', closeMenu);
+  }
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeMenu();
+  });
+
+  function onDrawerMqChange(event) {
+    if (!event.matches) closeMenu();
+    syncMenuInert();
+  }
+  if (drawerMq.addEventListener) {
+    drawerMq.addEventListener('change', onDrawerMqChange);
+  } else if (drawerMq.addListener) {
+    drawerMq.addListener(onDrawerMqChange);
+  }
+  syncMenuInert();
 
   window.addEventListener('binushka:stock', refresh);
   window.addEventListener('binushka:prices', refresh);

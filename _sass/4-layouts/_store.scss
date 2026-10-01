@@ -7,11 +7,126 @@
   }
 }
 
+.store-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 36px;
+
+  @media only screen and (max-width: $tablet) {
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+.store-layout__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.store-menu {
+  flex: 0 0 200px;
+  position: sticky;
+  top: 100px;
+  padding: 8px 0 16px;
+  text-align: right;
+
+  @media only screen and (max-width: $tablet) {
+    position: static;
+    flex-basis: auto;
+    width: 100%;
+    padding: 0 0 4px;
+    border-bottom: 1px solid var(--border-color);
+  }
+}
+
+.store-menu__group {
+  margin: 0 0 18px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.store-menu__link {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--heading-font-color);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: right;
+  cursor: pointer;
+  transition: color .15s ease;
+
+  &:hover {
+    color: var(--brand-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-color);
+    outline-offset: 3px;
+  }
+
+  &.is-active {
+    color: var(--brand-color);
+  }
+}
+
+.store-menu__link--child {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-alt-color);
+  padding: 3px 0;
+
+  &.is-active {
+    color: var(--brand-color);
+    font-weight: 700;
+  }
+}
+
+.store-menu__icon {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.store-menu__label {
+  flex: 1;
+}
+
+.store-menu__children {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0 18px 0 0;
+
+  li {
+    margin: 0;
+  }
+}
+
+.store-filter-empty {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading-font-color);
+}
+
 .store-toolbar {
   display: flex;
   flex-wrap: wrap;
-  // RTL: category stays on the right; sort sits on the left, flush with the grid.
-  justify-content: space-between;
+  // RTL: sort sits on the left of the product grid.
+  justify-content: flex-end;
   align-items: center;
   gap: 20px 28px;
   margin-bottom: 28px;
@@ -84,6 +199,7 @@
     }
   }
 }
+
 
 .store-item__content {
   position: relative;

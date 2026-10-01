@@ -7,7 +7,7 @@ price: ₪2
 out_of_stock: false
 limited_stock: false
 hide: false
-category: embroidery-supplies
+category: needles
 cart_price: 2
 order: 4
 preorder: false

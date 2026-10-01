@@ -7,7 +7,7 @@ price: ₪5 – ₪130
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidery-supplies
+category: threads
 order: 1
 preorder: false
 gallery:

@@ -80,10 +80,26 @@ noindex: true
           <label class="form__label" for="admin-category">קטגוריה בחנות</label>
           <select class="form__input" id="admin-category" name="category">
             <option value="">ללא קטגוריה</option>
-            <option value="embroidery-supplies">ציוד רקמה</option>
-            <option value="works-for-sale">עבודות למכירה</option>
+            <optgroup label="ציוד לרקמה">
+              <option value="threads">חוטים</option>
+              <option value="hoops">חישוקים</option>
+              <option value="needles">מחטים</option>
+              <option value="tools">כלי עבודה</option>
+              <option value="markers-stickers">טושים ומדבקות</option>
+              <option value="fabrics">בדים</option>
+            </optgroup>
+            <optgroup label="ערכות וספרים">
+              <option value="kits">ערכות רקמה</option>
+              <option value="books">ספרי רקמה</option>
+              <option value="beginners">למתחילות</option>
+            </optgroup>
+            <optgroup label="מתנות">
+              <option value="gift-card">גיפט קארד</option>
+              <option value="birth-gifts">מתנות ללידה</option>
+              <option value="embroidered-works">עבודות רקומות</option>
+            </optgroup>
           </select>
-          <p class="admin-hint">לפי הקטגוריה הלקוחות יכולות לסנן בחנות.</p>
+          <p class="admin-hint">לפי הקטגוריה הלקוחות יכולות לנווט בתפריט בחנות.</p>
         </div>
       </div>
 

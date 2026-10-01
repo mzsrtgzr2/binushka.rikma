@@ -362,6 +362,21 @@
   function categoryLabel(p) {
     if (p.category === 'embroidery-supplies') return 'ציוד רקמה';
     if (p.category === 'works-for-sale') return 'עבודות למכירה';
+    var labels = {
+      threads: 'חוטים',
+      hoops: 'חישוקים',
+      needles: 'מחטים',
+      tools: 'כלי עבודה',
+      'markers-stickers': 'טושים ומדבקות',
+      fabrics: 'בדים',
+      kits: 'ערכות רקמה',
+      books: 'ספרי רקמה',
+      beginners: 'למתחילות',
+      'gift-card': 'גיפט קארד',
+      'birth-gifts': 'מתנות ללידה',
+      'embroidered-works': 'עבודות רקומות',
+    };
+    if (p.category && labels[p.category]) return labels[p.category];
     return '';
   }
 

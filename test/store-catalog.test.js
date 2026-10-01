@@ -516,10 +516,13 @@ body
   const page = store.parsePage('floss', raw);
   assert.equal(page.category, 'embroidery-supplies');
   assert.equal(store.PRODUCT_CATEGORIES[page.category], 'ציוד רקמה');
+  assert.equal(store.productCouponScope(page.category), 'embroidery-supplies');
 
-  const next = store.applyPage(raw, { ...page, category: 'works-for-sale' });
-  assert.match(next, /category: works-for-sale/);
-  assert.equal(store.parsePage('floss', next).category, 'works-for-sale');
+  const next = store.applyPage(raw, { ...page, category: 'threads' });
+  assert.match(next, /category: threads/);
+  assert.equal(store.parsePage('floss', next).category, 'threads');
+  assert.equal(store.productCouponScope('threads'), 'embroidery-supplies');
+  assert.equal(store.categoryMatchesCouponScope('threads', 'embroidery-supplies'), true);
 
   const cleared = store.applyPage(next, { ...page, category: '' });
   assert.doesNotMatch(cleared, /category:/);
@@ -545,12 +548,12 @@ test('normalizeProductInput rejects unknown category', () => {
       title: 'חוטים',
       kind: 'fixed',
       cart_price: 50,
-      category: 'embroidery-supplies',
+      category: 'threads',
     },
     { isNew: true, existingSlugs: new Set() }
   );
   assert.equal(ok.error, undefined);
-  assert.equal(ok.input.category, 'embroidery-supplies');
+  assert.equal(ok.input.category, 'threads');
 });
 
 test('a product title cannot break out of its front matter line', () => {

@@ -7,7 +7,7 @@ price: ₪160
 out_of_stock: false
 limited_stock: true
 hide: false
-category: works-for-sale
+category: embroidered-works
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 order: 19
 cart_price: 160

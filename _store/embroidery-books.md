@@ -7,7 +7,7 @@ price: ₪195
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidery-supplies
+category: books
 order: 9
 preorder: false
 variants:

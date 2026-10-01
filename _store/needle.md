@@ -14,9 +14,6 @@ gallery:
   - /images/store/needle/screenshot-2026-09-25-at-20-15-47-muh86vqh.jpg
   - /images/store/needle/screenshot-2026-09-25-at-20-15-20-muh86vqq.jpg
 category: needles
-categories:
-  - needles
-  - tools
 limited_edition: false
 ---
 

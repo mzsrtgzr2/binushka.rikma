@@ -7,7 +7,7 @@ price: ₪20
 out_of_stock: false
 limited_stock: false
 hide: false
-category: tools
+category: fabrics
 cart_price: 20
 order: 10
 gallery:

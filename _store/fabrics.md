@@ -2,7 +2,7 @@
 title: ריבועי בד לרקמה
 date: 2026-09-24 12:39:00 +0000
 subtitle: כותנה וחברים
-image: /images/store/fabrics/screenshot-2026-09-24-at-15-38-17-mufir18h.jpg
+image: /images/store/fabrics/screenshot-2026-10-01-at-11-40-26-mupabb1t.png
 price: ₪10
 out_of_stock: false
 limited_stock: false

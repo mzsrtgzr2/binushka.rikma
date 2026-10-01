@@ -7,12 +7,16 @@ price: ₪30
 out_of_stock: false
 limited_stock: false
 hide: false
-category: markers-stickers
 order: 3
 preorder: false
 gallery:
   - /images/store/prym-marker-purple/screenshot-2026-10-01-at-11-56-27-mupavvq2.jpg
   - /images/store/water-marker/screenshot-2026-09-23-at-22-22-56-muejch5n.jpg
+category: markers-stickers
+categories:
+  - markers-stickers
+  - beginners
+limited_edition: false
 variants:
   water:
     name: יורד במים

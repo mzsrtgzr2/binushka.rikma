@@ -7,13 +7,17 @@ price: ₪2
 out_of_stock: false
 limited_stock: false
 hide: false
-category: needles
 cart_price: 2
 order: 4
 preorder: false
 gallery:
   - /images/store/needle/screenshot-2026-09-25-at-20-15-47-muh86vqh.jpg
   - /images/store/needle/screenshot-2026-09-25-at-20-15-20-muh86vqq.jpg
+category: needles
+categories:
+  - needles
+  - tools
+limited_edition: false
 ---
 
 מחט איכותית עם קוף גדול במיוחד למתחילות ולמי שלא רוצה לסבול.

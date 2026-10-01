@@ -515,18 +515,46 @@ body
 `;
   const page = store.parsePage('floss', raw);
   assert.equal(page.category, 'embroidery-supplies');
+  assert.deepEqual(page.categories, ['embroidery-supplies']);
   assert.equal(store.PRODUCT_CATEGORIES[page.category], 'ציוד רקמה');
   assert.equal(store.productCouponScope(page.category), 'embroidery-supplies');
 
-  const next = store.applyPage(raw, { ...page, category: 'threads' });
+  const next = store.applyPage(raw, { ...page, category: 'threads', categories: ['threads'] });
   assert.match(next, /category: threads/);
   assert.equal(store.parsePage('floss', next).category, 'threads');
   assert.equal(store.productCouponScope('threads'), 'embroidery-supplies');
   assert.equal(store.categoryMatchesCouponScope('threads', 'embroidery-supplies'), true);
 
-  const cleared = store.applyPage(next, { ...page, category: '' });
+  const cleared = store.applyPage(next, { ...page, category: '', categories: [] });
   assert.doesNotMatch(cleared, /category:/);
   assert.equal(store.parsePage('floss', cleared).category, '');
+});
+
+test('parsePage and applyPage persist multiple product categories', () => {
+  const raw = `---
+title: גיפט קארד
+price: כל סכום לבחירתך
+hide: false
+category: gift-card
+---
+
+body
+`;
+  const multi = store.applyPage(raw, {
+    ...store.parsePage('gift-card', raw),
+    categories: ['gift-card', 'birth-gifts'],
+  });
+  assert.match(multi, /category: gift-card/);
+  assert.match(multi, /categories:\n {2}- gift-card\n {2}- birth-gifts/);
+  const page = store.parsePage('gift-card', multi);
+  assert.equal(page.category, 'gift-card');
+  assert.deepEqual(page.categories, ['gift-card', 'birth-gifts']);
+  assert.equal(store.categoryMatchesCouponScope(page.categories, 'works-for-sale'), true);
+
+  const single = store.applyPage(multi, { ...page, categories: ['gift-card'] });
+  assert.match(single, /category: gift-card/);
+  assert.doesNotMatch(single, /^categories:/m);
+  assert.deepEqual(store.parsePage('gift-card', single).categories, ['gift-card']);
 });
 
 test('normalizeProductInput rejects unknown category', () => {
@@ -554,6 +582,22 @@ test('normalizeProductInput rejects unknown category', () => {
   );
   assert.equal(ok.error, undefined);
   assert.equal(ok.input.category, 'threads');
+  assert.deepEqual(ok.input.categories, ['threads']);
+
+  const multi = store.normalizeProductInput(
+    {
+      slug: 'gift-card',
+      title: 'גיפט קארד',
+      kind: 'variable',
+      min_price: 50,
+      max_price: 200,
+      categories: ['gift-card', 'birth-gifts', 'gift-card'],
+    },
+    { isNew: true, existingSlugs: new Set() }
+  );
+  assert.equal(multi.error, undefined);
+  assert.deepEqual(multi.input.categories, ['gift-card', 'birth-gifts']);
+  assert.equal(multi.input.category, 'gift-card');
 });
 
 test('a product title cannot break out of its front matter line', () => {

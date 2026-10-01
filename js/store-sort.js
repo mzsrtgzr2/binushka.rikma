@@ -127,8 +127,12 @@
   function matchesFilter(el, filterId) {
     if (!filterId || filterId === 'all') return true;
     var rule = menuIndex[filterId];
+    var productCats = (el.getAttribute('data-category') || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
     if (!rule) {
-      return (el.getAttribute('data-category') || '') === filterId;
+      return productCats.indexOf(filterId) !== -1;
     }
     if (rule.flags && rule.flags.length) {
       for (var i = 0; i < rule.flags.length; i += 1) {
@@ -141,8 +145,11 @@
     }
     var slug = el.getAttribute('data-product-id') || '';
     if (rule.slugs.length && rule.slugs.indexOf(slug) !== -1) return true;
-    var category = el.getAttribute('data-category') || '';
-    if (rule.categories.length && rule.categories.indexOf(category) !== -1) return true;
+    if (rule.categories.length) {
+      for (var c = 0; c < productCats.length; c += 1) {
+        if (rule.categories.indexOf(productCats[c]) !== -1) return true;
+      }
+    }
     return false;
   }
 

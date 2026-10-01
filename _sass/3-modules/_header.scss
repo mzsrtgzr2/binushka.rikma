@@ -141,6 +141,17 @@
           .arrow-down {
             display: none;
           }
+
+          &.nav__link--icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2em;
+          }
+        }
+
+        .nav__item-icon {
+          width: 1em;
+          height: 1em;
         }
       }
     }
@@ -266,6 +277,19 @@
         }
       }
 
+      &.nav__link--icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2em;
+      }
+    }
+
+    .nav__item-icon {
+      display: block;
+      width: 1em;
+      height: 1em;
+      flex-shrink: 0;
+      object-fit: contain;
     }
 
     &.dropdown {

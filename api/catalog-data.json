@@ -412,16 +412,12 @@
   "needle": {
     "name": "מחט לרקמה",
     "price": 2,
-    "category": "needles",
-    "categories": [
-      "needles",
-      "tools"
-    ]
+    "category": "needles"
   },
   "pencil-case": {
     "name": "קלמר קנבס לרקמה",
     "price": 20,
-    "category": "tools"
+    "category": "fabrics"
   },
   "portrait": {
     "name": "מסגרת רקומה",

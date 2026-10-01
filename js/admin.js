@@ -366,7 +366,7 @@
       threads: 'חוטים',
       hoops: 'חישוקים',
       needles: 'מחטים',
-      tools: 'כלי עבודה',
+      tools: 'מספריים',
       'markers-stickers': 'טושים ומדבקות',
       fabrics: 'בדים',
       kits: 'ערכות רקמה',

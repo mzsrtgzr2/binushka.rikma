@@ -451,7 +451,11 @@
       "water",
       "disappearing"
     ],
-    "category": "markers-stickers"
+    "category": "markers-stickers",
+    "categories": [
+      "markers-stickers",
+      "beginners"
+    ]
   },
   "scissors": {
     "name": "מספרי רקמה איכותיות",

@@ -15,6 +15,13 @@
   var newBtn = document.getElementById('admin-new');
   var saveSpotsBtn = document.getElementById('admin-save');
   var logoutBtn = document.getElementById('admin-logout');
+  var typeChooser = document.getElementById('admin-type-chooser');
+  var typeChooserList = document.getElementById('admin-type-chooser-list');
+  var typeChooserMessage = document.getElementById('admin-type-chooser-message');
+  var typeBlankBtn = document.getElementById('admin-type-blank');
+  var typeCancelBtn = document.getElementById('admin-type-cancel');
+  var typeBanner = document.getElementById('admin-type-banner');
+  var typeBannerLabel = document.getElementById('admin-type-banner-label');
   var editor = document.getElementById('admin-editor');
   var editorTitle = document.getElementById('admin-editor-title');
   var editorMessage = document.getElementById('admin-editor-message');
@@ -71,6 +78,9 @@
   var current = null;
   var previewTimer;
   var saveHint = '';
+  /* When set, changing the date re-fills subtitle/body/slug from this template. */
+  var activeTemplateId = null;
+  var lastTemplateTokens = null;
 
   /* Committed path -> the data URL the browser already has. An image is only
      served from /images/... after the next site build, so until then the
@@ -486,6 +496,372 @@
     } catch (e) {
       return date.toLocaleString();
     }
+  }
+
+  /* -------------------------------------------------------------- templates
+
+     Five recurring workshop shapes. Choosing one fills title, body, price and
+     category; the admin then mainly sets date and image. Tokens in subtitle /
+     body are filled from the date field. */
+
+  var MONTHS_HE = [
+    '', 'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+    'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+  ];
+  var WEEKDAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+  var WORKSHOP_TEMPLATES = [
+    {
+      id: 'mothers-embroidery',
+      label: 'אמהות רוקמות',
+      blurb: 'קורס רקמה לאמהות בחל״ד — ארבעה מפגשים',
+      slugPrefix: 'mothers',
+      defaultTime: '10:00',
+      meetingCount: 4,
+      title: 'רקמה לאימהות בחופשת לידה',
+      subtitle: 'ימי {{WEEKDAY}} החל מה{{DAY}} ב{{MONTH_HE}}',
+      category: 'mothers',
+      cart_price: 1090,
+      price_per: 'participant',
+      spots: 8,
+      packs: [],
+      filter_months: [],
+      body:
+        '## פרטי הסדנה אמהות רוקמות\n\n' +
+        '**תאריך פתיחה:** {{DATE_DMY}}\n\n' +
+        '**תאריכי המפגשים:** {{MEETINGS}}\n\n' +
+        '**מיקום:** אייזנברג, רחובות\n\n' +
+        '**שעה:** 10:00-12:30\n\n' +
+        '**מחיר:** 1090 ש"ח למשתתפת, לכל 4 המפגשים.\n\n' +
+        '### מה נלמד בסדנה?\n\n' +
+        '- יסודות הרקמה.\n' +
+        '- טכניקות מתקדמות.\n' +
+        '- יצירת סוגי תכים שונים על הבד.\n\n' +
+        '### למי הסדנה מתאימה?\n\n' +
+        'הסדנה מתאימה לכל מי שמחפשת חווייה עבור עצמה. הכוללת יצירת רקמה, ארוחת בוקר מפנקת ושיחות שקטות בין תינוק לתינוק.\n\n' +
+        'כל החומרים כלולים, ואין צורך בניסיון קודם – את רק מביאה את עצמך ואת התינוק 💕\n\n' +
+        '### מה תקבלו בסדנה?\n\n' +
+        '- ערכת רקמה אישית הכוללת חוטים, מחט ובד.\n' +
+        '- ארוחת בוקר מפנקת מעשה ידיי.\n' +
+        '- קבוצת וואטספ אינטימית למשתתפות הסדנא, בה נתייעץ ונשוויץ.\n' +
+        '- קבוצת אימהות חמה ומכילה עם מקום לקטנטנים.\n'
+    },
+    {
+      id: 'mothers-pamper',
+      label: 'בוקר פינוק לאמהות',
+      blurb: 'מפגש בוקר לאמהות בחל״ד — אפשר להוסיף אורחת',
+      slugPrefix: 'mothers',
+      defaultTime: '10:00',
+      title: 'בוקר פינוק לאמהות',
+      subtitle: 'ב{{DATE_DM}}',
+      category: 'mothers',
+      cart_price: 330,
+      price_per: 'participant',
+      spots: 8,
+      packs: [
+        { id: 'one', name: 'משתתפת אחת', price: 330, places: 1 },
+        { id: 'pair', name: 'שתי משתתפות ביחד', price: 600, places: 2 }
+      ],
+      filter_months: [],
+      body:
+        '# בואי לקחת אוויר!\n\n' +
+        '**תאריך המפגש:** {{DATE_DMY}}\n\n' +
+        '**מיקום:** אייזנברג, רחובות\n\n' +
+        '**שעה:** 10:00-12:30\n\n' +
+        '**מחיר:** 330 ש"ח למשתתפת \\ 600 ש"ח לנרשמות ביחד\n\n' +
+        '### מה מחכה לי כשאגיע?\n\n' +
+        '- ארוחת בוקר מפנקת של מלכות, מעשה ידיי.\n' +
+        '- קבוצת אימהות חמה ומכילה עם מקום לקטנטנים.\n' +
+        '- קבוצת וואטספ אינטימית למשתתפות המפגש, בה נתייעץ ונוכל להמשיך לדסקס.\n\n' +
+        '### למי הסדנה מתאימה?\n\n' +
+        '- לכל מי שצריכה שיפנקו אותה💕\n' +
+        '- לכל מי שרוצה לפגוש עוד אמהות בחל״ד💕\n' +
+        '- עם תינוקות עד גיל זחילה כולל.\n'
+    },
+    {
+      id: 'one-time-embroidery',
+      label: 'סדנת רקמה חד פעמית',
+      blurb: 'סדנת רקמה חד־פעמית בסטודיו — לכל הרמות',
+      slugPrefix: 'rehovot',
+      defaultTime: '09:00',
+      title: 'סדנת רקמה של שישי בבוקר',
+      subtitle: 'ב{{DATE_DM}} ברחובות',
+      category: 'all-levels',
+      cart_price: 330,
+      price_per: 'participant',
+      spots: 8,
+      packs: [],
+      filter_months: [],
+      body:
+        '## פרטי סדנת רקמה ברחובות\n' +
+        'דמיינו שהגעתן ליום חופש המושלם שלכן - כיבוד טרי, קפה משובח ותחביב חדש לנפש!\n' +
+        'וזהו, זה לא דמיון, זו המציאות אצלי בסדנה :)\n\n' +
+        '**מיקום:** אייזנברג, רחובות\n' +
+        '**תאריך:** {{DATE_DMY}}\n' +
+        '**שעה:** 09:00-12:00\n' +
+        '**מחיר:** 330 ש"ח למשתתף\n\n' +
+        '### מה נלמד בסדנה?\n\n' +
+        '- יסודות הרקמה.\n' +
+        '- תכים בעזרתם נייצר תנועות ומרקמים על הבד.\n' +
+        '- כלים ליצירת רקמה ייחודית.\n' +
+        '- שימוש במדבקות ובטושים לרקמה.\n\n' +
+        '### למי הסדנה מתאימה?\n\n' +
+        'הסדנה מתאימה לכל הרמות, החל ממתחילים ועד למתקדמים. אין צורך בניסיון קודם ברקמה.\n\n' +
+        '### מה תקבלו בסדנה?\n\n' +
+        '- חישוק עץ, בד פשתן, מחט נוחה למתחילים ושפע חוטי dmc.\n' +
+        '- קפה משובח, תה ירוק ומאפים טריים מעשה ידיי.\n' +
+        '- קבוצת וואטספ קטנה וייחודית לסדנה, להמשך שאלות ותמיכה בתהליך הרקמה.\n' +
+        '- כלי נהדר להפגת המתח!\n'
+    },
+    {
+      id: 'guest-workshop',
+      label: 'סדנת אורח',
+      blurb: 'סדנה בהנחיית מורה אורחת — עדכני שם ותוכן',
+      slugPrefix: 'guest',
+      defaultTime: '09:00',
+      title: 'סדנה עם מורה אורחת',
+      subtitle: '{{DATE_DM}} עם [שם האורחת]',
+      category: 'beginners',
+      cart_price: 330,
+      price_per: 'participant',
+      spots: 8,
+      packs: [
+        { id: 'one', name: 'משתתפת אחת', price: 330, places: 1 },
+        { id: 'pair', name: 'שתי משתתפות ביחד', price: 600, places: 2 }
+      ],
+      filter_months: [],
+      body:
+        '## הנה לכן פרטים על הסדנה בהנחיית [שם האורחת]\n' +
+        'בפעם הראשונה בסלוני, סדנה עם מורה אורחת שתיקח אותנו לעולם שלה.\n\n' +
+        '**מיקום:** אייזנברג, רחובות\n' +
+        '**תאריך:** {{DATE_DMY}}\n' +
+        '**שעה:** 09:00-12:00\n' +
+        '**מחיר:** 330 ש"ח למשתתפת \\ 600 ש"ח לנרשמות ביחד\n\n' +
+        '### מה נלמד בסדנה?\n\n' +
+        '- [נושא 1]\n' +
+        '- [נושא 2]\n' +
+        '- [נושא 3]\n\n' +
+        '### למי הסדנה מתאימה?\n\n' +
+        'למי שרוצה להתנסות בפעם הראשונה, וגם למי שכבר ניסתה קצת ורוצה ללמוד בצורה מסודרת.\n\n' +
+        '### מה תקבלו בסדנה?\n\n' +
+        '- כל החומרים כלולים.\n' +
+        '- כיבוד מעשה ידיי וקפה משובח.\n' +
+        '- קבוצת וואטספ קטנה וייחודית לסדנה.\n'
+    },
+    {
+      id: 'advanced-circle',
+      label: 'חוג רקמה למנוסות',
+      blurb: 'מפגש חודשי למי שכבר יודעת לרקום',
+      slugPrefix: 'monthly-meeting',
+      defaultTime: '11:00',
+      title: 'מפגש רקמה ברחובות',
+      subtitle: 'רביעי בבוקר אחת לחודש',
+      category: 'advanced',
+      cart_price: 110,
+      price_per: 'participant',
+      spots: 8,
+      packs: [],
+      filter_months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+      body:
+        '## פרטי מפגשי רקמה למנוסות\n\n' +
+        '**מיקום:** רח׳ אייזנברג, רחובות\n\n' +
+        '**שעה:** 11:00-13:00\n\n' +
+        '**מחיר:** 110 ש"ח למשתתף\n\n' +
+        '### למי המפגש מתאים?\n\n' +
+        '- לכל מי שכבר יודעת לרקום.\n' +
+        '- לכל מי שרוצה להמשיך לרקום בחברותא.\n' +
+        '- למי שרוצה לאתגר עצמה בתכים חדשים.\n' +
+        '- למי שרוצה להוסיף שימוש בצבעי מים, טושים ועוד. לצד הרקמה.\n' +
+        '- - לא מתאים למי שאין לה שום נסיון ברקמה.\n' +
+        '- - ללא תינוקות מגיל זחילה ומעלה.\n\n' +
+        '### מתי מתקיימים המפגשים הקרובים?\n' +
+        '- המפגש הקרוב יתקיים ב{{DATE_DMY}}.\n\n' +
+        '### מה תקבלו במפגש?\n\n' +
+        '- חוטים לשימוש חופשי במהלך השיעור (של חברת DMC הצרפתית).\n' +
+        '- שימוש בצבעי מים, דפים, מכחולים.\n' +
+        '- עוגיות מעשה ידיי.\n' +
+        '- חברותא של רוקמות, מיוחדת במינה. לצד קפה ומאפה משובחים.\n'
+    }
+  ];
+
+  function findTemplate(id) {
+    return WORKSHOP_TEMPLATES.filter(function (template) { return template.id === id; })[0] || null;
+  }
+
+  function meetingDates(parts, count) {
+    var out = [];
+    var n = count || 4;
+    for (var i = 0; i < n; i++) {
+      var date = new Date(parts.year, parts.month - 1, parts.day + (i * 7));
+      out.push(date.getDate() + '.' + (date.getMonth() + 1));
+    }
+    return out.join(', ');
+  }
+
+  function templateTokens(parts, template) {
+    var yy = String(parts.year).slice(-2);
+    var weekday = WEEKDAYS_HE[new Date(parts.year, parts.month - 1, parts.day).getDay()] || '';
+    return {
+      DATE_DM: parts.day + '.' + parts.month,
+      DATE_DMY: parts.day + '.' + parts.month + '.' + yy,
+      DAY: String(parts.day),
+      MONTH: String(parts.month),
+      MONTH_HE: MONTHS_HE[parts.month] || '',
+      WEEKDAY: weekday,
+      MEETINGS: meetingDates(parts, template && template.meetingCount)
+    };
+  }
+
+  function fillTokens(text, tokens) {
+    return String(text || '').replace(/\{\{([A-Z0-9_]+)\}\}/g, function (match, key) {
+      return tokens[key] != null ? tokens[key] : match;
+    });
+  }
+
+  /** Longer values first so `5.10.26` is not partially rewritten by `5.10`. */
+  var TOKEN_SWAP_ORDER = ['MEETINGS', 'DATE_DMY', 'DATE_DM', 'MONTH_HE', 'WEEKDAY'];
+
+  function swapTokenValues(text, fromTokens, toTokens) {
+    var out = String(text || '');
+    if (!fromTokens || !toTokens) return out;
+
+    TOKEN_SWAP_ORDER.forEach(function (key) {
+      var from = fromTokens[key];
+      var to = toTokens[key];
+      if (!from || to == null || from === to) return;
+      out = out.split(from).join(to);
+    });
+
+    return out;
+  }
+
+  function freeTemplateSlug(base) {
+    var root = String(base || 'workshop').replace(/^-+|-+$/g, '').slice(0, 50) || 'workshop';
+    if (!findWorkshop(root)) return root;
+
+    var n = 2;
+    while (findWorkshop(root + '-' + n)) n += 1;
+    return root + '-' + n;
+  }
+
+  function slugForTemplate(template, parts) {
+    if (template.id === 'advanced-circle') {
+      return freeTemplateSlug(template.slugPrefix);
+    }
+    var base = template.slugPrefix + '-' + parts.day + '-' + parts.month;
+    return freeTemplateSlug(base);
+  }
+
+  function defaultDateForTemplate(template) {
+    var now = new Date();
+    var time = String((template && template.defaultTime) || '10:00').split(':');
+    var hour = Number(time[0]) || 10;
+    var minute = Number(time[1]) || 0;
+    return (
+      now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+      ' ' + pad(hour) + ':' + pad(minute)
+    );
+  }
+
+  function workshopFromTemplate(template, dateValue) {
+    var date = dateValue || defaultDateForTemplate(template);
+    var parts = dateParts(date) || dateParts(defaultDateForTemplate(template));
+    var tokens = templateTokens(parts, template);
+
+    return {
+      slug: slugForTemplate(template, parts),
+      title: template.title,
+      subtitle: fillTokens(template.subtitle, tokens),
+      category: template.category || '',
+      filter_months: (template.filter_months || []).slice(),
+      date: parts.year + '-' + pad(parts.month) + '-' + pad(parts.day) + ' ' +
+        pad(parts.hour) + ':' + pad(parts.minute),
+      image: '',
+      body: fillTokens(template.body, tokens),
+      cart_price: template.cart_price || 0,
+      price_per: template.price_per === 'workshop' ? 'workshop' : 'participant',
+      spots: template.spots == null ? null : template.spots,
+      form_url: '',
+      packs: (template.packs || []).map(function (pack) {
+        return { id: pack.id, name: pack.name, price: pack.price, places: pack.places };
+      }),
+      registration_full: false,
+      registration_not_open: false,
+      last_places: false,
+      hide: true,
+      _templateTokens: tokens
+    };
+  }
+
+  function syncTemplateFromDate() {
+    if (!activeTemplateId || editor.hidden) return;
+    var template = findTemplate(activeTemplateId);
+    if (!template) return;
+
+    var parts = dateParts(dateInput.value);
+    if (!parts) return;
+
+    var tokens = templateTokens(parts, template);
+    var nextSlug = slugForTemplate(template, parts);
+
+    restoring = true;
+    subtitleInput.value = fillTokens(template.subtitle, tokens);
+    bodyInput.value = swapTokenValues(bodyInput.value, lastTemplateTokens, tokens);
+    if (!slugInput.readOnly) slugInput.value = nextSlug;
+    lastTemplateTokens = tokens;
+    restoring = false;
+
+    schedulePreview();
+    record('עדכון לפי תאריך', 'template-date');
+  }
+
+  function setTypeBanner(template) {
+    if (!typeBanner) return;
+    if (!template) {
+      typeBanner.hidden = true;
+      if (typeBannerLabel) typeBannerLabel.textContent = '';
+      return;
+    }
+    if (typeBannerLabel) typeBannerLabel.textContent = template.label;
+    typeBanner.hidden = false;
+  }
+
+  function renderTypeChooser() {
+    if (!typeChooserList) return;
+    typeChooserList.innerHTML = WORKSHOP_TEMPLATES.map(function (template) {
+      return (
+        '<li><button type="button" class="admin-type-chooser__card" data-template="' +
+        escapeHtml(template.id) + '">' +
+        '<span class="admin-type-chooser__name">' + escapeHtml(template.label) + '</span>' +
+        '<p class="admin-type-chooser__blurb">' + escapeHtml(template.blurb) + '</p>' +
+        '</button></li>'
+      );
+    }).join('');
+  }
+
+  function showTypeChooser() {
+    var go = function () {
+      current = null;
+      activeTemplateId = null;
+      editor.hidden = true;
+      listView.hidden = true;
+      if (typeChooser) typeChooser.hidden = false;
+      renderTypeChooser();
+      show(typeChooserMessage, '');
+      window.scrollTo(0, 0);
+    };
+
+    if (isDirty()) {
+      return saveSpots().then(go).catch(function (error) {
+        show(boardMessage, error.message || 'לא הצלחנו לשמור את המקומות לפני העריכה', 'error');
+      });
+    }
+
+    go();
+  }
+
+  function hideTypeChooser() {
+    if (typeChooser) typeChooser.hidden = true;
   }
 
   /* ------------------------------------------------------------------- packs */
@@ -1037,7 +1413,10 @@
     // A duplicate arrives with a slug already filled in and nothing behind it
     // on the site, so whether this is an edit is not something the slug knows.
     current = opts.isNew || !(workshop && workshop.slug) ? null : workshop;
+    activeTemplateId = opts.templateId || null;
+    lastTemplateTokens = (workshop && workshop._templateTokens) || null;
     var data = workshop || blankWorkshop();
+    var template = activeTemplateId ? findTemplate(activeTemplateId) : null;
 
     editorTitle.textContent = opts.heading || (current ? 'עריכת ' + (data.title || data.slug) : 'סדנה חדשה');
     slugInput.value = data.slug || '';
@@ -1066,6 +1445,7 @@
     linkBox.hidden = true;
     editorDelete.hidden = !current;
     syncPricePer();
+    setTypeBanner(template);
     show(editorMessage, '');
 
     // A save is a floor, not a step: undoing past it would suggest it could be
@@ -1306,12 +1686,15 @@
 
   function openEditor(workshop, options) {
     var go = function () {
+      hideTypeChooser();
       fillEditor(workshop, options);
       listView.hidden = true;
       editor.hidden = false;
       window.scrollTo(0, 0);
       updatePreview();
       if (options && options.note) show(editorMessage, options.note, 'info');
+      if (options && options.focusDate && dateInput) dateInput.focus();
+      else if (options && options.focusImage && imageInput) imageInput.focus();
     };
 
     if (isDirty()) {
@@ -1325,7 +1708,11 @@
 
   function closeEditor() {
     current = null;
+    activeTemplateId = null;
+    lastTemplateTokens = null;
+    setTypeBanner(null);
     editor.hidden = true;
+    hideTypeChooser();
     listView.hidden = false;
     show(editorMessage, '');
   }
@@ -1390,7 +1777,47 @@
   });
 
   newBtn.addEventListener('click', function () {
-    openEditor(null);
+    showTypeChooser();
+  });
+
+  if (typeChooserList) {
+    typeChooserList.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-template]');
+      if (!button) return;
+      var template = findTemplate(button.getAttribute('data-template'));
+      if (!template) return;
+
+      openEditor(workshopFromTemplate(template), {
+        isNew: true,
+        templateId: template.id,
+        heading: 'סדנה חדשה · ' + template.label,
+        history: 'תבנית: ' + template.label,
+        note: 'מילאתי את הפרטים לפי «' + template.label + '». עדכני תאריך ותמונה, ואפשר לשנות הכול לפני שמירה.',
+        focusDate: true
+      });
+    });
+  }
+
+  if (typeBlankBtn) {
+    typeBlankBtn.addEventListener('click', function () {
+      openEditor(null, {
+        isNew: true,
+        heading: 'סדנה חדשה',
+        history: 'סדנה ריקה'
+      });
+    });
+  }
+
+  if (typeCancelBtn) {
+    typeCancelBtn.addEventListener('click', function () {
+      hideTypeChooser();
+      listView.hidden = false;
+      show(typeChooserMessage, '');
+    });
+  }
+
+  dateInput.addEventListener('change', function () {
+    if (activeTemplateId) syncTemplateFromDate();
   });
 
   saveSpotsBtn.addEventListener('click', function () {

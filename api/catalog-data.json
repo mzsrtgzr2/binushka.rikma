@@ -2,7 +2,11 @@
   "birth-hoop": {
     "name": "תעודת לידה רקומה",
     "price": 450,
-    "category": "birth-gifts"
+    "category": "birth-gifts",
+    "categories": [
+      "birth-gifts",
+      "embroidered-works"
+    ]
   },
   "dmc-etoile-set": {
     "name": "סט חוטים מנצנצים",

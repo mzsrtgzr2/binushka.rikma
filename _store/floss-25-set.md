@@ -2,7 +2,7 @@
 title: חוטי מולינה dmc
 date: 2026-09-24 12:23:00 +0000
 subtitle: סטים במבחר גוונים
-image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
+image: /images/store/floss-25-set/screenshot-2026-09-28-at-10-54-17-mupazpjq.jpg
 price: ₪5 – ₪130
 out_of_stock: false
 limited_stock: true
@@ -10,6 +10,8 @@ hide: false
 category: embroidery-supplies
 order: 1
 preorder: false
+gallery:
+  - /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
 variants:
   dmc:
     name: דוללה בודדת של dmc

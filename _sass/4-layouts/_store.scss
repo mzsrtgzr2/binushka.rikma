@@ -53,7 +53,8 @@
     display: block;
     position: fixed;
     inset: 0;
-    z-index: 1190;
+    /* Above sticky .header (1202) so the drawer is not clipped under the logo. */
+    z-index: 1210;
     background: rgba(0, 0, 0, .35);
     opacity: 0;
     visibility: hidden;
@@ -73,7 +74,7 @@
     right: 0;
     bottom: 0;
     left: auto;
-    z-index: 1195;
+    z-index: 1211;
     flex-basis: auto;
     width: min(300px, 86vw);
     max-width: 100%;

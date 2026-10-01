@@ -2,13 +2,16 @@
 title: חישוקי רקמה מעץ
 date: 2026-09-23 12:50:00 +0000
 subtitle: במגוון גדלים וצורות
-image: /images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg
+image: /images/store/hoops/vog-embroidery-hoops-and-pastel-threads-mupadaxt.jpg
 price: ₪35 – ₪45
 out_of_stock: false
 limited_stock: true
 hide: false
 category: embroidery-supplies
 order: 2
+gallery:
+  - /images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg
+preorder: false
 variants:
   13:
     name: קוטר 13 ס״מ
@@ -22,17 +25,6 @@ variants:
     price: 35
     image: /images/store/hoops/screenshot-2026-09-24-at-15-42-15-mufiv0hq.jpg
     description: מיוצר ע״י חברת vog מעץ אשוח.
-  19:
-    name: קוטר 19 ס״מ
-    price: 40
-    image: /images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg
-    description: מיוצר ע״י חברת vog מעץ אשוח.
-  22:
-    name: קוטר 22 ס״מ
-    price: 40
-    stock: 2
-    image: /images/store/hoops/screenshot-2026-09-25-at-20-24-06-muh8dexe.jpg
-    description: חישוק לרקמה גדול ואיכותי של vog.
   oval-16x10cm:
     name: אובאלי 16X10 ס״מ
     price: 35
@@ -45,6 +37,17 @@ variants:
     price: 35
     image: /images/store/oval-hoop/screenshot-2026-09-23-at-18-49-38-muea6x4u.jpg
     description: חישוק אובאלי מעץ בוק איכותי.
+  19:
+    name: קוטר 19 ס״מ
+    price: 40
+    image: /images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg
+    description: מיוצר ע״י חברת vog מעץ אשוח.
+  22:
+    name: קוטר 22 ס״מ
+    price: 40
+    stock: 2
+    image: /images/store/hoops/screenshot-2026-09-25-at-20-24-06-muh8dexe.jpg
+    description: חישוק לרקמה גדול ואיכותי של vog.
   type-6:
     name: חישוק מתומן לא פחות ולא יותר
     price: 45

@@ -34,6 +34,7 @@ stockists:
       - name: סטרונג סטודיו - Strong studio
         logo: /images/stockists/strong-studio.jpg
         logo_fill: true
+        url: https://www.instagram.com/strong.studio.ness.tziona/
   - city: תל אביב
     locations:
       - name: השמורה
@@ -44,11 +45,13 @@ stockists:
       - name: עידית לוי - קעקועים בוטניים
         logo: /images/stockists/idit-levy.jpg
         logo_fill: true
+        url: https://www.instagram.com/idit__tattoo/
   - city: קיבוץ חולדה
     locations:
       - name: ReVibe בוטיק יד שנייה
         logo: /images/stockists/revibe.jpg
         logo_fill: true
+        url: https://www.instagram.com/revibe_2ndhand/
 gallery:
   - /images/scrunchies/06.jpeg
   - /images/scrunchies/01.jpeg

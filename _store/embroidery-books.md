@@ -65,10 +65,12 @@ variants:
     stock: 3
     image: /images/store/embroidery-books/screenshot-2026-09-25-at-23-09-05-muhei8a9.jpg
     gallery:
+      - /images/store/embroidery-books/screenshot-2026-10-02-at-20-41-26-mur93b6h.jpg
       - /images/store/embroidery-books/screenshot-2026-09-23-at-22-32-12-muhei8a9.jpg
       - /images/store/embroidery-books/screenshot-2026-09-25-at-23-14-39-muhei8a9.png
       - /images/store/embroidery-books/screenshot-2026-09-25-at-23-15-10-muhei8aa.jpg
       - /images/store/embroidery-books/screenshot-2026-09-26-at-11-35-24-mui8agq3.jpg
+      - /images/store/embroidery-books/screenshot-2026-10-02-at-20-41-34-mur93b6i.jpg
     description: "כמה מפתיע ומשמח ספר יכול להיות?\nפיל בקרקס או קוף על ענף עם בננה ביד.. תרקמו מה שתרצו מהספר היפהיפה הזה של יומיקו.\nהרבה תך שרשרת המדיטטיבי נוכח בעבודות של יומיקו וגם כאן בספר הרקמה של החיות.\nבתמונות אפשר לראות את הינשוף שרקמתי בהשראת הספר, עם חוטים מנצנצים של dmc מסדרת etoile."
   type-8:
     name: רקמה יפנית מודרנית בשני צבעים מאת יומיקו

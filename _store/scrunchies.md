@@ -12,7 +12,7 @@ price: ₪30 – ₪85
 hide: true
 category: embroidered-works
 stockists_title: איפה אפשר למצוא את הסקראנצ׳י שלי?
-stockists_subtitle: הסקראנצ׳יז שלי מחכות לכן גם בעסקים המקומיים האהובים האלה
+stockists_subtitle: הסקראנצ׳יז שלי מחכות לכן בעסקים המקומיים האהובים האלה
 stockists:
   - city: רחובות
     locations:

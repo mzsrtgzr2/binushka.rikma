@@ -1305,7 +1305,7 @@
         return (
           '<div class="scrunchies-variants-section">' +
           '<h2 class="scrunchies-variants-section__title">בחרי סוג</h2>' +
-          '<p class="scrunchies-variants-section__subtitle">כל סקראנצ\'י תפורה בעבודת יד — בצבע ובדגם שתבחרי.</p>' +
+          '<p class="scrunchies-variants-section__subtitle">כל סקראנצ\'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>' +
           '<div class="scrunchies-variants">' +
           rows +
           '</div></div>'

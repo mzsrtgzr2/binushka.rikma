@@ -52,11 +52,12 @@ variants:
     name: רקמות החיים ויום יום על פי יומיקו
     price: 195
     stock: 3
-    image: /images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg
+    image: /images/store/embroidery-books/screenshot-2026-10-02-at-20-28-23-mur8mwk5.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-10-02-at-20-27-12-mur8kvr3.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-52-10-mufpr95l.jpg
+      - /images/store/embroidery-books/screenshot-2026-10-02-at-20-28-33-mur8mwk6.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-18-53-14-mufpr95m.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg
     description: "הספר האחרון של יומיקו שמלווה אותי בכל טיול בזמן האחרון.\nאת כוס המרטיני רקמתי מתוך הספר בטיול האחרון ללונדון.\nיש בו אלמנטים כמעט מכל תחום - טבע, תעופה, מוזיקה, אוכל.."
   type-7:
     name: רקמות חיות על פי יומיקו

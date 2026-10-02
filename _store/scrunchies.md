@@ -12,21 +12,29 @@ price: ₪30 – ₪85
 hide: true
 category: embroidered-works
 stockists_title: איפה אפשר למצוא את הסקראנצ׳י שלי?
-stockists_subtitle: הסקראנצ׳יז שלי מחכות לכן גם בעסקים המקומיים האהובים האלה
+stockists_subtitle: הסקראנצ׳יז שלי מחכות לכן בעסקים המקומיים האהובים האלה
 stockists:
   - city: רחובות
     locations:
       - name: בתיה פרחים משמחים
+        logo: /images/stockists/batya-flowers.jpg
         url: https://www.instagram.com/batya_flowers/
       - name: רישי יוגה | בית ליוגה במרכז רחובות
         logo: /images/stockists/rishi-yoga.png
         url: https://www.rishiyoga.info/
+      - name: דפנה קיפר מנשקו | קוסמטיקאית
+        logo: /images/stockists/dafna-kiper.jpg
+        logo_fill: true
+        url: https://www.instagram.com/dafna.km/
   - city: נס ציונה
     locations:
       - name: זוהר פילאטיס סטודיו
         logo: /images/stockists/zohar-pilates.png
         url: https://zoharpilates.com/
       - name: סטרונג סטודיו - Strong studio
+        logo: /images/stockists/strong-studio.jpg
+        logo_fill: true
+        url: https://www.instagram.com/strong.studio.ness.tziona/
   - city: תל אביב
     locations:
       - name: השמורה
@@ -35,9 +43,15 @@ stockists:
   - city: יודפת
     locations:
       - name: עידית לוי - קעקועים בוטניים
+        logo: /images/stockists/idit-levy.jpg
+        logo_fill: true
+        url: https://www.instagram.com/idit__tattoo/
   - city: קיבוץ חולדה
     locations:
       - name: ReVibe בוטיק יד שנייה
+        logo: /images/stockists/revibe.jpg
+        logo_fill: true
+        url: https://www.instagram.com/revibe_2ndhand/
 gallery:
   - /images/scrunchies/06.jpeg
   - /images/scrunchies/01.jpeg

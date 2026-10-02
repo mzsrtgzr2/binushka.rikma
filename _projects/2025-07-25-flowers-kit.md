@@ -8,7 +8,7 @@ permalink: /projects/flowers-kit/
 form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
 hide: true
 registration_full: false
-order: 11
+order: 12
 ---
 
 ## ערכת רקמה להפחתת סטרס

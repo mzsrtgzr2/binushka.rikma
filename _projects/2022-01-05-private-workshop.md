@@ -10,7 +10,7 @@ registration_full: false
 hide: false
 cart_price: 2800
 price_per: workshop
-order: 10
+order: 11
 ---
 
 ## סדנא פרטית חד פעמית לחברים ומשפחה

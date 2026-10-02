@@ -15,6 +15,8 @@ noindex: true
     כאן כותבים סדנה, מעלים לה תמונה וקובעים כמה מקומות יש ומה המחיר בקופה.
     כל סדנה היא עמוד באתר, ואחרי שמירה הוא מופיע בעמוד הסדנאות ובסל.
     מקומות פנויים אפשר לעדכן ישר מהרשימה בלי להיכנס לעריכה.
+    «סדנה חדשה» נותנת לבחור סוג אירוע (אמהות רוקמות, בוקר פינוק, סדנה חד־פעמית, סדנת אורח, חוג למנוסות)
+    וממלאת מראש את התוכן והמחיר — נשאר בעיקר לעדכן תאריך ותמונה.
     «שכפול» פותח עותק של סדנה קיימת כסדנה חדשה ומוסתרת — נוח למחזור הבא של אותה סדנה.
     הסדר כאן הוא הסדר שבו הסדנאות יופיעו באתר — אפשר לגרור או להשתמש בחיצים,
     ואז לשמור. סדנה חדשה נכנסת למקומה לפי התאריך עד שמזיזים אותה.
@@ -36,11 +38,34 @@ noindex: true
       <ul class="admin-list" id="admin-list"></ul>
     </div>
 
+    <div class="admin-type-chooser" id="admin-type-chooser" hidden>
+      <div class="admin-editor__top">
+        <h2 class="admin-editor__title">איזה סוג סדנה?</h2>
+        <p class="admin-message" id="admin-type-chooser-message" hidden></p>
+      </div>
+      <p class="admin-hint admin-type-chooser__lead">
+        בחרי סוג — התוכן, הקטגוריה והמחיר ימולאו מראש.
+        אחר כך עדכני בעיקר את התאריך ואת התמונה (ואם צריך — פרטי אורחת).
+        הסדנה נשמרת כמוסתרת עד שמפרסמים אותה.
+      </p>
+      <ul class="admin-type-chooser__list" id="admin-type-chooser-list"></ul>
+      <div class="admin-editor__actions">
+        <button type="button" class="button" id="admin-type-blank">סדנה ריקה מההתחלה</button>
+        <button type="button" class="button" id="admin-type-cancel">חזרה</button>
+      </div>
+    </div>
+
     <form class="admin-editor" id="admin-editor" hidden novalidate>
       <div class="admin-editor__top">
         <h2 class="admin-editor__title" id="admin-editor-title">סדנה חדשה</h2>
         <p class="admin-message" id="admin-editor-message" hidden></p>
       </div>
+
+      <p class="admin-type-banner" id="admin-type-banner" hidden>
+        נוצרה מתבנית «<span id="admin-type-banner-label"></span>».
+        עדכני את <strong>התאריך</strong> ואת <strong>התמונה</strong> — שאר הפרטים כבר מולאו.
+        שינוי התאריך מעדכן גם את התת־כותרת ואת התאריכים בטקסט.
+      </p>
 
       <div class="admin-editor__split">
         <div class="admin-editor__fields">

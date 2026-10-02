@@ -52,6 +52,19 @@
           "/images/store/embroidery-books/screenshot-2026-09-26-at-13-54-43-mui9x0mx.jpg"
         ]
       },
+      "type-6": {
+        "name": "רקמות החיים ויום יום על פי יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-10-02-at-20-28-23-mur8mwk5.jpg",
+        "description": "הספר האחרון של יומיקו שמלווה אותי בכל טיול בזמן האחרון.\nאת כוס המרטיני רקמתי מתוך הספר בטיול האחרון ללונדון.\nיש בו אלמנטים כמעט מכל תחום - טבע, תעופה, מוזיקה, אוכל..",
+        "stock": 3,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-27-12-mur8kvr3.jpg",
+          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-28-33-mur8mwk6.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-18-53-14-mufpr95m.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg"
+        ]
+      },
       "paintwiththread": {
         "name": "paint with thread",
         "price": 195,
@@ -84,19 +97,6 @@
           "/images/store/embroidery-books/screenshot-2026-10-02-at-20-43-45-mur967sm.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-15-30-24-mufig8th.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-17-31-10-muhf8vkc.jpg"
-        ]
-      },
-      "type-6": {
-        "name": "רקמות החיים ויום יום על פי יומיקו",
-        "price": 195,
-        "image": "/images/store/embroidery-books/screenshot-2026-10-02-at-20-28-23-mur8mwk5.jpg",
-        "description": "הספר האחרון של יומיקו שמלווה אותי בכל טיול בזמן האחרון.\nאת כוס המרטיני רקמתי מתוך הספר בטיול האחרון ללונדון.\nיש בו אלמנטים כמעט מכל תחום - טבע, תעופה, מוזיקה, אוכל..",
-        "stock": 3,
-        "gallery": [
-          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-27-12-mur8kvr3.jpg",
-          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-28-33-mur8mwk6.jpg",
-          "/images/store/embroidery-books/screenshot-2026-09-24-at-18-53-14-mufpr95m.jpg",
-          "/images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg"
         ]
       },
       "type-7": {
@@ -143,12 +143,12 @@
       }
     },
     "variant_order": [
-      "365",
       "380",
+      "type-6",
+      "365",
       "paintwiththread",
       "type-3",
       "type-4",
-      "type-6",
       "type-7",
       "type-8",
       "type-9"

@@ -41,6 +41,9 @@
         "380": {
           "stock": 1
         },
+        "type-6": {
+          "stock": 3
+        },
         "paintwiththread": {
           "stock": 2
         },
@@ -49,9 +52,6 @@
         },
         "type-4": {
           "stock": 2
-        },
-        "type-6": {
-          "stock": 3
         },
         "type-7": {
           "stock": 3

@@ -12,6 +12,26 @@ preorder: false
 limited_edition: false
 category: books
 variants:
+  380:
+    name: 380 רקמות חתולים
+    price: 195
+    stock: 1
+    image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-35-mui9x0mx.png
+    gallery:
+      - /images/store/embroidery-books/screenshot-2026-09-23-at-22-29-44-muei03em.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-43-mui9x0mx.jpg
+    description: "הספר האחרון שקניתי והוא פשוט מטריף.\nהרבה השראה ורקמות מצחיקות של חתולים בכל מיני תנוחות של חתולים.\nתהנו. יש רק אחד :)\nאת הרקמה בתמונה השנייה רקמה נעמה בחוג לרוקמות מנוסות אצלי ברחובות."
+  type-6:
+    name: רקמות החיים ויום יום על פי יומיקו
+    price: 195
+    stock: 3
+    image: /images/store/embroidery-books/screenshot-2026-10-02-at-20-28-23-mur8mwk5.jpg
+    gallery:
+      - /images/store/embroidery-books/screenshot-2026-10-02-at-20-27-12-mur8kvr3.jpg
+      - /images/store/embroidery-books/screenshot-2026-10-02-at-20-28-33-mur8mwk6.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-53-14-mufpr95m.jpg
+      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg
+    description: "הספר האחרון של יומיקו שמלווה אותי בכל טיול בזמן האחרון.\nאת כוס המרטיני רקמתי מתוך הספר בטיול האחרון ללונדון.\nיש בו אלמנטים כמעט מכל תחום - טבע, תעופה, מוזיקה, אוכל.."
   365:
     name: "רקמה בכל יום! 365 רקמות פרקטיות"
     price: 195
@@ -25,15 +45,6 @@ variants:
       - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-06-mufplh6b.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-16-mufplh6c.png
     description: "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)"
-  380:
-    name: 380 רקמות חתולים
-    price: 195
-    stock: 1
-    image: /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-35-mui9x0mx.png
-    gallery:
-      - /images/store/embroidery-books/screenshot-2026-09-23-at-22-29-44-muei03em.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-26-at-13-54-43-mui9x0mx.jpg
-    description: "הספר האחרון שקניתי והוא פשוט מטריף.\nהרבה השראה ורקמות מצחיקות של חתולים בכל מיני תנוחות של חתולים.\nתהנו. יש רק אחד :)\nאת הרקמה בתמונה השנייה רקמה נעמה בחוג לרוקמות מנוסות אצלי ברחובות."
   paintwiththread:
     name: paint with thread
     price: 195
@@ -62,17 +73,6 @@ variants:
       - /images/store/embroidery-books/screenshot-2026-09-24-at-15-30-24-mufig8th.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-17-31-10-muhf8vkc.jpg
     description: "כמה רוגע אפשר לייצר בחזרתיות הזו של יומיקו, רקעים, עצים, חיים.\nספר עם המון השראה וייחודיות.\nהרקמה בתמונה היא של שירן במפגשי אמהות רוקמות, בהשראת הספר והחיים."
-  type-6:
-    name: רקמות החיים ויום יום על פי יומיקו
-    price: 195
-    stock: 3
-    image: /images/store/embroidery-books/screenshot-2026-10-02-at-20-28-23-mur8mwk5.jpg
-    gallery:
-      - /images/store/embroidery-books/screenshot-2026-10-02-at-20-27-12-mur8kvr3.jpg
-      - /images/store/embroidery-books/screenshot-2026-10-02-at-20-28-33-mur8mwk6.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-53-14-mufpr95m.jpg
-      - /images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg
-    description: "הספר האחרון של יומיקו שמלווה אותי בכל טיול בזמן האחרון.\nאת כוס המרטיני רקמתי מתוך הספר בטיול האחרון ללונדון.\nיש בו אלמנטים כמעט מכל תחום - טבע, תעופה, מוזיקה, אוכל.."
   type-7:
     name: רקמות חיות על פי יומיקו
     price: 195

@@ -509,19 +509,19 @@
       "regular": {
         "name": "סקראנצ'י גודל רגיל",
         "price": 30,
-        "image": "/images/scrunchies/11.jpeg",
+        "image": "/images/scrunchies/variant-regular.jpeg",
         "description": "הגומייה הקלאסית לגודל רגיל"
       },
       "large": {
         "name": "סקראנצ'י לארג'",
         "price": 45,
-        "image": "/images/scrunchies/04.jpeg",
+        "image": "/images/scrunchies/variant-large.jpeg",
         "description": "גדולה יותר, נוכחות על השיער"
       },
       "fancy": {
         "name": "Fancy סקראנצ'י",
         "price": 85,
-        "image": "/images/scrunchies/01.jpeg",
+        "image": "/images/scrunchies/variant-fancy.jpeg",
         "description": "תחרה ופרטים מיוחדים"
       }
     },

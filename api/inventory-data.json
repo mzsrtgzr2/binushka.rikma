@@ -355,6 +355,13 @@
       "stock": 8,
       "outOfStock": false,
       "limitedStock": false
+    },
+    "needle-threader": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "משחיל חוט למחט",
+      "price": 3
     }
   }
 }

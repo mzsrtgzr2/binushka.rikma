@@ -418,6 +418,15 @@
     "price": 2,
     "category": "needles"
   },
+  "needle-threader": {
+    "name": "משחיל חוט למחט",
+    "price": 3,
+    "category": "threads",
+    "categories": [
+      "threads",
+      "needles"
+    ]
+  },
   "pencil-case": {
     "name": "קלמר קנבס לרקמה",
     "price": 20,

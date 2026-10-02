@@ -18,7 +18,6 @@ stockists:
     locations:
       - name: בתיה פרחים משמחים
         logo: /images/stockists/batya-flowers.jpg
-        logo_fill: true
         url: https://www.instagram.com/batya_flowers/
       - name: רישי יוגה | בית ליוגה במרכז רחובות
         logo: /images/stockists/rishi-yoga.png

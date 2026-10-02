@@ -944,6 +944,24 @@
     return [{ id: 'one', name: 'משתתפת אחת', price: unit, places: 1 }].concat(packs);
   }
 
+  /**
+   * Headline "מ־₪…" rate: the cheapest pack price ÷ places (e.g. ₪600 / 2 =
+   * ₪300), not the solo fare. Cart still charges cart_price for one place.
+   */
+  function fromPrice(workshop) {
+    var unit = effectivePrice(workshop);
+    var packs = packsForBooking(workshop);
+    if (!packs.length) return unit;
+    var best = unit > 0 ? unit : Infinity;
+    packs.forEach(function (pack) {
+      var places = Number(pack.places);
+      if (!(places > 0)) places = 1;
+      var each = Math.floor(Number(pack.price) / places);
+      if (each > 0 && each < best) best = each;
+    });
+    return best === Infinity ? 0 : best;
+  }
+
   function priceUnit(workshop) {
     return workshop.price_per === 'workshop' ? 'לסדנה' : 'למשתתפת';
   }
@@ -1099,9 +1117,11 @@
     var soldOut = isSoldOut(workshop);
     var priceLine = '';
     if (price > 0 && !soldOut && !workshop.registration_not_open) {
+      var packs = packsForBooking(workshop);
+      var shown = packs.length ? fromPrice(workshop) : price;
       priceLine =
         '<div class="project-price">' +
-        (packsForBooking(workshop).length ? 'מ־' : '') + '₪' + escapeHtml(price) + ' ' + priceUnit(workshop) +
+        (packs.length ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
         '</div>';
     }
 
@@ -1205,8 +1225,10 @@
     if (cat) parts.push(cat);
 
     var price = effectivePrice(workshop);
-    if (price > 0) parts.push(((workshop.packs || []).length ? 'מ־' : '') + '₪' + price + ' ' + priceUnit(workshop));
-    else parts.push('בלי הרשמה בסל');
+    if (price > 0) {
+      var shown = (workshop.packs || []).length ? fromPrice(workshop) : price;
+      parts.push(((workshop.packs || []).length ? 'מ־' : '') + '₪' + shown + ' ' + priceUnit(workshop));
+    } else parts.push('בלי הרשמה בסל');
 
     return parts.join(' · ');
   }

@@ -1,16 +1,47 @@
 (function () {
   var grid = document.getElementById('workshops-grid');
   var filters = document.getElementById('workshop-filters');
+  var monthSelect = document.getElementById('workshop-month');
   var empty = document.getElementById('workshop-filter-empty');
+  var menu = document.getElementById('workshop-menu');
+  var menuToggle = document.getElementById('workshop-menu-toggle');
+  var menuClose = document.getElementById('workshop-menu-close');
+  var menuBackdrop = document.getElementById('workshop-menu-backdrop');
   if (!grid || !filters) return;
 
   var categoryButtons = filters.querySelectorAll('[data-workshop-category]');
-  var monthButtons = filters.querySelectorAll('[data-workshop-month]');
   var activeCategory = '';
   var activeMonth = '';
+  var menuOpen = false;
+  var drawerMq = window.matchMedia('(max-width: 768px)');
 
   function track(name, params) {
     if (window.Analytics) Analytics.track(name, params);
+  }
+
+  function syncMenuInert() {
+    if (!menu || !('inert' in menu)) return;
+    menu.inert = drawerMq.matches && !menuOpen;
+  }
+
+  function openMenu() {
+    if (!menu || menuOpen) return;
+    menuOpen = true;
+    menu.classList.add('is-open');
+    if (menuBackdrop) menuBackdrop.hidden = false;
+    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('store-menu-open');
+    syncMenuInert();
+  }
+
+  function closeMenu() {
+    if (!menu || !menuOpen) return;
+    menuOpen = false;
+    menu.classList.remove('is-open');
+    if (menuBackdrop) menuBackdrop.hidden = true;
+    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('store-menu-open');
+    syncMenuInert();
   }
 
   function setActiveCategory(category) {
@@ -24,11 +55,9 @@
 
   function setActiveMonth(month) {
     activeMonth = month || '';
-    monthButtons.forEach(function (btn) {
-      var match = (btn.getAttribute('data-workshop-month') || '') === activeMonth;
-      btn.classList.toggle('is-active', match);
-      btn.setAttribute('aria-pressed', match ? 'true' : 'false');
-    });
+    if (monthSelect && monthSelect.value !== activeMonth) {
+      monthSelect.value = activeMonth;
+    }
   }
 
   function matchesMonth(el) {
@@ -69,21 +98,21 @@
 
   filters.addEventListener('click', function (event) {
     var categoryBtn = event.target.closest('[data-workshop-category]');
-    if (categoryBtn && filters.contains(categoryBtn)) {
-      setActiveCategory(categoryBtn.getAttribute('data-workshop-category') || '');
-      var categoryResults = applyFilter();
-      track('workshop_filter', {
-        filter_type: 'category',
-        category: activeCategory || 'all',
-        month: activeMonth || 'all',
-        results: categoryResults,
-      });
-      return;
-    }
+    if (!categoryBtn || !filters.contains(categoryBtn)) return;
+    setActiveCategory(categoryBtn.getAttribute('data-workshop-category') || '');
+    var categoryResults = applyFilter();
+    track('workshop_filter', {
+      filter_type: 'category',
+      category: activeCategory || 'all',
+      month: activeMonth || 'all',
+      results: categoryResults,
+    });
+    closeMenu();
+  });
 
-    var monthBtn = event.target.closest('[data-workshop-month]');
-    if (monthBtn && filters.contains(monthBtn)) {
-      setActiveMonth(monthBtn.getAttribute('data-workshop-month') || '');
+  if (monthSelect) {
+    monthSelect.addEventListener('change', function () {
+      setActiveMonth(monthSelect.value || '');
       var monthResults = applyFilter();
       track('workshop_filter', {
         filter_type: 'month',
@@ -91,10 +120,40 @@
         month: activeMonth || 'all',
         results: monthResults,
       });
-    }
+    });
+  }
+
+  if (menuToggle) {
+    menuToggle.addEventListener('click', function () {
+      if (menuOpen) closeMenu();
+      else openMenu();
+    });
+  }
+
+  if (menuClose) {
+    menuClose.addEventListener('click', closeMenu);
+  }
+
+  if (menuBackdrop) {
+    menuBackdrop.addEventListener('click', closeMenu);
+  }
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeMenu();
   });
 
+  function onDrawerMqChange(event) {
+    if (!event.matches) closeMenu();
+    syncMenuInert();
+  }
+  if (drawerMq.addEventListener) {
+    drawerMq.addEventListener('change', onDrawerMqChange);
+  } else if (drawerMq.addListener) {
+    drawerMq.addListener(onDrawerMqChange);
+  }
+  syncMenuInert();
+
   setActiveCategory('');
-  setActiveMonth('');
+  setActiveMonth(monthSelect ? monthSelect.value || '' : '');
   applyFilter();
 })();

@@ -47,62 +47,101 @@ layout: default
 {% endif %}
 
 <div class="projects-page container animate">
-  <div class="workshop-filters" id="workshop-filters" aria-label="סינון סדנאות">
-    <div class="workshop-filters__row" role="group" aria-label="סינון לפי קטגוריה">
-      <span class="workshop-filters__label">בחירת סוג:</span>
-      <div class="workshop-filters__pills">
-        <button type="button" class="workshop-filter is-active" data-workshop-category="" data-analytics="workshop_filter_category" aria-pressed="true">הכל</button>
+  <div class="store-layout">
+    <div class="store-menu-backdrop" id="workshop-menu-backdrop" hidden></div>
+    <nav class="store-menu" id="workshop-menu" aria-label="סינון סדנאות">
+      <div class="store-menu__header">
+        <h2 class="store-menu__title">קטגוריות</h2>
+        <button type="button" class="store-menu__close" id="workshop-menu-close" aria-label="סגירת קטגוריות">&times;</button>
+      </div>
+      <div class="store-menu__body" id="workshop-filters">
+        <div class="store-menu__group">
+          <button
+            type="button"
+            class="store-menu__link is-active"
+            data-workshop-category=""
+            data-analytics="workshop_filter_category"
+            aria-pressed="true"
+          >
+            <span class="store-menu__label">כל הסדנאות</span>
+          </button>
+        </div>
         {% for category in site.data.workshop-categories %}
-        <button type="button" class="workshop-filter" data-workshop-category="{{ category[0] }}" data-analytics="workshop_filter_category" aria-pressed="false">{{ category[1] }}</button>
+        <div class="store-menu__group">
+          <button
+            type="button"
+            class="store-menu__link"
+            data-workshop-category="{{ category[0] }}"
+            data-analytics="workshop_filter_category"
+            aria-pressed="false"
+          >
+            <span class="store-menu__label">{{ category[1] }}</span>
+          </button>
+        </div>
         {% endfor %}
       </div>
-    </div>
-    <div class="workshop-filters__row" role="group" aria-label="סינון לפי חודש">
-      <span class="workshop-filters__label">בחירת חודש:</span>
-      <div class="workshop-filters__pills">
-        <button type="button" class="workshop-filter is-active" data-workshop-month="" data-analytics="workshop_filter_month" aria-pressed="true">הכל</button>
+    </nav>
+
+    <div class="store-layout__main">
+      <div class="store-toolbar">
+        <button
+          type="button"
+          class="store-toolbar__filters"
+          id="workshop-menu-toggle"
+          aria-expanded="false"
+          aria-controls="workshop-menu"
+          data-analytics="workshop_menu_open"
+        >
+          קטגוריות
+        </button>
+        <label class="store-toolbar__sort" for="workshop-month">
+          <span class="store-toolbar__label">בחירת חודש</span>
+          <select id="workshop-month" class="store-toolbar__select" name="workshop-month" data-analytics="workshop_filter_month">
+            <option value="" selected>הכל</option>
+            {% comment %}
+              Show only the next 4 months (current + 3), wrapping past December.
+            {% endcomment %}
+            {% assign current_month = 'now' | date: '%m' | plus: 0 %}
+            {% for offset in (0..3) %}
+              {% assign month_num = current_month | plus: offset %}
+              {% if month_num > 12 %}
+                {% assign month_num = month_num | minus: 12 %}
+              {% endif %}
+              {% assign month_key = month_num | plus: 100 | append: '' | slice: 1, 2 %}
+              <option value="{{ month_key }}">{{ site.data.months[month_key] }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <div class="row" id="workshops-grid">
         {% comment %}
-          Show only the next 4 months (current + 3), wrapping past December.
+          A workshop only carries `order` once it has been placed by hand in the
+          backoffice. Anything not placed yet keeps falling back to its date, so a
+          workshop added another way still appears, and a site where nothing has
+          been arranged reads chronologically: the next workshop first.
         {% endcomment %}
-        {% assign current_month = 'now' | date: '%m' | plus: 0 %}
-        {% for offset in (0..3) %}
-          {% assign month_num = current_month | plus: offset %}
-          {% if month_num > 12 %}
-            {% assign month_num = month_num | minus: 12 %}
-          {% endif %}
-          {% assign month_key = month_num | plus: 100 | append: '' | slice: 1, 2 %}
-          <button type="button" class="workshop-filter" data-workshop-month="{{ month_key }}" data-analytics="workshop_filter_month" aria-pressed="false">{{ site.data.months[month_key] }}</button>
+        {% assign projects_placed = '' | split: '' %}
+        {% assign projects_by_date = '' | split: '' %}
+        {% for project in site.projects %}
+          {% unless project.hide %}
+            {% if project.order %}
+              {% assign projects_placed = projects_placed | push: project %}
+            {% else %}
+              {% assign projects_by_date = projects_by_date | push: project %}
+            {% endif %}
+          {% endunless %}
+        {% endfor %}
+        {% assign projects_placed = projects_placed | sort: 'order' %}
+        {% assign projects_by_date = projects_by_date | sort: 'date' %}
+        {% assign projects_ordered = projects_placed | concat: projects_by_date %}
+
+        {% for project in projects_ordered %}
+          {% include project-card.html project=project %}
         {% endfor %}
       </div>
+      <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות שמתאימות לסינון כרגע.</p>
     </div>
   </div>
-
-  <div class="row" id="workshops-grid">
-    {% comment %}
-      A workshop only carries `order` once it has been placed by hand in the
-      backoffice. Anything not placed yet keeps falling back to its date, so a
-      workshop added another way still appears, and a site where nothing has
-      been arranged reads chronologically: the next workshop first.
-    {% endcomment %}
-    {% assign projects_placed = '' | split: '' %}
-    {% assign projects_by_date = '' | split: '' %}
-    {% for project in site.projects %}
-      {% unless project.hide %}
-        {% if project.order %}
-          {% assign projects_placed = projects_placed | push: project %}
-        {% else %}
-          {% assign projects_by_date = projects_by_date | push: project %}
-        {% endif %}
-      {% endunless %}
-    {% endfor %}
-    {% assign projects_placed = projects_placed | sort: 'order' %}
-    {% assign projects_by_date = projects_by_date | sort: 'date' %}
-    {% assign projects_ordered = projects_placed | concat: projects_by_date %}
-
-    {% for project in projects_ordered %}
-      {% include project-card.html project=project %}
-    {% endfor %}
-  </div>
-  <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות שמתאימות לסינון כרגע.</p>
 </div>
 <script src="{{ site.baseurl }}/js/workshop-filter.js" defer></script>

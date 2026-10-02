@@ -65,6 +65,13 @@
     "shipping": false,
     "stock": 1
   },
+  "workshop-mothers-7-12": {
+    "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה7 בדצמבר",
+    "price": 1090,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 8
+  },
   "workshop-private-workshop": {
     "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",
     "price": 2800,

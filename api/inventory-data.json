@@ -348,6 +348,13 @@
       "stock": 10,
       "outOfStock": false,
       "limitedStock": false
+    },
+    "workshop-mothers-7-12": {
+      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה7 בדצמבר",
+      "price": 1090,
+      "stock": 8,
+      "outOfStock": false,
+      "limitedStock": false
     }
   }
 }

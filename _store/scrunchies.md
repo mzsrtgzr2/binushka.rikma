@@ -39,6 +39,8 @@ stockists:
   - city: יודפת
     locations:
       - name: עידית לוי - קעקועים בוטניים
+        logo: /images/stockists/idit-levy.jpg
+        logo_fill: true
   - city: קיבוץ חולדה
     locations:
       - name: ReVibe בוטיק יד שנייה

@@ -23,7 +23,7 @@ registration_full: false
 hide: false
 cart_price: 110
 spots: 7
-order: 8
+order: 10
 ---
 
 ## פרטי מפגשי רקמה למנוסות

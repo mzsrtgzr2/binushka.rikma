@@ -1,4 +1,4 @@
-# Hebrew month names for workshop list filters on /projects/.
+# Hebrew month names for the workshop month select on /projects/.
 # Keys are zero-padded month numbers matching Liquid `date: '%m'`.
 # The workshops page shows only the next 4 months from "now"; this map
 # supplies labels (and wraps past December).

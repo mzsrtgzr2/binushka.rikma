@@ -10,14 +10,15 @@ preorder: false
 hide: false
 limited_edition: false
 cart_price: 3
+order: 7
 gallery:
   - /images/store/needle-threader/screenshot-2026-10-02-at-16-46-59-mur0t5vw.png
   - /images/store/needle-threader/screenshot-2026-10-02-at-16-46-41-mur0t5vx.png
-order: 7
 category: threads
 categories:
   - threads
   - needles
+  - beginners
 ---
 
 משחיל חוט עוזר בהשחלת החוט לקוף של המחט.

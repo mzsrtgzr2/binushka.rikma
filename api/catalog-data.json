@@ -32,6 +32,7 @@
         "image": "/images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg",
         "description": "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)",
         "stock": 0,
+        "preorder": true,
         "gallery": [
           "/images/store/embroidery-books/screenshot-2026-09-25-at-23-29-18-muhf0vew.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg",
@@ -142,6 +143,7 @@
       }
     },
     "variant_order": [
+      "365",
       "380",
       "paintwiththread",
       "type-3",
@@ -149,8 +151,7 @@
       "type-6",
       "type-7",
       "type-8",
-      "type-9",
-      "365"
+      "type-9"
     ],
     "category": "books"
   },

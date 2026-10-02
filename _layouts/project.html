@@ -39,7 +39,16 @@ layout: default
 
     {% if booking_in_cart and sold_out == false and page.registration_not_open != true %}
       {% if workshop.variants %}
-      <div class="project-price">מ־₪{{ workshop.price }} {{ price_unit }}</div>
+      {%- assign from_price = workshop.price | plus: 0 -%}
+      {%- for pack in workshop.variants -%}
+        {%- assign pack_places = pack[1].places | default: 1 | plus: 0 -%}
+        {%- if pack_places < 1 -%}{%- assign pack_places = 1 -%}{%- endif -%}
+        {%- assign pack_each = pack[1].price | plus: 0 | divided_by: pack_places -%}
+        {%- if pack_each > 0 and pack_each < from_price -%}
+          {%- assign from_price = pack_each -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <div class="project-price">מ־₪{{ from_price }} {{ price_unit }}</div>
       {% else %}
       <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}</div>
       {% endif %}

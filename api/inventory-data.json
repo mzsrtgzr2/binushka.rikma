@@ -324,9 +324,9 @@
     "workshop-rehovot-09-10": {
       "name": "בוקר קרושה ומאפה — 30.10 שישי בבוקר",
       "price": 330,
-      "stock": 1,
-      "outOfStock": false,
-      "limitedStock": true
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false
     },
     "workshop-rehovot-29-10": {
       "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",

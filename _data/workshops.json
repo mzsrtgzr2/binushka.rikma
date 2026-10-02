@@ -39,6 +39,25 @@
     "shipping": false,
     "stock": 7
   },
+  "workshop-mothers-11-11-2": {
+    "name": "בוקר פינוק לאמהות — ב11.11",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 10,
+    "variants": {
+      "one": {
+        "name": "משתתפת אחת",
+        "price": 330,
+        "places": 1
+      },
+      "pair": {
+        "name": "שתי משתתפות ביחד",
+        "price": 600,
+        "places": 2
+      }
+    }
+  },
   "workshop-mothers-5-10-26": {
     "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה5 באוקטובר",
     "price": 1090,

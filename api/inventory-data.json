@@ -341,6 +341,13 @@
       "stock": 0,
       "outOfStock": true,
       "limitedStock": false
+    },
+    "workshop-mothers-11-11-2": {
+      "name": "בוקר פינוק לאמהות — ב11.11",
+      "price": 330,
+      "stock": 10,
+      "outOfStock": false,
+      "limitedStock": false
     }
   }
 }

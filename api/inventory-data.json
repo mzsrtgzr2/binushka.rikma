@@ -279,6 +279,13 @@
         }
       }
     },
+    "needle-threader": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "משחיל חוט למחט",
+      "price": 3
+    },
     "workshop-monthly-meeting": {
       "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",
       "price": 110,
@@ -355,13 +362,6 @@
       "stock": 8,
       "outOfStock": false,
       "limitedStock": false
-    },
-    "needle-threader": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "משחיל חוט למחט",
-      "price": 3
     }
   }
 }

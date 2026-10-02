@@ -23,6 +23,10 @@ stockists:
       - name: רישי יוגה | בית ליוגה במרכז רחובות
         logo: /images/stockists/rishi-yoga.png
         url: https://www.rishiyoga.info/
+      - name: דפנה קיפר מנשקו | קוסמטיקאית
+        logo: /images/stockists/dafna-kiper.jpg
+        logo_fill: true
+        url: https://www.instagram.com/dafna.km/
   - city: נס ציונה
     locations:
       - name: זוהר פילאטיס סטודיו

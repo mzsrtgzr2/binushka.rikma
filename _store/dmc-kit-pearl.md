@@ -7,16 +7,17 @@ price: ₪120
 out_of_stock: false
 limited_stock: true
 hide: false
-category: kits
 stock: 2
 cart_price: 120
-order: 14
+order: 15
+preorder: false
 gallery:
   - /images/store/dmc-kit-pearl/screenshot-2026-09-23-at-15-15-02-mue2n4gg.png
   - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-25-mui9lg05.jpg
   - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-34-mui9lg06.jpg
   - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-48-03-mui9nxtz.jpg
-preorder: false
+category: kits
+limited_edition: false
 ---
 
 ערכת רקמה יפהיפיה שהבאתי מהטיול האחרון בלונדון! אחת לעצמי ו2 לכן. נהנתי ממנה מאוד, התוצאה משמחת והתהליך כיפי.

@@ -7,11 +7,12 @@ price: ₪300
 out_of_stock: true
 limited_stock: false
 hide: false
-category: embroidered-works
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
 cart_price: 300
-order: 15
+order: 16
 preorder: true
+category: embroidered-works
+limited_edition: false
 ---
 
 ## רקמת פרחים עדינה, ממוסגרת בעבודת יד

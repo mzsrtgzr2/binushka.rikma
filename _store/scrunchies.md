@@ -10,7 +10,6 @@ model_image: /images/scrunchies/lifestyle-01.jpeg
 form_url: https://pay.grow.link/cfbcac8807a8d68eaaf19f4ec11024d7-MzMyNDczNQ
 price: ₪30 – ₪85
 hide: true
-category: embroidered-works
 stockists_title: איפה אפשר למצוא את הסקראנצ׳י שלי?
 stockists_subtitle: הסקראנצ׳יז שלי מחכות לכן בעסקים המקומיים האהובים האלה
 stockists:
@@ -52,6 +51,9 @@ stockists:
         logo: /images/stockists/revibe.jpg
         logo_fill: true
         url: https://www.instagram.com/revibe_2ndhand/
+order: 27
+out_of_stock: false
+limited_stock: false
 gallery:
   - /images/scrunchies/06.jpeg
   - /images/scrunchies/01.jpeg
@@ -67,9 +69,11 @@ gallery:
   - /images/scrunchies/13.jpeg
   - /images/scrunchies/14.jpeg
   - /images/scrunchies/15.jpeg
-order: 17
-out_of_stock: false
-limited_stock: false
+category: embroidered-works
+limited_edition: false
+preorder: false
+noindex: true
+sitemap: false
 variants:
   regular:
     name: "סקראנצ'י גודל רגיל"

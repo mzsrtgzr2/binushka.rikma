@@ -7,14 +7,15 @@ price: ₪100
 out_of_stock: false
 limited_stock: true
 hide: false
-category: kits
 stock: 3
 cart_price: 100
-order: 13
+order: 14
+preorder: false
 gallery:
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg
-preorder: false
+category: kits
+limited_edition: false
 ---
 
 עוד ערכת רקמה כיפית שהבאתי איתי מלונדון.

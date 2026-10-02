@@ -7,11 +7,12 @@ price: ₪160
 out_of_stock: false
 limited_stock: true
 hide: false
-category: kits
-order: 11
+order: 12
+preorder: false
 gallery:
   - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
-preorder: false
+category: kits
+limited_edition: false
 variants:
   type-1:
     name: דוגמא פרחונית מונוכרמטית כחולה

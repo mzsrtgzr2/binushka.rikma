@@ -7,13 +7,14 @@ price: ₪20
 out_of_stock: false
 limited_stock: false
 hide: false
-category: fabrics
 cart_price: 20
-order: 10
+order: 11
+preorder: false
 gallery:
   - /images/store/pencil-case/screenshot-2026-09-23-at-18-52-54-mueaerl2.jpg
   - /images/store/pencil-case/screenshot-2026-09-23-at-18-53-15-mueaerl2.jpg
-preorder: false
+category: fabrics
+limited_edition: false
 ---
 
 קלמר פשתן נהדר לרקמה, הפרוייקט הקבוע שלי כשאני מחפשת לתת מתנה בעבודת יד.

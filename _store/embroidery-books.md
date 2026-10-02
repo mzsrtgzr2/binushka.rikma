@@ -7,9 +7,10 @@ price: ₪195
 out_of_stock: false
 limited_stock: true
 hide: false
-category: books
-order: 9
+order: 10
 preorder: false
+category: books
+limited_edition: false
 variants:
   380:
     name: 380 רקמות חתולים

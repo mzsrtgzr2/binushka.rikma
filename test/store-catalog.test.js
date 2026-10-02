@@ -15,13 +15,13 @@ test('formatYamlScalar quotes values that contain newlines', () => {
   assert.equal(store.formatYamlScalar('a\nb').includes('\n'), false);
 });
 
-test('multi-type variants are ordered cheapest first', () => {
-  const sortedMap = store.sortVariantsByPrice({
+test('multi-type variants keep saved order and sink sold-out', () => {
+  const sortedMap = store.sortVariantsForDisplay({
     pricey: { name: 'יקר', price: 240 },
     cheap: { name: 'זול', price: 170 },
     mid: { name: 'בינוני', price: 200 },
   });
-  assert.deepEqual(Object.keys(sortedMap), ['cheap', 'mid', 'pricey']);
+  assert.deepEqual(Object.keys(sortedMap), ['pricey', 'cheap', 'mid']);
 
   const sortedRows = store.variantsToArray({
     pricey: { name: 'יקר', price: 240 },
@@ -29,7 +29,7 @@ test('multi-type variants are ordered cheapest first', () => {
   });
   assert.deepEqual(
     sortedRows.map((row) => row.id),
-    ['cheap', 'pricey']
+    ['pricey', 'cheap']
   );
 
   const fromAdmin = store.variantsFromArray([
@@ -37,19 +37,27 @@ test('multi-type variants are ordered cheapest first', () => {
     { name: 'זול', price: 170 },
     { name: 'בינוני', price: 200 },
   ]);
-  assert.deepEqual(Object.keys(fromAdmin), ['type-1', 'type-2', 'type-3']);
+  assert.deepEqual(fromAdmin.order, ['type-1', 'type-2', 'type-3']);
+  assert.deepEqual(Object.keys(fromAdmin.variants), ['type-1', 'type-2', 'type-3']);
   assert.deepEqual(
-    Object.values(fromAdmin).map((row) => row.price),
-    [170, 200, 280]
+    fromAdmin.order.map((id) => fromAdmin.variants[id].price),
+    [280, 170, 200]
   );
 
-  // Numeric-looking ids cannot rely on JSON object key order.
-  assert.deepEqual(store.variantIdsInPriceOrder({
-    22: { name: 'גדול', price: 40 },
-    oval: { name: 'אובאלי', price: 35 },
-    13: { name: 'קטן', price: 35 },
-    fancy: { name: 'מיוחד', price: 45 },
-  }), ['13', 'oval', '22', 'fancy']);
+  // Numeric-looking ids keep preferred (YAML/admin) order, not Object.keys order.
+  assert.deepEqual(
+    store.variantIdsInDisplayOrder(
+      {
+        22: { name: 'גדול', price: 40 },
+        oval: { name: 'אובאלי', price: 35 },
+        13: { name: 'קטן', price: 35 },
+        fancy: { name: 'מיוחד', price: 45 },
+      },
+      false,
+      ['22', 'oval', '13', 'fancy']
+    ),
+    ['22', 'oval', '13', 'fancy']
+  );
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-variant-sort-'));
   writePage(
@@ -84,29 +92,29 @@ variants:
 `
   );
   const catalog = store.buildCatalogFromDir(dir);
-  assert.deepEqual(catalog.bags.variant_order, ['type-2', 'type-1']);
+  assert.deepEqual(catalog.bags.variant_order, ['type-1', 'type-2']);
   assert.equal(catalog.bags.variants['type-2'].price, 170);
   assert.equal(catalog.bags.variants['type-1'].price, 240);
-  assert.deepEqual(catalog.hoops.variant_order, ['13', 'oval', '22']);
+  assert.deepEqual(catalog.hoops.variant_order, ['22', 'oval', '13']);
   const hoopPrices = catalog.hoops.variant_order.map((id) => catalog.hoops.variants[id].price);
-  assert.deepEqual(hoopPrices, [35, 35, 40]);
+  assert.deepEqual(hoopPrices, [40, 35, 35]);
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
 test('multi-type sold-out variants sink after in-stock ones', () => {
   assert.deepEqual(
-    store.variantIdsInPriceOrder({
+    store.variantIdsInDisplayOrder({
       cheapSold: { name: 'זול אזל', price: 50, stock: 0 },
       mid: { name: 'בינוני', price: 100, stock: 2 },
       priceySold: { name: 'יקר אזל', price: 200, stock: 0 },
       cheap: { name: 'זול', price: 80, stock: 1 },
     }),
-    ['cheap', 'mid', 'cheapSold', 'priceySold']
+    ['mid', 'cheap', 'cheapSold', 'priceySold']
   );
 
   // Preorder on the type stays with available — customers can still order.
   assert.deepEqual(
-    store.variantIdsInPriceOrder({
+    store.variantIdsInDisplayOrder({
       sold: { name: 'אזל', price: 50, stock: 0 },
       preorder: { name: 'הזמנה מראש', price: 90, stock: 0, preorder: true },
       ready: { name: 'במלאי', price: 120, stock: 3 },
@@ -116,7 +124,7 @@ test('multi-type sold-out variants sink after in-stock ones', () => {
 
   // Product-level preorder keeps every type with the available group.
   assert.deepEqual(
-    store.variantIdsInPriceOrder(
+    store.variantIdsInDisplayOrder(
       {
         sold: { name: 'אזל', price: 50, stock: 0 },
         ready: { name: 'במלאי', price: 120, stock: 3 },
@@ -150,6 +158,48 @@ variants:
   const catalog = store.buildCatalogFromDir(dir);
   assert.deepEqual(catalog.scissors.variant_order, ['singer', 'round', 'mid']);
   fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('admin variant order is written to YAML and shown in catalog', () => {
+  const raw = `---
+title: ספרים
+price: ₪100
+variants:
+  first:
+    name: ראשון
+    price: 100
+  second:
+    name: שני
+    price: 100
+---
+
+body
+`;
+  const page = store.parsePage('books', raw);
+  assert.deepEqual(
+    page.variants.map((v) => v.id),
+    ['first', 'second']
+  );
+
+  const reordered = store.applyPage(raw, {
+    ...page,
+    kind: 'variants',
+    variants: [
+      { id: 'second', name: 'שני', price: 100 },
+      { id: 'first', name: 'ראשון', price: 100 },
+      { id: '380', name: 'מספרי', price: 100 },
+    ],
+  });
+  assert.match(reordered, /variants:\n  second:\n(?:    .*\n)*  first:\n(?:    .*\n)*  380:/);
+
+  const again = store.parsePage('books', reordered);
+  assert.deepEqual(
+    again.variants.map((v) => v.id),
+    ['second', 'first', '380']
+  );
+
+  const catalog = store.catalogRowFromParsed(again);
+  assert.deepEqual(catalog.variant_order, ['second', 'first', '380']);
 });
 
 function writePage(dir, slug, yaml, body = 'body') {

@@ -1031,6 +1031,10 @@
   border-radius: 16px;
   background: var(--background-alt-color);
 
+  &.is-dragging {
+    opacity: 0.4;
+  }
+
   .admin-grid {
     margin-bottom: 20px;
 
@@ -1070,6 +1074,17 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
+}
+
+.admin-variant__heading-start {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-variant__heading .admin-card__order {
+  flex-shrink: 0;
 }
 
 .admin-variant__label {

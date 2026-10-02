@@ -575,10 +575,11 @@
     });
   }
 
-  /* In-stock types first (by price), sold-out last — same rule as catalog
-     variant_order, applied again when live stock changes mid-session. */
+  /* Keep the merchant's catalog order; only sink sold-out types when live
+     stock changes mid-session (same rule as catalog variant_order). */
   function reorderVariantCards(productId, p) {
     if (!p || !p.variants) return;
+    var preferred = Array.isArray(p.variant_order) ? p.variant_order : [];
     document.querySelectorAll('[data-product-id="' + productId + '"]').forEach(function (root) {
       var container = root.querySelector('.store-variants, .scrunchies-variants');
       if (!container) return;
@@ -586,9 +587,19 @@
         container.querySelectorAll('.store-variant[data-variant-id], .scrunchies-variant[data-variant-id]')
       );
       if (cards.length < 2) return;
+      var rank = {};
+      preferred.forEach(function (id, index) {
+        rank[String(id)] = index;
+      });
+      cards.forEach(function (card, index) {
+        var id = card.getAttribute('data-variant-id');
+        if (rank[id] == null) rank[id] = preferred.length + index;
+      });
       cards.sort(function (a, b) {
-        var aRow = p.variants[a.getAttribute('data-variant-id')] || {};
-        var bRow = p.variants[b.getAttribute('data-variant-id')] || {};
+        var aId = a.getAttribute('data-variant-id');
+        var bId = b.getAttribute('data-variant-id');
+        var aRow = p.variants[aId] || {};
+        var bRow = p.variants[bId] || {};
         function unavailable(row) {
           return (
             typeof row.stock === 'number' &&
@@ -600,10 +611,7 @@
         var aOut = unavailable(aRow);
         var bOut = unavailable(bRow);
         if (aOut !== bOut) return aOut ? 1 : -1;
-        var pa = Number(aRow.price) || 0;
-        var pb = Number(bRow.price) || 0;
-        if (pa !== pb) return pa - pb;
-        return 0;
+        return (rank[aId] || 0) - (rank[bId] || 0);
       });
       cards.forEach(function (card) {
         container.appendChild(card);

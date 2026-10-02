@@ -33,6 +33,7 @@
   var original = {};
   var originalOrder = '';
   var reorder = null;
+  var variantReorder = null;
   var editingNew = false;
   var saveHint = '';
   var photoItems = [];
@@ -640,11 +641,16 @@
     var n = (index == null ? 0 : index) + 1;
     var images = variantImagesFromRow(row);
     return (
-      '<div class="admin-variant">' +
+      '<div class="admin-variant" data-variant-index="' +
+      n +
+      '">' +
       '<div class="admin-variant__heading">' +
+      '<div class="admin-variant__heading-start">' +
+      orderControlsHtml(index) +
       '<p class="admin-variant__label">סוג ' +
       n +
       '</p>' +
+      '</div>' +
       '<button type="button" class="admin-variant__remove" data-remove-variant>הסרת סוג</button>' +
       '</div>' +
       '<div class="form__group">' +
@@ -740,13 +746,18 @@
     Array.prototype.forEach.call(variantsEl.querySelectorAll('.admin-variant'), function (el, index) {
       variantPhotos.set(el, variantImagesFromRow(list[index] || {}));
     });
+    if (variantReorder) variantReorder.refresh();
   }
 
   function renumberVariants() {
     Array.prototype.forEach.call(variantsEl.querySelectorAll('.admin-variant'), function (row, index) {
       var label = row.querySelector('.admin-variant__label');
       if (label) label.textContent = 'סוג ' + (index + 1);
+      var rank = row.querySelector('.admin-card__rank');
+      if (rank) rank.textContent = index + 1;
+      row.setAttribute('data-variant-index', String(index + 1));
     });
+    if (variantReorder) variantReorder.refresh();
   }
 
   function readVariantImages(row) {
@@ -1667,6 +1678,14 @@
         saveBtn.disabled = !isDirty();
       }
     });
+    variantReorder = AdminReorder.attach(variantsEl, {
+      itemSelector: '.admin-variant',
+      keyAttribute: 'data-variant-index',
+      onChange: function () {
+        renumberVariants();
+        schedulePreview();
+      }
+    });
   }
 
   saveBtn.addEventListener('click', function () {
@@ -1700,6 +1719,7 @@
   addVariantBtn.addEventListener('click', function () {
     var nextIndex = variantsEl.querySelectorAll('.admin-variant').length;
     variantsEl.insertAdjacentHTML('beforeend', variantRowHtml({}, nextIndex));
+    renumberVariants();
     schedulePreview();
   });
 

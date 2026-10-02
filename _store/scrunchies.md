@@ -17,6 +17,8 @@ stockists:
   - city: רחובות
     locations:
       - name: בתיה פרחים משמחים
+        logo: /images/stockists/batya-flowers.jpg
+        logo_fill: true
         url: https://www.instagram.com/batya_flowers/
       - name: רישי יוגה | בית ליוגה במרכז רחובות
         logo: /images/stockists/rishi-yoga.png
@@ -27,6 +29,8 @@ stockists:
         logo: /images/stockists/zohar-pilates.png
         url: https://zoharpilates.com/
       - name: סטרונג סטודיו - Strong studio
+        logo: /images/stockists/strong-studio.jpg
+        logo_fill: true
   - city: תל אביב
     locations:
       - name: השמורה
@@ -38,6 +42,8 @@ stockists:
   - city: קיבוץ חולדה
     locations:
       - name: ReVibe בוטיק יד שנייה
+        logo: /images/stockists/revibe.jpg
+        logo_fill: true
 gallery:
   - /images/scrunchies/06.jpeg
   - /images/scrunchies/01.jpeg

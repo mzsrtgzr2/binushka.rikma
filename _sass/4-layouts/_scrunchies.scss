@@ -359,10 +359,29 @@
       mix-blend-mode: multiply;
     }
 
+    &--fill {
+      padding: 0;
+      overflow: hidden;
+      background: var(--background-alt-color);
+
+      img {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        object-fit: cover;
+        mix-blend-mode: normal;
+      }
+    }
+
     @media only screen and (max-width: $mobile) {
       height: 88px;
       padding: 12px;
       margin-bottom: 16px;
+
+      &--fill {
+        padding: 0;
+      }
     }
   }
 

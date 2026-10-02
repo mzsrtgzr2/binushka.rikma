@@ -68,7 +68,7 @@ layout: default
         {% else %}
         <div class="scrunchies-stockist">
         {% endif %}
-          <div class="scrunchies-stockist__logo">
+          <div class="scrunchies-stockist__logo{% if location.logo_fill %} scrunchies-stockist__logo--fill{% endif %}">
             {% if location.logo %}
             <img class="lazy" data-src="{{ location.logo | relative_url }}" alt="{{ location.name }}">
             {% else %}

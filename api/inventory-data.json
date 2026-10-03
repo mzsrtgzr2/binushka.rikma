@@ -45,10 +45,10 @@
           "stock": 3
         },
         "paintwiththread": {
-          "stock": 2
+          "stock": 1
         },
         "type-3": {
-          "stock": 2
+          "stock": 1
         },
         "type-4": {
           "stock": 2
@@ -229,7 +229,7 @@
           "stock": 2
         },
         "singer": {
-          "stock": 1
+          "stock": 0
         }
       }
     },

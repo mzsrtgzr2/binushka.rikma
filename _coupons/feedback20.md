@@ -5,7 +5,7 @@ value: 20
 active: true
 applies_to: category
 category: embroidery-supplies
-uses: 2
+uses: 3
 note: "מענה על סקר אתר"
 ---
 

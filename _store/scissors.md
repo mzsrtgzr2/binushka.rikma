@@ -7,9 +7,10 @@ price: ₪70 – ₪80
 out_of_stock: false
 limited_stock: true
 hide: false
-category: tools
 order: 6
 preorder: false
+category: tools
+limited_edition: false
 variants:
   9:
     name: עגולות גודל 9 ס״מ
@@ -33,7 +34,7 @@ variants:
   singer:
     name: מספרי רקמה פרחוניות של singer
     price: 80
-    stock: 1
+    stock: 0
     image: /images/store/scissors/screenshot-2026-09-24-at-15-32-45-mufij4sz.jpg
     description: "איך אפשר שלא להתאהב בך\nגודל 10.1 cm"
 ---

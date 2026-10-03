@@ -48,7 +48,7 @@ variants:
   paintwiththread:
     name: paint with thread
     price: 195
-    stock: 2
+    stock: 1
     image: /images/store/embroidery-books/screenshot-2026-09-23-at-22-23-35-muehtzc2.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-23-at-22-23-44-muehtzc2.jpg
@@ -57,7 +57,7 @@ variants:
   type-3:
     name: עונות השנה לפי יומיקו
     price: 195
-    stock: 2
+    stock: 1
     image: /images/store/embroidery-books/screenshot-2026-09-24-at-15-24-12-mufibpec.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-09-24-at-15-26-17-mufibped.jpg

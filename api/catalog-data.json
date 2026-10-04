@@ -612,6 +612,15 @@
     ],
     "category": "markers-stickers"
   },
+  "trimits-kit-elephant": {
+    "name": "ערכת רקמה למתחילות – פילים",
+    "price": 100,
+    "category": "kits",
+    "categories": [
+      "kits",
+      "beginners"
+    ]
+  },
   "voucher-gift": {
     "name": "שובר מתנה - בוקר פינוק לאמהות",
     "price": 330,

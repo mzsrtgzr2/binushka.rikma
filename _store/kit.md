@@ -1,5 +1,5 @@
 ---
-title: ערכת רקמה מפנקת
+title: ערכת רקמה הכל כלול
 date: 2023-01-20 10:00:00 +0300
 subtitle: "מתנה שהייתי שמחה לקבל!"
 image: /images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg

@@ -22,7 +22,7 @@ form_url: https://pages.greeninvoice.co.il/payments/links/59988810-26f7-4902-9e5
 registration_full: false
 hide: false
 cart_price: 110
-spots: 7
+spots: 5
 order: 10
 ---
 

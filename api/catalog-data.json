@@ -546,6 +546,18 @@
     ],
     "category": "tools"
   },
+  "scrunchie-demo-floral": {
+    "name": "סקראנצ'י פרחוני",
+    "price": 40
+  },
+  "scrunchie-demo-lace": {
+    "name": "סקראנצ'י תחרה",
+    "price": 55
+  },
+  "scrunchie-demo-linen": {
+    "name": "סקראנצ'י פשתן טבעי",
+    "price": 35
+  },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",
     "variants": {

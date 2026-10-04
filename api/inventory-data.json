@@ -79,6 +79,20 @@
       "name": "זר פרחים רקום",
       "price": 300
     },
+    "embroidery-tablecloth": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
+      "variants": {
+        "type-1": {
+          "stock": 1
+        },
+        "type-2": {
+          "stock": 1
+        }
+      }
+    },
     "embroidery-tshirt": {
       "stock": null,
       "outOfStock": false,
@@ -193,6 +207,20 @@
       "name": "ערכת רקמה הכל כלול",
       "price": 210
     },
+    "needle-threader": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "משחיל חוט למחט",
+      "price": 3
+    },
+    "needle": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "מחט לרקמה",
+      "price": 2
+    },
     "pencil-case": {
       "stock": null,
       "outOfStock": false,
@@ -236,6 +264,27 @@
         }
       }
     },
+    "scrunchie-demo-floral": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י פרחוני",
+      "price": 40
+    },
+    "scrunchie-demo-lace": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י תחרה",
+      "price": 55
+    },
+    "scrunchie-demo-linen": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י פשתן טבעי",
+      "price": 35
+    },
     "scrunchies": {
       "stock": null,
       "outOfStock": false,
@@ -261,34 +310,6 @@
       "limitedStock": true,
       "name": "רקמת בטטה מושרשת",
       "price": 300
-    },
-    "needle": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "מחט לרקמה",
-      "price": 2
-    },
-    "embroidery-tablecloth": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
-      "variants": {
-        "type-1": {
-          "stock": 1
-        },
-        "type-2": {
-          "stock": 1
-        }
-      }
-    },
-    "needle-threader": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "משחיל חוט למחט",
-      "price": 3
     },
     "workshop-monthly-meeting": {
       "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",

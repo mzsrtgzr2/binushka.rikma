@@ -339,9 +339,9 @@
     "workshop-rehovot-29-10": {
       "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",
       "price": 330,
-      "stock": 4,
+      "stock": 1,
       "outOfStock": false,
-      "limitedStock": false
+      "limitedStock": true
     },
     "workshop-2022-11-04": {
       "name": "מסיבת מדיומים לאמהות — ב4.11 בלי ילדים🫣",

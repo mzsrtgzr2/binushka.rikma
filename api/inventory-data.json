@@ -368,11 +368,18 @@
       "limitedStock": false
     },
     "trimits-kit-elephant": {
-      "stock": 1,
+      "stock": null,
       "outOfStock": false,
       "limitedStock": true,
-      "name": "ערכת רקמה למתחילות – פילים",
-      "price": 100
+      "name": "ערכת רקמה שהבאתי מלונדון",
+      "variants": {
+        "type-1": {
+          "stock": 1
+        },
+        "type-2": {
+          "stock": 1
+        }
+      }
     }
   }
 }

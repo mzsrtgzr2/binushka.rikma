@@ -623,8 +623,34 @@
     "category": "markers-stickers"
   },
   "trimits-kit-elephant": {
-    "name": "ערכת רקמה למתחילות – פילים",
-    "price": 100,
+    "name": "ערכת רקמה שהבאתי מלונדון",
+    "variants": {
+      "type-1": {
+        "name": "דוגמת פילים",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg",
+        "description": "",
+        "stock": 1,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg"
+        ]
+      },
+      "type-2": {
+        "name": "דוגמת פרפר",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg",
+        "description": "",
+        "stock": 1,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg",
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "type-1",
+      "type-2"
+    ],
     "category": "kits",
     "categories": [
       "kits",

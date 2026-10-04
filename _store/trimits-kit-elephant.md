@@ -1,25 +1,34 @@
 ---
-title: ערכת רקמה למתחילות – פילים
+title: ערכת רקמה שהבאתי מלונדון
 date: 2026-10-04 12:16:00 +0000
 subtitle: של חברת trimits הבריטית
-image: /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutsbs91.jpg
+image: /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqm.jpg
 price: ₪100
 out_of_stock: false
-limited_stock: false
+limited_stock: true
 preorder: false
 hide: false
-gallery:
-  - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-50-mutsbs91.jpg
-  - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-30-mutsbs92.jpg
-  - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutsbs92.jpg
-  - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-43-mutsbs92.jpg
+limited_edition: false
 category: kits
 categories:
   - kits
   - beginners
-limited_edition: false
-stock: 1
-cart_price: 100
+variants:
+  type-1:
+    name: דוגמת פילים
+    price: 100
+    stock: 1
+    image: /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg
+    gallery:
+      - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg
+  type-2:
+    name: דוגמת פרפר
+    price: 100
+    stock: 1
+    image: /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg
+    gallery:
+      - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg
+      - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg
 ---
 
 ערכת רקמה נעימה ופשוטה למי שרוצה להתחיל לרקום, או פשוט בא לה פרויקט מגוון.

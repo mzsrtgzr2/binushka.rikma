@@ -285,6 +285,13 @@
       "name": "סקראנצ'י פשתן טבעי",
       "price": 35
     },
+    "scrunchie-midbari": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י מדברי",
+      "price": 45
+    },
     "scrunchies": {
       "stock": null,
       "outOfStock": false,

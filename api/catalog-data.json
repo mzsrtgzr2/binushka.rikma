@@ -558,6 +558,10 @@
     "name": "סקראנצ'י פשתן טבעי",
     "price": 35
   },
+  "scrunchie-midbari": {
+    "name": "סקראנצ'י מדברי",
+    "price": 45
+  },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",
     "variants": {

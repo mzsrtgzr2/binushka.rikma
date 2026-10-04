@@ -417,7 +417,17 @@
   "kit": {
     "name": "ערכת רקמה מפנקת",
     "price": 210,
-    "category": "kits"
+    "category": "threads",
+    "categories": [
+      "threads",
+      "hoops",
+      "needles",
+      "tools",
+      "markers-stickers",
+      "fabrics",
+      "kits",
+      "beginners"
+    ]
   },
   "needle": {
     "name": "מחט לרקמה",

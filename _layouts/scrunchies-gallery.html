@@ -51,52 +51,10 @@ layout: default
 </div>
 {% endif %}
 
-{% if page.stockists %}
-<div class="scrunchies-stockists-band animate">
-  <div class="container">
-    <section class="scrunchies-stockists">
-      <p class="scrunchies-stockists__eyebrow">לקנות בחנות</p>
-      <h2 class="scrunchies-stockists__title">{{ page.stockists_title | default: 'איפה אפשר למצוא את הסקראנצ׳י שלי?' }}</h2>
-      {% if page.stockists_subtitle %}
-      <p class="scrunchies-stockists__subtitle">{{ page.stockists_subtitle }}</p>
-      {% endif %}
-      <div class="scrunchies-stockists__grid">
-        {% for stockist in page.stockists %}
-        {% for location in stockist.locations %}
-        {% if location.url %}
-        <a class="scrunchies-stockist scrunchies-stockist--link" href="{{ location.url }}" target="_blank" rel="noopener">
-        {% else %}
-        <div class="scrunchies-stockist">
-        {% endif %}
-          <div class="scrunchies-stockist__logo{% if location.logo_fill %} scrunchies-stockist__logo--fill{% endif %}">
-            {% if location.logo %}
-            <img class="lazy" data-src="{{ location.logo | relative_url }}" alt="{{ location.name }}">
-            {% else %}
-            <span class="scrunchies-stockist__monogram">{{ location.name | slice: 0 }}</span>
-            {% endif %}
-          </div>
-          <h3 class="scrunchies-stockist__name">{{ location.name }}</h3>
-          <p class="scrunchies-stockist__city">{{ stockist.city }}</p>
-          {% if location.url %}
-          <p class="scrunchies-stockist__link">{% if location.url contains 'instagram' %}לאינסטגרם{% else %}לאתר{% endif %}</p>
-          {% endif %}
-        {% if location.url %}
-        </a>
-        {% else %}
-        </div>
-        {% endif %}
-        {% endfor %}
-        {% endfor %}
-      </div>
-    </section>
-  </div>
-</div>
-{% endif %}
-
 {% assign gallery_items = site.store | where: "scrunchie_gallery", true %}
 {% if site.data.store-cart.enabled and gallery_items.size > 0 %}
 <div class="container scrunchies-variants-section animate">
-  <p class="scrunchies-variants-section__eyebrow">הזמנה ישירה</p>
+  <p class="scrunchies-variants-section__eyebrow">לקנות דרך האתר</p>
   <h2 class="scrunchies-variants-section__title">בחרי את הסקראנצ'י שלך</h2>
   <p class="scrunchies-variants-section__subtitle">כל סקראנצ'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>
 
@@ -172,6 +130,7 @@ layout: default
         </label>
       </div>
 
+      <div class="gallery-grid-scroll">
       <div class="scrunchies-variants" id="scrunchies-gallery-grid">
         {% for item in gallery_items %}
         {% assign slug = item.slug | default: item.basename %}
@@ -202,16 +161,59 @@ layout: default
         </article>
         {% endfor %}
       </div>
+      </div>
       <p class="store-filter-empty" id="gallery-filter-empty" hidden>לא נמצאו פריטים מתאימים</p>
     </div>
   </div>
 </div>
 {% else %}
 <div class="container scrunchies-cta animate">
-  <p class="scrunchies-cta__eyebrow">הזמנה ישירה</p>
+  <p class="scrunchies-cta__eyebrow">לקנות דרך האתר</p>
   <p class="scrunchies-cta__text">כל סקראנצ'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>
   <a href="{{ page.form_url }}" class="button button--primary scrunchies-cta__btn" target="_blank" rel="noopener">להזמנה ותשלום</a>
   <p class="scrunchies-cta__note">הרכישה היא לפי המלאי הקיים. לאחר ההזמנה <a href="https://wa.me/972544247753?text={{ 'הי בינושקה, הזמנתי סקראנצ׳י ואשמח לראות את הבדים הזמינים' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ</a> כדי לראות את הבדים הזמינים.</p>
+</div>
+{% endif %}
+
+{% if page.stockists %}
+<div class="scrunchies-stockists-band animate">
+  <div class="container">
+    <section class="scrunchies-stockists">
+      <p class="scrunchies-stockists__eyebrow">לקנות בחנות</p>
+      <h2 class="scrunchies-stockists__title">{{ page.stockists_title | default: 'איפה אפשר למצוא את הסקראנצ׳י שלי?' }}</h2>
+      {% if page.stockists_subtitle %}
+      <p class="scrunchies-stockists__subtitle">{{ page.stockists_subtitle }}</p>
+      {% endif %}
+      <div class="scrunchies-stockists__grid">
+        {% for stockist in page.stockists %}
+        {% for location in stockist.locations %}
+        {% if location.url %}
+        <a class="scrunchies-stockist scrunchies-stockist--link" href="{{ location.url }}" target="_blank" rel="noopener">
+        {% else %}
+        <div class="scrunchies-stockist">
+        {% endif %}
+          <div class="scrunchies-stockist__logo{% if location.logo_fill %} scrunchies-stockist__logo--fill{% endif %}">
+            {% if location.logo %}
+            <img class="lazy" data-src="{{ location.logo | relative_url }}" alt="{{ location.name }}">
+            {% else %}
+            <span class="scrunchies-stockist__monogram">{{ location.name | slice: 0 }}</span>
+            {% endif %}
+          </div>
+          <h3 class="scrunchies-stockist__name">{{ location.name }}</h3>
+          <p class="scrunchies-stockist__city">{{ stockist.city }}</p>
+          {% if location.url %}
+          <p class="scrunchies-stockist__link">{% if location.url contains 'instagram' %}לאינסטגרם{% else %}לאתר{% endif %}</p>
+          {% endif %}
+        {% if location.url %}
+        </a>
+        {% else %}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
 </div>
 {% endif %}
 
@@ -222,10 +224,12 @@ layout: default
 .gallery-layout { margin-top: 8px; }
 .gallery-filter__label { display: flex; font-weight: 700; color: var(--heading-font-color); cursor: default; }
 .gallery-filter__clear { width: 100%; text-align: right; }
+.gallery-grid-scroll { max-height: 560px; overflow-y: auto; overscroll-behavior: contain; padding: 4px; }
 .gallery-card { height: 100%; }
 .gallery-card .scrunchies-variant__name { min-height: 2.7em; }
 .gallery-card .scrunchies-variant__desc { flex: 0 0 auto; min-height: 1.7em; margin-bottom: 12px; }
 .gallery-card__footer { margin-top: auto; }
 .gallery-card__meta { margin: 0 0 12px; font-size: .82rem; opacity: .65; min-height: 1.4em; }
 .gallery-card[hidden] { display: none !important; }
+@media only screen and (max-width: 768px) { .gallery-grid-scroll { max-height: none; overflow: visible; padding: 0; } }
 </style>

@@ -9,6 +9,9 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 order: 2
+scrunchie_type: כותנה
+scrunchie_color: צבעוני
+fabric_country: יפן
 category: scrunchies-gallery
 ---
 

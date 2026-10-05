@@ -9,6 +9,9 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 order: 1
+scrunchie_type: פשתן
+scrunchie_color: שמנת
+fabric_country: הודו
 category: scrunchies-gallery
 ---
 

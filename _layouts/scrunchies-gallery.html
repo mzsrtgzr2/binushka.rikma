@@ -99,24 +99,114 @@ layout: default
   <p class="scrunchies-variants-section__eyebrow">הזמנה ישירה</p>
   <h2 class="scrunchies-variants-section__title">בחרי את הסקראנצ'י שלך</h2>
   <p class="scrunchies-variants-section__subtitle">כל סקראנצ'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>
-  <div class="scrunchies-variants">
-    {% for item in gallery_items %}
-    {% assign slug = item.slug | default: item.basename %}
-    <article class="scrunchies-variant" data-product-id="{{ slug }}">
-      {% if item.image %}
-      <div class="scrunchies-variant__photo">
-        <img class="lazy" data-src="{{ item.image | relative_url }}" alt="{{ item.title }}">
+
+  {% assign f_types = '' | split: '' %}
+  {% assign f_colors = '' | split: '' %}
+  {% assign f_countries = '' | split: '' %}
+  {% for item in gallery_items %}
+    {% if item.scrunchie_type and item.scrunchie_type != blank %}{% assign f_types = f_types | push: item.scrunchie_type %}{% endif %}
+    {% if item.scrunchie_color and item.scrunchie_color != blank %}{% assign f_colors = f_colors | push: item.scrunchie_color %}{% endif %}
+    {% if item.fabric_country and item.fabric_country != blank %}{% assign f_countries = f_countries | push: item.fabric_country %}{% endif %}
+  {% endfor %}
+  {% assign f_types = f_types | uniq | sort %}
+  {% assign f_colors = f_colors | uniq | sort %}
+  {% assign f_countries = f_countries | uniq | sort %}
+
+  <div class="store-layout gallery-layout">
+    <div class="store-menu-backdrop" id="store-menu-backdrop" hidden></div>
+    <nav class="store-menu" id="store-menu" aria-label="סינון הסקראנצ'ים">
+      <div class="store-menu__header">
+        <h2 class="store-menu__title">סינון</h2>
+        <button type="button" class="store-menu__close" id="store-menu-close" aria-label="סגירת סינון">&times;</button>
       </div>
-      {% endif %}
-      <h3 class="scrunchies-variant__name">{{ item.title }}</h3>
-      {% if item.subtitle %}
-      <p class="scrunchies-variant__desc">{{ item.subtitle }}</p>
-      {% endif %}
-      <div class="scrunchies-variant__price">{{ item.price }}</div>
-      <button type="button" class="button button--primary" data-cart-add="{{ slug }}">הוסיפי לסל</button>
-      <p class="scrunchies-variant__note">הרכישה היא לפי המלאי הקיים. לאחר ההזמנה <a href="https://wa.me/972544247753?text={{ 'הי בינושקה, הזמנתי סקראנצ׳י ואשמח לראות את הבדים הזמינים' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ</a> כדי לראות את הבדים הזמינים.</p>
-    </article>
-    {% endfor %}
+      <div class="store-menu__body">
+        <div class="store-menu__group">
+          <button type="button" class="store-menu__link gallery-filter__clear is-active" data-gallery-clear="all" aria-pressed="true">הצגת הכל</button>
+        </div>
+
+        {% if f_types.size > 0 %}
+        <div class="store-menu__group store-menu__group--parent">
+          <span class="store-menu__link gallery-filter__label">סוג</span>
+          <ul class="store-menu__children">
+            {% for t in f_types %}
+            <li><button type="button" class="store-menu__link store-menu__link--child" data-gallery-filter="type" data-gallery-value="{{ t }}" aria-pressed="false">{{ t }}</button></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if f_colors.size > 0 %}
+        <div class="store-menu__group store-menu__group--parent">
+          <span class="store-menu__link gallery-filter__label">צבע</span>
+          <ul class="store-menu__children">
+            {% for c in f_colors %}
+            <li><button type="button" class="store-menu__link store-menu__link--child" data-gallery-filter="color" data-gallery-value="{{ c }}" aria-pressed="false">{{ c }}</button></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if f_countries.size > 0 %}
+        <div class="store-menu__group store-menu__group--parent">
+          <span class="store-menu__link gallery-filter__label">מדינת הבד</span>
+          <ul class="store-menu__children">
+            {% for k in f_countries %}
+            <li><button type="button" class="store-menu__link store-menu__link--child" data-gallery-filter="country" data-gallery-value="{{ k }}" aria-pressed="false">{{ k }}</button></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="store-layout__main">
+      <div class="store-toolbar">
+        <button type="button" class="store-toolbar__filters" id="store-menu-toggle" aria-expanded="false" aria-controls="store-menu">סינון</button>
+        <label class="store-toolbar__sort" for="gallery-sort">
+          <span class="store-toolbar__label">מיון לפי</span>
+          <select id="gallery-sort" class="store-toolbar__select" name="gallery-sort">
+            <option value="default" selected>ברירת מחדל</option>
+            <option value="price-asc">מחיר: מהנמוך לגבוה</option>
+            <option value="price-desc">מחיר: מהגבוה לנמוך</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="scrunchies-variants" id="scrunchies-gallery-grid">
+        {% for item in gallery_items %}
+        {% assign slug = item.slug | default: item.basename %}
+        {% if item.cart_price and item.cart_price != blank %}
+          {% assign item_price = item.cart_price %}
+        {% else %}
+          {% assign price_token = item.price | replace: '₪', '' | strip %}
+          {% assign item_price = price_token | plus: 0 %}
+        {% endif %}
+        <article class="scrunchies-variant gallery-card" data-product-id="{{ slug }}"
+          data-gallery-type="{{ item.scrunchie_type }}"
+          data-gallery-color="{{ item.scrunchie_color }}"
+          data-gallery-country="{{ item.fabric_country }}"
+          data-price="{{ item_price }}"
+          data-order="{{ forloop.index }}">
+          {% if item.image %}
+          <div class="scrunchies-variant__photo">
+            <img class="lazy" data-src="{{ item.image | relative_url }}" alt="{{ item.title }}">
+          </div>
+          {% endif %}
+          <h3 class="scrunchies-variant__name">{{ item.title }}</h3>
+          {% if item.subtitle %}
+          <p class="scrunchies-variant__desc">{{ item.subtitle }}</p>
+          {% endif %}
+          {% if item.scrunchie_type %}
+          <p class="gallery-card__meta">{{ item.scrunchie_type }}{% if item.scrunchie_color %} · {{ item.scrunchie_color }}{% endif %}{% if item.fabric_country %} · {{ item.fabric_country }}{% endif %}</p>
+          {% endif %}
+          <div class="scrunchies-variant__price">{{ item.price }}</div>
+          <button type="button" class="button button--primary" data-cart-add="{{ slug }}">הוסיפי לסל</button>
+          <p class="scrunchies-variant__note">הרכישה היא לפי המלאי הקיים. לאחר ההזמנה <a href="https://wa.me/972544247753?text={{ 'הי בינושקה, הזמנתי סקראנצ׳י ואשמח לראות את הבדים הזמינים' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ</a> כדי לראות את הבדים הזמינים.</p>
+        </article>
+        {% endfor %}
+      </div>
+      <p class="store-filter-empty" id="gallery-filter-empty" hidden>לא נמצאו פריטים מתאימים</p>
+    </div>
   </div>
 </div>
 {% else %}
@@ -129,3 +219,12 @@ layout: default
 {% endif %}
 
 {% include store-shipping.html %}
+<script src="{{ site.baseurl }}/js/scrunchies-gallery.js" defer></script>
+
+<style>
+.gallery-layout { margin-top: 8px; }
+.gallery-filter__label { display: flex; font-weight: 700; color: var(--heading-font-color); cursor: default; }
+.gallery-filter__clear { width: 100%; text-align: right; }
+.gallery-card__meta { margin: 0; font-size: .82rem; opacity: .65; }
+.gallery-card[hidden] { display: none !important; }
+</style>

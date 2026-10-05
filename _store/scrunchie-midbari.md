@@ -8,6 +8,9 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 order: 4
+scrunchie_type: פרחוני
+scrunchie_color: אדום
+fabric_country: הודו
 category: scrunchies-gallery
 ---
 

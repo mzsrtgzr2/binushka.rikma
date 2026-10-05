@@ -9,6 +9,9 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 order: 3
+scrunchie_type: תחרה
+scrunchie_color: ורוד
+fabric_country: צרפת
 category: scrunchies-gallery
 ---
 

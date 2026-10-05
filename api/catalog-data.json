@@ -546,65 +546,9 @@
     ],
     "category": "tools"
   },
-  "scrunchie-aviv": {
-    "name": "סקראנצ'י אביב",
-    "price": 40
-  },
-  "scrunchie-demo-floral": {
-    "name": "סקראנצ'י פרחוני",
-    "price": 40
-  },
-  "scrunchie-demo-lace": {
-    "name": "סקראנצ'י תחרה",
-    "price": 55
-  },
-  "scrunchie-demo-linen": {
-    "name": "סקראנצ'י פשתן טבעי",
-    "price": 35
-  },
-  "scrunchie-katom-shemesh": {
-    "name": "סקראנצ'י כתום שמש",
-    "price": 50
-  },
-  "scrunchie-layla": {
-    "name": "סקראנצ'י לילה",
-    "price": 75
-  },
-  "scrunchie-midbari": {
-    "name": "סקראנצ'י מדברי",
-    "price": 45
-  },
-  "scrunchie-pori": {
-    "name": "סקראנצ'י פראי",
-    "price": 70
-  },
-  "scrunchie-sagol-malchuti": {
-    "name": "סקראנצ'י סגול מלכותי",
-    "price": 60
-  },
   "scrunchie-tarnegolim": {
     "name": "סקראנצ'י תרנגולים",
     "price": 30
-  },
-  "scrunchie-tchelet": {
-    "name": "סקראנצ'י תכלת",
-    "price": 35
-  },
-  "scrunchie-varod-halom": {
-    "name": "סקראנצ'י ורוד חלום",
-    "price": 55
-  },
-  "scrunchie-yam-tichoni": {
-    "name": "סקראנצ'י ים תיכוני",
-    "price": 45
-  },
-  "scrunchie-yerushalmi": {
-    "name": "סקראנצ'י ירושלמי",
-    "price": 65
-  },
-  "scrunchie-zahav": {
-    "name": "סקראנצ'י זהב",
-    "price": 85
   },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",

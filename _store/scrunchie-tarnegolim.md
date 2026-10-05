@@ -2,8 +2,8 @@
 title: "סקראנצ'י תרנגולים"
 subtitle: הדפס תרנגולים על כחול
 image: /images/scrunchies/gallery/scrunchie-tarnegolim.jpg
-price: ₪45
-cart_price: 45
+price: ₪30
+cart_price: 30
 hide: true
 noindex: true
 sitemap: false

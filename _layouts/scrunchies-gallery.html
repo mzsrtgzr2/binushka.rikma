@@ -193,14 +193,12 @@ layout: default
           </div>
           {% endif %}
           <h3 class="scrunchies-variant__name">{{ item.title }}</h3>
-          {% if item.subtitle %}
           <p class="scrunchies-variant__desc">{{ item.subtitle }}</p>
-          {% endif %}
-          {% if item.scrunchie_type %}
-          <p class="gallery-card__meta">{{ item.scrunchie_type }}{% if item.scrunchie_color %} · {{ item.scrunchie_color }}{% endif %}{% if item.fabric_country %} · {{ item.fabric_country }}{% endif %}</p>
-          {% endif %}
-          <div class="scrunchies-variant__price">{{ item.price }}</div>
-          <button type="button" class="button button--primary" data-cart-add="{{ slug }}">הוסיפי לסל</button>
+          <div class="gallery-card__footer">
+            <p class="gallery-card__meta">{{ item.scrunchie_type }}{% if item.scrunchie_color %} · {{ item.scrunchie_color }}{% endif %}{% if item.fabric_country %} · {{ item.fabric_country }}{% endif %}</p>
+            <div class="scrunchies-variant__price">{{ item.price }}</div>
+            <button type="button" class="button button--primary" data-cart-add="{{ slug }}">הוסיפי לסל</button>
+          </div>
         </article>
         {% endfor %}
       </div>
@@ -224,6 +222,10 @@ layout: default
 .gallery-layout { margin-top: 8px; }
 .gallery-filter__label { display: flex; font-weight: 700; color: var(--heading-font-color); cursor: default; }
 .gallery-filter__clear { width: 100%; text-align: right; }
-.gallery-card__meta { margin: 0; font-size: .82rem; opacity: .65; }
+.gallery-card { height: 100%; }
+.gallery-card .scrunchies-variant__name { min-height: 2.7em; }
+.gallery-card .scrunchies-variant__desc { flex: 0 0 auto; min-height: 1.7em; margin-bottom: 12px; }
+.gallery-card__footer { margin-top: auto; }
+.gallery-card__meta { margin: 0 0 12px; font-size: .82rem; opacity: .65; min-height: 1.4em; }
 .gallery-card[hidden] { display: none !important; }
 </style>

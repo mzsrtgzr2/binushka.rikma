@@ -264,6 +264,13 @@
         }
       }
     },
+    "scrunchie-aviv": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י אביב",
+      "price": 40
+    },
     "scrunchie-demo-floral": {
       "stock": null,
       "outOfStock": false,
@@ -285,12 +292,75 @@
       "name": "סקראנצ'י פשתן טבעי",
       "price": 35
     },
+    "scrunchie-katom-shemesh": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י כתום שמש",
+      "price": 50
+    },
+    "scrunchie-layla": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י לילה",
+      "price": 75
+    },
     "scrunchie-midbari": {
       "stock": null,
       "outOfStock": false,
       "limitedStock": false,
       "name": "סקראנצ'י מדברי",
       "price": 45
+    },
+    "scrunchie-pori": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י פראי",
+      "price": 70
+    },
+    "scrunchie-sagol-malchuti": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י סגול מלכותי",
+      "price": 60
+    },
+    "scrunchie-tchelet": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י תכלת",
+      "price": 35
+    },
+    "scrunchie-varod-halom": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י ורוד חלום",
+      "price": 55
+    },
+    "scrunchie-yam-tichoni": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י ים תיכוני",
+      "price": 45
+    },
+    "scrunchie-yerushalmi": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י ירושלמי",
+      "price": 65
+    },
+    "scrunchie-zahav": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י זהב",
+      "price": 85
     },
     "scrunchies": {
       "stock": null,

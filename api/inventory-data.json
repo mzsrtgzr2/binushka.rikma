@@ -327,6 +327,13 @@
       "name": "סקראנצ'י סגול מלכותי",
       "price": 60
     },
+    "scrunchie-tarnegolim": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "סקראנצ'י תרנגולים",
+      "price": 45
+    },
     "scrunchie-tchelet": {
       "stock": null,
       "outOfStock": false,

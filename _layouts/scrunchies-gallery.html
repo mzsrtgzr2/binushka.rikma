@@ -224,12 +224,15 @@ layout: default
 .gallery-layout { margin-top: 8px; }
 .gallery-filter__label { display: flex; font-weight: 700; color: var(--heading-font-color); cursor: default; }
 .gallery-filter__clear { width: 100%; text-align: right; }
-.gallery-grid-scroll { max-height: 560px; overflow-y: auto; overscroll-behavior: contain; padding: 4px; }
-.gallery-card { height: 100%; }
-.gallery-card .scrunchies-variant__name { min-height: 2.7em; }
-.gallery-card .scrunchies-variant__desc { flex: 0 0 auto; min-height: 1.7em; margin-bottom: 12px; }
+.gallery-grid-scroll { max-height: 660px; overflow-y: auto; overscroll-behavior: contain; padding: 4px; }
+.gallery-card { height: 100%; padding-bottom: 16px; }
+.gallery-card .scrunchies-variant__photo { height: 120px; margin-bottom: 10px; }
+.gallery-card .scrunchies-variant__name { font-size: 16px; min-height: 2.5em; margin-bottom: 6px; padding: 0 14px; }
+.gallery-card .scrunchies-variant__desc { font-size: 12px; flex: 0 0 auto; min-height: 1.5em; margin-bottom: 6px; padding: 0 14px; }
 .gallery-card__footer { margin-top: auto; }
-.gallery-card__meta { margin: 0 0 12px; font-size: .82rem; opacity: .65; min-height: 1.4em; }
+.gallery-card .scrunchies-variant__price { font-size: 22px; margin-bottom: 12px; padding: 0 14px; }
+.gallery-card .button { width: calc(100% - 28px); padding: 9px 14px; }
+.gallery-card__meta { margin: 0 0 6px; font-size: .72rem; opacity: .65; min-height: 1.4em; padding: 0 14px; }
 .gallery-card[hidden] { display: none !important; }
 @media only screen and (max-width: 768px) { .gallery-grid-scroll { max-height: none; overflow: visible; padding: 0; } }
 </style>

@@ -8,6 +8,7 @@
   var menuClose = document.getElementById('store-menu-close');
   var menuBackdrop = document.getElementById('store-menu-backdrop');
   var empty = document.getElementById('gallery-filter-empty');
+  var moreBtn = document.getElementById('gallery-more');
 
   var active = { type: [], color: [], country: [] };
   var filterButtons = menu ? menu.querySelectorAll('[data-gallery-filter]') : [];
@@ -70,19 +71,29 @@
     clearBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
 
+  var BATCH = 6;
+  var visibleCount = BATCH;
+
   function applyFilter() {
     var cards = grid.querySelectorAll('.gallery-card');
-    var visible = 0;
+    var matched = 0;
+    var shown = 0;
     cards.forEach(function (card) {
       if (cardMatches(card)) {
-        card.hidden = false;
-        visible += 1;
+        matched += 1;
+        if (shown < visibleCount) {
+          card.hidden = false;
+          shown += 1;
+        } else {
+          card.hidden = true;
+        }
       } else {
         card.hidden = true;
       }
     });
-    if (empty) empty.hidden = visible > 0;
-    return visible;
+    if (empty) empty.hidden = matched > 0;
+    if (moreBtn) moreBtn.hidden = matched <= shown;
+    return shown;
   }
 
   function applySort() {
@@ -185,6 +196,7 @@
       btn.classList.toggle('is-active', on);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       syncClear();
+      visibleCount = BATCH;
       applyFilter();
     });
   });
@@ -199,11 +211,23 @@
         btn.setAttribute('aria-pressed', 'false');
       });
       syncClear();
+      visibleCount = BATCH;
       applyFilter();
     });
   }
 
-  select.addEventListener('change', applySort);
+  if (moreBtn) {
+    moreBtn.addEventListener('click', function () {
+      visibleCount += BATCH;
+      applyFilter();
+    });
+  }
+
+  select.addEventListener('change', function () {
+    visibleCount = BATCH;
+    applySort();
+    applyFilter();
+  });
 
   if (menuToggle) {
     menuToggle.addEventListener('click', function () {

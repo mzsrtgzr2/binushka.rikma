@@ -179,6 +179,7 @@ layout: default
       </div>
       </div>
       <p class="store-filter-empty" id="gallery-filter-empty" hidden>לא נמצאו פריטים מתאימים</p>
+      <button type="button" class="button button--primary gallery-more" id="gallery-more" hidden>הצג עוד</button>
     </div>
   </div>
 </div>
@@ -240,7 +241,8 @@ layout: default
 .gallery-layout { margin-top: 8px; }
 .gallery-filter__label { display: flex; font-weight: 700; color: var(--heading-font-color); cursor: default; }
 .gallery-filter__clear { width: 100%; text-align: right; }
-.gallery-grid-scroll { max-height: 660px; overflow-y: auto; overscroll-behavior: contain; padding: 4px; }
+.gallery-grid-scroll { padding: 4px; }
+.gallery-more { display: block; margin: 20px auto 0; }
 .gallery-card { height: 100%; padding-bottom: 16px; }
 .gallery-card__media { position: relative; margin-bottom: 10px; }
 .gallery-card__photo-link { display: block; }
@@ -259,5 +261,4 @@ layout: default
 .gallery-card .button { width: calc(100% - 28px); padding: 9px 14px; }
 .gallery-card__meta { margin: 0 0 6px; font-size: .72rem; opacity: .65; min-height: 1.4em; padding: 0 14px; }
 .gallery-card[hidden] { display: none !important; }
-@media only screen and (max-width: 768px) { .gallery-grid-scroll { max-height: none; overflow: visible; padding: 0; } }
 </style>

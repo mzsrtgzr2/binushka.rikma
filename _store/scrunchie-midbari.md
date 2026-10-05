@@ -3,8 +3,9 @@ title: "סקראנצ'י מדברי"
 subtitle: בד פרחוני בגוון אדום
 image: /images/scrunchies/gallery/scrunchie-midbari.png
 gallery:
+  - /images/scrunchies/gallery/scrunchie-midbari-2.svg
+  - /images/scrunchies/gallery/scrunchie-midbari-3.svg
   - /images/scrunchies/01.jpeg
-  - /images/scrunchies/04.jpeg
 price: ₪45
 cart_price: 45
 hide: true

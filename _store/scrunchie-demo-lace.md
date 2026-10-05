@@ -3,8 +3,9 @@ title: "סקראנצ'י תחרה"
 subtitle: תחרה עדינה בגוון ורוד
 image: /images/scrunchies/03.jpeg
 gallery:
+  - /images/scrunchies/gallery/scrunchie-demo-lace-2.svg
+  - /images/scrunchies/gallery/scrunchie-demo-lace-3.svg
   - /images/scrunchies/06.jpeg
-  - /images/scrunchies/07.jpeg
 price: ₪55
 cart_price: 55
 hide: true

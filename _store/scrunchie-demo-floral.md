@@ -3,8 +3,9 @@ title: "סקראנצ'י פרחוני"
 subtitle: כותנה עם הדפס פרחים
 image: /images/scrunchies/02.jpeg
 gallery:
+  - /images/scrunchies/gallery/scrunchie-demo-floral-2.svg
+  - /images/scrunchies/gallery/scrunchie-demo-floral-3.svg
   - /images/scrunchies/04.jpeg
-  - /images/scrunchies/05.jpeg
 price: ₪40
 cart_price: 40
 hide: true

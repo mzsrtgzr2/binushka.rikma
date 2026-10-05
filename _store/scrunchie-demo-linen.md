@@ -3,8 +3,9 @@ title: "סקראנצ'י פשתן טבעי"
 subtitle: בד פשתן בגוון שמנת
 image: /images/scrunchies/01.jpeg
 gallery:
+  - /images/scrunchies/gallery/scrunchie-demo-linen-2.svg
+  - /images/scrunchies/gallery/scrunchie-demo-linen-3.svg
   - /images/scrunchies/02.jpeg
-  - /images/scrunchies/03.jpeg
 price: ₪35
 cart_price: 35
 hide: true

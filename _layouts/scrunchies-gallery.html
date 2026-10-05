@@ -146,12 +146,28 @@ layout: default
           data-gallery-country="{{ item.fabric_country }}"
           data-price="{{ item_price }}"
           data-order="{{ forloop.index }}">
-          {% if item.image %}
-          <div class="scrunchies-variant__photo">
-            <img class="lazy" data-src="{{ item.image | relative_url }}" alt="{{ item.title }}">
+          {% assign item_images = '' | split: '' %}
+          {% if item.image %}{% assign item_images = item_images | push: item.image %}{% endif %}
+          {% if item.gallery %}{% for gimg in item.gallery %}{% unless gimg == item.image %}{% assign item_images = item_images | push: gimg %}{% endunless %}{% endfor %}{% endif %}
+          {% if item_images.size > 0 %}
+          <div class="gallery-card__media">
+            <a class="gallery-card__photo-link" href="{{ item.url }}" aria-label="{{ item.title }}">
+              <div class="gallery-card__photos" data-card-photos>
+                {% for img in item_images %}
+                <img class="gallery-card__img{% if forloop.first %} is-active{% endif %} lazy" data-src="{{ img | relative_url }}" alt="{{ item.title }}">
+                {% endfor %}
+              </div>
+            </a>
+            {% if item_images.size > 1 %}
+            <div class="gallery-card__dots">
+              {% for img in item_images %}
+              <button type="button" class="gallery-card__dot{% if forloop.first %} is-active{% endif %}" data-card-dot="{{ forloop.index0 }}" aria-label="תמונה {{ forloop.index }}"></button>
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
           {% endif %}
-          <h3 class="scrunchies-variant__name">{{ item.title }}</h3>
+          <h3 class="scrunchies-variant__name"><a href="{{ item.url }}">{{ item.title }}</a></h3>
           <p class="scrunchies-variant__desc">{{ item.subtitle }}</p>
           <div class="gallery-card__footer">
             <p class="gallery-card__meta">{{ item.scrunchie_type }}{% if item.scrunchie_color %} · {{ item.scrunchie_color }}{% endif %}{% if item.fabric_country %} · {{ item.fabric_country }}{% endif %}</p>
@@ -226,7 +242,16 @@ layout: default
 .gallery-filter__clear { width: 100%; text-align: right; }
 .gallery-grid-scroll { max-height: 660px; overflow-y: auto; overscroll-behavior: contain; padding: 4px; }
 .gallery-card { height: 100%; padding-bottom: 16px; }
-.gallery-card .scrunchies-variant__photo { height: 120px; margin-bottom: 10px; }
+.gallery-card__media { position: relative; margin-bottom: 10px; }
+.gallery-card__photo-link { display: block; }
+.gallery-card__photos { position: relative; height: 120px; background: var(--background-alt-color); overflow: hidden; }
+.gallery-card__img { display: none; width: 100%; height: 100%; object-fit: cover; }
+.gallery-card__img.is-active { display: block; }
+.gallery-card__dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 6px; }
+.gallery-card__dot { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; background: rgba(255,255,255,.65); box-shadow: 0 0 0 1px rgba(0,0,0,.15); cursor: pointer; }
+.gallery-card__dot.is-active { background: #fff; }
+.gallery-card .scrunchies-variant__name a { color: inherit; text-decoration: none; }
+.gallery-card .scrunchies-variant__name a:hover { text-decoration: underline; }
 .gallery-card .scrunchies-variant__name { font-size: 16px; min-height: 2.5em; margin-bottom: 6px; padding: 0 14px; }
 .gallery-card .scrunchies-variant__desc { font-size: 12px; flex: 0 0 auto; min-height: 1.5em; margin-bottom: 6px; padding: 0 14px; }
 .gallery-card__footer { margin-top: auto; }

@@ -1,6 +1,10 @@
 ---
 title: "סקראנצ'י מדברי"
+subtitle: בד פרחוני בגוון אדום
 image: /images/scrunchies/gallery/scrunchie-midbari.png
+gallery:
+  - /images/scrunchies/01.jpeg
+  - /images/scrunchies/04.jpeg
 price: ₪45
 cart_price: 45
 hide: true
@@ -14,4 +18,6 @@ fabric_country: הודו
 category: scrunchies-gallery
 ---
 
-פריט מתוך גלריית הסקראנצ'יז החדשה.
+סקראנצ'י תפורה בעבודת יד מבד פרחוני בגווני אדום. כל פריט ייחודי ואין שניים זהים.
+
+נוח, נעים ומחזיק היטב את השיער.

@@ -2,6 +2,9 @@
 title: "סקראנצ'י תחרה"
 subtitle: תחרה עדינה בגוון ורוד
 image: /images/scrunchies/03.jpeg
+gallery:
+  - /images/scrunchies/06.jpeg
+  - /images/scrunchies/07.jpeg
 price: ₪55
 cart_price: 55
 hide: true
@@ -15,4 +18,6 @@ fabric_country: צרפת
 category: scrunchies-gallery
 ---
 
-פריט מתוך גלריית הסקראנצ'יז החדשה.
+סקראנצ'י עם תחרה עדינה בגוון ורוד — דגם מפורט ומיוחד. נתפר בעבודת יד, פריט יחיד.
+
+מתאים גם כאקססורי לחגיגה או כמתנה.

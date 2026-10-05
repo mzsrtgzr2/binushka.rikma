@@ -2,6 +2,9 @@
 title: "סקראנצ'י פשתן טבעי"
 subtitle: בד פשתן בגוון שמנת
 image: /images/scrunchies/01.jpeg
+gallery:
+  - /images/scrunchies/02.jpeg
+  - /images/scrunchies/03.jpeg
 price: ₪35
 cart_price: 35
 hide: true
@@ -15,4 +18,6 @@ fabric_country: הודו
 category: scrunchies-gallery
 ---
 
-פריט מתוך גלריית הסקראנצ'יז החדשה.
+סקראנצ'י תפורה בעבודת יד מבד פשתן טבעי בגוון שמנת. כל פריט נתפר בנפרד ואין שניים זהים — הדוגמאות והבדים משתנים כל הזמן.
+
+מתאים לשיער ארוך או אסוף, ונעים במיוחד ביום חם.

@@ -2,6 +2,9 @@
 title: "סקראנצ'י פרחוני"
 subtitle: כותנה עם הדפס פרחים
 image: /images/scrunchies/02.jpeg
+gallery:
+  - /images/scrunchies/04.jpeg
+  - /images/scrunchies/05.jpeg
 price: ₪40
 cart_price: 40
 hide: true
@@ -15,4 +18,6 @@ fabric_country: יפן
 category: scrunchies-gallery
 ---
 
-פריט מתוך גלריית הסקראנצ'יז החדשה.
+סקראנצ'י מכותנה רכה עם הדפס פרחים צבעוני. תפורה בעבודת יד בכמויות קטנות, כל אחת בבד אחר.
+
+מוסיפה צבע ופרטיות לכל תסרוקת.

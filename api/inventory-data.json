@@ -264,6 +264,20 @@
         }
       }
     },
+    "scrunchie-chuma-pirchonit-fableism": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י חומה פרחונית Fableism",
+      "price": 45
+    },
+    "scrunchie-nimrim-adilit": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י נמרים אצילית",
+      "price": 85
+    },
     "scrunchie-psim-sagol-kachol": {
       "stock": 1,
       "outOfStock": false,

@@ -104,6 +104,9 @@
       var pb = Number(b.getAttribute('data-price')) || 0;
       if (mode === 'price-asc' && pa !== pb) return pa - pb;
       if (mode === 'price-desc' && pa !== pb) return pb - pa;
+      var sa = Number(a.getAttribute('data-size-rank')) || 9;
+      var sb = Number(b.getAttribute('data-size-rank')) || 9;
+      if (sa !== sb) return sa - sb;
       var oa = Number(a.getAttribute('data-order')) || 0;
       var ob = Number(b.getAttribute('data-order')) || 0;
       return oa - ob;

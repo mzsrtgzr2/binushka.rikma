@@ -53,14 +53,23 @@ layout: default
 </div>
 {% endif %}
 
-{% assign gallery_items = '' | split: '' %}
+{% assign g_regular = '' | split: '' %}
+{% assign g_large = '' | split: '' %}
+{% assign g_fancy = '' | split: '' %}
+{% assign g_other = '' | split: '' %}
 {% for item in site.store %}
   {% assign is_gallery_item = false %}
   {% if item.scrunchie_gallery %}{% assign is_gallery_item = true %}{% endif %}
   {% if item.category == 'scrunchies-gallery' %}{% assign is_gallery_item = true %}{% endif %}
   {% if item.categories %}{% if item.categories contains 'scrunchies-gallery' %}{% assign is_gallery_item = true %}{% endif %}{% endif %}
-  {% if is_gallery_item %}{% assign gallery_items = gallery_items | push: item %}{% endif %}
+  {% if is_gallery_item %}
+    {% if item.scrunchie_size == 'regular' %}{% assign g_regular = g_regular | push: item %}
+    {% elsif item.scrunchie_size == 'large' %}{% assign g_large = g_large | push: item %}
+    {% elsif item.scrunchie_size == 'fancy' %}{% assign g_fancy = g_fancy | push: item %}
+    {% else %}{% assign g_other = g_other | push: item %}{% endif %}
+  {% endif %}
 {% endfor %}
+{% assign gallery_items = g_regular | concat: g_large | concat: g_fancy | concat: g_other %}
 {% if site.data.store-cart.enabled and gallery_items.size > 0 %}
 <div class="container scrunchies-variants-section animate" id="scrunchies-shop">
   <p class="scrunchies-variants-section__eyebrow">לקנות דרך האתר</p>
@@ -141,7 +150,10 @@ layout: default
           {% assign price_token = item.price | replace: '₪', '' | strip %}
           {% assign item_price = price_token | plus: 0 %}
         {% endif %}
+        {% assign item_size_rank = 9 %}
+        {% if item.scrunchie_size == 'regular' %}{% assign item_size_rank = 1 %}{% elsif item.scrunchie_size == 'large' %}{% assign item_size_rank = 2 %}{% elsif item.scrunchie_size == 'fancy' %}{% assign item_size_rank = 3 %}{% endif %}
         <article class="scrunchies-variant gallery-card" data-product-id="{{ slug }}"
+          data-size-rank="{{ item_size_rank }}"
           data-gallery-type="{{ item.scrunchie_type }}"
           data-gallery-color="{{ item.scrunchie_color }}"
           data-gallery-country="{{ item.fabric_country }}"

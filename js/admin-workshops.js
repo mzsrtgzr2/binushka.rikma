@@ -1030,7 +1030,7 @@
 
     var footer = '';
     if (!workshop.registration_not_open && soldOut) {
-      footer = fakeButton('עדכני אותי כשהסדנה נפתחת', 'project__add', 'waitlist');
+      footer = fakeButton('הירשמי לרשימת המתנה', 'project__add', 'waitlist');
     } else if (workshop.registration_not_open) {
       footer = fakeButton('עדכני אותי כשההרשמה נפתחת', 'project__add', 'waitlist');
     } else if (price > 0 && !workshop.registration_not_open && !soldOut) {
@@ -1140,7 +1140,7 @@
       if (soldOut) {
         booking =
           '<div class="workshop-booking workshop-booking--waitlist">' +
-          fakeButton('עדכני אותי כשהסדנה נפתחת', 'section-button', 'waitlist') +
+          fakeButton('הירשמי לרשימת המתנה', 'section-button', 'waitlist') +
           '<p class="workshop-booking__note">הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.</p>' +
           '</div>';
       } else {

@@ -6,36 +6,26 @@
 ## כתובת
 `/scrunchies-gallery/`
 
-## הקונספט
-במקום חלוקה לפי סוג (רגיל / לארג' / Fancy), כל סקראנצ'י הוא פריט בפני עצמו:
-תמונה + שם + מחיר + כפתור "הוסיפי לסל".
+## גודלים ומחירים (קבוע)
+| גודל | מזהה | מחיר |
+| --- | --- | --- |
+| רגילה | `regular` | ₪30 |
+| גדולה | `large` | ₪45 |
+| Fancy | `fancy` | ₪85 |
+
+מקור: `_data/scrunchie-sizes.yml`. כשמעלים גומיה חדשה, בינה אומרת את הגודל — ומכאן המחיר.
 
 ## איך מוסיפים סקראנצ'י חדש
-1. שומרים את התמונה תחת `images/scrunchies/gallery/<slug>.jpeg` (אפשר אחר כך, בינתיים אפשר להפנות לקובץ קיים).
-2. יוצרים קובץ `_store/<slug>.md`:
-   ```yaml
-   ---
-   title: "סקראנצ'י — <שם הבד>"
-   subtitle: <תיאור קצר>
-   image: /images/scrunchies/gallery/<slug>.jpeg
-   price: ₪<מחיר>
-   cart_price: <מחיר>
-   hide: true          # לא מופיע בחנות הרגילה
-   noindex: true
-   sitemap: false
-   scrunchie_gallery: true   # מסמן שזה שייך לגלריה
-   order: <מספר סדר>
-   category: scrunchies-gallery
-   ---
-   ```
-3. מריצים `node scripts/build-catalog.js`.
+1. שומרים את התמונה תחת `images/scrunchies/gallery/<slug>.jpg`.
+2. יוצרים `_store/<slug>.md` עם:
+   - `title`, `subtitle`
+   - `image` (+ `gallery` לעוד תמונות)
+   - `price` ו-`cart_price` לפי הגודל מהטבלה למעלה
+   - `category: scrunchies-gallery` (או `scrunchie_gallery: true`)
+   - `hide: true`, `noindex: true`, `sitemap: false`
+   - אופציונלי לסינון: `scrunchie_type`, `scrunchie_color`, `fabric_country`
+3. `node scripts/build-catalog.js`.
 4. commit + push ל-branch.
 
-העמוד מציג אוטומטית כל פריט עם `scrunchie_gallery: true`.
-
-## פריטים לדוגמה כרגע
-- `scrunchie-demo-linen` — ₪35
-- `scrunchie-demo-floral` — ₪40
-- `scrunchie-demo-lace` — ₪55
-
-(התמונות כרגע הן תמונות קיימות מהסקראנצ'ים — להחליף בתמונות אמיתיות בהמשך.)
+## הערה על ה-admin
+בטופס המוצר יש קטגוריה `סקראנצ׳ים (גלריה)` — מוצר שסומן בה יופיע בגלריה ולא ברשת החנות הרגילה.

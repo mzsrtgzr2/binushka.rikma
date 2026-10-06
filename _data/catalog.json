@@ -546,6 +546,21 @@
     ],
     "category": "tools"
   },
+  "scrunchie-psim-sagol-kachol": {
+    "name": "סקראנצ'י פסים סגול כחול",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-rikmat-prachim-bezh": {
+    "name": "סקראנצ'י רקמת פרחים בז׳",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-tarnegolim": {
+    "name": "סקראנצ'י תרנגולים",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",
     "variants": {

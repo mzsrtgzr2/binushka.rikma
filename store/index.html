@@ -86,7 +86,7 @@ layout: default
         {% assign supplies_cats = 'threads,hoops,needles,tools,markers-stickers,fabrics,kits,books,beginners,embroidery-supplies' | split: ',' %}
         {% for item in sorted %}
           {% comment %}Skip hidden items and broken front matter (empty title husks).{% endcomment %}
-          {% unless item.hide or item.title == blank %}
+          {% unless item.hide or item.title == blank or item.scrunchie_gallery or item.category == 'scrunchies-gallery' or item.categories contains 'scrunchies-gallery' %}
             {% assign item_slug = item.slug | default: item.basename %}
             {% if item.categories and item.categories.size > 0 %}
               {% assign item_cats = item.categories %}

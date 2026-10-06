@@ -10,5 +10,5 @@
   {% include newsletter-notify-button.html intent="workshop" source=include.source class=include.class analytics="newsletter_workshop" %}
 {% else %}
   {%- assign waitlist_text = 'הי בינושקה :) אשמח להצטרף לרשימת המתנה לסדנה "' | append: include.title | append: '"' -%}
-  <a href="https://wa.me/972544247753?text={{ waitlist_text | url_encode }}" class="button button--waitlist{% if include.class %} {{ include.class }}{% endif %}" target="_blank" rel="noopener" data-analytics="workshop_waitlist">הרשמי לרשימת המתנה</a>
+  <a href="https://wa.me/972544247753?text={{ waitlist_text | url_encode }}" class="button button--waitlist{% if include.class %} {{ include.class }}{% endif %}" target="_blank" rel="noopener" data-analytics="workshop_waitlist">הירשמי לרשימת המתנה</a>
 {% endif %}

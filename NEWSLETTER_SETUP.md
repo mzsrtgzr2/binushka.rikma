@@ -8,7 +8,8 @@ Gmail account. There is no newsletter provider and no monthly bill.
 
 `newsletter.enabled` in `_data/settings.yml` is the public switch. Set it to
 `false` and the next build removes the newsletter from the site: the home
-section, the footer form, the footer link, `/newsletter/`, and every issue
+section, the footer form, the footer link, the restock/workshop signup panel,
+`/newsletter/`, and every issue
 page. Those addresses redirect home and stay out of the sitemap.
 
 The backoffice at `/admin/newsletter/` is unchanged, and so are signup and

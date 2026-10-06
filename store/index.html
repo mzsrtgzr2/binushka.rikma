@@ -251,6 +251,8 @@ layout: default
                 <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener" data-analytics="product_external_order">
                   {% if preorder %}הזמיני מראש{% else %}הזמיני עכשיו{% endif %}
                 </a>
+                {% elsif sold_out %}
+                  {% include newsletter-notify-button.html intent="restock" source="store_card" class="store-item__add" analytics="newsletter_restock" %}
                 {% endif %}
                 </div>
               </div>

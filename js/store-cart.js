@@ -450,18 +450,55 @@
     return preorder ? 'הזמיני מראש' : 'הוסיפי לסל';
   }
 
-  /* Shop cards built as sold-out have no CTA. When live stock flips to
-     preorder, inject the same yellow button the liquid would have rendered. */
+  function newsletterModal() {
+    return document.getElementById('newsletter-modal');
+  }
+
+  function newsletterButtonLabel(intent) {
+    var modal = newsletterModal();
+    if (!modal) return '';
+    return modal.getAttribute('data-' + intent + '-button') || '';
+  }
+
+  function ensureNotifyButton(host, opts) {
+    if (!host || !newsletterModal()) return null;
+    var existing = host.querySelector('[data-newsletter-open]');
+    if (existing) {
+      existing.hidden = false;
+      return existing;
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = opts.className || 'button button--primary newsletter-notify';
+    btn.setAttribute('data-newsletter-open', '');
+    btn.setAttribute('data-newsletter-intent', opts.intent);
+    btn.setAttribute('data-newsletter-source', opts.source);
+    btn.setAttribute('data-analytics', opts.analytics || 'newsletter_notify');
+    btn.textContent = newsletterButtonLabel(opts.intent) || 'הירשמי לניוזלטר';
+    host.appendChild(btn);
+    return btn;
+  }
+
+  /* Shop cards built as sold-out have no add-to-cart CTA. Show the newsletter
+     restock button instead, and restore a cart CTA if live stock returns. */
   function ensureStoreCardCta(root, p, soldOut, preorder) {
     if (!root || !root.classList.contains('store-item')) return;
     var footer = root.querySelector('.store-item__footer');
     if (!footer) return;
-    var existing = footer.querySelector('.store-item__add');
+    var cartCta = footer.querySelector('.store-item__add:not([data-newsletter-open])');
+    var notify = footer.querySelector('[data-newsletter-open]');
     if (soldOut) {
-      if (existing) existing.parentNode.removeChild(existing);
+      if (cartCta) cartCta.parentNode.removeChild(cartCta);
+      ensureNotifyButton(footer, {
+        intent: 'restock',
+        source: 'store_card',
+        className: 'button button--primary store-item__add newsletter-notify',
+        analytics: 'newsletter_restock'
+      });
       return;
     }
-    if (existing) return;
+    if (notify) notify.parentNode.removeChild(notify);
+    if (cartCta) return;
     if (p.variable || p.variants) {
       var pick = document.createElement('a');
       pick.href = p.url || '#';
@@ -478,6 +515,44 @@
     btn.setAttribute('data-analytics', 'add_to_cart');
     btn.textContent = addToCartLabel(preorder);
     footer.appendChild(btn);
+  }
+
+  function ensureWorkshopNotify(root, p, soldOut) {
+    if (!root || !p || p.kind !== 'workshop') return;
+    var notOpen = root.querySelector('.registration-full, .registration-full-text');
+    if (notOpen && /תיפתח/.test(notOpen.textContent || '')) return;
+
+    if (root.classList.contains('project')) {
+      var footer = root.querySelector('.project__footer');
+      var cartBtn = root.querySelector('[data-cart-add], a[data-analytics="workshop_choose_pack"]');
+      if (soldOut) {
+        if (cartBtn && cartBtn.parentNode) cartBtn.parentNode.removeChild(cartBtn);
+        if (!footer) {
+          var info = root.querySelector('.project__info');
+          if (!info) return;
+          footer = document.createElement('div');
+          footer.className = 'project__footer';
+          info.appendChild(footer);
+        }
+        ensureNotifyButton(footer, {
+          intent: 'workshop',
+          source: 'workshop_card',
+          className: 'button button--primary project__add newsletter-notify',
+          analytics: 'newsletter_workshop'
+        });
+        return;
+      }
+      if (footer) {
+        var cardNotify = footer.querySelector('[data-newsletter-open]');
+        if (cardNotify) cardNotify.parentNode.removeChild(cardNotify);
+      }
+      return;
+    }
+
+    var waitlist = root.querySelector('[data-newsletter-notify-slot="workshop"]');
+    var register = root.querySelector('.workshop-booking:not(.workshop-booking--waitlist)');
+    if (waitlist) waitlist.hidden = !soldOut;
+    if (register) register.hidden = soldOut;
   }
 
   function setCartAddLabel(btn, preorder) {
@@ -535,10 +610,16 @@
         root.setAttribute('data-preorder', preorder ? 'true' : 'false');
         ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
         ensureStoreCardCta(root, p, soldOut, preorder);
+        ensureWorkshopNotify(root, p, soldOut);
         if (root.querySelector('.page-head')) {
           ensureStockText(root.querySelector('.page-head'), soldOut, preorder, showLimitedBadge, p.stock);
-          var pageActions = root.querySelector('.store-item__cart-actions');
-          if (pageActions) pageActions.hidden = soldOut;
+          var pageActions = root.querySelector('[data-cart-actions]');
+          if (pageActions && !multiType) pageActions.hidden = soldOut;
+          var pageNotify = root.querySelector('[data-newsletter-notify-slot="product"]');
+          if (pageNotify) {
+            var hasVariantCards = Boolean(root.querySelector('.store-variant, .scrunchies-variant'));
+            pageNotify.hidden = hasVariantCards ? true : !soldOut;
+          }
         }
       });
 
@@ -566,6 +647,20 @@
           var info = card && (card.querySelector('.store-variant__info') || card);
           ensureVariantStockText(info, vSoldOut, vPreorder, vLimited, vStock);
           if (p.kind !== 'workshop') setCartAddLabel(btn, vPreorder);
+          if (card) {
+            btn.hidden = vSoldOut;
+            if (vSoldOut) {
+              ensureNotifyButton(card, {
+                intent: 'restock',
+                source: 'product_variant',
+                className: 'button button--primary newsletter-notify',
+                analytics: 'newsletter_restock'
+              });
+            } else {
+              var variantNotify = card.querySelector('[data-newsletter-open]');
+              if (variantNotify) variantNotify.hidden = true;
+            }
+          }
         } else if (p.kind !== 'workshop') {
           setCartAddLabel(btn, preorder);
         }

@@ -62,22 +62,41 @@ hero:
 # live in lib/newsletter/email-copy.mjs. See NEWSLETTER_SETUP.md.
 #
 # enabled is the public switch. false removes the newsletter from the site:
-# the home section, the footer form, the footer link, /newsletter/, and every
-# issue page. The backoffice at /admin/newsletter/ stays, and so do signup and
-# unsubscribe, so mail that already went out still has a working removal link.
+# the home section, the footer form, the footer link, the restock/workshop
+# signup panel, /newsletter/, and every issue page. The backoffice at
+# /admin/newsletter/ stays, and so do signup and unsubscribe, so mail that
+# already went out still has a working removal link.
 newsletter:
   enabled: true
   locale: he-IL
   title: הירשמי לניוזלטר
-  description: קבלי עדכונים על סדנאות חדשות, מוצרים ופרויקטים מיוחדים
+  description: עדכונים על סדנאות, מוצרים חדשים, ומלאי שחוזר — מייל אחד מדי פעם, בלי להציף.
   placeholder: הכנסי את כתובת האימייל שלך
   button: הירשמי
   consent: לא שולחת ספאם, ואפשר להסיר את עצמך בכל רגע בלחיצה אחת בתחתית כל מייל.
   consent_link_text: לפרטים ולביטול הרשמה
 
+  # Copy for the signup panel that opens from restock / workshop buttons.
+  modal:
+    title: בואי להישאר בתמונה
+    description: בניוזלטר אני מספרת על סדנאות חדשות, מוצרים מהסטודיו, ומתי משהו חוזר למלאי. מייל חברותי מדי פעם — לא ספאם, ואפשר להסיר את עצמך בלחיצה אחת.
+    close: סגירה
+    restock:
+      title: רוצה לדעת כשזה חוזר למלאי?
+      description: כשמוצר חוזר למלאי אני כותבת על זה בניוזלטר, יחד עם סדנאות ועדכונים מהסטודיו. בלי להציף ובלי רשימת תפוצה אגרסיבית.
+      button: עדכני אותי כשחוזר למלאי
+    workshop:
+      title: רוצה לשמוע כשהסדנה נפתחת שוב?
+      description: כשנפתח סבב חדש או מתפנה מקום, אני מספרת על זה בניוזלטר. גם עדכונים על מוצרים ומלאי, בלי ספאם.
+      button: עדכני אותי כשהסדנה נפתחת
+    opening:
+      title: רוצה לדעת כשההרשמה נפתחת?
+      description: כשההרשמה לסדנה נפתחת אני כותבת על זה בניוזלטר, יחד עם סדנאות נוספות ומוצרים מהסטודיו. מייל אחד מדי פעם, בלי להציף.
+      button: עדכני אותי כשההרשמה נפתחת
+
   section:
     title: הניוזלטר שלי
-    description: פעם בכמה שבועות, מייל אחד עם סדנאות חדשות, השראה ורעיונות לרקמה
+    description: פעם בכמה שבועות, מייל אחד עם סדנאות חדשות, מוצרים, ומלאי שחוזר
     teaser_label: הגיליון האחרון
 
   messages:

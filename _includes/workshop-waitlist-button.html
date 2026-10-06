@@ -1,8 +1,14 @@
 {%- comment -%}
-  Waitlist CTA for a sold-out workshop. Opens WhatsApp with the workshop title
-  prefilled so Bina can add the person to that workshop's list.
-  include.title — workshop title
-  include.class  — extra button classes (e.g. project__add, section-button)
+  Sold-out workshop CTA. Opens the newsletter panel so the visitor can hear
+  when a date opens again. If the public newsletter is off, keep the WhatsApp
+  waitlist that Bina already uses.
+  include.title  — workshop title (WhatsApp fallback)
+  include.class  — extra button classes
+  include.source — newsletter source (workshop_card / workshop_page)
 {%- endcomment -%}
-{%- assign waitlist_text = 'הי בינושקה :) אשמח להצטרף לרשימת המתנה לסדנה "' | append: include.title | append: '"' -%}
-<a href="https://wa.me/972544247753?text={{ waitlist_text | url_encode }}" class="button button--waitlist{% if include.class %} {{ include.class }}{% endif %}" target="_blank" rel="noopener" data-analytics="workshop_waitlist">הרשמי לרשימת המתנה</a>
+{% if site.data.settings.newsletter.enabled %}
+  {% include newsletter-notify-button.html intent="workshop" source=include.source class=include.class analytics="newsletter_workshop" %}
+{% else %}
+  {%- assign waitlist_text = 'הי בינושקה :) אשמח להצטרף לרשימת המתנה לסדנה "' | append: include.title | append: '"' -%}
+  <a href="https://wa.me/972544247753?text={{ waitlist_text | url_encode }}" class="button button--waitlist{% if include.class %} {{ include.class }}{% endif %}" target="_blank" rel="noopener" data-analytics="workshop_waitlist">הרשמי לרשימת המתנה</a>
+{% endif %}

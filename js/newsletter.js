@@ -57,17 +57,22 @@
     var honeypot = form.querySelector('[data-newsletter-honeypot]');
     var busy = false;
 
+    function currentSource() {
+      return form.getAttribute('data-newsletter-source') || options.source || 'website';
+    }
+
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       if (busy || !emailInput) return;
 
       var email = emailInput.value.trim();
+      var source = currentSource();
       if (!email) {
         setStatus(status, text.invalidEmail, 'error');
         if (options.trackName) {
           track(options.trackName + '_error', {
             reason: 'invalid_email',
-            source: options.source || undefined,
+            source: source || undefined,
           });
         }
         return;
@@ -83,7 +88,7 @@
 
       var payload = { email: email };
       if (honeypot) payload.website = honeypot.value;
-      if (options.source) payload.source = options.source;
+      if (source) payload.source = source;
 
       submitEmail(options.url, payload)
         .then(function (result) {
@@ -91,7 +96,7 @@
             setStatus(status, options.successMessage(result.body, email), 'success');
             form.reset();
             if (options.trackName) {
-              track(options.trackName, { source: options.source || undefined });
+              track(options.trackName, { source: source || undefined });
             }
             return;
           }
@@ -100,7 +105,7 @@
           if (options.trackName) {
             track(options.trackName + '_error', {
               reason: (result.body && result.body.code) || 'request_failed',
-              source: options.source || undefined,
+              source: source || undefined,
             });
           }
         })
@@ -109,7 +114,7 @@
           if (options.trackName) {
             track(options.trackName + '_error', {
               reason: 'network',
-              source: options.source || undefined,
+              source: source || undefined,
             });
           }
         })
@@ -177,10 +182,72 @@
     form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  function initModal() {
+    var modal = document.getElementById('newsletter-modal');
+    if (!modal) return;
+
+    var copy = config.modal || {};
+    var intents = copy.intents || {};
+    var titleEl = modal.querySelector('[data-newsletter-modal-title]');
+    var descEl = modal.querySelector('[data-newsletter-modal-description]');
+    var form = modal.querySelector('[data-newsletter-form]');
+    var lastTrigger = null;
+
+    function applyIntent(intent, source) {
+      var pack = intents[intent] || {};
+      if (titleEl) titleEl.textContent = pack.title || copy.title || '';
+      if (descEl) descEl.textContent = pack.description || copy.description || '';
+      if (form) form.setAttribute('data-newsletter-source', source || intent || 'modal');
+      var status = form && form.querySelector('[data-newsletter-status]');
+      setStatus(status, '', null);
+    }
+
+    function openModal(trigger) {
+      lastTrigger = trigger || null;
+      var intent = (trigger && trigger.getAttribute('data-newsletter-intent')) || '';
+      var source = (trigger && trigger.getAttribute('data-newsletter-source')) || 'modal';
+      applyIntent(intent, source);
+      modal.hidden = false;
+      document.body.classList.add('newsletter-modal-open');
+      var email = form && form.querySelector('input[type="email"]');
+      if (email) {
+        try { email.focus(); } catch (e) { /* ignore */ }
+      }
+    }
+
+    function closeModal() {
+      if (modal.hidden) return;
+      modal.hidden = true;
+      document.body.classList.remove('newsletter-modal-open');
+      if (lastTrigger && typeof lastTrigger.focus === 'function') {
+        try { lastTrigger.focus(); } catch (e) { /* ignore */ }
+      }
+      lastTrigger = null;
+    }
+
+    document.addEventListener('click', function (event) {
+      var trigger = event.target.closest && event.target.closest('[data-newsletter-open]');
+      if (trigger) {
+        event.preventDefault();
+        openModal(trigger);
+        return;
+      }
+      if (event.target.closest && event.target.closest('[data-newsletter-close]')) {
+        event.preventDefault();
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeModal();
+    });
+  }
+
   function init() {
     initSignupForms();
     initUnsubscribeForms();
     initUnsubscribeNotice();
+    initModal();
   }
 
   if (document.readyState === 'loading') {

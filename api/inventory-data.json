@@ -254,7 +254,7 @@
           "stock": 3
         },
         "type-3": {
-          "stock": 2
+          "stock": 1
         },
         "victorinox": {
           "stock": 1
@@ -356,9 +356,9 @@
     "workshop-mothers-5-10-26": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה5 באוקטובר",
       "price": 1090,
-      "stock": 1,
-      "outOfStock": false,
-      "limitedStock": true
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false
     },
     "workshop-rehovot-04-12": {
       "name": "סדנת רקמה של שישי בבוקר — ב4.12 ברחובות",
@@ -377,7 +377,7 @@
     "workshop-rehovot-29-10": {
       "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",
       "price": 330,
-      "stock": 2,
+      "stock": 1,
       "outOfStock": false,
       "limitedStock": true
     },
@@ -389,7 +389,7 @@
       "limitedStock": false
     },
     "workshop-mothers-11-11-2": {
-      "name": "בוקר פינוק לאמהות — ב11.11",
+      "name": "בוקר פינוק לאמהות — ב11.11 עם דינה אלטשולר ויסוצקי",
       "price": 330,
       "stock": 10,
       "outOfStock": false,

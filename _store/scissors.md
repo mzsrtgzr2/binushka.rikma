@@ -32,7 +32,7 @@ variants:
   type-3:
     name: הזוג המלכותי
     price: 70
-    stock: 2
+    stock: 1
     image: /images/store/scissors/screenshot-2026-09-23-at-23-03-34-muej8ry3.jpg
     gallery:
       - /images/store/scissors/screenshot-2026-09-23-at-22-01-39-muej8ry4.jpg

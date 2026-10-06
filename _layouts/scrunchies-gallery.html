@@ -45,7 +45,9 @@ layout: default
 <div class="scrunchies-gallery animate">
   {% for img in page.gallery %}
   <div class="scrunchies-gallery__item">
-    <img class="lazy" data-src="{{ img | relative_url }}" alt="סקראנצ'י">
+    <a class="scrunchies-gallery__link" href="#scrunchies-shop" aria-label="לקטלוג הסקראנצ׳ים למכירה">
+      <img class="lazy" data-src="{{ img | relative_url }}" alt="סקראנצ'י">
+    </a>
   </div>
   {% endfor %}
 </div>
@@ -60,7 +62,7 @@ layout: default
   {% if is_gallery_item %}{% assign gallery_items = gallery_items | push: item %}{% endif %}
 {% endfor %}
 {% if site.data.store-cart.enabled and gallery_items.size > 0 %}
-<div class="container scrunchies-variants-section animate">
+<div class="container scrunchies-variants-section animate" id="scrunchies-shop">
   <p class="scrunchies-variants-section__eyebrow">לקנות דרך האתר</p>
   <h2 class="scrunchies-variants-section__title">בחרי את הסקראנצ'י שלך</h2>
   <p class="scrunchies-variants-section__subtitle">כל סקראנצ'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>
@@ -238,6 +240,11 @@ layout: default
 
 <style>
 .gallery-layout { margin-top: 8px; }
+html { scroll-behavior: smooth; }
+#scrunchies-shop { scroll-margin-top: 96px; }
+.scrunchies-gallery__link { display: block; cursor: pointer; }
+.scrunchies-gallery__link img { transition: transform .25s ease, opacity .25s ease; }
+.scrunchies-gallery__link:hover img { transform: scale(1.04); opacity: .92; }
 .gallery-filter__label { display: flex; font-weight: 700; color: var(--heading-font-color); cursor: default; }
 .gallery-filter__clear { width: 100%; text-align: right; }
 .gallery-grid-scroll { padding: 4px; }

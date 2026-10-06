@@ -37,7 +37,7 @@
     "price": 1090,
     "kind": "workshop",
     "shipping": false,
-    "stock": 7
+    "stock": 6
   },
   "workshop-mothers-11-11-2": {
     "name": "בוקר פינוק לאמהות — ב11.11 עם דינה אלטשולר ויסוצקי",
@@ -83,7 +83,7 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 8
+    "stock": 7
   },
   "workshop-rehovot-09-10": {
     "name": "בוקר קרושה ומאפה — 30.10 שישי בבוקר",

@@ -548,7 +548,8 @@
   },
   "scrunchie-tarnegolim": {
     "name": "סקראנצ'י תרנגולים",
-    "price": 30
+    "price": 30,
+    "category": "scrunchies-gallery"
   },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",

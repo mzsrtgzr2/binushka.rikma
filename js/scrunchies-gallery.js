@@ -2,7 +2,7 @@
   var grid = document.getElementById('scrunchies-gallery-grid');
   var select = document.getElementById('gallery-sort');
   var menu = document.getElementById('store-menu');
-  if (!grid || !select) return;
+  if (!grid) return;
 
   var menuToggle = document.getElementById('store-menu-toggle');
   var menuClose = document.getElementById('store-menu-close');
@@ -97,7 +97,7 @@
   }
 
   function applySort() {
-    var mode = select.value || 'default';
+    var mode = select ? (select.value || 'default') : 'default';
     var cards = Array.prototype.slice.call(grid.querySelectorAll('.gallery-card'));
     cards.sort(function (a, b) {
       var pa = Number(a.getAttribute('data-price')) || 0;
@@ -223,11 +223,13 @@
     });
   }
 
-  select.addEventListener('change', function () {
-    visibleCount = BATCH;
-    applySort();
-    applyFilter();
-  });
+  if (select) {
+    select.addEventListener('change', function () {
+      visibleCount = BATCH;
+      applySort();
+      applyFilter();
+    });
+  }
 
   if (menuToggle) {
     menuToggle.addEventListener('click', function () {

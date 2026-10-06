@@ -127,14 +127,6 @@ layout: default
     <div class="store-layout__main">
       <div class="store-toolbar">
         <button type="button" class="store-toolbar__filters" id="store-menu-toggle" aria-expanded="false" aria-controls="store-menu">סינון</button>
-        <label class="store-toolbar__sort" for="gallery-sort">
-          <span class="store-toolbar__label">מיון לפי</span>
-          <select id="gallery-sort" class="store-toolbar__select" name="gallery-sort">
-            <option value="default" selected>ברירת מחדל</option>
-            <option value="price-asc">מחיר: מהנמוך לגבוה</option>
-            <option value="price-desc">מחיר: מהגבוה לנמוך</option>
-          </select>
-        </label>
       </div>
 
       <div class="gallery-grid-scroll">
@@ -249,11 +241,11 @@ layout: default
 .gallery-filter__clear { width: 100%; text-align: right; }
 .gallery-grid-scroll { padding: 4px; }
 .gallery-more { display: block; margin: 20px auto 0; }
-.gallery-card { height: 100%; padding-bottom: 16px; }
+.gallery-card { height: 100%; padding: 0 0 16px; border: 0; border-radius: 0; background: none; }
 .gallery-card__media { position: relative; margin-bottom: 10px; }
 .gallery-card__photo-link { display: block; }
-.gallery-card__photos { position: relative; aspect-ratio: 3 / 4; background: var(--background-alt-color); overflow: hidden; }
-.gallery-card__img { display: none; width: 100%; height: 100%; object-fit: contain; }
+.gallery-card__photos { position: relative; padding-top: 85%; background: var(--background-alt-color); overflow: hidden; border-radius: 8px; }
+.gallery-card__img { position: absolute; top: 0; left: 0; display: none; width: 100%; height: 100%; object-fit: cover; }
 .gallery-card__img.is-active { display: block; }
 .gallery-card__dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 6px; }
 .gallery-card__dot { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; background: rgba(255,255,255,.65); box-shadow: 0 0 0 1px rgba(0,0,0,.15); cursor: pointer; }

@@ -79,20 +79,6 @@
       "name": "זר פרחים רקום",
       "price": 300
     },
-    "embroidery-tablecloth": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
-      "variants": {
-        "type-1": {
-          "stock": 1
-        },
-        "type-2": {
-          "stock": 1
-        }
-      }
-    },
     "embroidery-tshirt": {
       "stock": null,
       "outOfStock": false,
@@ -207,20 +193,6 @@
       "name": "ערכת רקמה הכל כלול",
       "price": 210
     },
-    "needle-threader": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "משחיל חוט למחט",
-      "price": 3
-    },
-    "needle": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "מחט לרקמה",
-      "price": 2
-    },
     "pencil-case": {
       "stock": null,
       "outOfStock": false,
@@ -264,27 +236,6 @@
         }
       }
     },
-    "scrunchie-psim-sagol-kachol": {
-      "stock": 1,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "סקראנצ'י פסים סגול כחול",
-      "price": 45
-    },
-    "scrunchie-rikmat-prachim-bezh": {
-      "stock": 2,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "סקראנצ'י רקמת פרחים בז׳",
-      "price": 45
-    },
-    "scrunchie-tarnegolim": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "סקראנצ'י תרנגולים",
-      "price": 30
-    },
     "scrunchies": {
       "stock": null,
       "outOfStock": false,
@@ -296,20 +247,6 @@
       "outOfStock": false,
       "limitedStock": false,
       "name": "מדבקות לרקמה"
-    },
-    "trimits-kit-elephant": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "ערכת רקמה שהבאתי מלונדון",
-      "variants": {
-        "type-1": {
-          "stock": 1
-        },
-        "type-2": {
-          "stock": 1
-        }
-      }
     },
     "voucher-gift": {
       "stock": null,
@@ -324,6 +261,48 @@
       "limitedStock": true,
       "name": "רקמת בטטה מושרשת",
       "price": 300
+    },
+    "needle": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "מחט לרקמה",
+      "price": 2
+    },
+    "embroidery-tablecloth": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
+      "variants": {
+        "type-1": {
+          "stock": 1
+        },
+        "type-2": {
+          "stock": 1
+        }
+      }
+    },
+    "needle-threader": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false,
+      "name": "משחיל חוט למחט",
+      "price": 3
+    },
+    "trimits-kit-elephant": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכת רקמה שהבאתי מלונדון",
+      "variants": {
+        "type-1": {
+          "stock": 1
+        },
+        "type-2": {
+          "stock": 1
+        }
+      }
     },
     "workshop-monthly-meeting": {
       "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",

@@ -21,9 +21,7 @@
   ],
   "redirects": [
     { "source": "/admin", "destination": "/admin/store/", "permanent": false },
-    { "source": "/admin/", "destination": "/admin/store/", "permanent": false },
-    { "source": "/scrunchies-gallery", "destination": "/store/scrunchies/", "permanent": true },
-    { "source": "/scrunchies-gallery/", "destination": "/store/scrunchies/", "permanent": true }
+    { "source": "/admin/", "destination": "/admin/store/", "permanent": false }
   ],
   "headers": [
     {

@@ -2,7 +2,7 @@
 title: "סקראנצ'יז בעבודת יד"
 subtitle: מבדים מיוחדים
 date: 2024-06-04 10:00:00 +0300
-layout: scrunchies-gallery
+layout: scrunchies
 image: /images/scrunchies/11.jpeg
 hero_image: /images/scrunchies/11.jpeg
 lifestyle_image: /images/scrunchies/sewing-machine.jpeg

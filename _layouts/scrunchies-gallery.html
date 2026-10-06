@@ -170,7 +170,6 @@ layout: default
           <h3 class="scrunchies-variant__name"><a href="{{ item.url }}">{{ item.title }}</a></h3>
           <p class="scrunchies-variant__desc">{{ item.subtitle }}</p>
           <div class="gallery-card__footer">
-            <p class="gallery-card__meta">{{ item.scrunchie_type }}{% if item.scrunchie_color %} · {{ item.scrunchie_color }}{% endif %}{% if item.fabric_country %} · {{ item.fabric_country }}{% endif %}</p>
             <div class="scrunchies-variant__price">{{ item.price }}</div>
             <button type="button" class="button button--primary" data-cart-add="{{ slug }}">הוסיפי לסל</button>
           </div>
@@ -246,8 +245,8 @@ layout: default
 .gallery-card { height: 100%; padding-bottom: 16px; }
 .gallery-card__media { position: relative; margin-bottom: 10px; }
 .gallery-card__photo-link { display: block; }
-.gallery-card__photos { position: relative; height: 120px; background: var(--background-alt-color); overflow: hidden; }
-.gallery-card__img { display: none; width: 100%; height: 100%; object-fit: cover; }
+.gallery-card__photos { position: relative; aspect-ratio: 3 / 4; background: var(--background-alt-color); overflow: hidden; }
+.gallery-card__img { display: none; width: 100%; height: 100%; object-fit: contain; }
 .gallery-card__img.is-active { display: block; }
 .gallery-card__dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 6px; }
 .gallery-card__dot { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; background: rgba(255,255,255,.65); box-shadow: 0 0 0 1px rgba(0,0,0,.15); cursor: pointer; }

@@ -8,6 +8,7 @@ hide: true
 noindex: true
 sitemap: false
 scrunchie_gallery: true
+scrunchie_size: regular
 order: 15
 scrunchie_type: כותנה
 scrunchie_color: כחול

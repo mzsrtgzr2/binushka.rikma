@@ -166,8 +166,9 @@ layout: default
             {% endif %}
           </div>
           {% endif %}
+          {% assign size_info = site.data.scrunchie_sizes[item.scrunchie_size] %}
           <h3 class="scrunchies-variant__name"><a href="{{ item.url }}">{{ item.title }}</a></h3>
-          <p class="scrunchies-variant__desc">{{ item.subtitle }}</p>
+          <p class="scrunchies-variant__desc">{% if size_info %}{{ size_info.label }}{% elsif item.scrunchie_size %}{{ item.scrunchie_size }}{% endif %}</p>
           <div class="gallery-card__footer">
             <div class="scrunchies-variant__price">{{ item.price }}</div>
             <button type="button" class="button button--primary" data-cart-add="{{ slug }}">הוסיפי לסל</button>
@@ -252,10 +253,10 @@ layout: default
 .gallery-card__dot.is-active { background: #fff; }
 .gallery-card .scrunchies-variant__name a { color: inherit; text-decoration: none; }
 .gallery-card .scrunchies-variant__name a:hover { text-decoration: underline; }
-.gallery-card .scrunchies-variant__name { font-size: 16px; min-height: 2.5em; margin-bottom: 6px; padding: 0 14px; }
-.gallery-card .scrunchies-variant__desc { font-size: 12px; flex: 0 0 auto; min-height: 1.5em; margin-bottom: 6px; padding: 0 14px; }
-.gallery-card__footer { margin-top: auto; }
-.gallery-card .scrunchies-variant__price { font-size: 22px; margin-bottom: 12px; padding: 0 14px; }
+.gallery-card .scrunchies-variant__name { font-size: 17px; line-height: 1.2; margin: 0 0 4px; padding: 0 14px; }
+.gallery-card .scrunchies-variant__desc { font-size: 12.5px; letter-spacing: .4px; line-height: 1.3; flex: 0 0 auto; margin: 0 0 8px; padding: 0 14px; }
+.gallery-card__footer { margin-top: auto; padding-top: 4px; }
+.gallery-card .scrunchies-variant__price { font-size: 20px; line-height: 1.2; margin: 0 0 10px; padding: 0 14px; }
 .gallery-card .button { width: calc(100% - 28px); padding: 9px 14px; }
 .gallery-card__meta { margin: 0 0 6px; font-size: .72rem; opacity: .65; min-height: 1.4em; padding: 0 14px; }
 .gallery-card[hidden] { display: none !important; }

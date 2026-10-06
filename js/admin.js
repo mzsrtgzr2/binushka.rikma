@@ -1180,7 +1180,8 @@
   }
 
   function storeCardCta(p) {
-    if (isUnavailable(p) || p.kind === 'content') return '';
+    if (p.kind === 'content') return '';
+    if (isUnavailable(p)) return fakeButton('עדכני אותי כשחוזר למלאי', 'store-item__add');
     if (p.kind === 'variable') return fakeButton('בחרי סכום', 'store-item__add');
     if (p.kind === 'variants') return fakeButton('בחרי סוג', 'store-item__add');
     return fakeButton(addToCartLabel(isPreorder(p)), 'store-item__add');
@@ -1247,6 +1248,8 @@
           var scrunchiePreorder =
             (Number(v.stock) === 0 || v.stock === '0') &&
             (Boolean(p.preorder) || Boolean(v.preorder));
+          var scrunchieSold =
+            (Number(v.stock) === 0 || v.stock === '0') && !scrunchiePreorder;
           return (
             '<article class="scrunchies-variant">' +
             img +
@@ -1258,13 +1261,15 @@
               : '') +
             (v.price ? '<div class="scrunchies-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
             variantStockLabel(v, 'scrunchies-variant__stock', p.preorder) +
-            fakeButton(addToCartLabel(scrunchiePreorder)) +
+            fakeButton(scrunchieSold ? 'עדכני אותי כשחוזר למלאי' : addToCartLabel(scrunchiePreorder)) +
             '</article>'
           );
         }
         var variantPreorder =
           (Number(v.stock) === 0 || v.stock === '0') &&
           (Boolean(p.preorder) || Boolean(v.preorder));
+        var variantSold =
+          (Number(v.stock) === 0 || v.stock === '0') && !variantPreorder;
         return (
           '<article class="store-variant">' +
           img +
@@ -1276,7 +1281,7 @@
           (v.price ? '<div class="store-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
           variantStockLabel(v, null, p.preorder) +
           '</div>' +
-          fakeButton(addToCartLabel(variantPreorder)) +
+          fakeButton(variantSold ? 'עדכני אותי כשחוזר למלאי' : addToCartLabel(variantPreorder)) +
           '</article>'
         );
       })
@@ -1284,7 +1289,8 @@
   }
 
   function productCartHtml(p) {
-    if (isUnavailable(p) || p.kind === 'content') return '';
+    if (p.kind === 'content') return '';
+    if (isUnavailable(p)) return fakeButton('עדכני אותי כשחוזר למלאי', 'section-button');
     if (p.kind === 'variable') {
       var chips = (p.presets || [])
         .map(function (n) {

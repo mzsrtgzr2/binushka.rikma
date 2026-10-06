@@ -50,7 +50,7 @@ layout: default
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <div class="section__navigation store-item__cart-actions">
+        <div class="section__navigation store-item__cart-actions" data-cart-actions>
           {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false %}
             {% if cart_meta.variable %}
             <div class="gift-amount">
@@ -164,9 +164,15 @@ layout: default
                   <div class="store-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
                   {% endif %}
                 </div>
-                <button type="button" class="button button--primary" data-cart-add="{{ slug }}" data-cart-variant="{{ vid }}" data-analytics="add_to_cart">
+                <button type="button" class="button button--primary" data-cart-add="{{ slug }}" data-cart-variant="{{ vid }}" data-analytics="add_to_cart"{% if v_sold_out %} hidden{% endif %}>
                   {% if v_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
                 </button>
+                {% if v_sold_out %}
+                {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" %}
+                {% else %}
+                {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" hide="1" %}
+                {% endif %}
+
               </article>
               {% endif %}
               {% endfor %}
@@ -187,6 +193,20 @@ layout: default
   </div>
   </div>
   {% endunless %}
+
+  {% if site.data.settings.newsletter.enabled %}
+  <div class="store-item-content animate" data-newsletter-notify-slot="product"{% unless sold_out %} hidden{% endunless %}>
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="section__navigation store-item__cart-actions">
+            {% include newsletter-notify-button.html intent="restock" source="product_restock" class="section-button" analytics="newsletter_restock" %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
   {% assign page_image = page.image %}
   {% if page_image == blank and page.variants %}

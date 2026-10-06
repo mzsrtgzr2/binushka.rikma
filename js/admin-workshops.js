@@ -1030,7 +1030,9 @@
 
     var footer = '';
     if (!workshop.registration_not_open && soldOut) {
-      footer = fakeButton('הרשמי לרשימת המתנה', 'project__add', 'waitlist');
+      footer = fakeButton('עדכני אותי כשהסדנה נפתחת', 'project__add', 'waitlist');
+    } else if (workshop.registration_not_open) {
+      footer = fakeButton('עדכני אותי כשההרשמה נפתחת', 'project__add', 'waitlist');
     } else if (price > 0 && !workshop.registration_not_open && !soldOut) {
       footer = fakeButton(
         workshop.price_per === 'workshop' ? 'הזמנת סדנה' : 'הרשמה לסדנה',
@@ -1126,7 +1128,11 @@
     }
 
     var content = workshop.registration_not_open
-      ? '<p>פרטי הסדנה יפורסמו בקרוב.</p>'
+      ? '<p>פרטי הסדנה יפורסמו בקרוב.</p>' +
+        '<div class="workshop-booking workshop-booking--waitlist">' +
+        fakeButton('עדכני אותי כשההרשמה נפתחת', 'section-button', 'waitlist') +
+        '<p class="workshop-booking__note">כשההרשמה תיפתח אכתוב על זה בניוזלטר, יחד עם סדנאות ומוצרים נוספים. מייל אחד מדי פעם, בלי להציף.</p>' +
+        '</div>'
       : renderMarkdown(workshop.body);
 
     var booking = '';
@@ -1134,8 +1140,8 @@
       if (soldOut) {
         booking =
           '<div class="workshop-booking workshop-booking--waitlist">' +
-          fakeButton('הרשמי לרשימת המתנה', 'section-button', 'waitlist') +
-          '<p class="workshop-booking__note">הסדנה מלאה כרגע. שלחי הודעה בוואטסאפ ואעדכן אותך אם מתפנה מקום.</p>' +
+          fakeButton('עדכני אותי כשהסדנה נפתחת', 'section-button', 'waitlist') +
+          '<p class="workshop-booking__note">הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.</p>' +
           '</div>';
       } else {
         booking = bookingHtml(workshop);

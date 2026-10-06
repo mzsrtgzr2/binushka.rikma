@@ -1,0 +1,25 @@
+{%- comment -%}
+  Opens the newsletter signup panel. Used when a product is out of stock or a
+  workshop is full / not open yet, so the visitor can hear when it comes back.
+  include.intent  — restock | workshop | opening (copy in settings.newsletter.modal)
+  include.source  — Mixpanel / subscriber source
+  include.class   — extra button classes
+  include.analytics — data-analytics label
+  include.hide    — "1" hides the button until live stock sells out
+{%- endcomment -%}
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+{% assign intent = include.intent | default: 'restock' %}
+{% assign pack = newsletter.modal.restock %}
+{% if intent == 'workshop' %}{% assign pack = newsletter.modal.workshop %}{% endif %}
+{% if intent == 'opening' %}{% assign pack = newsletter.modal.opening %}{% endif %}
+<button type="button"
+        class="button button--primary newsletter-notify{% if include.class %} {{ include.class }}{% endif %}"
+        data-newsletter-open
+        data-newsletter-intent="{{ intent }}"
+        data-newsletter-source="{{ include.source | default: intent }}"
+        data-analytics="{{ include.analytics | default: 'newsletter_notify' }}"
+        {% if include.hide == '1' %}hidden{% endif %}>
+  {{ pack.button | default: newsletter.button }}
+</button>
+{% endif %}

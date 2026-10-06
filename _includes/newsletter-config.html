@@ -15,6 +15,24 @@
     "rateLimited": {{ messages.rate_limited | jsonify }},
     "unavailable": {{ messages.unavailable | jsonify }},
     "error": {{ messages.error | jsonify }}
+  },
+  "modal": {
+    "title": {{ newsletter.modal.title | jsonify }},
+    "description": {{ newsletter.modal.description | jsonify }},
+    "intents": {
+      "restock": {
+        "title": {{ newsletter.modal.restock.title | jsonify }},
+        "description": {{ newsletter.modal.restock.description | jsonify }}
+      },
+      "workshop": {
+        "title": {{ newsletter.modal.workshop.title | jsonify }},
+        "description": {{ newsletter.modal.workshop.description | jsonify }}
+      },
+      "opening": {
+        "title": {{ newsletter.modal.opening.title | jsonify }},
+        "description": {{ newsletter.modal.opening.description | jsonify }}
+      }
+    }
   }
 }
 </script>

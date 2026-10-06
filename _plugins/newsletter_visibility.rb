@@ -17,10 +17,19 @@ module NewsletterVisibility
     # The public page lives in the `pages` collection, so it is not a site.page.
     # Match the file as well as the url: the url is not always assigned yet.
     path = item.respond_to?(:relative_path) ? item.relative_path.to_s : ''
-    return true if path == '_pages/newsletter.html'
+    return true if path == '_pages/newsletter.html' || path == '_pages/newsletter-subscribe.html'
 
     url = item.respond_to?(:url) ? item.url.to_s : ''
-    ['/newsletter', '/newsletter/', '/newsletter/index.html', '/newsletter.html'].include?(url)
+    [
+      '/newsletter',
+      '/newsletter/',
+      '/newsletter/index.html',
+      '/newsletter.html',
+      '/subscribe',
+      '/subscribe/',
+      '/subscribe/index.html',
+      '/subscribe.html'
+    ].include?(url)
   end
 end
 

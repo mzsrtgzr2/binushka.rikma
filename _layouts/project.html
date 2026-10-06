@@ -59,6 +59,14 @@ layout: default
   <div class="project-content animate">
     {% if page.registration_not_open %}
       <p>פרטי הסדנה יפורסמו בקרוב.</p>
+      {% if site.data.settings.newsletter.enabled %}
+      <div class="workshop-booking workshop-booking--waitlist">
+        {% include newsletter-notify-button.html intent="opening" source="workshop_opening" class="section-button" analytics="newsletter_workshop_opening" %}
+        <p class="workshop-booking__note">
+          כשההרשמה תיפתח אכתוב על זה בניוזלטר, יחד עם סדנאות ומוצרים נוספים. מייל אחד מדי פעם, בלי להציף.
+        </p>
+      </div>
+      {% endif %}
     {% else %}
       {{ content }}
     {% endif %}
@@ -71,12 +79,24 @@ layout: default
       <div class="col-12">
         {% if sold_out %}
         <div class="workshop-booking workshop-booking--waitlist">
-          {% include workshop-waitlist-button.html title=page.title class="section-button" %}
+          {% include workshop-waitlist-button.html title=page.title class="section-button" source="workshop_page" %}
           <p class="workshop-booking__note">
+            {% if site.data.settings.newsletter.enabled %}
+            הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.
+            {% else %}
             הסדנה מלאה כרגע. שלחי הודעה בוואטסאפ ואעדכן אותך אם מתפנה מקום.
+            {% endif %}
           </p>
         </div>
         {% elsif booking_in_cart %}
+        {% if site.data.settings.newsletter.enabled %}
+        <div class="workshop-booking workshop-booking--waitlist" data-newsletter-notify-slot="workshop" hidden>
+          {% include workshop-waitlist-button.html title=page.title class="section-button" source="workshop_page" %}
+          <p class="workshop-booking__note">
+            הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.
+          </p>
+        </div>
+        {% endif %}
         <div class="workshop-booking">
           {% unless workshop.variants %}
           <div class="workshop-booking__head">

@@ -149,9 +149,14 @@ layout: default
       {% elsif v_limited %}
       <div class="scrunchies-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
       {% endif %}
-      <button type="button" class="button button--primary" data-cart-add="scrunchies" data-cart-variant="{{ vid }}">
+      <button type="button" class="button button--primary" data-cart-add="scrunchies" data-cart-variant="{{ vid }}"{% if v_sold_out %} hidden{% endif %}>
         {% if v_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
       </button>
+      {% if v_sold_out %}
+      {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" %}
+      {% else %}
+      {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" hide="1" %}
+      {% endif %}
       <p class="scrunchies-variant__note">הרכישה היא לפי המלאי הקיים. לאחר ההזמנה <a href="https://wa.me/972544247753?text={{ 'הי בינושקה, הזמנתי סקראנצ׳י ואשמח לראות את הבדים הזמינים' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ</a> כדי לראות את הבדים הזמינים.</p>
     </article>
     {% endif %}

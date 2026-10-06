@@ -33,7 +33,10 @@
                     <p>
                     {% include social-nav.html %}
                     </p>
+                    {% include newsletter-page-flags.html %}
+                    {% unless newsletter_subscribe_page %}
                     {% include newsletter-signup.html source="footer" class="newsletter-signup--footer" %}
+                    {% endunless %}
                   </div>
                 </div>
               </div>

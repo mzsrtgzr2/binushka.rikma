@@ -40,7 +40,7 @@
 | `store_sort` | שונה סדר המיון | `sort_by` |
 | `workshop_filter` | סוננו סדנאות לפי קטגוריה או חודש | `filter_type`, `category`, `month`, `results` |
 | `contact_click` | לחיצה על וואטסאפ / מייל / טלפון | `method` |
-| `newsletter_signup` | הרשמה לניוזלטר הצליחה | `source` |
+| `newsletter_signup` | הרשמה לניוזלטר הצליחה | `source` (`home`, `footer`, `modal`, `subscribe_page`, `store_card`, `product_restock`, `product_variant`, `workshop_card`, `workshop_page`, `workshop_opening`) |
 | `newsletter_signup_error` | הרשמה לניוזלטר נכשלה | `reason`, `source` |
 | `purchase_untracked` | הגיעו ל-`/thanks/` בלי הזמנה שמורה בדפדפן | `reason` |
 

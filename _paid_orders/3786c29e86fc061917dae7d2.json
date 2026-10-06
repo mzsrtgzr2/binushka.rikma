@@ -1,0 +1,13 @@
+{
+  "orderId": "3786c29e86fc061917dae7d2",
+  "documentId": "0ba5c808-b248-4fcc-a104-57ec3330870e",
+  "amount": 70,
+  "purchases": [
+    {
+      "slug": "prym-marker-purple",
+      "quantity": 1,
+      "variant": "water"
+    }
+  ],
+  "paidAt": "2026-10-06T22:33:19.818Z"
+}

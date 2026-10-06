@@ -264,6 +264,20 @@
         }
       }
     },
+    "scrunchie-psim-sagol-kachol": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פסים סגול כחול",
+      "price": 45
+    },
+    "scrunchie-rikmat-prachim-bezh": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י רקמת פרחים בז׳",
+      "price": 45
+    },
     "scrunchie-tarnegolim": {
       "stock": null,
       "outOfStock": false,

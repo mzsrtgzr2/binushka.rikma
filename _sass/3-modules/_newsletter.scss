@@ -305,6 +305,15 @@
   }
 }
 
+.newsletter-signup--page {
+  max-width: 560px;
+  margin: 0 auto 64px;
+}
+
+.newsletter-signup--page .newsletter-signup__form {
+  max-width: none;
+}
+
 .newsletter-signup--modal {
   padding: 0;
   background: transparent;

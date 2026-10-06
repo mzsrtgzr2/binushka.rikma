@@ -1,0 +1,17 @@
+{% assign newsletter_public_page = false %}
+{% assign newsletter_subscribe_page = false %}
+{% if page.collection == 'newsletter' %}
+  {% assign newsletter_public_page = true %}
+{% endif %}
+{% assign newsletter_page_url = page.url | default: '' %}
+{% if newsletter_page_url == '/newsletter' or newsletter_page_url == '/newsletter/' or newsletter_page_url == '/newsletter/index.html' %}
+  {% assign newsletter_public_page = true %}
+{% endif %}
+{% if newsletter_page_url == '/subscribe' or newsletter_page_url == '/subscribe/' or newsletter_page_url == '/subscribe/index.html' %}
+  {% assign newsletter_public_page = true %}
+  {% assign newsletter_subscribe_page = true %}
+{% endif %}
+{% assign newsletter_hidden = false %}
+{% if site.data.settings.newsletter.enabled == false and newsletter_public_page %}
+  {% assign newsletter_hidden = true %}
+{% endif %}

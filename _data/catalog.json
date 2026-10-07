@@ -551,6 +551,11 @@
     "price": 45,
     "category": "scrunchies-gallery"
   },
+  "scrunchie-lavavot-yerukim": {
+    "name": "סקראנצ'י לבבות ירוקים",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
   "scrunchie-nimrim-adilit": {
     "name": "סקראנצ'י נמרים אצילית",
     "price": 85,
@@ -559,6 +564,16 @@
   "scrunchie-psim-sagol-kachol": {
     "name": "סקראנצ'י פסים סגול כחול",
     "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-psim-turquiz": {
+    "name": "סקראנצ'י פסים טורקיז",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-psim-vrod-chum": {
+    "name": "סקראנצ'י פסים ורוד חום",
+    "price": 30,
     "category": "scrunchies-gallery"
   },
   "scrunchie-rikmat-prachim-bezh": {

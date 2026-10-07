@@ -271,6 +271,13 @@
       "name": "סקראנצ'י חומה פרחונית Fableism",
       "price": 45
     },
+    "scrunchie-lavavot-yerukim": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י לבבות ירוקים",
+      "price": 30
+    },
     "scrunchie-nimrim-adilit": {
       "stock": 1,
       "outOfStock": false,
@@ -284,6 +291,20 @@
       "limitedStock": true,
       "name": "סקראנצ'י פסים סגול כחול",
       "price": 45
+    },
+    "scrunchie-psim-turquiz": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פסים טורקיז",
+      "price": 45
+    },
+    "scrunchie-psim-vrod-chum": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פסים ורוד חום",
+      "price": 30
     },
     "scrunchie-rikmat-prachim-bezh": {
       "stock": 2,

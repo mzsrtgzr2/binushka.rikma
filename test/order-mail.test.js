@@ -101,7 +101,7 @@ test('renderOrderEmail includes items, notes, and totals in Hebrew', () => {
     shipping: 25,
     discount: 17,
     total: 178,
-    coupon: { code: 'TEN', discount: 17 },
+    coupon: { code: 'TEN', discount: 17, type: 'percent', value: 10 },
     notes: {
       variantNote: 'תחרה',
       packAsGift: true,
@@ -117,11 +117,52 @@ test('renderOrderEmail includes items, notes, and totals in Hebrew', () => {
   assert.match(mail.html, /תחרה/);
   assert.match(mail.html, /מזל טוב/);
   assert.match(mail.html, /אריזה כמתנה/);
+  assert.match(mail.html, /קוד קופון/);
+  assert.match(mail.html, /TEN \(10%\)/);
+  assert.match(mail.html, /הערות ואפשרויות/);
   assert.match(mail.html, /Fancy/);
   assert.match(mail.html, /doc-12345678/);
-  assert.match(mail.html, /TEN/);
+  assert.match(mail.text, /קוד קופון: TEN/);
+  assert.match(mail.text, /אריזה כמתנה: כן/);
   assert.match(mail.text, /סה״כ לתשלום: ₪178/);
   assert.match(mail.text, /× 2/);
+});
+
+test('full checkout snapshot email surfaces coupon and gift packing', () => {
+  let order = applyGiftPacking(
+    applyWorkshopNote(
+      applyVariantNote(buildOrder([{ id: 'scrunchies', quantity: 2, variant: 'fancy' }], 'courier'), body.variantNote),
+      body.participantsNote
+    ),
+    body
+  );
+  order = coupons.applyCoupon(order, 'TEN', {
+    TEN: { code: 'TEN', type: 'percent', value: 10, active: true },
+  });
+  const snapshot = orderMail.buildSnapshot({
+    orderId: 'abcdef0123456789abcdef01',
+    order,
+    body,
+    customer: {
+      name: 'נועה כהן',
+      emails: ['noa@example.com'],
+      phone: '0501234567',
+      address: 'אייזנברג 39',
+      city: 'רחובות',
+      zip: '7620000',
+      country: 'IL',
+    },
+  });
+  const mail = orderMail.renderOrderEmail(snapshot);
+  assert.match(mail.html, /קוד קופון/);
+  assert.match(mail.html, /TEN/);
+  assert.match(mail.html, /אריזה כמתנה/);
+  assert.match(mail.html, /מזל טוב/);
+  assert.match(mail.html, /תחרה זהובה/);
+  assert.match(mail.html, /נועה ומאיה/);
+  assert.match(mail.text, /קוד קופון: TEN/);
+  assert.match(mail.text, /אריזה כמתנה: כן/);
+  assert.match(mail.text, /כרטיס ברכה: מזל טוב/);
 });
 
 test('sendOrderSummary skips when Gmail is not configured', async () => {
@@ -192,14 +233,30 @@ test('snapshotFromMorningDocument recovers client and income rows', () => {
         zip: '7620000',
         country: 'IL',
       },
-      income: [{ description: 'fox — אריזה כמתנה', quantity: 1, price: 220 }],
+      income: [
+        {
+          description: 'fox — אריזה כמתנה — כרטיס ברכה: מזל טוב',
+          quantity: 1,
+          price: 220,
+        },
+        { description: 'הנחה — קופון TEN', quantity: 1, price: -22 },
+      ],
     },
-    { orderId: 'abcdef0123456789abcdef01', amount: 220, coupon: 'TEN' }
+    { orderId: 'abcdef0123456789abcdef01', amount: 198, coupon: 'TEN' }
   );
   assert.equal(snapshot.customer.email, 'noa@example.com');
-  assert.equal(snapshot.lines[0].description, 'fox — אריזה כמתנה');
-  assert.equal(snapshot.total, 220);
+  assert.equal(snapshot.lines[0].description, 'fox — אריזה כמתנה — כרטיס ברכה: מזל טוב');
+  assert.equal(snapshot.total, 198);
   assert.equal(snapshot.coupon.code, 'TEN');
+  assert.equal(snapshot.discount, 22);
+  assert.equal(snapshot.notes.packAsGift, true);
+  assert.equal(snapshot.notes.giftMessage, 'מזל טוב');
+
+  const mail = orderMail.renderOrderEmail(snapshot);
+  assert.match(mail.html, /קוד קופון/);
+  assert.match(mail.html, /אריזה כמתנה/);
+  assert.match(mail.html, /מזל טוב/);
+  assert.match(mail.text, /הנחה \(TEN\): −₪22/);
 });
 
 test('pending order paths are scoped under orders/pending', () => {

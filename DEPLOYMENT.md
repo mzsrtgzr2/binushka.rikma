@@ -199,8 +199,15 @@ environment variables between Preview and Production:
 | `NEWSLETTER_SECRET` | `openssl rand -hex 32`; signs unsubscribe links |
 | `GMAIL_USER` | the sending address |
 | `GMAIL_APP_PASSWORD` | 16-character app password, not the account password |
+| `ORDER_NOTIFY_EMAIL` | optional inbox for completed-order summaries; defaults to `GMAIL_USER` |
 | `SITE_URL` | `https://rikma.binushka.com` |
 | `NEWSLETTER_DAILY_CAP` | optional; defaults to 400 recipients per send |
+
+The same Gmail account also sends the studio a detailed order summary after
+each paid checkout (and after a ₪0 / skipped checkout). Checkout stores the
+full customer snapshot in private Blob until Morning confirms payment; free
+checkouts mail immediately. Without `GMAIL_USER` / `GMAIL_APP_PASSWORD` the
+sale still completes and the mail is skipped.
 
 Until the first three are set the signup form answers "ההרשמה לניוזלטר לא זמינה
 כרגע". The pages still build and render, so a preview without them shows the

@@ -267,3 +267,54 @@ test('a paid order with a coupon bumps uses once', async () => {
   const marker = JSON.parse(fs.readFileSync(path.join(root, admin.paidOrderPath(orderId)), 'utf8'));
   assert.equal(marker.coupon, 'SAVE10');
 });
+
+test('a confirmed payment emails the owner the pending order snapshot', async () => {
+  const sent = [];
+  const realSend = notify.orderMail.sendOrderSummary;
+  const realRead = notify.pendingOrders.read;
+  const realRemove = notify.pendingOrders.remove;
+  notify.orderMail.sendOrderSummary = async (snapshot, opts) => {
+    sent.push({ snapshot, opts });
+    return { ok: true };
+  };
+  notify.pendingOrders.read = async (_env, orderId) => ({
+    orderId,
+    customer: {
+      name: 'נועה כהן',
+      email: 'noa@example.com',
+      phone: '0501234567',
+      address: 'אייזנברג 39',
+      city: 'רחובות',
+      zip: '7620000',
+      country: 'IL',
+    },
+    shippingLabel: 'משלוח - שליח עד הבית',
+    lines: [{ description: 'fox', quantity: 1, price: 220 }],
+    subtotal: 220,
+    shipping: 0,
+    discount: 0,
+    total: 220,
+    notes: { packAsGift: true, giftMessage: 'מזל טוב' },
+  });
+  notify.pendingOrders.remove = async () => ({ ok: true });
+  notify.morning.fetchDocument = async (id) => ({
+    id,
+    amount: 220,
+    creationDate: Math.floor(Date.now() / 1000),
+  });
+
+  try {
+    const token = orderToken();
+    const res = await callNotify(token);
+    assert.equal(res.statusCode, 200);
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0].snapshot.customer.email, 'noa@example.com');
+    assert.equal(sent[0].snapshot.notes.giftMessage, 'מזל טוב');
+    assert.equal(sent[0].opts.documentId, 'doc-12345678');
+    assert.equal(stockOf(root), 1);
+  } finally {
+    notify.orderMail.sendOrderSummary = realSend;
+    notify.pendingOrders.read = realRead;
+    notify.pendingOrders.remove = realRemove;
+  }
+});

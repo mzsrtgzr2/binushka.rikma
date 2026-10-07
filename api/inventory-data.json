@@ -107,10 +107,10 @@
       "name": "ריבועי בד לרקמה",
       "variants": {
         "type-1": {
-          "stock": 99
+          "stock": 97
         },
         "type-2": {
-          "stock": 100
+          "stock": 99
         },
         "type-3": {
           "stock": null
@@ -127,7 +127,7 @@
           "stock": null
         },
         "custom-25": {
-          "stock": 19
+          "stock": 18
         },
         "original-27": {
           "stock": 1

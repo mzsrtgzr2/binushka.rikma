@@ -7,11 +7,12 @@ price: ₪5 – ₪130
 out_of_stock: false
 limited_stock: true
 hide: false
-category: threads
 order: 1
 preorder: false
 gallery:
   - /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
+category: threads
+limited_edition: false
 variants:
   dmc:
     name: דוללה בודדת של dmc
@@ -21,7 +22,7 @@ variants:
   custom-25:
     name: סט של 25 — שאני מרכיבה לך
     price: 100
-    stock: 19
+    stock: 18
     image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
     gallery:
       - /images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg

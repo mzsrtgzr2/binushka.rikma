@@ -101,55 +101,77 @@ permalink: /checkout/
           </div>
         </div>
 
-        <div class="form__group">
-          <label class="form__label" for="checkout-address">כתובת (רחוב, מספר בית ועיר) *</label>
-          <input
-            type="text"
-            id="checkout-address"
-            name="address"
-            class="form__input"
-            placeholder="לדוגמה: אייזנברג 39, רחובות"
-            autocomplete="street-address"
-            required
-          >
-        </div>
+        <p class="checkout-shipping__none" id="checkout-no-shipping" hidden>
+          ההזמנה כוללת הרשמה לסדנאות בלבד — אין מה לשלוח, אז אין דמי משלוח.
+        </p>
 
-        <div class="row">
-          <div class="col col-6 col-d-12">
-            <div class="form__group">
-              <label class="form__label" for="checkout-city">עיר *</label>
-              <input
-                type="text"
-                id="checkout-city"
-                name="city"
-                class="form__input"
-                placeholder="עיר"
-                autocomplete="address-level2"
-                required
-              >
+        <fieldset class="checkout-shipping" id="checkout-shipping">
+          <legend>משלוח *</legend>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="pickup" required>
+            <span>איסוף עצמי מרחובות — חינם</span>
+          </label>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="registered" required>
+            <span>דואר רשום — ₪25</span>
+          </label>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="courier" required checked>
+            <span>שליח עד הבית — ₪40</span>
+          </label>
+        </fieldset>
+
+        <div id="checkout-address-fields">
+          <div class="form__group">
+            <label class="form__label" for="checkout-address">כתובת (רחוב, מספר בית ועיר) *</label>
+            <input
+              type="text"
+              id="checkout-address"
+              name="address"
+              class="form__input"
+              placeholder="לדוגמה: אייזנברג 39, רחובות"
+              autocomplete="street-address"
+              required
+            >
+          </div>
+
+          <div class="row">
+            <div class="col col-6 col-d-12">
+              <div class="form__group">
+                <label class="form__label" for="checkout-city">עיר *</label>
+                <input
+                  type="text"
+                  id="checkout-city"
+                  name="city"
+                  class="form__input"
+                  placeholder="עיר"
+                  autocomplete="address-level2"
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="col col-6 col-d-12">
+              <div class="form__group">
+                <label class="form__label" for="checkout-zip">מיקוד</label>
+                <input
+                  type="text"
+                  id="checkout-zip"
+                  name="zip"
+                  class="form__input"
+                  placeholder="מיקוד"
+                  autocomplete="postal-code"
+                >
+              </div>
             </div>
           </div>
 
-          <div class="col col-6 col-d-12">
-            <div class="form__group">
-              <label class="form__label" for="checkout-zip">מיקוד</label>
-              <input
-                type="text"
-                id="checkout-zip"
-                name="zip"
-                class="form__input"
-                placeholder="מיקוד"
-                autocomplete="postal-code"
-              >
-            </div>
+          <div class="form__group">
+            <label class="form__label" for="checkout-country">מדינה *</label>
+            <select id="checkout-country" name="country" class="form__input" autocomplete="country" required>
+              <option value="IL" selected>ישראל</option>
+            </select>
           </div>
-        </div>
-
-        <div class="form__group">
-          <label class="form__label" for="checkout-country">מדינה *</label>
-          <select id="checkout-country" name="country" class="form__input" autocomplete="country" required>
-            <option value="IL" selected>ישראל</option>
-          </select>
         </div>
 
         <div class="form__group" id="checkout-variant-note-group" hidden>
@@ -177,26 +199,6 @@ permalink: /checkout/
           ></textarea>
           <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם נרשמת ליותר ממקום אחד, אפשר לרשום כאן מי מגיעה.</p>
         </div>
-
-        <p class="checkout-shipping__none" id="checkout-no-shipping" hidden>
-          ההזמנה כוללת הרשמה לסדנאות בלבד — אין מה לשלוח, אז אין דמי משלוח.
-        </p>
-
-        <fieldset class="checkout-shipping" id="checkout-shipping">
-          <legend>משלוח *</legend>
-          <label class="checkout-shipping__option">
-            <input type="radio" name="shipping" value="pickup" required>
-            <span>איסוף עצמי מרחובות — חינם</span>
-          </label>
-          <label class="checkout-shipping__option">
-            <input type="radio" name="shipping" value="registered" required>
-            <span>דואר רשום — ₪25</span>
-          </label>
-          <label class="checkout-shipping__option">
-            <input type="radio" name="shipping" value="courier" required checked>
-            <span>שליח עד הבית — ₪40</span>
-          </label>
-        </fieldset>
 
         <div class="checkout-coupon" id="checkout-coupon">
           <label class="form__label" for="checkout-coupon-code">קוד קופון</label>

@@ -88,6 +88,47 @@ test('payment form uses 12 installments only when MORNING_MAX_PAYMENTS is set', 
   assert.equal(payload.maxPayments, 12);
 });
 
+test('pickup checkout skips address fields', () => {
+  const { customer } = checkout.readCustomer({
+    ...customerBody,
+    shipping: 'pickup',
+    address: '',
+    city: '',
+    zip: '',
+  });
+  assert.equal(customer.address, '');
+  assert.equal(customer.city, '');
+  assert.equal(customer.zip, '');
+  assert.equal(customer.phone, '0501234567');
+});
+
+test('courier checkout still requires address fields', () => {
+  const result = checkout.readCustomer({
+    firstName: 'נועה',
+    lastName: 'כהן',
+    email: 'noa@example.com',
+    phone: '0501234567',
+    shipping: 'courier',
+    address: '',
+    city: '',
+    country: 'IL',
+  });
+  assert.equal(result.error, 'חסרים פרטי כתובת למשלוח');
+});
+
+test('workshop-only checkout skips address fields', () => {
+  const { customer } = checkout.readCustomer({
+    firstName: 'נועה',
+    lastName: 'כהן',
+    email: 'noa@example.com',
+    phone: '0501234567',
+    shipping: 'none',
+    country: 'IL',
+  });
+  assert.equal(customer.address, '');
+  assert.equal(customer.city, '');
+});
+
 test('zero-price shipping is omitted from income rows', () => {
   const rows = checkout.buildIncomeRows(
     [

@@ -236,6 +236,25 @@
     });
   }
 
+  /* Pickup and workshop-only carts do not need a delivery address. */
+  function requiresAddress(method) {
+    return method !== 'pickup' && method !== 'none';
+  }
+
+  function syncAddressVisibility(shippingNeeded) {
+    var wrap = document.getElementById('checkout-address-fields');
+    if (!wrap) return;
+    var method = shippingNeeded ? selectedShipping() : 'none';
+    var need = requiresAddress(method);
+    wrap.hidden = !need;
+    ['address', 'city', 'country'].forEach(function (name) {
+      var el = form.elements[name];
+      if (!el) return;
+      if (need) el.setAttribute('required', '');
+      else el.removeAttribute('required');
+    });
+  }
+
   function syncShippingVisibility(items) {
     var shipping = needsShipping(items);
     var fieldset = document.getElementById('checkout-shipping');
@@ -247,6 +266,7 @@
       });
     }
     if (note) note.hidden = shipping;
+    syncAddressVisibility(shipping);
     return shipping;
   }
 
@@ -422,6 +442,8 @@
   restoreCustomer();
   syncGiftMessageVisibility();
   loadPersistedCoupon();
+  /* Address visibility depends on restored shipping; renderSummary also syncs. */
+  syncAddressVisibility(true);
 
   if (couponApply) {
     couponApply.addEventListener('click', function () {
@@ -529,8 +551,10 @@
     var data = Object.fromEntries(new FormData(form).entries());
     var subtotal = window.StoreCart ? StoreCart.subtotal() : 0;
     var shipping = needsShipping(items);
-    var ship = shipping ? shippingCost(data.shipping, subtotal) : 0;
+    var shippingMethod = shipping ? data.shipping : 'none';
+    var ship = shipping ? shippingCost(shippingMethod, subtotal) : 0;
     var discount = appliedCoupon && appliedCoupon.discount ? Number(appliedCoupon.discount) : 0;
+    var needAddress = requiresAddress(shippingMethod);
     var payload = {
       items: items.map(function (item) {
         var row = { id: item.id, quantity: item.quantity };
@@ -538,15 +562,15 @@
         if (item.variant) row.variant = item.variant;
         return row;
       }),
-      shipping: shipping ? data.shipping : 'none',
+      shipping: shippingMethod,
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,
       email: data.email,
-      address: data.address,
-      city: data.city,
-      zip: data.zip || '',
-      country: data.country,
+      address: needAddress ? data.address : '',
+      city: needAddress ? data.city : '',
+      zip: needAddress ? data.zip || '' : '',
+      country: needAddress ? data.country : data.country || 'IL',
     };
     if (appliedCoupon && appliedCoupon.code) payload.couponCode = appliedCoupon.code;
     else if (data.couponCode) payload.couponCode = String(data.couponCode).trim();
@@ -563,7 +587,7 @@
     }
     saveCustomer();
     submitted = true;
-    reportShipping(items, shipping ? data.shipping : 'none');
+    reportShipping(items, shippingMethod);
     /* Mixpanel dedupes purchase by this ref ($insert_id), so it must stay stable. */
     var orderRef =
       'BNK-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -605,7 +629,7 @@
             JSON.stringify({
               items: items,
               orderRef: orderRef,
-              shipping: data.shipping,
+              shipping: shippingMethod,
               shippingCost: ship,
               subtotal: subtotal,
               discount: discount,

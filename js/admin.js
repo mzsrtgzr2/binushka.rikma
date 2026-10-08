@@ -1556,7 +1556,22 @@
     });
   }
 
+  // Save and "edit while the board is dirty" can both call this. Run them one
+  // after another so two requests don't race the same GitHub branch.
+  var stockSaveQueue = Promise.resolve();
+
   function saveStock() {
+    var run = stockSaveQueue.then(function () {
+      return saveStockNow();
+    });
+    stockSaveQueue = run.then(
+      function () {},
+      function () {}
+    );
+    return run;
+  }
+
+  function saveStockNow() {
     saveBtn.disabled = true;
     show(boardMessage, 'שומרת…', 'info');
 

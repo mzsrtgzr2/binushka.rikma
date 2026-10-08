@@ -12,13 +12,13 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 29
+order: 30
 scrunchie_type: כותנה
 scrunchie_color: סגול
 fabric_country:
-category: scrunchies-gallery
 limited_edition: false
 preorder: false
+category: scrunchies-gallery
 ---
 
 סקראנצ'י מבד כותנה עם פסים בגווני סגול וכחול. תפורה בעבודת יד — פריט יחיד.

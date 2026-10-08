@@ -12,16 +12,16 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: fancy
-order: 31
+order: 32
 scrunchie_type: תחרה
 scrunchie_color: ורוד
 fabric_country:
+limited_edition: false
+preorder: false
 gallery:
   - /images/scrunchies/gallery/scrunchie-nimrim-adilit-2.png
   - /images/scrunchies/gallery/scrunchie-nimrim-adilit-3.png
 category: scrunchies-gallery
-limited_edition: false
-preorder: false
 ---
 
 סקראנצ'י בהדפס נמרים וטיגריסים על רקע מג'נטה, עם סיומת תחרה ורודה. גודל Fancy — הפריט הכי מיוחד בסדרה. תפורה בעבודת יד, פריט יחיד.

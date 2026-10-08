@@ -10,12 +10,12 @@ hide: true
 in_cart: false
 noindex: true
 sitemap: false
-order: 12
+order: 24
 preorder: false
+limited_edition: false
 gallery:
   - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
 category: kits
-limited_edition: false
 ---
 
 המוצר אוחד לעמוד [ערכות רקמה מיוחדות](/store/special-embroidery-kits/).

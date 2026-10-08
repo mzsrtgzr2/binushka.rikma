@@ -12,13 +12,13 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 32
+order: 33
 scrunchie_type: כותנה
 scrunchie_color: חום
 fabric_country:
-category: scrunchies-gallery
 limited_edition: false
 preorder: false
+category: scrunchies-gallery
 ---
 
 סקראנצ'י מבד Fableism בגוון חום עם פרחים קטנים בגווני לבן וחלודה. גודל גדול. תפורה בעבודת יד, פריט יחיד.

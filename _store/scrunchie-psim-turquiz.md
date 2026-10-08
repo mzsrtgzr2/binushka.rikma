@@ -12,17 +12,17 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 35
+order: 36
 scrunchie_type: כותנה
 scrunchie_color: תכלת
 fabric_country:
+limited_edition: false
+preorder: false
 gallery:
   - /images/scrunchies/gallery/scrunchie-psim-turquiz-2.png
   - /images/scrunchies/gallery/scrunchie-psim-turquiz-3.png
   - /images/scrunchies/gallery/scrunchie-psim-turquiz-4.png
 category: scrunchies-gallery
-limited_edition: false
-preorder: false
 ---
 
 סקראנצ'י מבד כותנה עם פסים דקים בטורקיז על רקע לבן. גודל גדול. תפורה בעבודת יד.

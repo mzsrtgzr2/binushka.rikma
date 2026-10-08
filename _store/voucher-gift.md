@@ -8,7 +8,7 @@ out_of_stock: false
 limited_stock: false
 hide: false
 form_url: https://pay.grow.link/65997fae6f0da07374ea72c89464965c-MjczNTM1OQ
-order: 24
+order: 20
 cart_price: 330
 limited_edition: false
 preorder: false

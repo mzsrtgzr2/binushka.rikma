@@ -11,13 +11,13 @@ in_cart: false
 noindex: true
 sitemap: false
 stock: 3
-order: 14
+order: 26
 preorder: false
+limited_edition: false
 gallery:
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg
   - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg
 category: kits
-limited_edition: false
 ---
 
 המוצר אוחד לעמוד [ערכות רקמה מיוחדות](/store/special-embroidery-kits/).

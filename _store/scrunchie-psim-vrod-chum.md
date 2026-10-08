@@ -12,16 +12,16 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 33
+order: 34
 scrunchie_type: כותנה
 scrunchie_color: ורוד
 fabric_country:
+limited_edition: false
+preorder: false
 gallery:
   - /images/scrunchies/gallery/scrunchie-psim-vrod-chum-2.png
   - /images/scrunchies/gallery/scrunchie-psim-vrod-chum-3.png
 category: scrunchies-gallery
-limited_edition: false
-preorder: false
 ---
 
 סקראנצ'י מבד כותנה עם פסים באלכסון בגווני ורוד, חום ושמנת. תפורה בעבודת יד — פריט יחיד.

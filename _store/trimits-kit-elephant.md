@@ -12,7 +12,7 @@ in_cart: false
 noindex: true
 sitemap: false
 limited_edition: false
-order: 16
+order: 28
 category: kits
 categories:
   - kits

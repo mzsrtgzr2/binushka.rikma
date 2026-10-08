@@ -9,10 +9,10 @@ limited_stock: true
 limited_edition: true
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-order: 19
+order: 15
 cart_price: 300
-category: embroidered-works
 preorder: false
+category: embroidered-works
 ---
 
 ## פרחי אביב וחורף ופנטזיות על ימים טובים

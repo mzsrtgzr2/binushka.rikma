@@ -26,7 +26,7 @@
   var categoryGroup = document.getElementById('coupon-category-group');
   var categoryInput = document.getElementById('coupon-category');
   var productGroup = document.getElementById('coupon-product-group');
-  var productInput = document.getElementById('coupon-product');
+  var productsList = document.getElementById('coupon-products-list');
   var workshopsGroup = document.getElementById('coupon-workshops-group');
   var workshopScopeInput = document.getElementById('coupon-workshop-scope');
   var workshopsList = document.getElementById('coupon-workshops-list');
@@ -42,7 +42,20 @@
 
   var CATEGORY_LABELS = {
     'embroidery-supplies': 'ציוד רקמה',
+    kits: 'ערכות רקמה',
+    threads: 'חוטים',
+    hoops: 'חישוקים',
+    needles: 'מחטים',
+    tools: 'מספריים',
+    'markers-stickers': 'טושים ומדבקות',
+    fabrics: 'בדים',
+    books: 'ספרי רקמה',
+    beginners: 'למתחילות',
     'works-for-sale': 'עבודות למכירה',
+    'embroidered-works': 'עבודות רקומות',
+    'birth-gifts': 'מתנות ללידה',
+    'scrunchies-gallery': 'סקראנצ׳ים (גלריה)',
+    'gift-card': 'גיפט קארד',
     workshops: 'סדנאות'
   };
 
@@ -80,7 +93,7 @@
       min_purchase_invalid: 'מינימום רכישה לא תקין (מספר שלם בשקלים)',
       applies_to_invalid: 'בחרי על מה הקופון חל',
       category_invalid: 'בחרי קטגוריה',
-      product_invalid: 'בחרי מוצר',
+      product_invalid: 'בחרי לפחות מוצר אחד',
       products_invalid: 'בחרי לפחות סדנה אחת',
       invalid_request: 'הבקשה לא תקינה'
     };
@@ -95,8 +108,10 @@
     if (name === 'min_purchase') return minPurchaseInput;
     if (name === 'applies_to') return appliesToInput;
     if (name === 'category') return categoryInput;
-    if (name === 'product') return productInput;
-    if (name === 'products') return workshopScopeInput;
+    if (name === 'product' || name === 'products') {
+      if (isWorkshopsCategory()) return workshopScopeInput;
+      return productsList;
+    }
     return null;
   }
 
@@ -147,29 +162,44 @@
     }
   }
 
-  function fillProductOptions(selected) {
-    if (!productInput) return;
-    var current = selected || productInput.value || '';
-    var options =
-      '<option value="">בחרי מוצר</option>' +
-      products
-        .slice()
-        .sort(function (a, b) {
-          return String(a.title || a.slug).localeCompare(String(b.title || b.slug), 'he');
-        })
-        .map(function (p) {
-          return (
-            '<option value="' +
-            escapeHtml(p.slug) +
-            '"' +
-            (p.slug === current ? ' selected' : '') +
-            '>' +
-            escapeHtml(p.title || p.slug) +
-            '</option>'
-          );
-        })
-        .join('');
-    productInput.innerHTML = options;
+  function productLabel(row) {
+    var title = row.title || row.slug || '';
+    var cat = row.category ? CATEGORY_LABELS[row.category] || row.category : '';
+    if (cat) return title + ' · ' + cat;
+    return title;
+  }
+
+  function fillProductOptions(selectedIds) {
+    if (!productsList) return;
+    var selected = {};
+    (selectedIds || []).forEach(function (id) {
+      selected[id] = true;
+    });
+    if (!products.length) {
+      productsList.innerHTML = '<p class="admin-hint">אין מוצרים להצגה.</p>';
+      return;
+    }
+    productsList.innerHTML = products
+      .slice()
+      .sort(function (a, b) {
+        return String(a.title || a.slug).localeCompare(String(b.title || b.slug), 'he');
+      })
+      .map(function (p) {
+        var id = p.slug || '';
+        if (!id) return '';
+        return (
+          '<label class="admin-check">' +
+          '<input type="checkbox" name="coupon-product" value="' +
+          escapeHtml(id) +
+          '"' +
+          (selected[id] ? ' checked' : '') +
+          '> ' +
+          escapeHtml(productLabel(p)) +
+          '</label>'
+        );
+      })
+      .filter(Boolean)
+      .join('');
   }
 
   function workshopLabel(row) {
@@ -212,6 +242,16 @@
       })
       .filter(Boolean)
       .join('');
+  }
+
+  function readSelectedProducts() {
+    if (!productsList) return [];
+    return Array.prototype.slice
+      .call(productsList.querySelectorAll('input[name="coupon-product"]:checked'))
+      .map(function (el) {
+        return el.value;
+      })
+      .filter(Boolean);
   }
 
   function readSelectedWorkshops() {
@@ -266,17 +306,20 @@
       return null;
     }
     var category = categoryInput ? categoryInput.value : '';
-    var product = productInput ? productInput.value : '';
+    var selectedProducts = [];
     var selectedWorkshops = [];
     if (appliesTo === 'category' && !category) {
       show(formMessage, errorText('category_invalid'), 'error');
       if (categoryInput) categoryInput.focus();
       return null;
     }
-    if (appliesTo === 'product' && !product) {
-      show(formMessage, errorText('product_invalid'), 'error');
-      if (productInput) productInput.focus();
-      return null;
+    if (appliesTo === 'product') {
+      selectedProducts = readSelectedProducts();
+      if (!selectedProducts.length) {
+        show(formMessage, errorText('product_invalid'), 'error');
+        if (productsList && productsList.focus) productsList.focus();
+        return null;
+      }
     }
     if (appliesTo === 'category' && category === 'workshops') {
       if (workshopScopeInput && workshopScopeInput.value === 'selected') {
@@ -300,9 +343,13 @@
         min_purchase: minPurchase,
         applies_to: appliesTo,
         category: appliesTo === 'category' ? category : '',
-        product: appliesTo === 'product' ? product : '',
+        product: appliesTo === 'product' && selectedProducts.length === 1 ? selectedProducts[0] : '',
         products:
-          appliesTo === 'category' && category === 'workshops' ? selectedWorkshops : [],
+          appliesTo === 'product'
+            ? selectedProducts
+            : appliesTo === 'category' && category === 'workshops'
+              ? selectedWorkshops
+              : [],
         active: activeInput.checked
       }
     };
@@ -351,7 +398,7 @@
       products = (data.products || []).filter(function (p) {
         return p && p.slug && p.in_cart !== false && p.kind !== 'content';
       });
-      fillProductOptions();
+      fillProductOptions([]);
     });
   }
 
@@ -377,6 +424,24 @@
     return n + ' מימושים';
   }
 
+  function formatProductScope(row) {
+    var ids = [];
+    if (row.products && row.products.length) {
+      ids = row.products.slice();
+    } else if (row.product) {
+      ids = [row.product];
+    }
+    if (!ids.length) return '';
+    var labels = ids.map(function (id) {
+      var match = products.find(function (p) {
+        return p.slug === id;
+      });
+      return match ? match.title || match.slug : id;
+    });
+    if (labels.length === 1) return 'מוצר: ' + labels[0];
+    return 'מוצרים: ' + labels.join(', ');
+  }
+
   function formatScope(row) {
     if (row.applies_to === 'category' && row.category) {
       if (row.category === 'workshops' && row.products && row.products.length) {
@@ -391,11 +456,8 @@
       }
       return 'קטגוריה: ' + (CATEGORY_LABELS[row.category] || row.category);
     }
-    if (row.applies_to === 'product' && row.product) {
-      var match = products.find(function (p) {
-        return p.slug === row.product;
-      });
-      return 'מוצר: ' + (match ? match.title || match.slug : row.product);
+    if (row.applies_to === 'product') {
+      return formatProductScope(row);
     }
     return '';
   }
@@ -429,6 +491,13 @@
     valueInput.step = 'any';
   }
 
+  function selectedProductIds(row) {
+    if (!row) return [];
+    if (row.products && row.products.length) return row.products.slice();
+    if (row.product) return [row.product];
+    return [];
+  }
+
   function resetForm() {
     editing = null;
     form.reset();
@@ -438,7 +507,7 @@
     if (appliesToInput) appliesToInput.value = 'all';
     if (categoryInput) categoryInput.value = '';
     if (workshopScopeInput) workshopScopeInput.value = 'all';
-    fillProductOptions('');
+    fillProductOptions([]);
     fillWorkshopOptions([]);
     codeInput.readOnly = false;
     if (formLegend) formLegend.textContent = 'קוד חדש';
@@ -461,12 +530,13 @@
     }
     if (appliesToInput) appliesToInput.value = row.applies_to || 'all';
     if (categoryInput) categoryInput.value = row.category || '';
-    fillProductOptions(row.product || '');
+    fillProductOptions(selectedProductIds(row));
     var selected = Array.isArray(row.products) ? row.products : [];
     if (workshopScopeInput) {
-      workshopScopeInput.value = selected.length ? 'selected' : 'all';
+      workshopScopeInput.value =
+        row.category === 'workshops' && selected.length ? 'selected' : 'all';
     }
-    fillWorkshopOptions(selected);
+    fillWorkshopOptions(row.category === 'workshops' ? selected : []);
     activeInput.checked = row.active !== false;
     if (formLegend) formLegend.textContent = 'עריכת ' + row.code;
     if (cancelBtn) cancelBtn.hidden = false;

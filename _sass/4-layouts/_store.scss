@@ -401,9 +401,6 @@ body.store-menu-open {
   }
 
   .store-item__footer {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
     margin-top: 0;
     padding-top: 0;
   }
@@ -415,8 +412,7 @@ body.store-menu-open {
   }
 
   .store-item__add {
-    margin-top: auto;
-    padding-top: 16px;
+    margin-top: 12px;
     width: 100%;
     box-sizing: border-box;
     text-align: center;

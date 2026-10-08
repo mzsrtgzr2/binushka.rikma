@@ -14,20 +14,6 @@
       "name": "סט חוטים מנצנצים",
       "price": 330
     },
-    "dmc-kit-flowers": {
-      "stock": 3,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "ערכת רקמה עם 2 דוגמאות",
-      "price": 100
-    },
-    "dmc-kit-pearl": {
-      "stock": 2,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "רקמת סתיו מבית DMC",
-      "price": 120
-    },
     "embroidery-books": {
       "stock": null,
       "outOfStock": false,
@@ -78,20 +64,6 @@
       "preorder": true,
       "name": "זר פרחים רקום",
       "price": 300
-    },
-    "embroidery-tablecloth": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "ערכת רקמה  שהיא מפה יפהיפיה",
-      "variants": {
-        "type-1": {
-          "stock": 1
-        },
-        "type-2": {
-          "stock": 1
-        }
-      }
     },
     "embroidery-tshirt": {
       "stock": null,
@@ -199,13 +171,6 @@
           "stock": 3
         }
       }
-    },
-    "kit": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": false,
-      "name": "ערכת רקמה הכל כלול",
-      "price": 210
     },
     "needle-threader": {
       "stock": null,
@@ -326,25 +291,40 @@
       "limitedStock": false,
       "name": "סקראנצ'יז בעבודת יד"
     },
+    "special-embroidery-kits": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכות רקמה מיוחדות",
+      "variants": {
+        "tablecloth-mono": {
+          "stock": 1
+        },
+        "tablecloth-autumn": {
+          "stock": 1
+        },
+        "dmc-flowers": {
+          "stock": 3
+        },
+        "dmc-pearl": {
+          "stock": 2
+        },
+        "trimits-elephants": {
+          "stock": 1
+        },
+        "trimits-butterfly": {
+          "stock": 1
+        },
+        "kit-all-inclusive": {
+          "stock": null
+        }
+      }
+    },
     "stickers": {
       "stock": null,
       "outOfStock": false,
       "limitedStock": false,
       "name": "מדבקות לרקמה"
-    },
-    "trimits-kit-elephant": {
-      "stock": null,
-      "outOfStock": false,
-      "limitedStock": true,
-      "name": "ערכת רקמה שהבאתי מלונדון",
-      "variants": {
-        "type-1": {
-          "stock": 1
-        },
-        "type-2": {
-          "stock": 1
-        }
-      }
     },
     "voucher-gift": {
       "stock": null,

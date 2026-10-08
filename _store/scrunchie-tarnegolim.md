@@ -12,7 +12,7 @@ scrunchie_size: regular
 order: 29
 scrunchie_type: כותנה
 scrunchie_color: כחול
-fabric_country:
+fabric_country: לונדון
 out_of_stock: false
 limited_stock: false
 limited_edition: false

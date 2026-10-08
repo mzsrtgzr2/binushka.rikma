@@ -15,7 +15,7 @@ scrunchie_size: large
 order: 33
 scrunchie_type: כותנה
 scrunchie_color: חום
-fabric_country:
+fabric_country: לונדון
 limited_edition: false
 preorder: false
 category: scrunchies-gallery

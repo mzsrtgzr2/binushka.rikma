@@ -250,6 +250,13 @@
       "name": "סקראנצ'י נמרים אצילית",
       "price": 85
     },
+    "scrunchie-psim-turquiz-regular": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פסים טורקיז",
+      "price": 30
+    },
     "scrunchie-psim-turquiz": {
       "stock": 2,
       "outOfStock": false,

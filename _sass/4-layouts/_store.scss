@@ -377,7 +377,7 @@ body.store-menu-open {
   text-align: center;
 
   .store-item__title {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     font-size: 26px;
     line-height: 1.15;
 
@@ -401,8 +401,11 @@ body.store-menu-open {
   }
 
   .store-item__footer {
-    margin-top: auto;
-    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 0;
+    padding-top: 0;
   }
 
   .store-item__price {
@@ -412,7 +415,8 @@ body.store-menu-open {
   }
 
   .store-item__add {
-    margin-top: 12px;
+    margin-top: auto;
+    padding-top: 16px;
     width: 100%;
     box-sizing: border-box;
     text-align: center;

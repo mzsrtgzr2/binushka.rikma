@@ -251,7 +251,7 @@
       "price": 85
     },
     "scrunchie-prachim-yapaniyim": {
-      "stock": 2,
+      "stock": 1,
       "outOfStock": false,
       "limitedStock": true,
       "name": "סקראנצ'י פרחים יפניים",
@@ -279,7 +279,7 @@
       "price": 30
     },
     "scrunchie-rikmat-prachim-bezh": {
-      "stock": 2,
+      "stock": 1,
       "outOfStock": false,
       "limitedStock": true,
       "name": "סקראנצ'י רקמת פרחים בז׳",
@@ -321,7 +321,7 @@
           "stock": 3
         },
         "dmc-pearl": {
-          "stock": 2
+          "stock": 1
         },
         "trimits-elephants": {
           "stock": 1

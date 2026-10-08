@@ -46,7 +46,7 @@ variants:
   dmc-pearl:
     name: רקמת סתיו מבית DMC
     price: 120
-    stock: 2
+    stock: 1
     image: /images/store/dmc-kit-pearl/screenshot-2026-09-23-at-15-15-02-mue2n4gg.png
     gallery:
       - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-34-mui9lg06.jpg

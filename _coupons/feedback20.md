@@ -2,7 +2,7 @@
 code: FEEDBACK20
 type: percent
 value: 20
-active: true
+active: false
 applies_to: category
 category: embroidery-supplies
 uses: 3

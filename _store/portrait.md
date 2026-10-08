@@ -9,10 +9,10 @@ limited_stock: false
 limited_edition: true
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-order: 17
+order: 18
 cart_price: 250
-category: embroidered-works
 preorder: false
+category: embroidered-works
 ---
 
 ## מסגרת רקומה מחוטי כותנה יפהיפיים, בשילוב תמונה שלכם

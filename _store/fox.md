@@ -8,10 +8,11 @@ out_of_stock: false
 limited_stock: true
 limited_edition: true
 hide: false
-category: embroidered-works
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-order: 22
+order: 23
 cart_price: 220
+category: embroidered-works
+preorder: false
 ---
 
 ## שועל משמח רקום בטכניקת punch needle

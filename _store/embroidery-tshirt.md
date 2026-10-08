@@ -7,10 +7,12 @@ price: ₪100
 out_of_stock: false
 limited_stock: false
 hide: false
-category: embroidered-works
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-order: 20
+order: 21
 cart_price: 100
+category: embroidered-works
+limited_edition: false
+preorder: false
 ---
 
 ## רקמה על פריט לבוש בהזמנה אישית

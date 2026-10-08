@@ -12,11 +12,13 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 17
+order: 30
 scrunchie_type: רקמה
 scrunchie_color: בז'
 fabric_country:
 category: scrunchies-gallery
+limited_edition: false
+preorder: false
 ---
 
 סקראנצ'י מבד בגוון בז׳ טבעי עם רקמת פרחים עדינה. תפורה בעבודת יד — פריט ייחודי.

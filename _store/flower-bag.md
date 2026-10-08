@@ -7,10 +7,11 @@ price: ₪240
 out_of_stock: false
 limited_stock: true
 hide: false
-category: embroidered-works
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-order: 24
+order: 25
 preorder: false
+category: embroidered-works
+limited_edition: false
 variants:
   type-2:
     name: פרחוני גווני צהוב וירוק

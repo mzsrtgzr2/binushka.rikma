@@ -7,15 +7,17 @@ price: כל סכום לבחירתך
 out_of_stock: false
 limited_stock: false
 hide: false
-category: gift-card
-categories:
-  - gift-card
-  - birth-gifts
 variable: true
 min_price: 50
 max_price: 2000
 form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
-order: 26
+order: 27
+category: gift-card
+categories:
+  - gift-card
+  - birth-gifts
+limited_edition: false
+preorder: false
 presets:
   - 100
   - 150

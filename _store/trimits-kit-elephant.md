@@ -9,6 +9,7 @@ limited_stock: true
 preorder: false
 hide: false
 limited_edition: false
+order: 16
 category: kits
 categories:
   - kits

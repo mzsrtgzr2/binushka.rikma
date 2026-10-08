@@ -7,10 +7,12 @@ price: ₪300
 out_of_stock: true
 limited_stock: true
 hide: false
-category: embroidered-works
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-order: 21
+order: 22
 cart_price: 300
+category: embroidered-works
+limited_edition: false
+preorder: false
 ---
 
 ## רקמת בטטה מושרשת בעבודת יד עדינה

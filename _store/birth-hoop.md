@@ -9,13 +9,13 @@ limited_stock: false
 limited_edition: false
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
-order: 25
+order: 26
 cart_price: 450
+preorder: false
 category: birth-gifts
 categories:
   - birth-gifts
   - embroidered-works
-preorder: false
 ---
 
 ## תעודת לידה רקומה בעבודת יד

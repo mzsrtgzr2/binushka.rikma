@@ -51,9 +51,13 @@ stockists:
         logo: /images/stockists/revibe.jpg
         logo_fill: true
         url: https://www.instagram.com/revibe_2ndhand/
-order: 27
+order: 36
 out_of_stock: false
 limited_stock: false
+limited_edition: false
+preorder: false
+noindex: true
+sitemap: false
 gallery:
   - /images/scrunchies/06.jpeg
   - /images/scrunchies/01.jpeg
@@ -70,10 +74,6 @@ gallery:
   - /images/scrunchies/14.jpeg
   - /images/scrunchies/15.jpeg
 category: embroidered-works
-limited_edition: false
-preorder: false
-noindex: true
-sitemap: false
 variants:
   regular:
     name: "סקראנצ'י גודל רגיל"

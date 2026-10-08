@@ -6,9 +6,11 @@ image: /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-40-mue2vvu5.
 price: ₪100
 out_of_stock: false
 limited_stock: true
-hide: false
+hide: true
+in_cart: false
+noindex: true
+sitemap: false
 stock: 3
-cart_price: 100
 order: 14
 preorder: false
 gallery:
@@ -18,6 +20,4 @@ category: kits
 limited_edition: false
 ---
 
-עוד ערכת רקמה כיפית שהבאתי איתי מלונדון.
-מה שמיוחד בה זה שdmc חשבו על כל פרט קטן בדרך. כוללת בד, חישוק וחוטים תואמים.
-יש בפנים הסבר ל2 דוגמאות שונות. תרקמו מה שכיף לכן :)
+המוצר אוחד לעמוד [ערכות רקמה מיוחדות](/store/special-embroidery-kits/).

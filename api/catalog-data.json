@@ -13,16 +13,6 @@
     "price": 330,
     "category": "threads"
   },
-  "dmc-kit-flowers": {
-    "name": "ערכת רקמה עם 2 דוגמאות",
-    "price": 100,
-    "category": "kits"
-  },
-  "dmc-kit-pearl": {
-    "name": "רקמת סתיו מבית DMC",
-    "price": 120,
-    "category": "kits"
-  },
   "embroidery-books": {
     "name": "ספרי רקמה",
     "variants": {
@@ -165,39 +155,6 @@
     "price": 300,
     "category": "embroidered-works"
   },
-  "embroidery-tablecloth": {
-    "name": "ערכת רקמה  שהיא מפה יפהיפיה",
-    "variants": {
-      "type-1": {
-        "name": "דוגמא פרחונית מונוכרמטית כחולה",
-        "price": 160,
-        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg",
-        "description": "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.",
-        "stock": 1,
-        "gallery": [
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg",
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg"
-        ]
-      },
-      "type-2": {
-        "name": "דוגמת סתיו שלכת",
-        "price": 160,
-        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-56-mui93a0t.jpg",
-        "description": "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.",
-        "stock": 1,
-        "gallery": [
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui93a0u.jpg",
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-07-mui93a0u.jpg",
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg"
-        ]
-      }
-    },
-    "variant_order": [
-      "type-1",
-      "type-2"
-    ],
-    "category": "kits"
-  },
   "embroidery-tshirt": {
     "name": "רקמה בהזמנה אישית",
     "price": 100,
@@ -211,14 +168,14 @@
         "price": 10,
         "image": "/images/store/fabrics/screenshot-2026-09-24-at-15-38-17-mufir18h.jpg",
         "description": "גודל ריבוע לפחות 25*25 ס״מ",
-        "stock": 99
+        "stock": 97
       },
       "type-2": {
         "name": "דריל צבע טבעי - קרם",
         "price": 10,
         "image": "/images/store/fabrics/screenshot-2026-09-24-at-15-38-09-mufir18i.jpg",
         "description": "גודל ריבוע לפחות 25*25 ס״מ",
-        "stock": 100
+        "stock": 99
       },
       "type-3": {
         "name": "גולמי - פשתן",
@@ -252,7 +209,7 @@
         "price": 100,
         "image": "/images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg",
         "description": "הצבעים שאני משתמשת בהם הכי הרבה בסט מעולה למתחילות, מתקדמות.\nכולל שחור, לבן, ecru, ירוקים, כחולים, צהובים, אדומים. ועוד :)",
-        "stock": 19,
+        "stock": 18,
         "gallery": [
           "/images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg"
         ]
@@ -413,21 +370,6 @@
       "type-6"
     ],
     "category": "hoops"
-  },
-  "kit": {
-    "name": "ערכת רקמה הכל כלול",
-    "price": 210,
-    "category": "threads",
-    "categories": [
-      "threads",
-      "hoops",
-      "needles",
-      "tools",
-      "markers-stickers",
-      "fabrics",
-      "kits",
-      "beginners"
-    ]
   },
   "needle": {
     "name": "מחט לרקמה",
@@ -615,6 +557,102 @@
     ],
     "category": "embroidered-works"
   },
+  "special-embroidery-kits": {
+    "name": "ערכות רקמה מיוחדות",
+    "variants": {
+      "tablecloth-mono": {
+        "name": "מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה",
+        "price": 160,
+        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg",
+        "description": "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg"
+        ]
+      },
+      "tablecloth-autumn": {
+        "name": "מפה יפהיפיה – דוגמת סתיו שלכת",
+        "price": 160,
+        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-56-mui93a0t.jpg",
+        "description": "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui93a0u.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-07-mui93a0u.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg"
+        ]
+      },
+      "dmc-flowers": {
+        "name": "ערכת רקמה עם 2 דוגמאות",
+        "price": 100,
+        "image": "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-40-mue2vvu5.jpg",
+        "description": "ערכת רקמה כיפית מבית DMC שהבאתי מלונדון.\nכוללת בד, חישוק וחוטים תואמים, עם הסבר ל־2 דוגמאות שונות.",
+        "stock": 3,
+        "gallery": [
+          "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg",
+          "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg"
+        ]
+      },
+      "dmc-pearl": {
+        "name": "רקמת סתיו מבית DMC",
+        "price": 120,
+        "image": "/images/store/dmc-kit-pearl/screenshot-2026-09-23-at-15-15-02-mue2n4gg.png",
+        "description": "ערכת רקמה יפהיפיה מבית DMC שהבאתי מהטיול האחרון בלונדון.\nהתוצאה משמחת והתהליך כיפי.",
+        "stock": 2,
+        "gallery": [
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-34-mui9lg06.jpg",
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-23-at-22-31-14-muei2kk4.jpg",
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-25-mui9lg05.jpg",
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-48-03-mui9nxtz.jpg"
+        ]
+      },
+      "trimits-elephants": {
+        "name": "ערכת רקמה מלונדון – דוגמת פילים",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg",
+        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg"
+        ]
+      },
+      "trimits-butterfly": {
+        "name": "ערכת רקמה מלונדון – דוגמת פרפר",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg",
+        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg",
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
+        ]
+      },
+      "kit-all-inclusive": {
+        "name": "ערכת רקמה הכל כלול",
+        "price": 210,
+        "image": "/images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg",
+        "description": "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים.",
+        "gallery": [
+          "/images/gallery/kit.jpeg"
+        ]
+      }
+    },
+    "variant_order": [
+      "tablecloth-mono",
+      "tablecloth-autumn",
+      "dmc-flowers",
+      "dmc-pearl",
+      "trimits-elephants",
+      "trimits-butterfly",
+      "kit-all-inclusive"
+    ],
+    "category": "kits",
+    "categories": [
+      "kits",
+      "beginners"
+    ]
+  },
   "stickers": {
     "name": "מדבקות לרקמה",
     "variants": {
@@ -661,41 +699,6 @@
       "type-3"
     ],
     "category": "markers-stickers"
-  },
-  "trimits-kit-elephant": {
-    "name": "ערכת רקמה שהבאתי מלונדון",
-    "variants": {
-      "type-1": {
-        "name": "דוגמת פילים",
-        "price": 100,
-        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg",
-        "description": "",
-        "stock": 1,
-        "gallery": [
-          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg"
-        ]
-      },
-      "type-2": {
-        "name": "דוגמת פרפר",
-        "price": 100,
-        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg",
-        "description": "",
-        "stock": 1,
-        "gallery": [
-          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg",
-          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
-        ]
-      }
-    },
-    "variant_order": [
-      "type-1",
-      "type-2"
-    ],
-    "category": "kits",
-    "categories": [
-      "kits",
-      "beginners"
-    ]
   },
   "voucher-gift": {
     "name": "שובר מתנה - בוקר פינוק לאמהות",

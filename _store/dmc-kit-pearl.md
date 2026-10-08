@@ -6,9 +6,11 @@ image: /images/store/dmc-kit-pearl/screenshot-2026-09-23-at-15-15-02-mue2n4gg.pn
 price: ₪120
 out_of_stock: false
 limited_stock: true
-hide: false
+hide: true
+in_cart: false
+noindex: true
+sitemap: false
 stock: 2
-cart_price: 120
 order: 15
 preorder: false
 limited_edition: false
@@ -20,4 +22,4 @@ gallery:
 category: kits
 ---
 
-ערכת רקמה יפהיפיה שהבאתי מהטיול האחרון בלונדון! אחת לעצמי ו2 לכן. נהנתי ממנה מאוד, התוצאה משמחת והתהליך כיפי.
+המוצר אוחד לעמוד [ערכות רקמה מיוחדות](/store/special-embroidery-kits/).

@@ -5,6 +5,7 @@ image: /images/scrunchies/gallery/scrunchie-prachim-yapaniyim-1.png
 gallery:
   - /images/scrunchies/gallery/scrunchie-prachim-yapaniyim-2.png
   - /images/scrunchies/gallery/scrunchie-prachim-yapaniyim-3.png
+  - /images/scrunchies/gallery/scrunchie-prachim-yapaniyim-4.png
 price: ₪30
 cart_price: 30
 stock: 2

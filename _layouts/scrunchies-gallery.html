@@ -41,18 +41,6 @@ layout: default
   </div>
 </div>
 
-{% if page.gallery %}
-<div class="scrunchies-gallery animate">
-  {% for img in page.gallery %}
-  <div class="scrunchies-gallery__item">
-    <a class="scrunchies-gallery__link" href="#scrunchies-shop" aria-label="לקטלוג הסקראנצ׳ים למכירה">
-      <img class="lazy" data-src="{{ img | relative_url }}" alt="סקראנצ'י">
-    </a>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
 {% assign g_regular = '' | split: '' %}
 {% assign g_large = '' | split: '' %}
 {% assign g_fancy = '' | split: '' %}
@@ -247,6 +235,19 @@ layout: default
 {% endif %}
 
 {% include store-shipping.html %}
+
+{% if page.gallery %}
+<div class="scrunchies-gallery animate">
+  {% for img in page.gallery %}
+  <div class="scrunchies-gallery__item">
+    <a class="scrunchies-gallery__link" href="#scrunchies-shop" aria-label="לקטלוג הסקראנצ׳ים למכירה">
+      <img class="lazy" data-src="{{ img | relative_url }}" alt="סקראנצ'י">
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 <script src="{{ site.baseurl }}/js/scrunchies-gallery.js" defer></script>
 
 <style>

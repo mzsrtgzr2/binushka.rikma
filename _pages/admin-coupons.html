@@ -14,7 +14,7 @@ noindex: true
   <p class="admin-lead">
     כאן מגדירים קודי קופון מראש. הלקוחות מזינים אותם בעמוד התשלום לפני המעבר ל־Grow.
     אפשר להגדיר הנחה באחוזים או בסכום קבוע בשקלים — ההנחה חלה על המוצרים, לא על המשלוח.
-    אפשר להגביל למינימום רכישה, לקטגוריה, למוצר ספציפי או לסדנאות נבחרות, ולשים תאריך תפוגה.
+    אפשר להגביל למינימום רכישה, לסוג מוצר (למשל ערכות רקמה), לכמה מוצרים נבחרים, לסדנאות, או לשים תאריך תפוגה.
     אי אפשר ליצור קופון של 100% הנחה על הסל.
   </p>
 
@@ -91,27 +91,49 @@ noindex: true
             <label class="form__label" for="coupon-applies-to">חל על</label>
             <select class="form__input" id="coupon-applies-to">
               <option value="all">כל המוצרים בסל</option>
-              <option value="category">קטגוריה</option>
-              <option value="product">מוצר ספציפי</option>
+              <option value="category">קטגוריה / סוג מוצר</option>
+              <option value="product">מוצרים נבחרים</option>
             </select>
           </div>
 
           <div class="form__group" id="coupon-category-group" hidden>
-            <label class="form__label" for="coupon-category">קטגוריה</label>
+            <label class="form__label" for="coupon-category">קטגוריה / סוג</label>
             <select class="form__input" id="coupon-category">
               <option value="">בחרי קטגוריה</option>
-              <option value="embroidery-supplies">ציוד רקמה</option>
-              <option value="works-for-sale">עבודות למכירה</option>
-              <option value="workshops">סדנאות</option>
+              <optgroup label="ציוד רקמה">
+                <option value="embroidery-supplies">כל ציוד הרקמה</option>
+                <option value="kits">ערכות רקמה</option>
+                <option value="threads">חוטים</option>
+                <option value="hoops">חישוקים</option>
+                <option value="needles">מחטים</option>
+                <option value="tools">מספריים</option>
+                <option value="markers-stickers">טושים ומדבקות</option>
+                <option value="fabrics">בדים</option>
+                <option value="books">ספרי רקמה</option>
+                <option value="beginners">למתחילות</option>
+              </optgroup>
+              <optgroup label="עבודות למכירה">
+                <option value="works-for-sale">כל העבודות למכירה</option>
+                <option value="embroidered-works">עבודות רקומות</option>
+                <option value="birth-gifts">מתנות ללידה</option>
+                <option value="scrunchies-gallery">סקראנצ׳ים (גלריה)</option>
+              </optgroup>
+              <optgroup label="אחר">
+                <option value="gift-card">גיפט קארד</option>
+                <option value="workshops">סדנאות</option>
+              </optgroup>
             </select>
           </div>
 
           <div class="form__group" id="coupon-product-group" hidden>
-            <label class="form__label" for="coupon-product">מוצר</label>
-            <select class="form__input" id="coupon-product">
-              <option value="">בחרי מוצר</option>
-            </select>
-            <p class="admin-hint">ההנחה תחול רק על המוצר הזה בסל.</p>
+            <span class="form__label" id="coupon-products-label">מוצרים</span>
+            <div
+              class="admin-coupon-checklist"
+              id="coupon-products-list"
+              role="group"
+              aria-labelledby="coupon-products-label"
+            ></div>
+            <p class="admin-hint">סמני מוצר אחד או יותר שעליהם יחול הקופון.</p>
           </div>
         </div>
 
@@ -121,7 +143,7 @@ noindex: true
             <option value="all">כל הסדנאות</option>
             <option value="selected">סדנאות נבחרות</option>
           </select>
-          <div class="admin-coupon-workshops" id="coupon-workshops-list" hidden></div>
+          <div class="admin-coupon-checklist" id="coupon-workshops-list" hidden></div>
           <p class="admin-hint" id="coupon-workshops-hint">
             ההנחה תחול על כל הסדנאות בסל. אפשר לצמצם לסדנאות ספציפיות.
           </p>

@@ -81,18 +81,14 @@
     cards.forEach(function (card) {
       if (cardMatches(card)) {
         matched += 1;
-        if (shown < visibleCount) {
-          card.hidden = false;
-          shown += 1;
-        } else {
-          card.hidden = true;
-        }
+        card.hidden = false;
+        shown += 1;
       } else {
         card.hidden = true;
       }
     });
     if (empty) empty.hidden = matched > 0;
-    if (moreBtn) moreBtn.hidden = matched <= shown;
+    if (moreBtn) moreBtn.hidden = true;
     return shown;
   }
 

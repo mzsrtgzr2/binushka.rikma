@@ -498,6 +498,16 @@
     "price": 30,
     "category": "scrunchies-gallery"
   },
+  "scrunchie-mishbatzot-vrod-lavan": {
+    "name": "סקראנצ'י משבצות ורוד לבן",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-mishbatzot-vrod-lavan-large": {
+    "name": "סקראנצ'י משבצות ורוד לבן",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
   "scrunchie-nimrim-adilit": {
     "name": "סקראנצ'י נמרים אצילית",
     "price": 85,

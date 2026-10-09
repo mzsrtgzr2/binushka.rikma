@@ -175,7 +175,7 @@ layout: default
           <p class="scrunchies-variant__desc">{% if size_info %}{{ size_info.label }}{% elsif item.scrunchie_size %}{{ item.scrunchie_size }}{% endif %}</p>
           <div class="gallery-card__footer">
             <div class="scrunchies-variant__price">{{ item.price }}</div>
-            <button type="button" class="button button--primary" data-cart-add="{{ slug }}"{% if item_preorder %} data-preorder="true"{% endif %}>{% if item_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}</button>
+            <button type="button" class="button {% if item_preorder %}button--preorder{% else %}button--primary{% endif %}" data-cart-add="{{ slug }}"{% if item_preorder %} data-preorder="true"{% endif %}>{% if item_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}</button>
           </div>
         </article>
         {% endfor %}
@@ -254,6 +254,8 @@ layout: default
 
 <style>
 .gallery-layout { margin-top: 8px; }
+.button--preorder { background: #fff; color: #111; border: 1.5px solid #111; }
+.button--preorder:hover { background: #111; color: #fff; }
 html { scroll-behavior: smooth; }
 #scrunchies-shop { scroll-margin-top: 96px; }
 .scrunchies-gallery__link { display: block; cursor: pointer; }

@@ -278,6 +278,13 @@
       "name": "סקראנצ'י פסים ורוד חום",
       "price": 30
     },
+    "scrunchie-rikmat-prachim-bezh-regular": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י רקמת פרחים בז׳",
+      "price": 30
+    },
     "scrunchie-rikmat-prachim-bezh": {
       "stock": 2,
       "outOfStock": false,

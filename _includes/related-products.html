@@ -1,0 +1,163 @@
+{% comment %}
+  Related products gallery at the end of a product page.
+  Prefers same-category, in-stock items; fills with other shop products.
+  Skips the current product, hidden items, and scrunchie-gallery entries.
+{% endcomment %}
+{% assign max_related = 4 %}
+{% assign current_slug = page.slug | default: page.basename %}
+
+{% if page.categories and page.categories.size > 0 %}
+  {% assign page_cats = page.categories %}
+{% elsif page.category and page.category != blank %}
+  {% assign page_cats = page.category | split: ',' %}
+{% else %}
+  {% assign page_cats = '' | split: '' %}
+{% endif %}
+
+{% assign related_same = '' | split: '' %}
+{% assign related_other = '' | split: '' %}
+{% assign sorted_store = site.store | sort: 'title' %}
+
+{% for item in sorted_store %}
+  {% assign item_slug = item.slug | default: item.basename %}
+  {% unless item.hide or item.title == blank or item.scrunchie_gallery or item.category == 'scrunchies-gallery' or item.categories contains 'scrunchies-gallery' or item_slug == current_slug %}
+    {% assign item_sold_out = false %}
+    {% if item.out_of_stock or item.stock == 0 %}
+      {% unless item.preorder %}
+        {% assign item_sold_out = true %}
+      {% endunless %}
+    {% endif %}
+    {% unless item_sold_out %}
+      {% if item.categories and item.categories.size > 0 %}
+        {% assign item_cats = item.categories %}
+      {% elsif item.category and item.category != blank %}
+        {% assign item_cats = item.category | split: ',' %}
+      {% else %}
+        {% assign item_cats = '' | split: '' %}
+      {% endif %}
+      {% assign same_cat = false %}
+      {% for cat in page_cats %}
+        {% if item_cats contains cat %}
+          {% assign same_cat = true %}
+        {% endif %}
+      {% endfor %}
+      {% if same_cat %}
+        {% assign related_same = related_same | push: item %}
+      {% else %}
+        {% assign related_other = related_other | push: item %}
+      {% endif %}
+    {% endunless %}
+  {% endunless %}
+{% endfor %}
+
+{% assign related_pool = related_same | concat: related_other %}
+
+{% if related_pool.size > 0 %}
+<!-- begin related products -->
+<section class="related-products animate" id="related-products" aria-labelledby="related-products-title">
+  <div class="container">
+    <div class="related-products__head">
+      <h2 class="related-products__title" id="related-products-title">מוצרים נוספים</h2>
+    </div>
+    <div class="row related-products__grid">
+      {% for item in related_pool limit: max_related %}
+        {% assign sold_out = false %}
+        {% assign preorder = false %}
+        {% if item.out_of_stock or item.stock == 0 %}
+          {% if item.preorder %}
+            {% assign preorder = true %}
+          {% else %}
+            {% assign sold_out = true %}
+          {% endif %}
+        {% endif %}
+        {% assign slug = item.slug | default: item.basename %}
+        {% assign cart_meta = site.data.catalog[slug] %}
+        {% assign card_image = item.image %}
+        {% if card_image == blank and item.variants %}
+          {% for variant_pair in item.variants %}
+            {% if card_image == blank and variant_pair[1].image and variant_pair[1].image != blank %}
+              {% assign card_image = variant_pair[1].image %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {% assign sort_price = 0 %}
+        {% if cart_meta.variable and cart_meta.min_price %}
+          {% assign sort_price = cart_meta.min_price %}
+        {% elsif cart_meta.variants %}
+          {% assign sort_price = 999999 %}
+          {% for variant_pair in cart_meta.variants %}
+            {% assign variant_price = variant_pair[1].price | plus: 0 %}
+            {% if variant_price < sort_price %}
+              {% assign sort_price = variant_price %}
+            {% endif %}
+          {% endfor %}
+        {% elsif cart_meta.price %}
+          {% assign sort_price = cart_meta.price | plus: 0 %}
+        {% elsif item.min_price %}
+          {% assign sort_price = item.min_price | plus: 0 %}
+        {% elsif item.price %}
+          {% assign price_token = item.price | replace: '₪', '' | replace: ',', '' | split: '–' | first | split: '-' | first | strip %}
+          {% assign sort_price = price_token | plus: 0 %}
+        {% endif %}
+        <article
+          class="store-item col col-3 col-d-6 col-t-12"
+          data-product-id="{{ slug }}"
+          data-product-kind="product"
+          data-analytics="related_product_card"
+          data-price="{{ sort_price }}"
+          data-sold-out="{% if sold_out %}true{% else %}false{% endif %}"
+          data-preorder="{% if preorder %}true{% else %}false{% endif %}"
+        >
+          <div class="store-item__content">
+            <a href="{{ item.url }}" class="store-item__image" data-analytics="related_product_image">
+              {% if card_image and card_image != blank %}
+              <img class="lazy" data-src="{{ card_image }}" alt="{{ item.title }}">
+              {% endif %}
+              {% if sold_out %}
+                <div class="out-of-stock">אזל מהמלאי</div>
+              {% elsif preorder %}
+                <div class="preorder">הזמיני מראש</div>
+              {% elsif item.limited_stock %}
+                {% unless cart_meta.variants or item.variants %}
+                <div class="limited-stock">{% if item.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+                {% endunless %}
+              {% endif %}
+            </a>
+            <div class="store-item__info">
+              <h3 class="store-item__title"><a href="{{ item.url }}" data-analytics="related_product_title">{{ item.title }}</a></h3>
+              {% if item.subtitle %}
+              <div class="store-item__subtitle">{{ item.subtitle }}</div>
+              {% endif %}
+              <div class="store-item__footer">
+              {% if item.price %}
+              <div class="store-item__price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ item.price }}</div>
+              {% endif %}
+              {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false and sold_out != true %}
+                {% if cart_meta.variable %}
+              <a href="{{ item.url }}" class="button button--primary store-item__add" data-analytics="product_choose_amount">
+                בחרי סכום
+              </a>
+                {% elsif cart_meta.variants %}
+              <a href="{{ item.url }}" class="button button--primary store-item__add" data-analytics="product_choose_variant">
+                בחרי סוג
+              </a>
+                {% else %}
+              <button type="button" class="button button--primary store-item__add" data-cart-add="{{ slug }}" data-analytics="add_to_cart">
+                {% if preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
+              </button>
+                {% endif %}
+              {% elsif item.form_url and sold_out != true %}
+              <a href="{{ item.form_url }}" class="button button--primary store-item__add" target="_blank" rel="noopener" data-analytics="product_external_order">
+                {% if preorder %}הזמיני מראש{% else %}הזמיני עכשיו{% endif %}
+              </a>
+              {% endif %}
+              </div>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<!-- end related products -->
+{% endif %}

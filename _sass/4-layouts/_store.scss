@@ -697,6 +697,40 @@ body.store-menu-open {
   }
 }
 
+/* Related products on product pages */
+.related-products {
+  padding: 48px 0 72px;
+
+  @media only screen and (max-width: $mobile) {
+    padding: 36px 0 56px;
+  }
+}
+
+.related-products__head {
+  margin: 0 0 28px;
+  text-align: center;
+}
+
+.related-products__title {
+  margin: 0;
+  font-size: 36px;
+  line-height: 1.15;
+
+  @media only screen and (max-width: $mobile) {
+    font-size: 28px;
+  }
+}
+
+.related-products__grid {
+  .store-item__title {
+    font-size: 22px;
+
+    @media only screen and (max-width: $desktop) {
+      font-size: 24px;
+    }
+  }
+}
+
 /* Legacy class kept for any cached markup / older previews */
 .store-item-gallery {
   display: grid;

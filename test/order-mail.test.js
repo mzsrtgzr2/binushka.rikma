@@ -134,7 +134,7 @@ test('renderOrderEmail includes items, notes, and totals in Hebrew', () => {
   assert.match(mail.text, /קוד קופון: TEN/);
   assert.match(mail.text, /אריזה כמתנה: כן/);
   assert.match(mail.text, /הערות להזמנה: בבקשה להשאיר ליד הדלת/);
-  assert.match(mail.text, /קרטון בשימוש חוזר: כן/);
+  assert.match(mail.text, /האם לשלוח את ההזמנה בקרטון בשימוש חוזר: כן/);
   assert.match(mail.text, /סה״כ לתשלום: ₪178/);
   assert.match(mail.text, /× 2/);
 });
@@ -178,7 +178,29 @@ test('full checkout snapshot email surfaces coupon and gift packing', () => {
   assert.match(mail.text, /אריזה כמתנה: כן/);
   assert.match(mail.text, /כרטיס ברכה: מזל טוב/);
   assert.match(mail.text, /הערות להזמנה: בבקשה להשאיר ליד הדלת/);
-  assert.match(mail.text, /קרטון בשימוש חוזר: כן/);
+  assert.match(mail.text, /האם לשלוח את ההזמנה בקרטון בשימוש חוזר: כן/);
+});
+
+test('renderOrderEmail always lists reuse carton and order notes', () => {
+  const mail = orderMail.renderOrderEmail({
+    orderId: 'abcdef0123456789abcdef01',
+    customer: { name: 'נועה כהן', email: 'noa@example.com' },
+    shippingMethod: 'courier',
+    shippingLabel: 'שליח',
+    lines: [{ description: "Fancy סקראנצ'י", quantity: 1, price: 85 }],
+    subtotal: 85,
+    shipping: 0,
+    discount: 0,
+    total: 85,
+    notes: {},
+  });
+
+  assert.match(mail.html, /הערות להזמנה/);
+  assert.match(mail.html, />אין</);
+  assert.match(mail.html, /האם לשלוח את ההזמנה בקרטון בשימוש חוזר/);
+  assert.match(mail.html, />לא</);
+  assert.match(mail.text, /הערות להזמנה: אין/);
+  assert.match(mail.text, /האם לשלוח את ההזמנה בקרטון בשימוש חוזר: לא/);
 });
 
 test('sendOrderSummary skips when Gmail is not configured', async () => {

@@ -1,6 +1,6 @@
 ---
 permalink: /scrunchies-video-test/
-hero_video: /images/scrunchies/video/scrunchies-sewing.mov
+hero_video: /images/scrunchies/video/scrunchies-sewing.mp4
 hero_video_poster: /images/scrunchies/gallery/scrunchie-rikmat-prachim-bezh.png
 title: "סקראנצ'יז בעבודת יד"
 subtitle: מבדים מיוחדים

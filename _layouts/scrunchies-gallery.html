@@ -5,7 +5,8 @@ layout: default
 <div class="scrunchies-hero">
   {% if page.hero_video %}
   <video class="scrunchies-hero__bg" autoplay muted loop playsinline preload="metadata"{% if page.hero_video_poster %} poster="{{ page.hero_video_poster | relative_url }}"{% endif %}>
-    <source src="{{ page.hero_video | relative_url }}" type="video/quicktime">
+    <source src="{{ page.hero_video | relative_url }}" type="video/mp4">
+    <source src="{{ page.hero_video | replace: '.mp4', '.mov' | relative_url }}" type="video/quicktime">
   </video>
   {% elsif page.hero_image %}
   <img class="scrunchies-hero__bg lazy" data-src="{{ page.hero_image | relative_url }}" alt="{{ page.title }}">

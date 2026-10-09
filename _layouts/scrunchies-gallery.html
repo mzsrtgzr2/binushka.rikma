@@ -248,10 +248,25 @@ layout: default
 </div>
 {% endif %}
 
+{% if page.footer_video %}
+<div class="container scrunchies-video-cta animate">
+  <a href="#scrunchies-shop" class="button button--primary scrunchies-video-cta__btn">לרכישה</a>
+</div>
+<div class="scrunchies-video-band animate">
+  <video class="scrunchies-video-band__video" autoplay muted loop playsinline preload="metadata"{% if page.footer_video_poster %} poster="{{ page.footer_video_poster | relative_url }}"{% endif %}>
+    <source src="{{ page.footer_video | relative_url }}" type="video/quicktime">
+  </video>
+</div>
+{% endif %}
+
 <script src="{{ site.baseurl }}/js/scrunchies-gallery.js" defer></script>
 
 <style>
 .gallery-layout { margin-top: 8px; }
+.scrunchies-video-cta { text-align: center; margin: 8px auto 14px; }
+.scrunchies-video-cta__btn { display: inline-block; }
+.scrunchies-video-band { width: 100%; margin: 0; background: var(--background-alt-color); }
+.scrunchies-video-band__video { display: block; width: 100%; height: 70vh; max-height: 640px; object-fit: cover; }
 html { scroll-behavior: smooth; }
 #scrunchies-shop { scroll-margin-top: 96px; }
 .scrunchies-gallery__link { display: block; cursor: pointer; }

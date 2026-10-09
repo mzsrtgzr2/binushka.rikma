@@ -243,6 +243,13 @@
       "name": "סקראנצ'י לבבות ירוקים",
       "price": 30
     },
+    "scrunchie-mishbatzot-shechor-lavan": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י משבצות שחור לבן",
+      "price": 85
+    },
     "scrunchie-mishbatzot-vrod-lavan-large": {
       "stock": 1,
       "outOfStock": false,

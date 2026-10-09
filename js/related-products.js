@@ -52,11 +52,45 @@
 
     var state = edgeState(track);
     carousel.classList.toggle('is-scrollable', state.canScroll);
-    prev.disabled = !state.canScroll || state.atStart;
-    next.disabled = !state.canScroll || state.atEnd;
+    // Infinite loop: arrows stay active whenever the track overflows.
+    prev.disabled = !state.canScroll;
+    next.disabled = !state.canScroll;
+  }
+
+  function scrollToSlide(track, slide, alignEnd) {
+    var trackRect = track.getBoundingClientRect();
+    var slideRect = slide.getBoundingClientRect();
+    var rtl = isRtl(track);
+    var delta;
+    if (alignEnd) {
+      delta = rtl
+        ? slideRect.left - trackRect.left
+        : slideRect.right - trackRect.right;
+    } else {
+      delta = rtl
+        ? slideRect.right - trackRect.right
+        : slideRect.left - trackRect.left;
+    }
+    track.scrollBy({ left: delta, behavior: 'smooth' });
   }
 
   function scrollByDir(track, towardEnd) {
+    var state = edgeState(track);
+    if (!state.canScroll) return;
+
+    var slides = slidesOf(track);
+    if (!slides.length) return;
+
+    // Wrap around so the carousel never ends.
+    if (towardEnd && state.atEnd) {
+      scrollToSlide(track, slides[0], false);
+      return;
+    }
+    if (!towardEnd && state.atStart) {
+      scrollToSlide(track, slides[slides.length - 1], true);
+      return;
+    }
+
     var step = slideStep(track);
     var delta = towardEnd ? step : -step;
     // Positive scrollLeft moves content left. In RTL reading order, "next"

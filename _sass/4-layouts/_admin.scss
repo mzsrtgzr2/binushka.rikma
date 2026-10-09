@@ -638,6 +638,20 @@
   margin-bottom: 16px;
 }
 
+.admin-preview .store-item-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+
+  @media only screen and (max-width: $tablet) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-preview .store-item-layout__details .page-title {
+  font-size: 28px;
+}
+
 .admin-preview .store-item-content {
   margin-bottom: 28px;
 }

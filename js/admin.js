@@ -1419,7 +1419,7 @@
     if (!images.length) return '';
 
     return (
-      '<div class="store-item-content"><div class="product-gallery" data-product-gallery>' +
+      '<div class="product-gallery" data-product-gallery>' +
       '<div class="product-gallery__stage store-item-image-container">' +
       '<img class="product-gallery__image" data-gallery-main src="' +
       escapeHtml(images[0]) +
@@ -1428,7 +1428,7 @@
       galleryNavHtml(images) +
       '</div>' +
       galleryThumbsHtml(images) +
-      '</div></div>'
+      '</div>'
     );
   }
 
@@ -1502,6 +1502,8 @@
     }
     var mainImage = productGalleryHtml(p.image, p.gallery, stockOverlay(p));
     return (
+      '<div class="store-item-layout">' +
+      '<div class="store-item-layout__details">' +
       '<div class="page-head">' +
       '<h1 class="page-title">' +
       escapeHtml(p.title || 'שם המוצר') +
@@ -1510,9 +1512,11 @@
       (p.subtitle ? '<p class="store-item-subtitle">' + escapeHtml(p.subtitle) + '</p>' : '') +
       (p.price ? '<div class="store-item-price">' + escapeHtml(p.price) + '</div>' : '') +
       '</div>' +
-      (body ? '<div class="store-item-content admin-preview__markdown">' + body + '</div>' : '') +
-      (cart ? '<div class="store-item-content"><div class="store-item__cart-actions">' + cart + '</div></div>' : '') +
-      mainImage
+      (cart ? '<div class="store-item-layout__actions store-item__cart-actions">' + cart + '</div>' : '') +
+      '</div>' +
+      (mainImage ? '<div class="store-item-layout__media">' + mainImage + '</div>' : '') +
+      '</div>' +
+      (body ? '<div class="store-item-content admin-preview__markdown">' + body + '</div>' : '')
     );
   }
 

@@ -8,9 +8,10 @@ gallery:
   - /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-4.png
 price: ₪45
 cart_price: 45
-stock: 2
-limited_stock: true
-out_of_stock: false
+stock: 0
+limited_stock: false
+out_of_stock: true
+preorder: true
 hide: true
 noindex: true
 sitemap: false

@@ -300,9 +300,10 @@
       "price": 45
     },
     "scrunchie-rikmat-prachim-shechora": {
-      "stock": 2,
-      "outOfStock": false,
-      "limitedStock": true,
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false,
+      "preorder": true,
       "name": "סקראנצ'י רקמת פרחים שחורה",
       "price": 45
     },

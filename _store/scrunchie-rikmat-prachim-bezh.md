@@ -4,7 +4,7 @@ subtitle: רקמת פרחים על בז׳ טבעי
 image: /images/scrunchies/gallery/scrunchie-rikmat-prachim-bezh.png
 price: ₪45
 cart_price: 45
-stock: 1
+stock: 2
 limited_stock: true
 out_of_stock: false
 hide: true

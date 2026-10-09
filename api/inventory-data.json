@@ -236,6 +236,13 @@
       "name": "סקראנצ'י חומה פרחונית Fableism",
       "price": 45
     },
+    "scrunchie-lavavot-chumim": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י לבבות חומים",
+      "price": 85
+    },
     "scrunchie-lavavot-yerukim": {
       "stock": 1,
       "outOfStock": false,

@@ -366,6 +366,8 @@
     'participantsNote',
     'packAsGift',
     'giftMessage',
+    'orderNote',
+    'reuseCarton',
   ];
 
   function loadCustomer() {
@@ -394,10 +396,18 @@
       syncGiftMessageVisibility();
       return;
     }
+    if (name === 'reuseCarton') {
+      var cartonCb = form.elements.reuseCarton;
+      if (cartonCb) cartonCb.checked = Boolean(value);
+      return;
+    }
     if (value == null || value === '') return;
     if (name === 'shipping' && ['pickup', 'registered', 'courier'].indexOf(String(value)) === -1) return;
     if (name === 'variantNote' || name === 'giftMessage' || name === 'participantsNote') {
       value = String(value).slice(0, 200);
+    }
+    if (name === 'orderNote') {
+      value = String(value).slice(0, 500);
     }
     var el = form.elements[name];
     if (!el) return;
@@ -585,6 +595,8 @@
       payload.packAsGift = true;
       if (data.giftMessage) payload.giftMessage = String(data.giftMessage).trim().slice(0, 200);
     }
+    if (data.orderNote) payload.orderNote = String(data.orderNote).trim().slice(0, 500);
+    if (data.reuseCarton) payload.reuseCarton = true;
     saveCustomer();
     submitted = true;
     reportShipping(items, shippingMethod);

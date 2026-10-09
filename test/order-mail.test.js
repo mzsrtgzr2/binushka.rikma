@@ -27,6 +27,8 @@ const body = {
   participantsNote: 'נועה ומאיה',
   packAsGift: true,
   giftMessage: 'מזל טוב!',
+  orderNote: 'בבקשה להשאיר ליד הדלת',
+  reuseCarton: true,
 };
 
 test('buildSnapshot keeps every customer field and note', () => {
@@ -70,6 +72,8 @@ test('buildSnapshot keeps every customer field and note', () => {
   assert.equal(snapshot.notes.participantsNote, 'נועה ומאיה');
   assert.equal(snapshot.notes.packAsGift, true);
   assert.equal(snapshot.notes.giftMessage, 'מזל טוב!');
+  assert.equal(snapshot.notes.orderNote, 'בבקשה להשאיר ליד הדלת');
+  assert.equal(snapshot.notes.reuseCarton, true);
   assert.equal(snapshot.coupon.code, 'TEN');
   assert.ok(snapshot.discount > 0);
   assert.ok(snapshot.lines.some((line) => /תחרה זהובה/.test(line.description)));
@@ -106,6 +110,8 @@ test('renderOrderEmail includes items, notes, and totals in Hebrew', () => {
       variantNote: 'תחרה',
       packAsGift: true,
       giftMessage: 'מזל טוב',
+      orderNote: 'בבקשה להשאיר ליד הדלת',
+      reuseCarton: true,
     },
   };
 
@@ -117,6 +123,9 @@ test('renderOrderEmail includes items, notes, and totals in Hebrew', () => {
   assert.match(mail.html, /תחרה/);
   assert.match(mail.html, /מזל טוב/);
   assert.match(mail.html, /אריזה כמתנה/);
+  assert.match(mail.html, /הערות להזמנה/);
+  assert.match(mail.html, /בבקשה להשאיר ליד הדלת/);
+  assert.match(mail.html, /קרטון בשימוש חוזר/);
   assert.match(mail.html, /קוד קופון/);
   assert.match(mail.html, /TEN \(10%\)/);
   assert.match(mail.html, /הערות ואפשרויות/);
@@ -124,6 +133,8 @@ test('renderOrderEmail includes items, notes, and totals in Hebrew', () => {
   assert.match(mail.html, /doc-12345678/);
   assert.match(mail.text, /קוד קופון: TEN/);
   assert.match(mail.text, /אריזה כמתנה: כן/);
+  assert.match(mail.text, /הערות להזמנה: בבקשה להשאיר ליד הדלת/);
+  assert.match(mail.text, /קרטון בשימוש חוזר: כן/);
   assert.match(mail.text, /סה״כ לתשלום: ₪178/);
   assert.match(mail.text, /× 2/);
 });
@@ -160,9 +171,14 @@ test('full checkout snapshot email surfaces coupon and gift packing', () => {
   assert.match(mail.html, /מזל טוב/);
   assert.match(mail.html, /תחרה זהובה/);
   assert.match(mail.html, /נועה ומאיה/);
+  assert.match(mail.html, /הערות להזמנה/);
+  assert.match(mail.html, /בבקשה להשאיר ליד הדלת/);
+  assert.match(mail.html, /קרטון בשימוש חוזר/);
   assert.match(mail.text, /קוד קופון: TEN/);
   assert.match(mail.text, /אריזה כמתנה: כן/);
   assert.match(mail.text, /כרטיס ברכה: מזל טוב/);
+  assert.match(mail.text, /הערות להזמנה: בבקשה להשאיר ליד הדלת/);
+  assert.match(mail.text, /קרטון בשימוש חוזר: כן/);
 });
 
 test('sendOrderSummary skips when Gmail is not configured', async () => {

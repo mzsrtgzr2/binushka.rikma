@@ -241,6 +241,25 @@ permalink: /checkout/
           <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — יופיע על כרטיס הברכה באריזה.</p>
         </div>
 
+        <div class="form__group">
+          <label class="form__label" for="checkout-order-note">הערות להזמנה</label>
+          <textarea
+            id="checkout-order-note"
+            name="orderNote"
+            class="form__input checkout-variant-note"
+            maxlength="500"
+            rows="3"
+            placeholder="אופציונלי"
+          ></textarea>
+        </div>
+
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label" for="checkout-reuse-carton">
+            <input type="checkbox" id="checkout-reuse-carton" name="reuseCarton" value="1">
+            <span>אני מעוניינת לקבל את ההזמנה בקרטון בשימוש חוזר.</span>
+          </label>
+        </div>
+
         <div class="form__group form__group--checkbox">
           <label class="checkbox-label" for="checkout-terms">
             <input type="checkbox" id="checkout-terms" name="acceptTerms" required>

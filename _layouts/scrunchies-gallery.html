@@ -11,9 +11,6 @@ layout: default
     {% if page.subtitle %}
     <p class="scrunchies-hero__subtitle">{{ page.subtitle }}</p>
     {% endif %}
-    {% if page.hero_cta %}
-    <p class="scrunchies-hero__cta"><a class="button button--primary" href="#scrunchies-shop">לרכישה</a></p>
-    {% endif %}
   </div>
 </div>
 
@@ -32,15 +29,8 @@ layout: default
 {% endif %}
 
 <div class="container">
-  <div class="scrunchies-story animate{% if page.story_video %} scrunchies-story--video{% endif %}">
-    {% if page.story_video %}
-    <div class="scrunchies-story__img scrunchies-story__video">
-      <video muted loop playsinline preload="metadata"{% if page.story_video_poster %} poster="{{ page.story_video_poster | relative_url }}"{% endif %}>
-        <source src="{{ page.story_video | relative_url }}" type="video/mp4">
-        <source src="{{ page.story_video | replace: '.mp4', '.mov' | relative_url }}" type="video/quicktime">
-      </video>
-    </div>
-    {% elsif page.lifestyle_image %}
+  <div class="scrunchies-story animate">
+    {% if page.lifestyle_image %}
     <div class="scrunchies-story__img">
       <img class="lazy" data-src="{{ page.lifestyle_image | relative_url }}" alt="">
     </div>
@@ -262,11 +252,6 @@ layout: default
 
 <style>
 .gallery-layout { margin-top: 8px; }
-.scrunchies-hero__cta { margin: 22px 0 0; }
-.scrunchies-hero__cta .button { display: inline-block; }
-.scrunchies-story__video video { width: 100%; height: 520px; object-fit: cover; object-position: center center; display: block; }
-.scrunchies-story--video { grid-template-columns: 1fr 1fr; max-width: 1140px; gap: 40px; }
-@media only screen and (max-width: 1024px) { .scrunchies-story--video { grid-template-columns: 1fr; } .scrunchies-story__video video { height: 320px; } }
 html { scroll-behavior: smooth; }
 #scrunchies-shop { scroll-margin-top: 96px; }
 .scrunchies-gallery__link { display: block; cursor: pointer; }

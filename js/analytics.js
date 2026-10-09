@@ -263,6 +263,7 @@
   function trackLists() {
     var lists = [
       { selector: '#store-grid .store-item[data-product-id]', name: 'חנות' },
+      { selector: '#related-products .store-item[data-product-id]', name: 'מוצרים נוספים' },
       { selector: '.project[data-product-id]', name: 'סדנאות' },
     ];
     lists.forEach(function (list) {

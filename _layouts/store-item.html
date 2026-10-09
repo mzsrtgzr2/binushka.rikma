@@ -18,261 +18,252 @@ layout: default
   {% assign has_variants = true %}
 {% endif %}
 
+{% assign page_image = page.image %}
+{% if page_image == blank and page.variants %}
+  {% for variant_pair in page.variants %}
+    {% if page_image == blank and variant_pair[1].image and variant_pair[1].image != blank %}
+      {% assign page_image = variant_pair[1].image %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+{% assign gallery_images = '' | split: '' %}
+{% if page_image and page_image != blank %}
+  {% assign gallery_images = gallery_images | push: page_image %}
+{% endif %}
+{% if page.gallery %}
+  {% for gimg in page.gallery %}
+    {% unless gimg == page_image %}
+      {% assign gallery_images = gallery_images | push: gimg %}
+    {% endunless %}
+  {% endfor %}
+{% endif %}
+
 <div class="container" data-product-id="{{ slug }}" data-product-kind="product" data-preorder="{% if preorder %}true{% else %}false{% endif %}">
 
-  <div class="page-head">
-    <h1 class="page-title">{{ page.title }}</h1>
-    {% if sold_out %}
-      <div class="out-of-stock-text">אזל מהמלאי</div>
-    {% elsif preorder %}
-      <div class="preorder-text">הזמיני מראש</div>
-    {% elsif page.limited_stock %}
-      {% unless has_variants %}
-      <div class="limited-stock-text">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
-      {% endunless %}
-    {% endif %}
-
-    {% if page.subtitle %}
-      <p class="store-item-subtitle">{{ page.subtitle }}</p>
-    {% endif %}
-
-    {% if page.price %}
-      <div class="store-item-price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ page.price }}</div>
-    {% endif %}
-  </div>
-
-  <div class="store-item-content animate">
-    {{ content }}
-  </div>
-
-  {% unless sold_out %}
-  <div class="store-item-content animate">
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <div class="section__navigation store-item__cart-actions" data-cart-actions>
-          {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false %}
-            {% if cart_meta.variable %}
-            <div class="gift-amount">
-              <p class="gift-amount__label">בחרי סכום לגיפט קארד</p>
-              {% if cart_meta.presets %}
-              <div class="gift-amount__chips" role="group" aria-label="סכומים מומלצים">
-                {% for n in cart_meta.presets %}
-                <button type="button" class="gift-amount__chip" data-gift-amount="{{ n }}" data-analytics="gift_amount">₪{{ n }}</button>
-                {% endfor %}
-              </div>
-              {% endif %}
-              <label class="gift-amount__custom" for="gift-card-amount">
-                <span>או סכום אחר (₪{{ cart_meta.min_price }}–₪{{ cart_meta.max_price }})</span>
-                <input
-                  type="number"
-                  class="form__input gift-amount__input"
-                  id="gift-card-amount"
-                  name="giftAmount"
-                  min="{{ cart_meta.min_price }}"
-                  max="{{ cart_meta.max_price }}"
-                  step="1"
-                  inputmode="numeric"
-                  placeholder="₪"
-                >
-              </label>
-              <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}" data-analytics="add_to_cart" disabled>
-                {% if preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
-              </button>
-            </div>
-            {% elsif cart_meta.variants %}
-            <div class="store-variants">
-              {% assign variant_ids = cart_meta.variant_order %}
-              {% if variant_ids == nil or variant_ids.size == 0 %}
-                {% assign variant_ids = '' | split: '' %}
-                {% for variant in cart_meta.variants %}
-                  {% assign variant_ids = variant_ids | push: variant[0] %}
-                {% endfor %}
-              {% endif %}
-              {% for vid in variant_ids %}
-              {% assign v = cart_meta.variants[vid] %}
-              {% if v %}
-              {% assign v_sold_out = false %}
-              {% assign v_preorder = false %}
-              {% assign v_limited = false %}
-              {% if v.stock != nil and v.stock != blank %}
-                {% if v.stock == 0 %}
-                  {% if page.preorder or v.preorder %}
-                    {% assign v_preorder = true %}
-                  {% else %}
-                    {% assign v_sold_out = true %}
-                  {% endif %}
-                {% elsif v.stock <= 3 %}
-                  {% assign v_limited = true %}
-                {% endif %}
-              {% endif %}
-              {% assign v_images = '' | split: '' %}
-              {% if v.image and v.image != blank %}
-                {% assign v_images = v_images | push: v.image %}
-              {% endif %}
-              {% if v.gallery %}
-                {% for gimg in v.gallery %}
-                  {% unless gimg == v.image %}
-                    {% assign v_images = v_images | push: gimg %}
-                  {% endunless %}
-                {% endfor %}
-              {% endif %}
-              <article class="store-variant" data-variant-id="{{ vid }}">
-                {% if v_images.size > 0 %}
-                {% assign v_main = v_images | first %}
-                <div class="product-gallery product-gallery--variant" data-product-gallery>
-                  <div class="product-gallery__stage">
-                    <img
-                      class="product-gallery__image lazy"
-                      data-gallery-main
-                      data-src="{{ v_main | relative_url }}"
-                      alt="{{ v.name }}"
-                    >
-                    {% if v_images.size > 1 %}
-                    <button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>
-                    <button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="תמונה הבאה"></button>
-                    {% endif %}
-                  </div>
-                  {% if v_images.size > 1 %}
-                  <div class="product-gallery__thumbs" role="list">
-                    {% for img in v_images %}
-                    <button
-                      type="button"
-                      class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
-                      data-gallery-src="{{ img | relative_url }}"
-                      aria-label="תמונה {{ forloop.index }} מתוך {{ v_images.size }}"
-                      aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
-                    >
-                      <img class="lazy" data-src="{{ img | relative_url }}" alt="">
-                    </button>
-                    {% endfor %}
-                  </div>
-                  {% endif %}
-                </div>
-                {% endif %}
-                <div class="store-variant__info">
-                  <h3 class="store-variant__name">{{ v.name }}</h3>
-                  {% if v.description %}
-                  <p class="store-variant__desc">{{ v.description }}</p>
-                  {% endif %}
-                  <div class="store-variant__price">₪{{ v.price }}</div>
-                  {% if v_sold_out %}
-                  <div class="store-variant__stock out-of-stock-text">אזל מהמלאי</div>
-                  {% elsif v_preorder %}
-                  <div class="store-variant__stock preorder-text">הזמיני מראש</div>
-                  {% elsif v_limited %}
-                  <div class="store-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
-                  {% endif %}
-                </div>
-                <button type="button" class="button button--primary" data-cart-add="{{ slug }}" data-cart-variant="{{ vid }}" data-analytics="add_to_cart"{% if v_sold_out %} hidden{% endif %}>
-                  {% if v_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
-                </button>
-                {% if v_sold_out %}
-                {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" %}
-                {% else %}
-                {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" hide="1" %}
-                {% endif %}
-
-              </article>
-              {% endif %}
-              {% endfor %}
-            </div>
-            {% else %}
-          <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}" data-analytics="add_to_cart">
-            {% if preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
-          </button>
-            {% endif %}
-          {% elsif page.form_url %}
-          <a href="{{ page.form_url }}" class="button button--primary section-button" target="_blank" rel="noopener" data-analytics="product_external_order">
-            הזמיני עכשיו
-          </a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-  </div>
-  {% endunless %}
-
-  {% if site.data.settings.newsletter.enabled %}
-  <div class="store-item-content animate" data-newsletter-notify-slot="product"{% unless sold_out %} hidden{% endunless %}>
-    <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <div class="section__navigation store-item__cart-actions">
-            {% include newsletter-notify-button.html intent="restock" source="product_restock" class="section-button" analytics="newsletter_restock" %}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {% assign page_image = page.image %}
-  {% if page_image == blank and page.variants %}
-    {% for variant_pair in page.variants %}
-      {% if page_image == blank and variant_pair[1].image and variant_pair[1].image != blank %}
-        {% assign page_image = variant_pair[1].image %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-
-  {% assign gallery_images = '' | split: '' %}
-  {% if page_image and page_image != blank %}
-    {% assign gallery_images = gallery_images | push: page_image %}
-  {% endif %}
-  {% if page.gallery %}
-    {% for gimg in page.gallery %}
-      {% unless gimg == page_image %}
-        {% assign gallery_images = gallery_images | push: gimg %}
-      {% endunless %}
-    {% endfor %}
-  {% endif %}
-
-  {% if gallery_images.size > 0 %}
-  {% assign gallery_main = gallery_images | first %}
-  <div class="store-item-content animate">
-    <div class="product-gallery" data-product-gallery>
-      <div class="product-gallery__stage store-item-image-container">
-        <img
-          class="product-gallery__image lazy"
-          data-gallery-main
-          data-src="{{ gallery_main | relative_url }}"
-          alt="{{ page.title }}"
-        >
+  <div class="store-item-layout animate">
+    <div class="store-item-layout__details">
+      <div class="page-head">
+        <h1 class="page-title">{{ page.title }}</h1>
         {% if sold_out %}
-          <div class="out-of-stock">אזל מהמלאי</div>
+          <div class="out-of-stock-text">אזל מהמלאי</div>
         {% elsif preorder %}
-          <div class="preorder">הזמיני מראש</div>
+          <div class="preorder-text">הזמיני מראש</div>
         {% elsif page.limited_stock %}
           {% unless has_variants %}
-          <div class="limited-stock">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+          <div class="limited-stock-text">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
           {% endunless %}
         {% endif %}
-        {% if gallery_images.size > 1 %}
-        <button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>
-        <button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="תמונה הבאה"></button>
+
+        {% if page.subtitle %}
+          <p class="store-item-subtitle">{{ page.subtitle }}</p>
+        {% endif %}
+
+        {% if content != blank %}
+        <div class="store-item-content">
+          {{ content }}
+        </div>
+        {% endif %}
+
+        {% if page.price %}
+          <div class="store-item-price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ page.price }}</div>
         {% endif %}
       </div>
-      {% if gallery_images.size > 1 %}
-      <div class="product-gallery__thumbs" role="list">
-        {% for img in gallery_images %}
-        <button
-          type="button"
-          class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
-          data-gallery-src="{{ img | relative_url }}"
-          aria-label="תמונה {{ forloop.index }} מתוך {{ gallery_images.size }}"
-          aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
-        >
-          <img class="lazy" data-src="{{ img | relative_url }}" alt="">
+
+      {% unless sold_out %}
+      <div class="store-item-layout__actions store-item__cart-actions" data-cart-actions>
+        {% if site.data.store-cart.enabled and cart_meta and cart_meta.enabled != false %}
+          {% if cart_meta.variable %}
+          <div class="gift-amount">
+            <p class="gift-amount__label">בחרי סכום לגיפט קארד</p>
+            {% if cart_meta.presets %}
+            <div class="gift-amount__chips" role="group" aria-label="סכומים מומלצים">
+              {% for n in cart_meta.presets %}
+              <button type="button" class="gift-amount__chip" data-gift-amount="{{ n }}" data-analytics="gift_amount">₪{{ n }}</button>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <label class="gift-amount__custom" for="gift-card-amount">
+              <span>או סכום אחר (₪{{ cart_meta.min_price }}–₪{{ cart_meta.max_price }})</span>
+              <input
+                type="number"
+                class="form__input gift-amount__input"
+                id="gift-card-amount"
+                name="giftAmount"
+                min="{{ cart_meta.min_price }}"
+                max="{{ cart_meta.max_price }}"
+                step="1"
+                inputmode="numeric"
+                placeholder="₪"
+              >
+            </label>
+            <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}" data-analytics="add_to_cart" disabled>
+              {% if preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
+            </button>
+          </div>
+          {% elsif cart_meta.variants %}
+          <div class="store-variants">
+            {% assign variant_ids = cart_meta.variant_order %}
+            {% if variant_ids == nil or variant_ids.size == 0 %}
+              {% assign variant_ids = '' | split: '' %}
+              {% for variant in cart_meta.variants %}
+                {% assign variant_ids = variant_ids | push: variant[0] %}
+              {% endfor %}
+            {% endif %}
+            {% for vid in variant_ids %}
+            {% assign v = cart_meta.variants[vid] %}
+            {% if v %}
+            {% assign v_sold_out = false %}
+            {% assign v_preorder = false %}
+            {% assign v_limited = false %}
+            {% if v.stock != nil and v.stock != blank %}
+              {% if v.stock == 0 %}
+                {% if page.preorder or v.preorder %}
+                  {% assign v_preorder = true %}
+                {% else %}
+                  {% assign v_sold_out = true %}
+                {% endif %}
+              {% elsif v.stock <= 3 %}
+                {% assign v_limited = true %}
+              {% endif %}
+            {% endif %}
+            {% assign v_images = '' | split: '' %}
+            {% if v.image and v.image != blank %}
+              {% assign v_images = v_images | push: v.image %}
+            {% endif %}
+            {% if v.gallery %}
+              {% for gimg in v.gallery %}
+                {% unless gimg == v.image %}
+                  {% assign v_images = v_images | push: gimg %}
+                {% endunless %}
+              {% endfor %}
+            {% endif %}
+            <article class="store-variant" data-variant-id="{{ vid }}">
+              {% if v_images.size > 0 %}
+              {% assign v_main = v_images | first %}
+              <div class="product-gallery product-gallery--variant" data-product-gallery>
+                <div class="product-gallery__stage">
+                  <img
+                    class="product-gallery__image lazy"
+                    data-gallery-main
+                    data-src="{{ v_main | relative_url }}"
+                    alt="{{ v.name }}"
+                  >
+                  {% if v_images.size > 1 %}
+                  <button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>
+                  <button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="תמונה הבאה"></button>
+                  {% endif %}
+                </div>
+                {% if v_images.size > 1 %}
+                <div class="product-gallery__thumbs" role="list">
+                  {% for img in v_images %}
+                  <button
+                    type="button"
+                    class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+                    data-gallery-src="{{ img | relative_url }}"
+                    aria-label="תמונה {{ forloop.index }} מתוך {{ v_images.size }}"
+                    aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+                  >
+                    <img class="lazy" data-src="{{ img | relative_url }}" alt="">
+                  </button>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              {% endif %}
+              <div class="store-variant__info">
+                <h3 class="store-variant__name">{{ v.name }}</h3>
+                {% if v.description %}
+                <p class="store-variant__desc">{{ v.description }}</p>
+                {% endif %}
+                <div class="store-variant__price">₪{{ v.price }}</div>
+                {% if v_sold_out %}
+                <div class="store-variant__stock out-of-stock-text">אזל מהמלאי</div>
+                {% elsif v_preorder %}
+                <div class="store-variant__stock preorder-text">הזמיני מראש</div>
+                {% elsif v_limited %}
+                <div class="store-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+                {% endif %}
+              </div>
+              <button type="button" class="button button--primary" data-cart-add="{{ slug }}" data-cart-variant="{{ vid }}" data-analytics="add_to_cart"{% if v_sold_out %} hidden{% endif %}>
+                {% if v_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
+              </button>
+              {% if v_sold_out %}
+              {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" %}
+              {% else %}
+              {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" hide="1" %}
+              {% endif %}
+
+            </article>
+            {% endif %}
+            {% endfor %}
+          </div>
+          {% else %}
+        <button type="button" class="button button--primary section-button" data-cart-add="{{ slug }}" data-analytics="add_to_cart">
+          {% if preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
         </button>
-        {% endfor %}
+          {% endif %}
+        {% elsif page.form_url %}
+        <a href="{{ page.form_url }}" class="button button--primary section-button" target="_blank" rel="noopener" data-analytics="product_external_order">
+          הזמיני עכשיו
+        </a>
+        {% endif %}
+      </div>
+      {% endunless %}
+
+      {% if site.data.settings.newsletter.enabled %}
+      <div class="store-item-layout__actions" data-newsletter-notify-slot="product"{% unless sold_out %} hidden{% endunless %}>
+        {% include newsletter-notify-button.html intent="restock" source="product_restock" class="section-button" analytics="newsletter_restock" %}
       </div>
       {% endif %}
     </div>
+
+    {% if gallery_images.size > 0 %}
+    {% assign gallery_main = gallery_images | first %}
+    <div class="store-item-layout__media">
+      <div class="product-gallery" data-product-gallery>
+        <div class="product-gallery__stage store-item-image-container">
+          <img
+            class="product-gallery__image lazy"
+            data-gallery-main
+            data-src="{{ gallery_main | relative_url }}"
+            alt="{{ page.title }}"
+          >
+          {% if sold_out %}
+            <div class="out-of-stock">אזל מהמלאי</div>
+          {% elsif preorder %}
+            <div class="preorder">הזמיני מראש</div>
+          {% elsif page.limited_stock %}
+            {% unless has_variants %}
+            <div class="limited-stock">{% if page.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+            {% endunless %}
+          {% endif %}
+          {% if gallery_images.size > 1 %}
+          <button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>
+          <button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="תמונה הבאה"></button>
+          {% endif %}
+        </div>
+        {% if gallery_images.size > 1 %}
+        <div class="product-gallery__thumbs" role="list">
+          {% for img in gallery_images %}
+          <button
+            type="button"
+            class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+            data-gallery-src="{{ img | relative_url }}"
+            aria-label="תמונה {{ forloop.index }} מתוך {{ gallery_images.size }}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+          >
+            <img class="lazy" data-src="{{ img | relative_url }}" alt="">
+          </button>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
 
 </div>
 
 {% include store-shipping.html %}
+{% include related-products.html %}

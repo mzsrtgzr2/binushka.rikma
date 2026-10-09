@@ -3,13 +3,20 @@ layout: default
 ---
 
 <div class="scrunchies-hero">
-  {% if page.hero_image %}
+  {% if page.hero_video %}
+  <video class="scrunchies-hero__bg" autoplay muted loop playsinline preload="metadata"{% if page.hero_video_poster %} poster="{{ page.hero_video_poster | relative_url }}"{% endif %}>
+    <source src="{{ page.hero_video | relative_url }}" type="video/quicktime">
+  </video>
+  {% elsif page.hero_image %}
   <img class="scrunchies-hero__bg lazy" data-src="{{ page.hero_image | relative_url }}" alt="{{ page.title }}">
   {% endif %}
   <div class="scrunchies-hero__content container">
     <h1 class="scrunchies-hero__title">{{ page.title }}</h1>
     {% if page.subtitle %}
     <p class="scrunchies-hero__subtitle">{{ page.subtitle }}</p>
+    {% endif %}
+    {% if page.hero_video %}
+    <p class="scrunchies-hero__cta"><a class="button button--primary" href="#scrunchies-shop">לרכישה</a></p>
     {% endif %}
   </div>
 </div>
@@ -248,25 +255,12 @@ layout: default
 </div>
 {% endif %}
 
-{% if page.footer_video %}
-<div class="container scrunchies-video-cta animate">
-  <a href="#scrunchies-shop" class="button button--primary scrunchies-video-cta__btn">לרכישה</a>
-</div>
-<div class="scrunchies-video-band animate">
-  <video class="scrunchies-video-band__video" autoplay muted loop playsinline preload="metadata"{% if page.footer_video_poster %} poster="{{ page.footer_video_poster | relative_url }}"{% endif %}>
-    <source src="{{ page.footer_video | relative_url }}" type="video/quicktime">
-  </video>
-</div>
-{% endif %}
-
 <script src="{{ site.baseurl }}/js/scrunchies-gallery.js" defer></script>
 
 <style>
 .gallery-layout { margin-top: 8px; }
-.scrunchies-video-cta { text-align: center; margin: 8px auto 14px; }
-.scrunchies-video-cta__btn { display: inline-block; }
-.scrunchies-video-band { width: 100%; margin: 0; background: var(--background-alt-color); }
-.scrunchies-video-band__video { display: block; width: 100%; height: 70vh; max-height: 640px; object-fit: cover; }
+.scrunchies-hero__cta { margin: 22px 0 0; }
+.scrunchies-hero__cta .button { display: inline-block; }
 html { scroll-behavior: smooth; }
 #scrunchies-shop { scroll-margin-top: 96px; }
 .scrunchies-gallery__link { display: block; cursor: pointer; }

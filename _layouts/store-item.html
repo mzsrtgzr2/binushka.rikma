@@ -59,6 +59,12 @@ layout: default
           <p class="store-item-subtitle">{{ page.subtitle }}</p>
         {% endif %}
 
+        {% if content != blank %}
+        <div class="store-item-content">
+          {{ content }}
+        </div>
+        {% endif %}
+
         {% if page.price %}
           <div class="store-item-price"{% unless cart_meta.variable or cart_meta.variants %} data-product-price="{{ slug }}"{% endunless %}>{{ page.price }}</div>
         {% endif %}
@@ -256,12 +262,6 @@ layout: default
     </div>
     {% endif %}
   </div>
-
-  {% if content != blank %}
-  <div class="store-item-content animate">
-    {{ content }}
-  </div>
-  {% endif %}
 
 </div>
 

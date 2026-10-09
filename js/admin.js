@@ -1510,13 +1510,13 @@
       '</h1>' +
       stockText(p) +
       (p.subtitle ? '<p class="store-item-subtitle">' + escapeHtml(p.subtitle) + '</p>' : '') +
+      (body ? '<div class="store-item-content admin-preview__markdown">' + body + '</div>' : '') +
       (p.price ? '<div class="store-item-price">' + escapeHtml(p.price) + '</div>' : '') +
       '</div>' +
       (cart ? '<div class="store-item-layout__actions store-item__cart-actions">' + cart + '</div>' : '') +
       '</div>' +
       (mainImage ? '<div class="store-item-layout__media">' + mainImage + '</div>' : '') +
-      '</div>' +
-      (body ? '<div class="store-item-content admin-preview__markdown">' + body + '</div>' : '')
+      '</div>'
     );
   }
 

@@ -22,6 +22,7 @@
   var noteInput = document.getElementById('coupon-note');
   var expiresInput = document.getElementById('coupon-expires');
   var minPurchaseInput = document.getElementById('coupon-min-purchase');
+  var maxUsesInput = document.getElementById('coupon-max-uses');
   var appliesToInput = document.getElementById('coupon-applies-to');
   var categoryGroup = document.getElementById('coupon-category-group');
   var categoryInput = document.getElementById('coupon-category');
@@ -91,6 +92,7 @@
         'ערך לא תקין — לסכום קבוע יש להזין מספר שלם בשקלים, ולאחוזים מספר בין 1 ל־99 (לא 100%)',
       expires_invalid: 'תאריך תפוגה לא תקין',
       min_purchase_invalid: 'מינימום רכישה לא תקין (מספר שלם בשקלים)',
+      max_uses_invalid: 'מספר מימושים לא תקין (מספר שלם, 0 = בלי הגבלה)',
       applies_to_invalid: 'בחרי על מה הקופון חל',
       category_invalid: 'בחרי קטגוריה',
       product_invalid: 'בחרי לפחות מוצר אחד',
@@ -106,6 +108,7 @@
     if (name === 'value') return valueInput;
     if (name === 'expires') return expiresInput;
     if (name === 'min_purchase') return minPurchaseInput;
+    if (name === 'max_uses') return maxUsesInput;
     if (name === 'applies_to') return appliesToInput;
     if (name === 'category') return categoryInput;
     if (name === 'product' || name === 'products') {
@@ -132,6 +135,16 @@
     if (!raw) return 0;
     var n = Number(raw);
     if (!Number.isFinite(n) || n < 0) return NaN;
+    return Math.round(n);
+  }
+
+  function readMaxUses() {
+    if (!maxUsesInput) return 0;
+    var raw = String(maxUsesInput.value || '').trim();
+    if (!raw) return 0;
+    var n = Number(raw);
+    if (!Number.isFinite(n) || n < 0) return NaN;
+    if (Math.abs(n - Math.round(n)) > 0.001) return NaN;
     return Math.round(n);
   }
 
@@ -299,6 +312,12 @@
       if (minPurchaseInput) minPurchaseInput.focus();
       return null;
     }
+    var maxUses = readMaxUses();
+    if (!Number.isFinite(maxUses)) {
+      show(formMessage, errorText('max_uses_invalid'), 'error');
+      if (maxUsesInput) maxUsesInput.focus();
+      return null;
+    }
     var appliesTo = appliesToInput ? appliesToInput.value : 'all';
     if (appliesTo !== 'all' && appliesTo !== 'category' && appliesTo !== 'product') {
       show(formMessage, errorText('applies_to_invalid'), 'error');
@@ -341,6 +360,7 @@
         note: noteInput.value,
         expires: expiresInput ? expiresInput.value : '',
         min_purchase: minPurchase,
+        max_uses: maxUses,
         applies_to: appliesTo,
         category: appliesTo === 'category' ? category : '',
         product: appliesTo === 'product' && selectedProducts.length === 1 ? selectedProducts[0] : '',
@@ -420,6 +440,10 @@
     var n = Number(row && row.uses);
     if (!Number.isFinite(n) || n < 0) n = 0;
     n = Math.floor(n);
+    var max = Number(row && row.max_uses);
+    if (!Number.isFinite(max) || max < 0) max = 0;
+    max = Math.floor(max);
+    if (max > 0) return n + ' מתוך ' + max + ' מימושים';
     if (n === 1) return 'מימוש אחד';
     return n + ' מימושים';
   }
@@ -473,9 +497,18 @@
     return iso > String(row.expires);
   }
 
+  function isExhaustedRow(row) {
+    var max = Number(row && row.max_uses);
+    if (!Number.isFinite(max) || max <= 0) return false;
+    var n = Number(row && row.uses);
+    if (!Number.isFinite(n) || n < 0) n = 0;
+    return Math.floor(n) >= Math.floor(max);
+  }
+
   function statusLabel(row) {
     if (row.active === false) return 'כבוי';
     if (isExpiredRow(row)) return 'פג תוקף';
+    if (isExhaustedRow(row)) return 'מוצה';
     return 'פעיל';
   }
 
@@ -504,6 +537,7 @@
     activeInput.checked = true;
     if (expiresInput) expiresInput.value = '';
     if (minPurchaseInput) minPurchaseInput.value = '';
+    if (maxUsesInput) maxUsesInput.value = '';
     if (appliesToInput) appliesToInput.value = 'all';
     if (categoryInput) categoryInput.value = '';
     if (workshopScopeInput) workshopScopeInput.value = 'all';
@@ -527,6 +561,9 @@
     if (expiresInput) expiresInput.value = row.expires || '';
     if (minPurchaseInput) {
       minPurchaseInput.value = row.min_purchase > 0 ? row.min_purchase : '';
+    }
+    if (maxUsesInput) {
+      maxUsesInput.value = row.max_uses > 0 ? row.max_uses : '';
     }
     if (appliesToInput) appliesToInput.value = row.applies_to || 'all';
     if (categoryInput) categoryInput.value = row.category || '';
@@ -555,14 +592,14 @@
     }
     if (statsEl) {
       var active = coupons.filter(function (row) {
-        return row.active !== false && !isExpiredRow(row);
+        return row.active !== false && !isExpiredRow(row) && !isExhaustedRow(row);
       }).length;
       statsEl.textContent = coupons.length + ' קודים · ' + active + ' פעילים';
     }
     listEl.innerHTML = coupons
       .map(function (row) {
         var status = statusLabel(row);
-        var live = row.active !== false && !isExpiredRow(row);
+        var live = row.active !== false && !isExpiredRow(row) && !isExhaustedRow(row);
         var meta = formatDiscount(row);
         if (row.min_purchase > 0) meta += ' · מ־₪' + row.min_purchase;
         var scope = formatScope(row);

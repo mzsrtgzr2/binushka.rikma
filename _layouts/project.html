@@ -9,7 +9,8 @@ layout: default
 {%- assign sold_out = page.registration_full -%}
 {%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
 {%- assign last_places = page.last_places -%}
-{%- unless page.price_per == 'workshop' -%}
+{%- assign hide_remaining_spots = page.hide_remaining_spots -%}
+{%- unless page.price_per == 'workshop' or hide_remaining_spots -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
 {%- endunless -%}
 {%- assign booking_in_cart = false -%}
@@ -104,8 +105,8 @@ layout: default
             <span class="workshop-booking__per">{{ price_unit }}</span>
           </div>
           {% endunless %}
-          <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' %} hidden{% endif %}>
-            {%- if spots != nil and page.price_per != 'workshop' -%}
+          <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' or hide_remaining_spots %} hidden{% endif %}>
+            {%- if spots != nil and page.price_per != 'workshop' and hide_remaining_spots != true -%}
               {%- if spots == 1 -%}מקום אחרון — נותר 1{%- elsif spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
             {%- endif -%}
           </p>

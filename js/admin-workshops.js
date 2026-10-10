@@ -1007,7 +1007,8 @@
     beginners: 'למתחילות',
     advanced: 'למתקדמות',
     mothers: 'לאמהות בחל״ד',
-    'all-levels': 'לכל הרמות'
+    'all-levels': 'לכל הרמות',
+    hosting: 'אירוח'
   };
 
   function categoryLabel(workshop) {

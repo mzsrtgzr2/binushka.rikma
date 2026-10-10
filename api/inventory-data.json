@@ -79,7 +79,7 @@
       "name": "ריבועי בד לרקמה",
       "variants": {
         "type-1": {
-          "stock": 97
+          "stock": 96
         },
         "type-2": {
           "stock": 99
@@ -362,7 +362,7 @@
       "name": "ערכות רקמה מיוחדות",
       "variants": {
         "tablecloth-mono": {
-          "stock": 1
+          "stock": 0
         },
         "tablecloth-autumn": {
           "stock": 1

@@ -15,7 +15,7 @@ variants:
   type-1:
     name: דריל צבע לבן
     price: 10
-    stock: 97
+    stock: 96
     image: /images/store/fabrics/screenshot-2026-09-24-at-15-38-17-mufir18h.jpg
     description: "גודל ריבוע לפחות 25*25 ס״מ"
   type-2:

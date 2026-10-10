@@ -168,7 +168,7 @@
         "price": 10,
         "image": "/images/store/fabrics/screenshot-2026-09-24-at-15-38-17-mufir18h.jpg",
         "description": "גודל ריבוע לפחות 25*25 ס״מ",
-        "stock": 97
+        "stock": 96
       },
       "type-2": {
         "name": "דריל צבע טבעי - קרם",
@@ -610,7 +610,7 @@
         "price": 160,
         "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg",
         "description": "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
-        "stock": 1,
+        "stock": 0,
         "gallery": [
           "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg",
           "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg"
@@ -644,7 +644,7 @@
         "price": 120,
         "image": "/images/store/dmc-kit-pearl/screenshot-2026-09-23-at-15-15-02-mue2n4gg.png",
         "description": "ערכת רקמה יפהיפיה מבית DMC שהבאתי מהטיול האחרון בלונדון.\nהתוצאה משמחת והתהליך כיפי.",
-        "stock": 1,
+        "stock": 0,
         "gallery": [
           "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-34-mui9lg06.jpg",
           "/images/store/dmc-kit-pearl/screenshot-2026-09-23-at-22-31-14-muei2kk4.jpg",
@@ -667,7 +667,7 @@
         "price": 100,
         "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg",
         "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
-        "stock": 1,
+        "stock": 2,
         "gallery": [
           "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg",
           "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
@@ -684,13 +684,13 @@
       }
     },
     "variant_order": [
-      "tablecloth-mono",
       "tablecloth-autumn",
       "dmc-flowers",
-      "dmc-pearl",
       "trimits-elephants",
       "trimits-butterfly",
-      "kit-all-inclusive"
+      "kit-all-inclusive",
+      "tablecloth-mono",
+      "dmc-pearl"
     ],
     "category": "kits",
     "categories": [

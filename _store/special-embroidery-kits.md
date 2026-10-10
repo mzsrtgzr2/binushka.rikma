@@ -65,7 +65,7 @@ variants:
   trimits-butterfly:
     name: ערכת רקמה מלונדון – דוגמת פרפר
     price: 100
-    stock: 1
+    stock: 2
     image: /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg
     gallery:
       - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg

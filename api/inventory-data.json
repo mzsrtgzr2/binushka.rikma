@@ -361,10 +361,6 @@
       "limitedStock": true,
       "name": "ערכות רקמה מיוחדות",
       "variants": {
-        "tablecloth-mono": {
-          "stock": 0,
-          "preorder": true
-        },
         "tablecloth-autumn": {
           "stock": 1,
           "preorder": true
@@ -378,11 +374,15 @@
         "trimits-elephants": {
           "stock": 1
         },
+        "kit-all-inclusive": {
+          "stock": null
+        },
         "trimits-butterfly": {
           "stock": 2
         },
-        "kit-all-inclusive": {
-          "stock": null
+        "tablecloth-mono": {
+          "stock": 0,
+          "preorder": true
         }
       }
     },

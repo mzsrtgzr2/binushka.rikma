@@ -15,16 +15,6 @@ categories:
   - kits
   - beginners
 variants:
-  tablecloth-mono:
-    name: מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה
-    price: 160
-    stock: 0
-    preorder: true
-    image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg
-    gallery:
-      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
-      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg
-    description: "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת."
   tablecloth-autumn:
     name: מפה יפהיפיה – דוגמת סתיו שלכת
     price: 160
@@ -64,6 +54,13 @@ variants:
     gallery:
       - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg
     description: "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו."
+  kit-all-inclusive:
+    name: ערכת רקמה הכל כלול
+    price: 210
+    image: /images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg
+    gallery:
+      - /images/gallery/kit.jpeg
+    description: "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים."
   trimits-butterfly:
     name: ערכת רקמה מלונדון – דוגמת פרפר
     price: 100
@@ -73,13 +70,16 @@ variants:
       - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg
       - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg
     description: "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו."
-  kit-all-inclusive:
-    name: ערכת רקמה הכל כלול
-    price: 210
-    image: /images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg
+  tablecloth-mono:
+    name: מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה
+    price: 160
+    stock: 0
+    preorder: true
+    image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg
     gallery:
-      - /images/gallery/kit.jpeg
-    description: "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים."
+      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
+      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg
+    description: "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת."
 ---
 
 ערכות רקמה מוכנות ומפנקות מבית DMC ומבית VOG – כל אחת עם אופי משלה.

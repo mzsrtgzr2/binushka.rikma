@@ -605,18 +605,6 @@
   "special-embroidery-kits": {
     "name": "ערכות רקמה מיוחדות",
     "variants": {
-      "tablecloth-mono": {
-        "name": "מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה",
-        "price": 160,
-        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg",
-        "description": "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
-        "stock": 0,
-        "preorder": true,
-        "gallery": [
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg",
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg"
-        ]
-      },
       "tablecloth-autumn": {
         "name": "מפה יפהיפיה – דוגמת סתיו שלכת",
         "price": 160,
@@ -664,6 +652,15 @@
           "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg"
         ]
       },
+      "kit-all-inclusive": {
+        "name": "ערכת רקמה הכל כלול",
+        "price": 210,
+        "image": "/images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg",
+        "description": "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים.",
+        "gallery": [
+          "/images/gallery/kit.jpeg"
+        ]
+      },
       "trimits-butterfly": {
         "name": "ערכת רקמה מלונדון – דוגמת פרפר",
         "price": 100,
@@ -675,23 +672,26 @@
           "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
         ]
       },
-      "kit-all-inclusive": {
-        "name": "ערכת רקמה הכל כלול",
-        "price": 210,
-        "image": "/images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg",
-        "description": "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים.",
+      "tablecloth-mono": {
+        "name": "מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה",
+        "price": 160,
+        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg",
+        "description": "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
+        "stock": 0,
+        "preorder": true,
         "gallery": [
-          "/images/gallery/kit.jpeg"
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg"
         ]
       }
     },
     "variant_order": [
-      "tablecloth-mono",
       "tablecloth-autumn",
       "dmc-flowers",
       "trimits-elephants",
-      "trimits-butterfly",
       "kit-all-inclusive",
+      "trimits-butterfly",
+      "tablecloth-mono",
       "dmc-pearl"
     ],
     "category": "kits",

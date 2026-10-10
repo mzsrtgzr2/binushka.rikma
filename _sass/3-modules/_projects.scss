@@ -140,7 +140,7 @@
 .project-gallery {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0;
+  gap: 4px;
   width: 100vw;
   max-width: 100vw;
   margin-left: calc(50% - 50vw);

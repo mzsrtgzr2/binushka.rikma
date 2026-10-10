@@ -977,9 +977,16 @@
     return Boolean(workshop.registration_full) || spotsOf(workshop) === 0;
   }
 
+  function hideRemainingSpots(workshop) {
+    if (workshop.hide_remaining_spots) return true;
+    var spots = spotsOf(workshop);
+    // Mothers courses: keep the count private until 4 or fewer places remain.
+    return workshop.category === 'mothers' && spots != null && spots > 4;
+  }
+
   function isLastPlaces(workshop) {
     if (workshop.last_places) return true;
-    if (workshop.price_per === 'workshop') return false;
+    if (workshop.price_per === 'workshop' || hideRemainingSpots(workshop)) return false;
     var spots = spotsOf(workshop);
     return spots != null && spots > 0 && spots <= 3;
   }
@@ -1066,7 +1073,7 @@
 
     var packs = packsForBooking(workshop);
     var spots = spotsOf(workshop);
-    var showSpots = spots != null && workshop.price_per !== 'workshop';
+    var showSpots = spots != null && workshop.price_per !== 'workshop' && !hideRemainingSpots(workshop);
 
     var body = '';
     if (!packs.length) {

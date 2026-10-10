@@ -10,6 +10,13 @@ layout: default
 {%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
 {%- assign last_places = page.last_places -%}
 {%- assign hide_remaining_spots = page.hide_remaining_spots -%}
+{%- comment -%}
+  Mothers embroidery courses (category: mothers): do not publish the remaining
+  count while more than 4 places are free. At 4 or fewer, show it again.
+{%- endcomment -%}
+{%- if page.category == 'mothers' and spots != nil and spots > 4 -%}
+  {%- assign hide_remaining_spots = true -%}
+{%- endif -%}
 {%- unless page.price_per == 'workshop' or hide_remaining_spots -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
 {%- endunless -%}

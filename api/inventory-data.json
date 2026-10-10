@@ -480,6 +480,13 @@
       "stock": 8,
       "outOfStock": false,
       "limitedStock": false
+    },
+    "workshop-hosting-04-12": {
+      "name": "לארח בנחת — ב4.12 ברחובות",
+      "price": 500,
+      "stock": 10,
+      "outOfStock": false,
+      "limitedStock": false
     }
   }
 }

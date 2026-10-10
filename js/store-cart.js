@@ -549,10 +549,12 @@
       return;
     }
 
-    var waitlist = root.querySelector('[data-newsletter-notify-slot="workshop"]');
-    var register = root.querySelector('.workshop-booking:not(.workshop-booking--waitlist)');
-    if (waitlist) waitlist.hidden = !soldOut;
-    if (register) register.hidden = soldOut;
+    root.querySelectorAll('[data-newsletter-notify-slot="workshop"]').forEach(function (waitlist) {
+      waitlist.hidden = !soldOut;
+    });
+    root.querySelectorAll('.workshop-booking:not(.workshop-booking--waitlist)').forEach(function (register) {
+      register.hidden = soldOut;
+    });
   }
 
   function setCartAddLabel(btn, preorder) {

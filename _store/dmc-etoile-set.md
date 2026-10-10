@@ -9,15 +9,15 @@ limited_stock: true
 hide: false
 stock: 1
 cart_price: 330
-order: 9
+order: 11
 preorder: false
+limited_edition: false
 gallery:
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-22-32-12-muei676m.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-21-49-05-muegj9ev.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-11-muegj9ew.jpg
   - /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-26-muegj9ex.png
 category: threads
-limited_edition: false
 ---
 
 סוף סוף חוטים מנצנצים שגם נוח לעבוד איתם!!!

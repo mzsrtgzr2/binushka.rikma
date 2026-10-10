@@ -7,14 +7,14 @@ price: ₪25 – ₪80
 out_of_stock: false
 limited_stock: false
 hide: false
-order: 8
+order: 10
 preorder: false
+limited_edition: false
 gallery:
   - /images/store/stickers/screenshot-2026-09-23-at-23-29-13-muek4657.jpg
   - /images/store/stickers/screenshot-2026-09-25-at-23-20-17-muheo9mj.jpg
   - /images/store/stickers/screenshot-2026-09-23-at-22-18-22-muehnd9r.jpg
 category: markers-stickers
-limited_edition: false
 variants:
   type-4:
     name: "דף מדבקה לרקמה - ריק, להדפסה בבית"

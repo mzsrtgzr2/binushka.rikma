@@ -6,7 +6,11 @@
 {%- assign sold_out = project.registration_full -%}
 {%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
 {%- assign last_places = project.last_places -%}
-{%- unless project.price_per == 'workshop' or project.hide_remaining_spots -%}
+{%- assign hide_remaining_spots = project.hide_remaining_spots -%}
+{%- if project.category == 'mothers' and spots != nil and spots > 4 -%}
+  {%- assign hide_remaining_spots = true -%}
+{%- endif -%}
+{%- unless project.price_per == 'workshop' or hide_remaining_spots -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
 {%- endunless -%}
 {%- assign booking_in_cart = false -%}

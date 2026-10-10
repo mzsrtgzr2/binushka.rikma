@@ -25,6 +25,13 @@
       }
     }
   },
+  "workshop-hosting-04-12": {
+    "name": "לארח בנחת — ב4.12 ברחובות",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 8
+  },
   "workshop-monthly-meeting": {
     "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",
     "price": 110,

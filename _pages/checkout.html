@@ -27,13 +27,32 @@ permalink: /checkout/
     </section>
 
     <section class="checkout-form-section" id="checkout-form-section">
-      <h2>פרטים אישיים לתשלום</h2>
-      <p class="checkout-form-section__note">
-        יש למלא את הפרטים הבאים לפני המעבר לדף התשלום המאובטח.
-        הם נשמרים במכשיר הזה בלבד, לרכישה הבאה.
-      </p>
-
       <form class="checkout-form" id="checkout-form" novalidate>
+
+        <div class="checkout-coupon" id="checkout-coupon">
+          <label class="form__label" for="checkout-coupon-code">קוד קופון או גיפט קארד</label>
+          <div class="checkout-coupon__row">
+            <input
+              type="text"
+              id="checkout-coupon-code"
+              name="couponCode"
+              class="form__input checkout-coupon__input"
+              dir="ltr"
+              autocomplete="off"
+              maxlength="32"
+              placeholder="אם יש לך קוד"
+            >
+            <button type="button" class="button" id="checkout-coupon-apply" data-analytics="checkout_coupon_apply">החלי</button>
+            <button type="button" class="button checkout-coupon__clear" id="checkout-coupon-clear" data-analytics="checkout_coupon_clear" hidden>הסירי</button>
+          </div>
+          <p class="checkout-coupon__message" id="checkout-coupon-message" hidden></p>
+        </div>
+
+        <h2>פרטים אישיים לתשלום</h2>
+        <p class="checkout-form-section__note">
+          יש למלא את הפרטים הבאים לפני המעבר לדף התשלום המאובטח.
+          הם נשמרים במכשיר הזה בלבד, לרכישה הבאה.
+        </p>
 
         <div class="row">
           <div class="col col-6 col-d-12">
@@ -198,25 +217,6 @@ permalink: /checkout/
             placeholder="למשל: נועה כהן, מיכל לוי"
           ></textarea>
           <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם נרשמת ליותר ממקום אחד, אפשר לרשום כאן מי מגיעה.</p>
-        </div>
-
-        <div class="checkout-coupon" id="checkout-coupon">
-          <label class="form__label" for="checkout-coupon-code">קוד קופון או גיפט קארד</label>
-          <div class="checkout-coupon__row">
-            <input
-              type="text"
-              id="checkout-coupon-code"
-              name="couponCode"
-              class="form__input checkout-coupon__input"
-              dir="ltr"
-              autocomplete="off"
-              maxlength="32"
-              placeholder="אם יש לך קוד"
-            >
-            <button type="button" class="button" id="checkout-coupon-apply" data-analytics="checkout_coupon_apply">החלי</button>
-            <button type="button" class="button checkout-coupon__clear" id="checkout-coupon-clear" data-analytics="checkout_coupon_clear" hidden>הסירי</button>
-          </div>
-          <p class="checkout-coupon__message" id="checkout-coupon-message" hidden></p>
         </div>
 
         <p class="checkout-grand-total">לתשלום: <strong id="checkout-grand-total">₪0</strong></p>

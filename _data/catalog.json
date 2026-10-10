@@ -568,6 +568,11 @@
     "price": 30,
     "category": "scrunchies-gallery"
   },
+  "scrunchie-yarok-amok": {
+    "name": "סקראנצ'י ירוק עמוק",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
   "scrunchies": {
     "name": "סקראנצ'יז בעבודת יד",
     "variants": {

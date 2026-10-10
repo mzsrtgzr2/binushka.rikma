@@ -342,6 +342,13 @@
       "name": "סקראנצ'י תרנגולים",
       "price": 30
     },
+    "scrunchie-yarok-amok": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י ירוק עמוק",
+      "price": 30
+    },
     "scrunchies": {
       "stock": null,
       "outOfStock": false,

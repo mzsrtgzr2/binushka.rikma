@@ -12,11 +12,13 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 27
+order: 32
 scrunchie_type: כותנה
 scrunchie_color: סגול
 fabric_country: שווייץ
 category: scrunchies-gallery
+limited_edition: false
+preorder: false
 ---
 
 סקראנצ'י מבד כותנה עם הדפס פרחים/כתמים סגולים ונגיעות כתומות על רקע שמנת. גודל רגיל. בד משווייץ. תפורה בעבודת יד — פריט יחיד.

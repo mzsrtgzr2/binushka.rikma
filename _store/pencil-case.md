@@ -10,11 +10,12 @@ hide: false
 cart_price: 20
 order: 11
 preorder: false
+limited_edition: false
 gallery:
   - /images/store/pencil-case/screenshot-2026-09-23-at-18-52-54-mueaerl2.jpg
   - /images/store/pencil-case/screenshot-2026-09-23-at-18-53-15-mueaerl2.jpg
 category: fabrics
-limited_edition: false
+stock: 20
 ---
 
 קלמר פשתן נהדר לרקמה, הפרוייקט הקבוע שלי כשאני מחפשת לתת מתנה בעבודת יד.

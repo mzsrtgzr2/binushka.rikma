@@ -9,7 +9,7 @@ limited_stock: false
 hide: true
 in_cart: false
 form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
-order: 38
+order: 47
 noindex: true
 sitemap: false
 limited_edition: false

@@ -9,7 +9,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 29
+order: 36
 scrunchie_type: כותנה
 scrunchie_color: כחול
 fabric_country: לונדון

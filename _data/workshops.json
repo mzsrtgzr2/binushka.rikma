@@ -26,11 +26,11 @@
     }
   },
   "workshop-hosting-04-12": {
-    "name": "לארח בנחת — ב4.12 ברחובות",
+    "name": "לארח בנחת — סדנה מעשית לאירוח, אפייה והכנות מראש",
     "price": 500,
     "kind": "workshop",
     "shipping": false,
-    "stock": 10
+    "stock": 9
   },
   "workshop-monthly-meeting": {
     "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",

@@ -141,10 +141,10 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 4px;
-  width: 100vw;
-  max-width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 75vw;
+  max-width: 75vw;
+  margin-left: calc(50% - 37.5vw);
+  margin-right: calc(50% - 37.5vw);
   margin-bottom: 48px;
 
   @media only screen and (max-width: $desktop) {
@@ -152,6 +152,10 @@
   }
 
   @media only screen and (max-width: $mobile) {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     margin-bottom: 32px;
   }
 }

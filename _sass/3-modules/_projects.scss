@@ -137,6 +137,35 @@
   // display: inline-block;
 }
 
+.project-gallery {
+  display: grid;
+  gap: 24px;
+  margin-top: 8px;
+  margin-bottom: 48px;
+
+  @media only screen and (max-width: $desktop) {
+    margin-bottom: 40px;
+  }
+
+  @media only screen and (max-width: $mobile) {
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+}
+
+.project-gallery__item {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--background-alt-color);
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+  }
+}
+
 .registration-full {
   position: absolute;
   bottom: 20px;

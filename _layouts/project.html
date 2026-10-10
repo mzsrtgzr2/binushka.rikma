@@ -151,16 +151,27 @@ layout: default
   {% endunless %}
 
 
-  {% if page.image %}
+  {% if page.image or page.gallery %}
   <div class="project-content animate">
   <div class="container">
   <div class="row">
     <div class="col col-12 text-center">
+      {% if page.image %}
       <div class="page-image animate">
         <div class="project-image-container">
           <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
         </div>
       </div>
+      {% endif %}
+      {% if page.gallery %}
+      <div class="project-gallery">
+        {% for gimg in page.gallery %}
+        <div class="project-gallery__item animate">
+          <img class="lazy" data-src="{{site.baseurl}}{{gimg}}" alt="{{page.title}}">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
   </div>
   </div>

@@ -19,6 +19,7 @@ variants:
     name: מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה
     price: 160
     stock: 0
+    preorder: true
     image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg
     gallery:
       - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
@@ -28,6 +29,7 @@ variants:
     name: מפה יפהיפיה – דוגמת סתיו שלכת
     price: 160
     stock: 1
+    preorder: true
     image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-56-mui93a0t.jpg
     gallery:
       - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui93a0u.jpg

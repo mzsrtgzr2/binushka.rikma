@@ -2,6 +2,7 @@
 title: מפגש רקמה ברחובות
 date: 2025-10-21 11:00:00 +0300
 subtitle: רביעי בבוקר אחת לחודש
+location: "רח׳ אייזנברג, רחובות"
 category: advanced
 filter_months:
   - "01"

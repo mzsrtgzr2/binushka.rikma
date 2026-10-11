@@ -2,6 +2,7 @@
 title:  ערכת רקמה קלילה
 date: 2024-06-01 19:00:00 +0300
 subtitle: במקום לצפות במהדורה המרכזית
+location: "רח׳ אייזנברג, רחובות"
 category: all-levels
 image: '/images/gallery/flowers-kit.jpeg'
 permalink: /projects/flowers-kit/

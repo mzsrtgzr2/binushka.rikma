@@ -132,6 +132,33 @@ test('a workshop survives a write and read unchanged', () => {
   assert.equal(after.body, before.body);
 });
 
+test('workshop location is read and written for Event schema', () => {
+  const withLocation = workshops.serialize(
+    workshops.normalize({
+      title: 'סדנה',
+      date: '2026-05-01T18:30',
+      slug: 'loc',
+      location: 'י.ל גורדון 30, תל אביב',
+    })
+  );
+  assert.match(withLocation, /^location:\s*"?י\.ל גורדון 30, תל אביב"?$/m);
+  assert.equal(
+    workshops.parse('2026-05-01-loc.md', withLocation).location,
+    'י.ל גורדון 30, תל אביב'
+  );
+
+  const cleared = workshops.serialize(
+    workshops.normalize({
+      title: 'סדנה',
+      date: '2026-05-01T18:30',
+      slug: 'loc',
+      location: '',
+    }),
+    withLocation
+  );
+  assert.doesNotMatch(cleared, /^location:/m);
+});
+
 test('workshop category is read, written and rejected when unknown', () => {
   const withCategory = workshops.serialize(
     workshops.normalize({

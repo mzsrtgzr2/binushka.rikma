@@ -25,6 +25,8 @@ layout: default
 {%- assign price_unit = 'למשתתפת' -%}
 {%- if page.price_per == 'workshop' %}{% assign price_unit = 'לסדנה' %}{% endif -%}
 
+{% include workshop-event-schema.html %}
+
 <div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop">
 
   <div class="page-head">

@@ -29,8 +29,14 @@
 {%- assign proof_photos = proof.photos -%}
 {%- assign has_quotes = false -%}
 {%- assign has_photos = false -%}
+{%- assign has_quote_images = false -%}
 {%- if proof_quotes and proof_quotes.size > 0 -%}{%- assign has_quotes = true -%}{%- endif -%}
 {%- if proof_photos and proof_photos.size > 0 -%}{%- assign has_photos = true -%}{%- endif -%}
+{%- if has_quotes -%}
+  {%- for quote in proof_quotes -%}
+    {%- if quote.image -%}{%- assign has_quote_images = true -%}{%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
 {%- if has_quotes or has_photos -%}
 {%- assign proof_title = proof.title | default: site.data.workshop-testimonials.title | default: 'מה אומרות משתתפות' -%}
 <section class="workshop-proof animate" aria-labelledby="workshop-proof-title">
@@ -41,20 +47,49 @@
   {% if has_quotes %}
   <ul class="workshop-proof__quotes">
     {% for quote in proof_quotes %}
-    <li class="workshop-proof__quote">
-      <blockquote class="workshop-proof__text">
-        <p>{{ quote.text }}</p>
-      </blockquote>
-      {% if quote.name %}
-      <cite class="workshop-proof__name">{{ quote.name }}</cite>
+    <li class="workshop-proof__quote{% if quote.image %} workshop-proof__quote--with-image{% endif %}">
+      {% if quote.image %}
+      <figure class="workshop-proof__image">
+        <img
+          class="lazy"
+          data-src="{{ site.baseurl }}{{ quote.image }}"
+          alt="{{ quote.image_alt | default: quote.name | default: 'תמונה מסדנה קודמת' }}"
+        >
+      </figure>
       {% endif %}
+      <div class="workshop-proof__body">
+        <blockquote class="workshop-proof__text">
+          <p>{{ quote.text }}</p>
+        </blockquote>
+        {% if quote.name %}
+        <cite class="workshop-proof__name">{{ quote.name }}</cite>
+        {% endif %}
+      </div>
     </li>
     {% endfor %}
   </ul>
   {% endif %}
 
-  {% if has_photos %}
-  <div class="workshop-proof__photos" role="group" aria-label="תמונות מסדנאות קודמות">
+  {% comment %}
+    Desktop keeps the classic photo strip. Quote images render here for tablet+
+    (and stay beside the text on mobile). Leftover photos always show.
+  {% endcomment %}
+  {% if has_quote_images or has_photos %}
+  <div class="workshop-proof__photos{% unless has_photos %} workshop-proof__photos--quote-only{% endunless %}" role="group" aria-label="תמונות מסדנאות קודמות">
+    {% if has_quote_images %}
+    {% for quote in proof_quotes %}
+    {% if quote.image %}
+    <figure class="workshop-proof__photo workshop-proof__photo--paired">
+      <img
+        class="lazy"
+        data-src="{{ site.baseurl }}{{ quote.image }}"
+        alt="{{ quote.image_alt | default: quote.name | default: 'תמונה מסדנה קודמת' }}"
+      >
+    </figure>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    {% if has_photos %}
     {% for photo in proof_photos %}
     <figure class="workshop-proof__photo">
       <img
@@ -64,6 +99,7 @@
       >
     </figure>
     {% endfor %}
+    {% endif %}
   </div>
   {% endif %}
 </section>

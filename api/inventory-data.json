@@ -10,7 +10,8 @@
     "dmc-etoile-set": {
       "stock": 0,
       "outOfStock": true,
-      "limitedStock": true,
+      "limitedStock": false,
+      "preorder": true,
       "name": "סט חוטים מנצנצים",
       "price": 330
     },

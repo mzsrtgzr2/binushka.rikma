@@ -1,10 +1,11 @@
 /* Project */
 
 /* External http(s) links in workshop copy — blue so registration / Instagram
-   links read as clickable, not body text. */
+   links read as clickable, not body text. Skip .button so the yellow CTA
+   keeps its black label. */
 .project-content {
-  a[href^="http://"],
-  a[href^="https://"] {
+  a[href^="http://"]:not(.button),
+  a[href^="https://"]:not(.button) {
     color: #1a5fb4;
     border-bottom-color: rgba(26, 95, 180, 0.35);
 

@@ -56,6 +56,109 @@
   margin: 48px 0;
 }
 
+/* Social proof: quotes + previous-workshop photos, by category */
+.workshop-proof {
+  max-width: 780px;
+  margin: 56px auto 48px;
+  padding: 0 16px;
+}
+
+.workshop-proof__head {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.workshop-proof__title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  @media only screen and (max-width: $mobile) {
+    font-size: 24px;
+  }
+}
+
+.workshop-proof__quotes {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+
+  @media only screen and (min-width: $tablet) {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+}
+
+.workshop-proof__quote {
+  margin: 0;
+  padding: 0 4px;
+}
+
+.workshop-proof__text {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  quotes: none;
+
+  p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text-color);
+
+    &::before {
+      content: '״';
+    }
+
+    &::after {
+      content: '״';
+    }
+  }
+}
+
+.workshop-proof__name {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--heading-font-color);
+}
+
+.workshop-proof__photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  @media only screen and (max-width: $mobile) {
+    grid-template-columns: repeat(2, 1fr);
+
+    .workshop-proof__photo:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      max-width: 70%;
+      margin: 0 auto;
+    }
+  }
+}
+
+.workshop-proof__photo {
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--background-alt-color);
+  border-radius: 8px;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
 /* Workshop booking: the cart entry point on a workshop page */
 .workshop-booking {
   max-width: 520px;

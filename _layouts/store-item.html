@@ -176,7 +176,11 @@ layout: default
                 {% if v.description %}
                 <p class="store-variant__desc">{{ v.description }}</p>
                 {% endif %}
-                <div class="store-variant__price">₪{{ v.price }}</div>
+                {% assign page_v = page.variants[vid] %}
+                {% assign unit_count = page_v.units | default: v.units | default: 0 | plus: 0 %}
+                <div class="store-variant__price">
+                  ₪{{ v.price }}{% if unit_count > 1 %}{% assign unit_cents = v.price | times: 10000 | divided_by: unit_count | plus: 50 | divided_by: 100 %}{% assign unit_whole = unit_cents | divided_by: 100 %}{% assign unit_frac = unit_cents | modulo: 100 %} <span class="store-variant__unit-price">(₪{% if unit_frac == 0 %}{{ unit_whole }}{% elsif unit_frac < 10 %}{{ unit_whole }}.0{{ unit_frac }}{% else %}{{ unit_whole }}.{{ unit_frac }}{% endif %} לדוללה)</span>{% endif %}
+                </div>
                 {% if v_sold_out %}
                 <div class="store-variant__stock out-of-stock-text">אזל מהמלאי</div>
                 {% elsif v_preorder %}

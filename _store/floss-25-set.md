@@ -22,6 +22,7 @@ variants:
   custom-25:
     name: סט של 25 — שאני מרכיבה לך
     price: 100
+    units: 25
     stock: 18
     image: /images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg
     gallery:
@@ -30,6 +31,7 @@ variants:
   original-27:
     name: מארז מקורי — 27 גוונים
     price: 120
+    units: 27
     stock: 1
     image: /images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-19-mue250c8.jpg
     gallery:
@@ -38,6 +40,7 @@ variants:
   set-30:
     name: סט 30 גוונים
     price: 130
+    units: 30
     stock: 1
     image: /images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg
     gallery:

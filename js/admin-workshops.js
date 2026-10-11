@@ -32,6 +32,7 @@
   var slugHint = document.getElementById('workshop-slug-hint');
   var titleInput = document.getElementById('workshop-title');
   var subtitleInput = document.getElementById('workshop-subtitle');
+  var locationInput = document.getElementById('workshop-location');
   var categorySelect = document.getElementById('workshop-category');
   var dateInput = document.getElementById('workshop-date');
   var filterMonthsGroup = document.getElementById('workshop-filter-months-group');
@@ -526,6 +527,7 @@
       spots: 8,
       packs: [],
       filter_months: [],
+      location: 'אייזנברג, רחובות',
       body:
         '## פרטי הסדנה אמהות רוקמות\n\n' +
         '**תאריך פתיחה:** {{DATE_DMY}}  \n' +
@@ -564,6 +566,7 @@
         { id: 'pair', name: 'שתי משתתפות ביחד', price: 600, places: 2 }
       ],
       filter_months: [],
+      location: 'אייזנברג, רחובות',
       body:
         '# בואי לקחת אוויר!\n\n' +
         '**תאריך המפגש:** {{DATE_DMY}}  \n' +
@@ -594,6 +597,7 @@
       spots: 8,
       packs: [],
       filter_months: [],
+      location: 'אייזנברג, רחובות',
       body:
         '## פרטי סדנת רקמה ברחובות\n' +
         'דמיינו שהגעתן ליום חופש המושלם שלכן - כיבוד טרי, קפה משובח ותחביב חדש לנפש!\n' +
@@ -633,6 +637,7 @@
         { id: 'pair', name: 'שתי משתתפות ביחד', price: 600, places: 2 }
       ],
       filter_months: [],
+      location: 'אייזנברג, רחובות',
       body:
         '## הנה לכן פרטים על הסדנה בהנחיית [שם האורחת]\n' +
         'בפעם הראשונה בסלוני, סדנה עם מורה אורחת שתיקח אותנו לעולם שלה.\n\n' +
@@ -666,6 +671,7 @@
       spots: 8,
       packs: [],
       filter_months: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+      location: 'רח׳ אייזנברג, רחובות',
       body:
         '## פרטי מפגשי רקמה למנוסות\n\n' +
         '**מיקום:** רח׳ אייזנברג, רחובות  \n' +
@@ -777,6 +783,7 @@
       slug: slugForTemplate(template, parts),
       title: template.title,
       subtitle: fillTokens(template.subtitle, tokens),
+      location: template.location || 'אייזנברג, רחובות',
       category: template.category || '',
       filter_months: (template.filter_months || []).slice(),
       date: parts.year + '-' + pad(parts.month) + '-' + pad(parts.day) + ' ' +
@@ -1386,6 +1393,7 @@
       slug: '',
       title: '',
       subtitle: '',
+      location: 'אייזנברג, רחובות',
       category: '',
       filter_months: [],
       date: now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':00',
@@ -1468,6 +1476,7 @@
 
     titleInput.value = data.title || '';
     subtitleInput.value = data.subtitle || '';
+    if (locationInput) locationInput.value = data.location || '';
     if (categorySelect) categorySelect.value = data.category || '';
     dateInput.value = toLocalInput(data.date);
     setFilterMonths(data.filter_months || []);
@@ -1502,6 +1511,7 @@
       slug: slugInput.value.trim().toLowerCase(),
       title: titleInput.value.trim(),
       subtitle: subtitleInput.value.trim(),
+      location: locationInput ? locationInput.value.trim() : '',
       category: categorySelect ? categorySelect.value : '',
       filter_months: readFilterMonths(),
       date: dateInput.value,
@@ -1537,6 +1547,7 @@
   var FIELD_LABELS = {
     'workshop-title': 'שם הסדנה',
     'workshop-subtitle': 'תת כותרת',
+    'workshop-location': 'מיקום',
     'workshop-category': 'קטגוריה',
     'workshop-date': 'תאריך ושעה',
     'workshop-slug': 'מזהה',
@@ -1569,6 +1580,7 @@
       fields: {
         title: titleInput.value,
         subtitle: subtitleInput.value,
+        location: locationInput ? locationInput.value : '',
         category: categorySelect ? categorySelect.value : '',
         filter_months: readFilterMonths(),
         date: dateInput.value,
@@ -1596,6 +1608,7 @@
     restoring = true;
     titleInput.value = fields.title;
     subtitleInput.value = fields.subtitle;
+    if (locationInput) locationInput.value = fields.location || '';
     if (categorySelect) categorySelect.value = fields.category || '';
     setFilterMonths(fields.filter_months || []);
     dateInput.value = fields.date;

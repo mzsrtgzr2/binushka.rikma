@@ -69,6 +69,10 @@
           </button>
           {% endif %}
         </div>
+      {% elsif project.form_url %}
+        <div class="project__footer">
+          <a href="{{ project.form_url }}" class="button button--primary project__add" target="_blank" rel="noopener" data-analytics="workshop_external_register">הרשמה לסדנה</a>
+        </div>
       {% endif %}
     </div>
   </div>

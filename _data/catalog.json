@@ -82,7 +82,7 @@
         "price": 195,
         "image": "/images/store/embroidery-books/screenshot-2026-09-24-at-15-30-34-mufig8tg.jpg",
         "description": "כמה רוגע אפשר לייצר בחזרתיות הזו של יומיקו, רקעים, עצים, חיים.\nספר עם המון השראה וייחודיות.\nהרקמה בתמונה היא של שירן במפגשי אמהות רוקמות, בהשראת הספר והחיים.",
-        "stock": 2,
+        "stock": 1,
         "gallery": [
           "/images/store/embroidery-books/screenshot-2026-10-02-at-20-43-45-mur967sm.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-24-at-15-30-24-mufig8th.jpg",
@@ -175,7 +175,7 @@
         "price": 10,
         "image": "/images/store/fabrics/screenshot-2026-09-24-at-15-38-09-mufir18i.jpg",
         "description": "גודל ריבוע לפחות 25*25 ס״מ",
-        "stock": 99
+        "stock": 98
       },
       "type-3": {
         "name": "גולמי - פשתן",
@@ -209,33 +209,33 @@
         "price": 100,
         "image": "/images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg",
         "description": "הצבעים שאני משתמשת בהם הכי הרבה בסט מעולה למתחילות, מתקדמות.\nכולל שחור, לבן, ecru, ירוקים, כחולים, צהובים, אדומים. ועוד :)",
+        "units": 25,
         "stock": 18,
         "gallery": [
           "/images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg"
-        ],
-        "units": 25
+        ]
       },
       "original-27": {
         "name": "מארז מקורי — 27 גוונים",
         "price": 120,
         "image": "/images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-19-mue250c8.jpg",
         "description": "חוטים של חברת dmc הצרפתית עשויים מ100% כותנה.\nיכולים לשמש לרקמה על בגדים, תיקים, נעליים וכו.\nתהנו :)",
+        "units": 27,
         "stock": 1,
         "gallery": [
           "/images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-12-mue250c9.png"
-        ],
-        "units": 27
+        ]
       },
       "set-30": {
         "name": "סט 30 גוונים",
         "price": 130,
         "image": "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg",
         "description": "חוטי כותנה 100% של חברת dmc הצרפתית, סט גוונים שימושי ויפה לרקמת צמחים, טבע, יום יום ובגדול הכל :)",
+        "units": 30,
         "stock": 1,
         "gallery": [
           "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg"
-        ],
-        "units": 30
+        ]
       }
     },
     "variant_order": [
@@ -494,11 +494,6 @@
   "scrunchie-chuma-pirchonit-fableism": {
     "name": "סקראנצ'י חומה פרחונית Fableism",
     "price": 45,
-    "category": "scrunchies-gallery"
-  },
-  "scrunchie-lavavot-chumim": {
-    "name": "סקראנצ'י לבבות חומים",
-    "price": 85,
     "category": "scrunchies-gallery"
   },
   "scrunchie-lavavot-yerukim": {

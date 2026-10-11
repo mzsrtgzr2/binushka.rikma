@@ -399,16 +399,19 @@ test('every visible workshop is in the cart at the page price', () => {
   const dir = path.join(__dirname, '..', '_projects');
   const files = fs.readdirSync(dir).filter((name) => name.endsWith('.md'));
   const visible = [];
+  const external = [];
   const hidden = [];
   files.forEach((name) => {
     const raw = fs.readFileSync(path.join(dir, name), 'utf8');
     const page = store.parseWorkshopPage(store.workshopSlug(name), raw);
     if (!page) return;
     if (page.hide) hidden.push({ page, raw });
+    else if (page.form_url && !(page.price > 0)) external.push({ page, raw });
     else visible.push({ page, raw });
   });
   assert.ok(visible.length >= 9, 'expected the current open workshops to stay listed');
   assert.ok(hidden.length >= 1);
+  assert.ok(external.length >= 1, 'expected at least one external-registration workshop');
   visible.forEach(({ page, raw }) => {
     const row = PRODUCTS[page.id];
     assert.ok(row, `${page.slug} should be in the cart catalog`);
@@ -418,6 +421,11 @@ test('every visible workshop is in the cart at the page price', () => {
     const bodyPrice = store.workshopBodyPrice(raw);
     assert.ok(bodyPrice > 0, `${page.slug} should list a מחיר on the page`);
     assert.equal(row.price, bodyPrice, `${page.slug} cart price should match the page`);
+  });
+  external.forEach(({ page, raw }) => {
+    assert.equal(PRODUCTS[page.id], undefined, `${page.slug} registers externally and should stay out of the cart`);
+    assert.ok(page.form_url, `${page.slug} should have an external registration link`);
+    assert.ok(store.workshopBodyPrice(raw) > 0, `${page.slug} should still list a מחיר on the page`);
   });
   hidden.forEach(({ page }) => {
     assert.equal(PRODUCTS[page.id], undefined, `${page.slug} is hidden and should stay out of the cart`);

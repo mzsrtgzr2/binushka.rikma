@@ -447,6 +447,18 @@ spots: 6
   assert.equal(catalog['workshop-old-event'], undefined);
   assert.equal(catalog['workshop-listed-on-page'].price, 440);
   assert.equal(catalog['workshop-listed-on-page'].stock, 6);
+  writePage(
+    dir,
+    '2026-11-05-external-only',
+    `title: סדנה עם הרשמה חיצונית
+hide: false
+form_url: https://ju0xUKNd.web.arboxapp.com/group/97824118
+spots: 12
+`,
+    '**מחיר:** 350 ש"ח למשתתפת\n'
+  );
+  const withExternal = store.buildWorkshopCatalogFromDir(dir);
+  assert.equal(withExternal['workshop-external-only'], undefined);
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

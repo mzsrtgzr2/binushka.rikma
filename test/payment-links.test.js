@@ -38,9 +38,16 @@ test('payment link allowlist rejects lookalikes and non-https', () => {
   assert.equal(isAllowedPaymentLink('https://pages.greeninvoice.co.il/payments/links/x'), true);
   assert.equal(isAllowedPaymentLink('https://mrng.to/x'), true);
   assert.equal(isAllowedPaymentLink('https://secure.meshulam.co.il/credit-checkout?l=abc'), true);
+  assert.equal(
+    isAllowedPaymentLink(
+      'https://ju0xUKNd.web.arboxapp.com/group/97824118?whitelabel=Arbox&lang=he&referrer=SITE'
+    ),
+    true
+  );
   assert.equal(isAllowedPaymentLink('http://pay.grow.link/abc'), false);
   assert.equal(isAllowedPaymentLink('https://pay.grow.link.evil.example/abc'), false);
   assert.equal(isAllowedPaymentLink('https://evilgreeninvoice.co.il/x'), false);
+  assert.equal(isAllowedPaymentLink('https://evilarboxapp.com/group/1'), false);
   assert.equal(isAllowedPaymentLink('https://pay.grow.link@evil.example/'), false);
   assert.equal(isAllowedPaymentLink('javascript:alert(1)'), false);
 });

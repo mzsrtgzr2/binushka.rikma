@@ -12,8 +12,9 @@
 #   beginners       — סדנאות למתחילות (למשל קרושה)
 #   hosting         — סדנת אירוח / אפייה
 #
-# Each quote may carry image + image_alt (shown beside the text).
-# Optional photos: leftover atmosphere shots not tied to a named quote.
+# Each quote may carry image + image_alt (beside the text on mobile;
+# also used for the desktop photo strip). Optional photos: leftover
+# atmosphere shots not tied to a named quote.
 
 title: מה אומרות משתתפות
 

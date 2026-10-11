@@ -4,10 +4,10 @@ date: 2026-09-23 18:49:00 +0000
 subtitle: מהדורה מיוחדת של dmc
 image: /images/store/dmc-etoile-set/screenshot-2026-09-23-at-19-18-00-muegj9ev.png
 price: ₪330
-out_of_stock: false
+out_of_stock: true
 limited_stock: true
 hide: false
-stock: 1
+stock: 0
 cart_price: 330
 order: 11
 preorder: false

@@ -8,8 +8,8 @@
       "price": 450
     },
     "dmc-etoile-set": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סט חוטים מנצנצים",
       "price": 330
@@ -37,7 +37,7 @@
           "stock": 1
         },
         "type-4": {
-          "stock": 2
+          "stock": 1
         },
         "type-7": {
           "stock": 3
@@ -82,7 +82,7 @@
           "stock": 96
         },
         "type-2": {
-          "stock": 99
+          "stock": 98
         },
         "type-3": {
           "stock": null
@@ -237,8 +237,8 @@
       "price": 45
     },
     "scrunchie-lavavot-chumim": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י לבבות חומים",
       "price": 85

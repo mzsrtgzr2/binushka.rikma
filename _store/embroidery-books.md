@@ -66,7 +66,7 @@ variants:
   type-4:
     name: רקמה חזרתית של יומיקו
     price: 195
-    stock: 2
+    stock: 1
     image: /images/store/embroidery-books/screenshot-2026-09-24-at-15-30-34-mufig8tg.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-10-02-at-20-43-45-mur967sm.jpg

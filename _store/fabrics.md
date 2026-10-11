@@ -21,7 +21,7 @@ variants:
   type-2:
     name: דריל צבע טבעי - קרם
     price: 10
-    stock: 99
+    stock: 98
     image: /images/store/fabrics/screenshot-2026-09-24-at-15-38-09-mufir18i.jpg
     description: "גודל ריבוע לפחות 25*25 ס״מ"
   type-3:

@@ -116,11 +116,24 @@ layout: default
 
       <div class="row" id="workshops-grid">
         {% comment %}
-          Public list is always chronological: the next workshop first.
-          Manual `order` from the backoffice is ignored here so a hand-picked
-          position cannot put a later date ahead of an earlier one.
+          Public list is chronological (next workshop first). Manual backoffice
+          `order` is ignored. The ongoing advanced circle and the private
+          workshop stay at the end — circle first, then private.
         {% endcomment %}
-        {% assign projects_ordered = site.projects | sort: 'date' %}
+        {% assign projects_dated = '' | split: '' %}
+        {% assign pinned_monthly = '' | split: '' %}
+        {% assign pinned_private = '' | split: '' %}
+        {% assign projects_sorted = site.projects | sort: 'date' %}
+        {% for project in projects_sorted %}
+          {% if project.slug == 'monthly-meeting' %}
+            {% assign pinned_monthly = pinned_monthly | push: project %}
+          {% elsif project.slug == 'private-workshop' %}
+            {% assign pinned_private = pinned_private | push: project %}
+          {% else %}
+            {% assign projects_dated = projects_dated | push: project %}
+          {% endif %}
+        {% endfor %}
+        {% assign projects_ordered = projects_dated | concat: pinned_monthly | concat: pinned_private %}
 
         {% for project in projects_ordered %}
           {% unless project.hide %}

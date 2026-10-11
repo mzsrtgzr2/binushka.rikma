@@ -116,28 +116,29 @@ layout: default
 
       <div class="row" id="workshops-grid">
         {% comment %}
-          A workshop only carries `order` once it has been placed by hand in the
-          backoffice. Anything not placed yet keeps falling back to its date, so a
-          workshop added another way still appears, and a site where nothing has
-          been arranged reads chronologically: the next workshop first.
+          Public list is chronological (next workshop first). Manual backoffice
+          `order` is ignored. The ongoing advanced circle and the private
+          workshop stay at the end — circle first, then private.
         {% endcomment %}
-        {% assign projects_placed = '' | split: '' %}
-        {% assign projects_by_date = '' | split: '' %}
-        {% for project in site.projects %}
-          {% unless project.hide %}
-            {% if project.order %}
-              {% assign projects_placed = projects_placed | push: project %}
-            {% else %}
-              {% assign projects_by_date = projects_by_date | push: project %}
-            {% endif %}
-          {% endunless %}
+        {% assign projects_dated = '' | split: '' %}
+        {% assign pinned_monthly = '' | split: '' %}
+        {% assign pinned_private = '' | split: '' %}
+        {% assign projects_sorted = site.projects | sort: 'date' %}
+        {% for project in projects_sorted %}
+          {% if project.slug == 'monthly-meeting' %}
+            {% assign pinned_monthly = pinned_monthly | push: project %}
+          {% elsif project.slug == 'private-workshop' %}
+            {% assign pinned_private = pinned_private | push: project %}
+          {% else %}
+            {% assign projects_dated = projects_dated | push: project %}
+          {% endif %}
         {% endfor %}
-        {% assign projects_placed = projects_placed | sort: 'order' %}
-        {% assign projects_by_date = projects_by_date | sort: 'date' %}
-        {% assign projects_ordered = projects_placed | concat: projects_by_date %}
+        {% assign projects_ordered = projects_dated | concat: pinned_monthly | concat: pinned_private %}
 
         {% for project in projects_ordered %}
-          {% include project-card.html project=project %}
+          {% unless project.hide %}
+            {% include project-card.html project=project %}
+          {% endunless %}
         {% endfor %}
       </div>
       <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות שמתאימות לסינון כרגע.</p>

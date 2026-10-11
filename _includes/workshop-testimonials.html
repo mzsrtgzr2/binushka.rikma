@@ -41,13 +41,24 @@
   {% if has_quotes %}
   <ul class="workshop-proof__quotes">
     {% for quote in proof_quotes %}
-    <li class="workshop-proof__quote">
-      <blockquote class="workshop-proof__text">
-        <p>{{ quote.text }}</p>
-      </blockquote>
-      {% if quote.name %}
-      <cite class="workshop-proof__name">{{ quote.name }}</cite>
+    <li class="workshop-proof__quote{% if quote.image %} workshop-proof__quote--with-image{% endif %}">
+      {% if quote.image %}
+      <figure class="workshop-proof__image">
+        <img
+          class="lazy"
+          data-src="{{ site.baseurl }}{{ quote.image }}"
+          alt="{{ quote.image_alt | default: quote.name | default: 'תמונה מסדנה קודמת' }}"
+        >
+      </figure>
       {% endif %}
+      <div class="workshop-proof__body">
+        <blockquote class="workshop-proof__text">
+          <p>{{ quote.text }}</p>
+        </blockquote>
+        {% if quote.name %}
+        <cite class="workshop-proof__name">{{ quote.name }}</cite>
+        {% endif %}
+      </div>
     </li>
     {% endfor %}
   </ul>

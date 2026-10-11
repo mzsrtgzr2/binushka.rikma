@@ -56,9 +56,8 @@
   margin: 48px 0;
 }
 
-/* Social proof: quotes + previous-workshop photos, by category.
-   Desktop (tablet+) keeps the open 3-column layout; stacked view below
-   tablet gets card-style quotes and a balanced photo trio. */
+/* Social proof: each quote sits beside its matching photo; leftover
+   atmosphere shots (if any) stay in a small gallery below. */
 .workshop-proof {
   max-width: 780px;
   margin: 56px auto 48px;
@@ -97,11 +96,6 @@
   display: grid;
   gap: 16px;
 
-  @media only screen and (min-width: $tablet) {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-  }
-
   @media only screen and (max-width: #{$tablet - 1px}) {
     gap: 12px;
     margin-bottom: 20px;
@@ -110,13 +104,57 @@
 
 .workshop-proof__quote {
   margin: 0;
-  padding: 0 4px;
+  padding: 18px 16px;
+  background: var(--background-alt-color);
+  border-radius: $global-radius;
+
+  &--with-image {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    padding: 12px;
+  }
 
   @media only screen and (max-width: #{$tablet - 1px}) {
-    padding: 18px 16px 16px;
-    background: var(--background-alt-color);
-    border-radius: $global-radius;
+    &--with-image {
+      gap: 12px;
+      padding: 10px;
+    }
   }
+}
+
+.workshop-proof__image {
+  flex: 0 0 120px;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--background-color);
+  border-radius: 8px;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media only screen and (max-width: #{$tablet - 1px}) {
+    flex-basis: 96px;
+  }
+
+  @media only screen and (max-width: $mobile) {
+    flex-basis: 80px;
+  }
+}
+
+.workshop-proof__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 4px;
+  padding-inline-end: 4px;
 }
 
 .workshop-proof__text {
@@ -143,6 +181,10 @@
       font-size: 16px;
       line-height: 1.6;
     }
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 15px;
+    }
   }
 }
 
@@ -155,20 +197,17 @@
   color: var(--heading-font-color);
 
   @media only screen and (max-width: #{$tablet - 1px}) {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid var(--background-color);
+    margin-top: 8px;
     font-size: 15px;
   }
 }
 
 .workshop-proof__photos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 180px));
+  justify-content: center;
   gap: 8px;
 
-  /* Keep the trio balanced when quotes stack — avoid a 2+1 layout with a
-     lone centered third image, which reads as unfinished. */
   @media only screen and (max-width: #{$tablet - 1px}) {
     gap: 6px;
   }

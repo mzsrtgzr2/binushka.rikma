@@ -314,20 +314,12 @@
       "name": "סקראנצ'י רקמת פרחים בז׳",
       "price": 30
     },
-    "scrunchie-rikmat-prachim-bezh": {
-      "stock": 2,
+    "scrunchie-rikmat-prachim-shechora-regular": {
+      "stock": 1,
       "outOfStock": false,
       "limitedStock": true,
-      "name": "סקראנצ'י רקמת פרחים בז׳",
-      "price": 45
-    },
-    "scrunchie-rikmat-prachim-shechora": {
-      "stock": 0,
-      "outOfStock": true,
-      "limitedStock": false,
-      "preorder": true,
       "name": "סקראנצ'י רקמת פרחים שחורה",
-      "price": 45
+      "price": 30
     },
     "scrunchie-tarnegolim": {
       "stock": null,
@@ -335,6 +327,13 @@
       "limitedStock": false,
       "name": "סקראנצ'י תרנגולים",
       "price": 30
+    },
+    "scrunchie-yarok-amok-large": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י ירוק עמוק",
+      "price": 45
     },
     "scrunchie-yarok-amok": {
       "stock": 2,

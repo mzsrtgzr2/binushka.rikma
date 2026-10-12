@@ -546,19 +546,14 @@
     "price": 30,
     "category": "scrunchies-gallery"
   },
-  "scrunchie-rikmat-prachim-bezh": {
-    "name": "סקראנצ'י רקמת פרחים בז׳",
-    "price": 45,
-    "category": "scrunchies-gallery"
-  },
   "scrunchie-rikmat-prachim-bezh-regular": {
     "name": "סקראנצ'י רקמת פרחים בז׳",
     "price": 30,
     "category": "scrunchies-gallery"
   },
-  "scrunchie-rikmat-prachim-shechora": {
+  "scrunchie-rikmat-prachim-shechora-regular": {
     "name": "סקראנצ'י רקמת פרחים שחורה",
-    "price": 45,
+    "price": 30,
     "category": "scrunchies-gallery"
   },
   "scrunchie-tarnegolim": {
@@ -569,6 +564,11 @@
   "scrunchie-yarok-amok": {
     "name": "סקראנצ'י ירוק עמוק",
     "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-yarok-amok-large": {
+    "name": "סקראנצ'י ירוק עמוק",
+    "price": 45,
     "category": "scrunchies-gallery"
   },
   "scrunchies": {

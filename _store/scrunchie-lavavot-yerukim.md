@@ -4,7 +4,7 @@ subtitle: לבבות ירוקים על רקע לבן — בד משווייץ
 image: /images/scrunchies/gallery/scrunchie-lavavot-yerukim-1.png
 price: ₪30
 cart_price: 30
-stock: 1
+stock: 2
 limited_stock: true
 out_of_stock: false
 hide: true

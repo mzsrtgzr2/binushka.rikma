@@ -4,7 +4,7 @@ subtitle: פרחים יפניים על בד טבעי
 image: /images/scrunchies/gallery/scrunchie-prachim-yapaniyim-1.png
 price: ₪30
 cart_price: 30
-stock: 1
+stock: 2
 limited_stock: true
 out_of_stock: false
 hide: true

@@ -49,7 +49,10 @@
       ignoreErrors: [
         "ResizeObserver loop limit exceeded",
         "ResizeObserver loop completed with undelivered notifications",
-        /^Script error\.?$/
+        /^Script error\.?$/,
+        // iOS in-app browsers (Instagram, Facebook) read window.webkit.messageHandlers
+        // when that native bridge was not installed. This site never touches it.
+        "undefined is not an object (evaluating 'window.webkit.messageHandlers')"
       ],
       denyUrls: [
         /^chrome-extension:\/\//i,

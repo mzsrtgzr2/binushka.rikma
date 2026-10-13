@@ -1,0 +1,12 @@
+{
+  "orderId": "911150023c50f4adf729e6db",
+  "documentId": "c08212f9-3758-4359-bb63-3fb0d2c78223",
+  "amount": 30,
+  "purchases": [
+    {
+      "slug": "scrunchie-mishbatzot-vrod-lavan",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-10-13T11:39:33.768Z"
+}

@@ -116,9 +116,10 @@ layout: default
 
       <div class="row" id="workshops-grid">
         {% comment %}
-          Public list is chronological (next workshop first). Manual backoffice
-          `order` is ignored. The ongoing advanced circle and the private
-          workshop stay at the end — circle first, then private.
+          Public list is chronological (next workshop first), with open
+          workshops before sold-out. Manual backoffice `order` is ignored.
+          The ongoing advanced circle and the private workshop stay at the
+          end — circle first, then private.
         {% endcomment %}
         {% assign projects_dated = '' | split: '' %}
         {% assign pinned_monthly = '' | split: '' %}
@@ -133,6 +134,21 @@ layout: default
             {% assign projects_dated = projects_dated | push: project %}
           {% endif %}
         {% endfor %}
+        {% assign projects_open = '' | split: '' %}
+        {% assign projects_full = '' | split: '' %}
+        {% for project in projects_dated %}
+          {% assign workshop_id = 'workshop-' | append: project.slug %}
+          {% assign workshop = site.data.workshops[workshop_id] %}
+          {% assign is_full = false %}
+          {% if project.registration_full %}{% assign is_full = true %}{% endif %}
+          {% if workshop.stock == 0 %}{% assign is_full = true %}{% endif %}
+          {% if is_full %}
+            {% assign projects_full = projects_full | push: project %}
+          {% else %}
+            {% assign projects_open = projects_open | push: project %}
+          {% endif %}
+        {% endfor %}
+        {% assign projects_dated = projects_open | concat: projects_full %}
         {% assign projects_ordered = projects_dated | concat: pinned_monthly | concat: pinned_private %}
 
         {% for project in projects_ordered %}

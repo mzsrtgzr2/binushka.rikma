@@ -123,6 +123,21 @@
     }
     if (totalEl) totalEl.textContent = '₪' + (Number(order.total) || 0);
 
+    /* Checkout newsletter opt-in: subscribe once after payment, using the email
+       already collected on the form. Clear the flag so a reload does not
+       re-send the welcome mail. */
+    if (order.newsletterOptIn && order.email) {
+      order.newsletterOptIn = false;
+      try {
+        sessionStorage.setItem(LAST_ORDER_KEY, JSON.stringify(order));
+      } catch (e) {
+        /* private mode / quota */
+      }
+      if (window.Newsletter && typeof Newsletter.subscribe === 'function') {
+        Newsletter.subscribe(order.email, 'checkout');
+      }
+    }
+
     if (window.StoreCart) StoreCart.clear();
   }
 

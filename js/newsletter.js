@@ -50,6 +50,48 @@
     if (window.Analytics) Analytics.track(name, params);
   }
 
+  /* Programmatic signup (e.g. checkout opt-in on /thanks/). Same endpoint and
+     events as the forms; callers should not send PII to analytics. */
+  function subscribe(email, source) {
+    if (!endpoints.subscribe) {
+      return Promise.resolve({ ok: false, code: 'not_configured' });
+    }
+    var address = String(email || '').trim();
+    var src = typeof source === 'string' ? source : '';
+    if (!address) {
+      if (src) track('newsletter_signup_error', { reason: 'invalid_email', source: src });
+      return Promise.resolve({ ok: false, code: 'invalid_email' });
+    }
+
+    var payload = { email: address };
+    if (src) payload.source = src;
+
+    return submitEmail(endpoints.subscribe, payload)
+      .then(function (result) {
+        if (result.body && result.body.ok) {
+          track('newsletter_signup', { source: src || undefined });
+          return { ok: true, status: result.body.status || 'active' };
+        }
+        var code = (result.body && result.body.code) || 'request_failed';
+        track('newsletter_signup_error', {
+          reason: code,
+          source: src || undefined,
+        });
+        return { ok: false, code: code };
+      })
+      .catch(function () {
+        track('newsletter_signup_error', {
+          reason: 'network',
+          source: src || undefined,
+        });
+        return { ok: false, code: 'network' };
+      });
+  }
+
+  window.Newsletter = {
+    subscribe: subscribe,
+  };
+
   function bindForm(form, options) {
     var status = form.querySelector('[data-newsletter-status]');
     var button = form.querySelector('button[type="submit"]');

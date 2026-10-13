@@ -260,6 +260,22 @@ permalink: /checkout/
           </label>
         </div>
 
+        {% if site.data.settings.newsletter.enabled %}
+        {% assign newsletter = site.data.settings.newsletter %}
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label" for="checkout-newsletter">
+            <input type="checkbox" id="checkout-newsletter" name="newsletterOptIn" value="1" data-analytics="checkout_newsletter_opt_in">
+            <span>
+              {{ newsletter.checkout.label }}
+              {% if newsletter.checkout.hint %}
+              <span class="checkout-newsletter__hint">{{ newsletter.checkout.hint }}</span>
+              {% endif %}
+              <a href="{{ '/newsletter/' | relative_url }}" target="_blank" rel="noopener">{{ newsletter.consent_link_text }}</a>
+            </span>
+          </label>
+        </div>
+        {% endif %}
+
         <div class="form__group form__group--checkbox">
           <label class="checkbox-label" for="checkout-terms">
             <input type="checkbox" id="checkout-terms" name="acceptTerms" required>

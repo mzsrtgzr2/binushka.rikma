@@ -75,17 +75,13 @@
   position: relative;
   display: block;
   width: 100%;
-  padding: 10px;
-  border-radius: 16px;
   user-select: none;
-  overflow: hidden;
-  background-color: var(--background-alt-color);
 }
 
 .project__photo {
   position: relative;
   display: block;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   transform: translate(0);
   background-color: var(--background-alt-color);

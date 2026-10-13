@@ -1,4 +1,35 @@
 /* Projects */
+// 4 and 5 columns only fit once the category sidebar has room beside them.
+// Below $desktop the existing col-d / col-t widths take over.
+@media only screen and (min-width: $desktop + 1px) {
+  #workshops-grid[data-columns="4"] .project {
+    width: 25%;
+  }
+
+  #workshops-grid[data-columns="5"] .project {
+    width: 20%;
+  }
+
+  #workshops-grid[data-columns="4"] .project__title {
+    font-size: 26px;
+  }
+
+  #workshops-grid[data-columns="5"] .project__title {
+    font-size: 22px;
+  }
+
+  #workshops-grid[data-columns="4"] .registration-full,
+  #workshops-grid[data-columns="5"] .registration-full {
+    font-size: 16px;
+    padding: 6px 10px;
+  }
+
+  #workshops-grid[data-columns="5"] .project__add {
+    padding: 16px 8px;
+    font-size: 15px;
+  }
+}
+
 .projects-page {
   margin-bottom: 68px;
 

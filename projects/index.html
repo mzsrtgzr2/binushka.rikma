@@ -94,6 +94,14 @@ layout: default
         >
           קטגוריות
         </button>
+        <div class="store-toolbar__grid" role="group" aria-label="כמה כרטיסים בשורה">
+          <span class="store-toolbar__label">בשורה</span>
+          <div class="store-toolbar__columns">
+            <button type="button" class="store-toolbar__column is-active" data-workshop-columns="3" aria-pressed="true" data-analytics="workshop_grid_3">3</button>
+            <button type="button" class="store-toolbar__column" data-workshop-columns="4" aria-pressed="false" data-analytics="workshop_grid_4">4</button>
+            <button type="button" class="store-toolbar__column" data-workshop-columns="5" aria-pressed="false" data-analytics="workshop_grid_5">5</button>
+          </div>
+        </div>
         <label class="store-toolbar__sort" for="workshop-month">
           <span class="store-toolbar__label">בחירת חודש</span>
           <select id="workshop-month" class="store-toolbar__select" name="workshop-month" data-analytics="workshop_filter_month">
@@ -114,7 +122,7 @@ layout: default
         </label>
       </div>
 
-      <div class="row" id="workshops-grid">
+      <div class="row" id="workshops-grid" data-columns="3">
         {% comment %}
           Public list is chronological (next workshop first), with open
           workshops before sold-out. Manual backoffice `order` is ignored.

@@ -65,6 +65,25 @@
       }
     }
   },
+  "workshop-mothers-30-12": {
+    "name": "בוקר פינוק לאמהות — ב30.12 עם הפסיכולוגית מיכל כץ-בלך",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 10,
+    "variants": {
+      "one": {
+        "name": "משתתפת אחת",
+        "price": 330,
+        "places": 1
+      },
+      "pair": {
+        "name": "שתי משתתפות ביחד",
+        "price": 600,
+        "places": 2
+      }
+    }
+  },
   "workshop-mothers-7-12": {
     "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה7 בדצמבר",
     "price": 1090,

@@ -462,6 +462,13 @@
       "outOfStock": false,
       "limitedStock": false
     },
+    "workshop-mothers-30-12": {
+      "name": "בוקר פינוק לאמהות — ב30.12 עם הפסיכולוגית מיכל כץ-בלך",
+      "price": 330,
+      "stock": 10,
+      "outOfStock": false,
+      "limitedStock": false
+    },
     "workshop-hosting-04-12": {
       "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב4.12 שישי בבוקר",
       "price": 500,

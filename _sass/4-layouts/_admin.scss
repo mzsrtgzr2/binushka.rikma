@@ -1719,6 +1719,17 @@
   min-height: 0;
 }
 
+.admin-preview .project__date {
+  top: 8px;
+  inset-inline-start: 8px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.admin-preview .project__city {
+  font-size: 14px;
+}
+
 .admin-preview .project__info {
   margin-top: 16px;
 

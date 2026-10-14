@@ -8,6 +8,7 @@ image: '/images/gallery/flowers-kit.jpeg'
 permalink: /projects/flowers-kit/
 form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
 hide: true
+hide_faq: true
 registration_full: false
 order: 15
 ---

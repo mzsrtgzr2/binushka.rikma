@@ -1,17 +1,31 @@
 /* Project */
 
 /* External http(s) links in workshop copy — blue so registration / Instagram
-   links read as clickable, not body text. Skip .button so the yellow CTA
-   keeps its black label. */
+   links read as clickable (default --link-color matches body text). Skip
+   .button so the yellow CTA keeps its black label. */
 .project-content {
   a[href^="http://"]:not(.button),
   a[href^="https://"]:not(.button) {
     color: #1a5fb4;
-    border-bottom-color: rgba(26, 95, 180, 0.35);
+    border-bottom: 1px solid rgba(26, 95, 180, 0.35);
 
     &:hover {
       color: #0d3d8c;
       border-bottom-color: #0d3d8c;
+    }
+  }
+}
+
+/* FAQ answers: cancellation / terms links must read clearly as links
+   (blue + underline). Default --link-color matches body text. */
+.project-faq {
+  a:not(.button) {
+    color: #1a5fb4;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: #0d3d8c;
     }
   }
 }

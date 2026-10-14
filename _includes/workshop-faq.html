@@ -1,0 +1,44 @@
+{%- comment -%}
+  FAQ accordion on workshop pages, via _data/workshop-faqs.yml
+  or an explicit page.accordion override.
+
+  Matching (in order):
+    1. page.accordion (full override — same shape as homepage / retreat)
+    2. page.faq_category
+    3. private workshops (price_per: workshop) → private
+    4. mothers pages that are not the embroidery course
+       (title lacks רקמה/רוקמות) → mothers-pamper
+    5. page.category
+    6. all-levels fallback
+
+  Skip with front matter hide_faq: true.
+{%- endcomment -%}
+{%- unless page.hide_faq -%}
+{%- assign accordion_items = nil -%}
+{%- if page.accordion and page.accordion.size > 0 -%}
+  {%- assign accordion_items = page.accordion -%}
+{%- else -%}
+  {%- assign faq_key = page.faq_category | default: page.category -%}
+  {%- if page.faq_category == nil and page.price_per == 'workshop' -%}
+    {%- assign faq_key = 'private' -%}
+  {%- endif -%}
+  {%- if page.faq_category == nil and page.category == 'mothers' -%}
+    {%- assign _t = page.title | default: '' -%}
+    {%- unless _t contains 'רקמה' or _t contains 'רוקמות' -%}
+      {%- assign faq_key = 'mothers-pamper' -%}
+    {%- endunless -%}
+  {%- endif -%}
+  {%- assign accordion_items = site.data.workshop-faqs.categories[faq_key] -%}
+  {%- unless accordion_items -%}
+    {%- assign accordion_items = site.data.workshop-faqs.categories['all-levels'] -%}
+  {%- endunless -%}
+{%- endif -%}
+{%- if accordion_items and accordion_items.size > 0 -%}
+<section class="project-faq animate">
+  <div class="text-center">
+    <h3 class="hero__title">שאלות נפוצות</h3>
+  </div>
+  {% include section-accordion.html accordion_items=accordion_items %}
+</section>
+{%- endif -%}
+{%- endunless -%}

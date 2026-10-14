@@ -86,14 +86,7 @@ layout: default
 
   {% include workshop-testimonials.html %}
 
-  {% if page.accordion %}
-  <section class="project-faq animate">
-    <div class="text-center">
-      <h3 class="hero__title">שאלות נפוצות</h3>
-    </div>
-    {% include section-accordion.html %}
-  </section>
-  {% endif %}
+  {% include workshop-faq.html %}
 
   {% if page.gallery %}
   <div class="project-gallery animate">

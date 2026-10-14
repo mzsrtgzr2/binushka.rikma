@@ -406,13 +406,6 @@
       "outOfStock": false,
       "limitedStock": false
     },
-    "workshop-bar-14-10": {
-      "name": "בוקר פינוק לאמהות — ב14.10 עם בר גרנות",
-      "price": 330,
-      "stock": 0,
-      "outOfStock": true,
-      "limitedStock": false
-    },
     "workshop-mothers-1-6": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה2 בנובמבר",
       "price": 1090,

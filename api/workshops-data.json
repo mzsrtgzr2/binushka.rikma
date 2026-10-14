@@ -6,25 +6,6 @@
     "shipping": false,
     "stock": 0
   },
-  "workshop-bar-14-10": {
-    "name": "בוקר פינוק לאמהות — ב14.10 עם בר גרנות",
-    "price": 330,
-    "kind": "workshop",
-    "shipping": false,
-    "stock": 0,
-    "variants": {
-      "one": {
-        "name": "משתתפת אחת",
-        "price": 330,
-        "places": 1
-      },
-      "pair": {
-        "name": "שתי משתתפות ביחד",
-        "price": 600,
-        "places": 2
-      }
-    }
-  },
   "workshop-hosting-04-12": {
     "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב4.12 שישי בבוקר",
     "price": 500,

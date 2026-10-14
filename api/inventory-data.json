@@ -273,9 +273,9 @@
       "price": 85
     },
     "scrunchie-prachim-sgulim": {
-      "stock": 1,
-      "outOfStock": false,
-      "limitedStock": true,
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false,
       "name": "סקראנצ'י פרחים סגולים",
       "price": 30
     },

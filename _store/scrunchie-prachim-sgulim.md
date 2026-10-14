@@ -4,9 +4,9 @@ subtitle: פרחים סגולים עם נגיעות כתומות על רקע ש�
 image: /images/scrunchies/gallery/scrunchie-prachim-sgulim-1.png
 price: ₪30
 cart_price: 30
-stock: 1
-limited_stock: true
-out_of_stock: false
+stock: 0
+limited_stock: false
+out_of_stock: true
 hide: true
 noindex: true
 sitemap: false

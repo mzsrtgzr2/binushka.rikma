@@ -15,6 +15,7 @@ noindex: true
     כאן מגדירים קודי קופון מראש. הלקוחות מזינים אותם בעמוד התשלום לפני המעבר ל־Grow.
     אפשר להגדיר הנחה באחוזים או בסכום קבוע בשקלים — ההנחה חלה על המוצרים, לא על המשלוח.
     אפשר להגביל למינימום רכישה, למספר מימושים, לסוג מוצר (למשל ערכות רקמה), לכמה מוצרים נבחרים, לסדנאות, או לשים תאריך תפוגה.
+    כברירת מחדל הקופון חל רק על מחיר מלא של כרטיס בודד בסדנה — לא על חבילות (למשל 2 ב־600). אפשר לסמן שגם חבילות ייכללו.
     אי אפשר ליצור קופון של 100% הנחה על הסל.
   </p>
 
@@ -179,6 +180,14 @@ noindex: true
           <label class="form__label" for="coupon-note">הערה פנימית (אופציונלי)</label>
           <input class="form__input" type="text" id="coupon-note" maxlength="200" placeholder="למשל: מבצע פתיחה">
         </div>
+
+        <label class="admin-check" for="coupon-include-packs">
+          <input type="checkbox" id="coupon-include-packs">
+          תקף גם על חבילות בסדנאות
+        </label>
+        <p class="admin-hint">
+          כבוי = רק כרטיס בודד במחיר מלא. דלוק = גם חבילות כמו 2 ב־600.
+        </p>
 
         <label class="admin-check" for="coupon-active">
           <input type="checkbox" id="coupon-active" checked>

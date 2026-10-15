@@ -32,6 +32,7 @@
   var workshopScopeInput = document.getElementById('coupon-workshop-scope');
   var workshopsList = document.getElementById('coupon-workshops-list');
   var workshopsHint = document.getElementById('coupon-workshops-hint');
+  var includePacksInput = document.getElementById('coupon-include-packs');
   var activeInput = document.getElementById('coupon-active');
   var cancelBtn = document.getElementById('coupon-cancel');
   if (!loginForm || !board || !form) return;
@@ -370,6 +371,7 @@
             : appliesTo === 'category' && category === 'workshops'
               ? selectedWorkshops
               : [],
+        include_packs: includePacksInput ? includePacksInput.checked : false,
         active: activeInput.checked
       }
     };
@@ -535,6 +537,7 @@
     editing = null;
     form.reset();
     activeInput.checked = true;
+    if (includePacksInput) includePacksInput.checked = false;
     if (expiresInput) expiresInput.value = '';
     if (minPurchaseInput) minPurchaseInput.value = '';
     if (maxUsesInput) maxUsesInput.value = '';
@@ -574,6 +577,7 @@
         row.category === 'workshops' && selected.length ? 'selected' : 'all';
     }
     fillWorkshopOptions(row.category === 'workshops' ? selected : []);
+    if (includePacksInput) includePacksInput.checked = row.include_packs === true;
     activeInput.checked = row.active !== false;
     if (formLegend) formLegend.textContent = 'עריכת ' + row.code;
     if (cancelBtn) cancelBtn.hidden = false;
@@ -605,6 +609,8 @@
         var scope = formatScope(row);
         if (scope) meta += ' · ' + scope;
         if (row.expires) meta += ' · בתוקף עד ' + row.expires;
+        if (row.include_packs) meta += ' · כולל חבילות';
+        else meta += ' · בלי חבילות';
         meta += ' · ' + formatUses(row);
         if (row.note) meta += ' · ' + row.note;
         return (

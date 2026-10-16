@@ -1053,11 +1053,8 @@
       footer = fakeButton('הירשמי לרשימת המתנה', 'project__add', 'waitlist');
     } else if (workshop.registration_not_open) {
       footer = fakeButton('עדכני אותי כשההרשמה נפתחת', 'project__add', 'waitlist');
-    } else if (price > 0 && !workshop.registration_not_open && !soldOut) {
-      footer = fakeButton(
-        workshop.price_per === 'workshop' ? 'הזמנת סדנה' : 'הרשמה לסדנה',
-        'project__add'
-      );
+    } else if ((price > 0 || workshop.form_url) && !workshop.registration_not_open && !soldOut) {
+      footer = fakeButton('פרטים נוספים', 'project__add');
     }
 
     return (

@@ -255,6 +255,16 @@
     font-size: 14px;
     line-height: 1.5;
     color: var(--text-alt-color);
+
+    a {
+      color: var(--text-color);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+
+      &:hover {
+        color: var(--link-color-hover);
+      }
+    }
   }
 
   @media only screen and (max-width: $mobile) {

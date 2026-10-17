@@ -78,10 +78,11 @@
           <span class="workshop-booking__whatsapp-question">מתלבטת אם הקורס מתאים לך ולתינוק שלך?</span>
           <a class="workshop-booking__whatsapp-link" href="https://wa.me/972544247753?text={{ 'הי בינושקה, מתלבטת אם קורס אמהות רוקמות מתאים לי ואשמח לעזרה' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ ואשמח לעזור 💗</a>
         </p>
-        {% endif %}
+        {% else %}
         <p class="workshop-booking__note">
           ההרשמה עוברת לסל הקניות — אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.
         </p>
+        {% endif %}
       </div>
       {% elsif page.form_url %}
       <div class="section__navigation">

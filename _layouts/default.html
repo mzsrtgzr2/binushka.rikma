@@ -3,7 +3,7 @@
 
 {% include head.html %}
 
-<body>
+<body{% if page.layout == 'project' %} class="has-workshop-sticky"{% endif %}>
 
   {% if site.data.settings.mixpanel-token %}
     {% include mixpanel.html %}

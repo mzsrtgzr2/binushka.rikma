@@ -1,0 +1,26 @@
+{%- comment -%}
+  Mobile sticky registration bar for workshop pages.
+  Relies on layout assigns: workshop_id, workshop, sold_out, booking_in_cart,
+  spots, hide_remaining_spots, page.
+{%- endcomment -%}
+{%- unless page.registration_not_open or sold_out -%}
+<div class="workshop-sticky" role="region" aria-label="הרשמה לסדנה">
+  <div class="workshop-sticky__inner">
+    <div class="workshop-sticky__meta">
+      <strong class="workshop-sticky__price">₪{{ workshop.price }}</strong>
+      <span class="workshop-sticky__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or hide_remaining_spots %} hidden{% endif %}>
+        {%- if spots != nil and hide_remaining_spots != true -%}
+          {%- if spots == 1 -%}מקום אחרון{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
+        {%- endif -%}
+      </span>
+    </div>
+    {%- if booking_in_cart -%}
+    <button type="button" class="button button--primary" data-cart-add="{{ workshop_id }}" data-analytics="workshop_register_sticky">
+      {% if page.price_per == 'workshop' %}הזמיני סדנה{% else %}הרשמי לסדנה{% endif %}
+    </button>
+    {%- elsif page.form_url -%}
+    <a class="button button--primary" href="{{ page.form_url }}" target="_blank" rel="noopener" data-analytics="workshop_external_register_sticky">הרשמי לסדנה</a>
+    {%- endif -%}
+  </div>
+</div>
+{%- endunless -%}

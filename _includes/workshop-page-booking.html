@@ -28,16 +28,20 @@
         </p>
       </div>
       {% endif %}
-      <div class="workshop-booking">
+      <div class="workshop-booking" id="register">
         {% unless workshop.variants %}
         <div class="workshop-booking__head">
           <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>
           <span class="workshop-booking__per">{{ price_unit }}</span>
         </div>
+        {% if page.sessions_count and workshop.price %}
+        {% assign per_session = workshop.price | times: 1.0 | divided_by: page.sessions_count | round %}
+        <p class="workshop-booking__per-session">כ־₪{{ per_session }} למפגש · {{ page.sessions_count }} מפגשים</p>
+        {% endif %}
         {% endunless %}
         <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' or hide_remaining_spots %} hidden{% endif %}>
           {%- if spots != nil and page.price_per != 'workshop' and hide_remaining_spots != true -%}
-            {%- if spots == 1 -%}מקום אחרון — נותר 1{%- elsif spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
+            {%- if spots == 1 -%}מקום אחרון — נותר 1{%- elsif spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{% if page.capacity %} מתוך {{ page.capacity }}{% endif %}{%- else -%}נותרו {{ spots }} מקומות{% if page.capacity %} מתוך {{ page.capacity }}{% endif %}{%- endif -%}
           {%- endif -%}
         </p>
         {% if workshop.variants %}
@@ -63,6 +67,10 @@
           {% if page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
         </button>
         {% endif %}
+        {%- assign wa_text = 'היי בינה, יש לי שאלה לגבי ' | append: page.title -%}
+        <a class="workshop-booking__whatsapp" href="https://wa.me/972544247753?text={{ wa_text | url_encode }}" target="_blank" rel="noopener" data-analytics="workshop_whatsapp">
+          מתלבטת? שאלי אותי בוואטסאפ
+        </a>
         <p class="workshop-booking__note">
           ההרשמה עוברת לסל הקניות — אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.
         </p>

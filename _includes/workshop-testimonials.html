@@ -38,6 +38,10 @@
     <h2 class="workshop-proof__title" id="workshop-proof-title">{{ proof_title }}</h2>
   </div>
 
+  {% if proof.intro %}
+  <p class="workshop-proof__intro">{{ proof.intro }}</p>
+  {% endif %}
+
   {% if has_quotes %}
   <ul class="workshop-proof__quotes">
     {% for quote in proof_quotes %}

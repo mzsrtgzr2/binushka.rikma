@@ -255,10 +255,38 @@
     font-size: 14px;
     line-height: 1.5;
     color: var(--text-alt-color);
+
+    a {
+      color: var(--text-color);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+
+      &:hover {
+        color: var(--link-color-hover);
+      }
+    }
   }
 
   @media only screen and (max-width: $mobile) {
     padding: 22px 18px;
+  }
+}
+
+.workshop-booking__note--whatsapp {
+  .workshop-booking__whatsapp-question {
+    display: block;
+  }
+
+  .workshop-booking__whatsapp-link {
+    display: inline-block;
+    margin-top: 4px;
+    color: var(--text-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: var(--link-color-hover);
+    }
   }
 }
 

@@ -259,6 +259,7 @@
     var shipping = needsShipping(items);
     var fieldset = document.getElementById('checkout-shipping');
     var note = document.getElementById('checkout-no-shipping');
+    var reuseGroup = document.getElementById('checkout-reuse-carton-group');
     if (fieldset) {
       fieldset.hidden = !shipping;
       form.querySelectorAll('input[name="shipping"]').forEach(function (radio) {
@@ -266,6 +267,14 @@
       });
     }
     if (note) note.hidden = shipping;
+    /* Reused carton only makes sense when something is being shipped. */
+    if (reuseGroup) {
+      reuseGroup.hidden = !shipping;
+      if (!shipping) {
+        var cartonCb = form.elements.reuseCarton;
+        if (cartonCb) cartonCb.checked = false;
+      }
+    }
     syncAddressVisibility(shipping);
     return shipping;
   }

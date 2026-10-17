@@ -461,6 +461,13 @@
       "stock": 5,
       "outOfStock": false,
       "limitedStock": false
+    },
+    "workshop-rehovot-15-1": {
+      "name": "סדנת רקמה של שישי בבוקר — ב15.1 ברחובות",
+      "price": 330,
+      "stock": 8,
+      "outOfStock": false,
+      "limitedStock": false
     }
   }
 }

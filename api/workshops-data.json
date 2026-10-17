@@ -25,7 +25,7 @@
     "price": 1090,
     "kind": "workshop",
     "shipping": false,
-    "stock": 5
+    "stock": 4
   },
   "workshop-mothers-11-11-2": {
     "name": "בוקר פינוק לאמהות — ב11.11 עם דינה אלטשולר ויסוצקי",
@@ -103,6 +103,13 @@
         "places": 2
       }
     }
+  },
+  "workshop-rehovot-15-1": {
+    "name": "סדנת רקמה של שישי בבוקר — ב15.1 ברחובות",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 8
   },
   "workshop-rehovot-29-10": {
     "name": "סדנת רקמה בסטודיו קרמיקסטאר — ערב יין, גבינות וחוטים",

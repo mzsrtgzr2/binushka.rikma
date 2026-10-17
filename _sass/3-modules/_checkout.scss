@@ -84,6 +84,15 @@
   }
 }
 
+.checkout-newsletter__hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
 .checkout-form__submit {
   margin-top: 24px;
 }

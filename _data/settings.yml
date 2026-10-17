@@ -76,6 +76,11 @@ newsletter:
   consent: לא שולחת ספאם, ואפשר להסיר את עצמך בכל רגע בלחיצה אחת בתחתית כל מייל.
   consent_link_text: לפרטים ולביטול הרשמה
 
+  # Opt-in on /checkout/ — reuses the email already on the form.
+  checkout:
+    label: אני רוצה להצטרף לקהילה ולניוזלטר
+    hint: עדכונים על סדנאות, מוצרים חדשים ומלאי שחוזר — מייל אחד מדי פעם.
+
   # Copy for the signup panel that opens from restock / workshop buttons.
   modal:
     title: בואי להישאר בתמונה

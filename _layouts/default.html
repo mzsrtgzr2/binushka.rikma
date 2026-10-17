@@ -32,13 +32,13 @@
   {% if site.data.store-cart.enabled %}
   <script src="{{ site.baseurl }}/js/store-cart.js" defer></script>
   {% endif %}
+  {% include newsletter-config.html %}
   {% if page.url == '/checkout/' or page.url == '/checkout' %}
   <script src="{{ site.baseurl }}/js/checkout.js" defer></script>
   {% endif %}
   {% if page.url == '/thanks/' or page.url == '/thanks' %}
   <script src="{{ site.baseurl }}/js/thanks.js" defer></script>
   {% endif %}
-  {% include newsletter-config.html %}
   {% include newsletter-modal.html %}
 </body>
 

@@ -368,6 +368,7 @@
     'giftMessage',
     'orderNote',
     'reuseCarton',
+    'newsletterOptIn',
   ];
 
   function loadCustomer() {
@@ -399,6 +400,11 @@
     if (name === 'reuseCarton') {
       var cartonCb = form.elements.reuseCarton;
       if (cartonCb) cartonCb.checked = Boolean(value);
+      return;
+    }
+    if (name === 'newsletterOptIn') {
+      var nlCb = form.elements.newsletterOptIn;
+      if (nlCb) nlCb.checked = Boolean(value);
       return;
     }
     if (value == null || value === '') return;
@@ -596,7 +602,7 @@
       if (data.giftMessage) payload.giftMessage = String(data.giftMessage).trim().slice(0, 200);
     }
     if (data.orderNote) payload.orderNote = String(data.orderNote).trim().slice(0, 500);
-    if (data.reuseCarton) payload.reuseCarton = true;
+            if (data.reuseCarton) payload.reuseCarton = true;
     saveCustomer();
     submitted = true;
     reportShipping(items, shippingMethod);
@@ -652,6 +658,7 @@
               giftMessage: data.packAsGift && data.giftMessage
                 ? String(data.giftMessage).trim().slice(0, 200)
                 : '',
+              newsletterOptIn: Boolean(data.newsletterOptIn),
             })
           );
         } catch (e) {

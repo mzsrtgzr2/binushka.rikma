@@ -1042,11 +1042,42 @@
     );
   }
 
+  function cardFacts(workshop) {
+    var subtitle = String((workshop && workshop.subtitle) || '');
+    var heading = (workshop && workshop.card_title) || (workshop && workshop.title) || 'שם הסדנה';
+    var location = String((workshop && workshop.location) || '');
+    var city = '';
+    if (location) {
+      var parts = location.split(',');
+      city = parts[parts.length - 1].trim();
+    }
+
+    var dateLabel = '';
+    if (subtitle.indexOf('בזמן שמתאים') !== -1) {
+      dateLabel = 'גמיש';
+    } else if (subtitle.indexOf('אחת לחודש') !== -1) {
+      dateLabel = subtitle.split(/\s+/)[0] || '';
+    } else {
+      var match = String((workshop && workshop.date) || '').match(/(\d{4})-(\d{2})-(\d{2})/);
+      var dm = match ? String(Number(match[3])) + '.' + String(Number(match[2])) : '';
+      if (dm && subtitle.indexOf('החל מ') !== -1) dateLabel = 'מ־' + dm;
+      else dateLabel = dm;
+    }
+
+    return {
+      heading: heading,
+      showSubtitle: !workshop.card_title && subtitle,
+      city: city,
+      dateLabel: dateLabel,
+    };
+  }
+
   function cardHtml(workshop) {
     var image = workshop.image ? previewSrc(workshop.image) : '';
     var badge = badgeText(workshop);
     var price = effectivePrice(workshop);
     var soldOut = isSoldOut(workshop);
+    var facts = cardFacts(workshop);
 
     var footer = '';
     if (!workshop.registration_not_open && soldOut) {
@@ -1061,13 +1092,16 @@
       '<article class="project' + (workshop.hide ? ' is-preview-hidden' : '') + '">' +
       '<div class="project__content">' +
       '<span class="project__image">' +
+      '<span class="project__photo">' +
       (image ? '<img src="' + escapeHtml(image) + '" alt="">' : '') +
+      (facts.dateLabel ? '<span class="project__date">' + escapeHtml(facts.dateLabel) + '</span>' : '') +
       (badge ? '<div class="registration-full">' + escapeHtml(badge) + '</div>' : '') +
-      '</span>' +
+      '</span></span>' +
       '<div class="project__info">' +
       (categoryLabel(workshop) ? '<div class="project__category">' + escapeHtml(categoryLabel(workshop)) + '</div>' : '') +
-      '<h3 class="project__title"><span>' + escapeHtml(workshop.title || 'שם הסדנה') + '</span></h3>' +
-      (workshop.subtitle ? '<div class="project__subtitle">' + escapeHtml(workshop.subtitle) + '</div>' : '') +
+      '<h3 class="project__title"><span>' + escapeHtml(facts.heading) + '</span></h3>' +
+      (facts.city ? '<div class="project__city">' + escapeHtml(facts.city) + '</div>' : '') +
+      (facts.showSubtitle ? '<div class="project__subtitle">' + escapeHtml(workshop.subtitle) + '</div>' : '') +
       (footer ? '<div class="project__footer">' + footer + '</div>' : '') +
       '</div></div></article>'
     );

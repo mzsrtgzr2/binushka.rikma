@@ -7,6 +7,8 @@
   var menuToggle = document.getElementById('workshop-menu-toggle');
   var menuClose = document.getElementById('workshop-menu-close');
   var menuBackdrop = document.getElementById('workshop-menu-backdrop');
+  var columnButtons = document.querySelectorAll('[data-workshop-columns]');
+  var columnsKey = 'workshop-grid';
   if (!grid || !filters) return;
 
   var categoryButtons = filters.querySelectorAll('[data-workshop-category]');
@@ -109,6 +111,31 @@
     });
     closeMenu();
   });
+
+  function setColumns(columns) {
+    var value = columns === '4' || columns === '5' ? columns : '3';
+    grid.setAttribute('data-columns', value);
+    try {
+      localStorage.setItem(columnsKey, value);
+    } catch (error) {}
+    columnButtons.forEach(function (btn) {
+      var on = btn.getAttribute('data-workshop-columns') === value;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  columnButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setColumns(btn.getAttribute('data-workshop-columns'));
+    });
+  });
+
+  var savedColumns = '3';
+  try {
+    savedColumns = localStorage.getItem(columnsKey) || '3';
+  } catch (error) {}
+  setColumns(savedColumns);
 
   if (monthSelect) {
     monthSelect.addEventListener('change', function () {

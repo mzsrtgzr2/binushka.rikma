@@ -29,24 +29,56 @@
   {%- assign date_month = project.date | date: '%m' -%}
   {%- assign filter_month_keys = filter_month_keys | push: date_month -%}
 {%- endif -%}
+{%- assign card_heading = project.title -%}
+{%- if project.card_title and project.card_title != '' -%}
+  {%- assign card_heading = project.card_title -%}
+{%- endif -%}
+{%- assign card_city = '' -%}
+{%- if project.location -%}
+  {%- assign city_parts = project.location | split: ',' -%}
+  {%- assign card_city = city_parts | last | strip -%}
+{%- endif -%}
+{%- assign card_date = '' -%}
+{%- if project.subtitle contains 'בזמן שמתאים' -%}
+  {%- assign card_date = 'גמיש' -%}
+{%- elsif project.subtitle contains 'אחת לחודש' -%}
+  {%- assign card_date = project.subtitle | split: ' ' | first -%}
+{%- elsif project.date -%}
+  {%- assign card_day = project.date | date: '%d' | plus: 0 -%}
+  {%- assign card_month = project.date | date: '%m' | plus: 0 -%}
+  {%- capture card_dm -%}{{ card_day }}.{{ card_month }}{%- endcapture -%}
+  {%- if project.subtitle contains 'החל מ' -%}
+    {%- assign card_date = 'מ־' | append: card_dm -%}
+  {%- else -%}
+    {%- assign card_date = card_dm -%}
+  {%- endif -%}
+{%- endif -%}
 <article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-analytics="workshop_card" data-category="{{ project.category }}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
   <div class="project__content">
     <a href="{{ project.url }}" class="project__image" data-analytics="workshop_card_image">
-      <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
-      {% if project.registration_not_open %}
-        <div class="registration-full">ההרשמה תיפתח בקרוב</div>
-      {% elsif sold_out %}
-        <div class="registration-full">אין מקומות פנויים</div>
-      {% elsif last_places %}
-        <div class="registration-full">{% if spots == 1 %}מקום אחרון{% else %}מקומות אחרונים{% endif %}</div>
-      {% endif %}
+      <span class="project__photo">
+        <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
+        {% if card_date != '' %}
+          <span class="project__date">{{ card_date }}</span>
+        {% endif %}
+        {% if project.registration_not_open %}
+          <div class="registration-full">ההרשמה תיפתח בקרוב</div>
+        {% elsif sold_out %}
+          <div class="registration-full">אין מקומות פנויים</div>
+        {% elsif last_places %}
+          <div class="registration-full">{% if spots == 1 %}מקום אחרון{% else %}מקומות אחרונים{% endif %}</div>
+        {% endif %}
+      </span>
     </a>
     <div class="project__info">
       {% if category_label != '' %}
       <div class="project__category">{{ category_label }}</div>
       {% endif %}
-      <h3 class="project__title"><a href="{{ project.url }}" data-analytics="workshop_card_title">{{ project.title }}</a></h3>
-      {% if project.subtitle %}
+      <h3 class="project__title"><a href="{{ project.url }}" data-analytics="workshop_card_title">{{ card_heading }}</a></h3>
+      {% if card_city != '' %}
+      <div class="project__city">{{ card_city }}</div>
+      {% endif %}
+      {% if project.subtitle and card_heading == project.title %}
       <div class="project__subtitle">{{ project.subtitle }}</div>
       {% endif %}
       {% if project.registration_not_open %}

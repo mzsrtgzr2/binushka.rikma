@@ -286,6 +286,54 @@ body.store-menu-open {
   white-space: nowrap;
 }
 
+.store-toolbar__grid {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--heading-font-color);
+
+  @media only screen and (max-width: $desktop) {
+    display: none;
+  }
+}
+
+.store-toolbar__columns {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--background-alt-color);
+}
+
+.store-toolbar__column {
+  appearance: none;
+  min-width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--heading-font-color);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+
+  &.is-active {
+    background: var(--brand-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--brand-color);
+    outline-offset: 2px;
+  }
+}
+
 .store-toolbar__select {
   min-width: 220px;
   padding: 10px 14px;

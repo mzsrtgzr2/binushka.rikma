@@ -272,6 +272,24 @@
   }
 }
 
+.workshop-booking__note--whatsapp {
+  .workshop-booking__whatsapp-question {
+    display: block;
+  }
+
+  .workshop-booking__whatsapp-link {
+    display: inline-block;
+    margin-top: 4px;
+    color: var(--text-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: var(--link-color-hover);
+    }
+  }
+}
+
 /* Project Navigation */
 .project__nav {
   max-width: 780px;

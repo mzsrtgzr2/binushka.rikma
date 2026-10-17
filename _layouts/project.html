@@ -66,6 +66,23 @@ layout: default
   </div>
 
 
+  {%- comment -%}
+    Mothers embroidery: booking CTA (with WhatsApp) goes right after
+    פרטי הסדנה, before curriculum sections. Other workshops unchanged.
+  {%- endcomment -%}
+  {%- assign mothers_course_split = false -%}
+  {%- unless page.registration_not_open -%}
+    {%- if page.category == 'mothers' -%}
+      {%- assign _mothers_title = page.title | default: '' -%}
+      {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
+        {%- assign _content_parts = content | split: '<h3' -%}
+        {%- if _content_parts.size > 1 -%}
+          {%- assign mothers_course_split = true -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endunless -%}
+
   <div class="project-content animate">
     {% if page.registration_not_open %}
       <p>פרטי הסדנה יפורסמו בקרוב.</p>
@@ -77,12 +94,22 @@ layout: default
         </p>
       </div>
       {% endif %}
+    {% elsif mothers_course_split %}
+      {{ _content_parts.first }}
     {% else %}
       {{ content }}
     {% endif %}
   </div>
 
   {% include workshop-page-booking.html %}
+
+  {% if mothers_course_split %}
+  <div class="project-content animate">
+    {% for part in _content_parts %}
+      {% unless forloop.first %}<h3{{ part }}{% endunless %}
+    {% endfor %}
+  </div>
+  {% endif %}
 
   {% include workshop-testimonials.html %}
 

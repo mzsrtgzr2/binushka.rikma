@@ -72,17 +72,19 @@ layout: default
       <div class="project-price">מ־₪{{ from_price }} {{ price_unit }}</div>
       {% else %}
       {%- comment -%}
-        Mothers embroidery is always 4 meetings; show round-half-up ₪/meeting
-        under the yellow total (1090 → 273), matching the page body copy.
+        Mothers embroidery is always 4 meetings: lead with sessions + ₪/meeting
+        (round-half-up, 1090 → 273), total in parentheses underneath.
       {%- endcomment -%}
       {%- assign per_session = nil -%}
       {%- if mothers_embroidery and workshop.price -%}
         {%- assign per_session = workshop.price | plus: 2 | divided_by: 4 -%}
       {%- endif -%}
       <div class="project-price">
-        <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}
         {% if per_session and per_session > 0 %}
-        <span class="project-price__per-session">({{ per_session }} ₪ למפגש)</span>
+        4 מפגשים · {{ per_session }} ₪ למפגש
+        <span class="project-price__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }})</span>
+        {% else %}
+        <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}
         {% endif %}
       </div>
       {% endif %}

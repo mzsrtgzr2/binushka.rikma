@@ -1153,13 +1153,18 @@
       var packs = packsForBooking(workshop);
       var shown = packs.length ? fromPrice(workshop) : price;
       var perSession = !packs.length ? perSessionPrice(workshop) : 0;
-      priceLine =
-        '<div class="project-price">' +
-        (packs.length ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
-        (perSession > 0
-          ? '<span class="project-price__per-session">(' + escapeHtml(perSession) + ' ₪ למפגש)</span>'
-          : '') +
-        '</div>';
+      if (perSession > 0) {
+        priceLine =
+          '<div class="project-price">' +
+          '4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש' +
+          '<span class="project-price__detail">(סה״כ ₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) + ')</span>' +
+          '</div>';
+      } else {
+        priceLine =
+          '<div class="project-price">' +
+          (packs.length ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
+          '</div>';
+      }
     }
 
     var content = workshop.registration_not_open

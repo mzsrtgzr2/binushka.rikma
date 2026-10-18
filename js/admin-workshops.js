@@ -1106,7 +1106,7 @@
           '<div class="workshop-booking__head">' +
           '<div class="workshop-booking__price">' +
           '4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש' +
-          '<span class="workshop-booking__detail">(סה״כ ₪' + escapeHtml(price) + ' ' + priceUnit(workshop) + ')</span>' +
+          '<span class="workshop-booking__detail">(סה״כ ₪' + escapeHtml(price) + ')</span>' +
           '</div></div>';
       } else {
         body +=
@@ -1167,7 +1167,7 @@
         priceLine =
           '<div class="project-price">' +
           '4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש' +
-          '<span class="project-price__detail">(סה״כ ₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) + ')</span>' +
+          '<span class="project-price__detail">(סה״כ ₪' + escapeHtml(shown) + ')</span>' +
           '</div>';
       } else {
         priceLine =

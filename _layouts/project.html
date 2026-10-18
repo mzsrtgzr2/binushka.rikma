@@ -82,7 +82,7 @@ layout: default
       <div class="project-price">
         {% if per_session and per_session > 0 %}
         4 מפגשים · {{ per_session }} ₪ למפגש
-        <span class="project-price__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }})</span>
+        <span class="project-price__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>)</span>
         {% else %}
         <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}
         {% endif %}

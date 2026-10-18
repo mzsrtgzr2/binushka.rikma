@@ -52,7 +52,7 @@
           {% if per_session and per_session > 0 %}
           <div class="workshop-booking__price">
             4 מפגשים · {{ per_session }} ₪ למפגש
-            <span class="workshop-booking__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }})</span>
+            <span class="workshop-booking__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>)</span>
           </div>
           {% else %}
           <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>

@@ -99,7 +99,7 @@ variants:
   365:
     name: "רקמה בכל יום! 365 רקמות פרקטיות"
     price: 195
-    stock: 0
+    stock: 4
     preorder: true
     image: /images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg
     gallery:

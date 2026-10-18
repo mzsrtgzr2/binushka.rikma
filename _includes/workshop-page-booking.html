@@ -2,7 +2,17 @@
   Registration / waitlist CTA on a workshop page.
   Relies on layout assigns: workshop_id, workshop, sold_out, booking_in_cart,
   price_unit, spots, hide_remaining_spots.
+
+  Mothers embroidery courses (אמהות רוקמות): soft WhatsApp help under the
+  register button. Same title heuristic as FAQ/testimonials — not pamper mornings.
 {%- endcomment -%}
+{%- assign mothers_course_whatsapp = false -%}
+{%- if page.category == 'mothers' -%}
+  {%- assign _mothers_title = page.title | default: '' -%}
+  {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
+    {%- assign mothers_course_whatsapp = true -%}
+  {%- endif -%}
+{%- endif -%}
 {% unless page.registration_not_open %}
 <div class="project-content animate">
 <div class="container">
@@ -63,15 +73,28 @@
           {% if page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
         </button>
         {% endif %}
+        {% if mothers_course_whatsapp %}
+        <p class="workshop-booking__note workshop-booking__note--whatsapp">
+          <span class="workshop-booking__whatsapp-question">מתלבטת אם הקורס מתאים לך ולתינוק שלך?</span>
+          <a class="workshop-booking__whatsapp-link" href="https://wa.me/972544247753?text={{ 'הי בינושקה, מתלבטת אם קורס אמהות רוקמות מתאים לי ואשמח לעזרה' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ ואשמח לעזור 💗</a>
+        </p>
+        {% else %}
         <p class="workshop-booking__note">
           ההרשמה עוברת לסל הקניות — אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.
         </p>
+        {% endif %}
       </div>
       {% elsif page.form_url %}
       <div class="section__navigation">
           <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank" rel="noopener" data-analytics="workshop_external_register">
           הרשמי לסדנה זו
         </a>
+        {% if mothers_course_whatsapp %}
+        <p class="workshop-booking__note workshop-booking__note--whatsapp">
+          <span class="workshop-booking__whatsapp-question">מתלבטת אם הקורס מתאים לך ולתינוק שלך?</span>
+          <a class="workshop-booking__whatsapp-link" href="https://wa.me/972544247753?text={{ 'הי בינושקה, מתלבטת אם קורס אמהות רוקמות מתאים לי ואשמח לעזרה' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ ואשמח לעזור 💗</a>
+        </p>
+        {% endif %}
       </div>
       {% endif %}
     </div>

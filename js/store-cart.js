@@ -596,25 +596,39 @@
       /* Multi-type: never badge the shop card / page hero — only each type. */
       var showLimitedBadge = limited && !multiType;
       var workshop = p.kind === 'workshop';
-      var overlayLabel = soldOut
-        ? workshop
-          ? 'אין מקומות פנויים'
-          : 'אזל מהמלאי'
-        : preorder
-          ? 'הזמיני מראש'
-          : showLimitedBadge
-            ? limitedStockLabel(p.stock, workshop)
-            : '';
       var overlayClass = soldOut ? 'out-of-stock' : preorder ? 'preorder' : 'limited-stock';
 
       document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
+        /* Mothers: "מקומות אחרונים" only when Liquid/admin marked data-last-places.
+           Other workshops: keep auto low-stock, and honor an explicit mark so the
+           red badge does not flash off before live stock arrives. */
+        var lastPlacesAttr = root.getAttribute('data-last-places');
+        var mothers = root.getAttribute('data-category') === 'mothers';
+        var workshopLimited = false;
+        if (workshop && !stockGone) {
+          if (mothers) workshopLimited = lastPlacesAttr === 'true';
+          else {
+            workshopLimited =
+              lastPlacesAttr === 'true' || Boolean(p.limitedStock) || isLowStock(p.stock);
+          }
+        }
+        var badgeLimited = workshop ? workshopLimited : showLimitedBadge;
+        var overlayLabel = soldOut
+          ? workshop
+            ? 'אין מקומות פנויים'
+            : 'אזל מהמלאי'
+          : preorder
+            ? 'הזמיני מראש'
+            : badgeLimited
+              ? limitedStockLabel(p.stock, workshop)
+              : '';
         root.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
         root.setAttribute('data-preorder', preorder ? 'true' : 'false');
         ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
         ensureStoreCardCta(root, p, soldOut, preorder);
         ensureWorkshopNotify(root, p, soldOut);
         if (root.querySelector('.page-head')) {
-          ensureStockText(root.querySelector('.page-head'), soldOut, preorder, showLimitedBadge, p.stock);
+          ensureStockText(root.querySelector('.page-head'), soldOut, preorder, badgeLimited, p.stock);
           var pageActions = root.querySelector('[data-cart-actions]');
           if (pageActions && !multiType) pageActions.hidden = soldOut;
           var pageNotify = root.querySelector('[data-newsletter-notify-slot="product"]');

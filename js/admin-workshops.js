@@ -1011,6 +1011,8 @@
 
   function isLastPlaces(workshop) {
     if (workshop.last_places) return true;
+    // Mothers: badge is opt-in via the checkbox only (no auto from low stock).
+    if (workshop.category === 'mothers') return false;
     if (workshop.price_per === 'workshop' || hideRemainingSpots(workshop)) return false;
     var spots = spotsOf(workshop);
     return spots != null && spots > 0 && spots <= 3;

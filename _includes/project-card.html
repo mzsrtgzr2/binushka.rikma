@@ -10,7 +10,10 @@
 {%- if project.category == 'mothers' and spots != nil and spots > 4 -%}
   {%- assign hide_remaining_spots = true -%}
 {%- endif -%}
-{%- unless project.price_per == 'workshop' or hide_remaining_spots -%}
+{%- comment -%}
+  Mothers: "מקומות אחרונים" only when the admin checkbox is on — not from stock.
+{%- endcomment -%}
+{%- unless project.price_per == 'workshop' or hide_remaining_spots or project.category == 'mothers' -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
 {%- endunless -%}
 {%- assign booking_in_cart = false -%}
@@ -29,7 +32,7 @@
   {%- assign date_month = project.date | date: '%m' -%}
   {%- assign filter_month_keys = filter_month_keys | push: date_month -%}
 {%- endif -%}
-<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-analytics="workshop_card" data-category="{{ project.category }}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
+<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-analytics="workshop_card" data-category="{{ project.category }}" data-last-places="{% if last_places %}true{% else %}false{% endif %}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
   <div class="project__content">
     <a href="{{ project.url }}" class="project__image" data-analytics="workshop_card_image">
       <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">

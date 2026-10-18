@@ -534,7 +534,6 @@
         '**תאריכי המפגשים:** {{MEETINGS}}  \n' +
         '**מיקום:** אייזנברג, רחובות  \n' +
         '**שעה:** 10:00-12:30  \n' +
-        '**מחיר:** 1090 ש"ח למשתתפת, לכל 4 המפגשים.  \n' +
         '**מספר משתתפות:** עד 8\n\n' +
         '### מה נלמד בסדנה?\n\n' +
         '- יסודות הרקמה.\n' +
@@ -978,6 +977,20 @@
     return workshop.price_per === 'workshop' ? 'לסדנה' : 'למשתתפת';
   }
 
+  /** Mothers embroidery course (not a one-off pamper morning). */
+  function isMothersEmbroidery(workshop) {
+    if (workshop.category !== 'mothers') return false;
+    var title = String(workshop.title || '');
+    return title.indexOf('רקמה') !== -1 || title.indexOf('רוקמות') !== -1;
+  }
+
+  /** Round-half-up ₪ per meeting for the 4-session mothers embroidery package. */
+  function perSessionPrice(workshop) {
+    var price = effectivePrice(workshop);
+    if (!(price > 0) || !isMothersEmbroidery(workshop)) return 0;
+    return Math.round(price / 4);
+  }
+
   function spotsOf(workshop) {
     var raw = workshop.spots;
     if (raw == null || raw === '') return null;
@@ -998,6 +1011,8 @@
 
   function isLastPlaces(workshop) {
     if (workshop.last_places) return true;
+    // Mothers: badge is opt-in via the checkbox only (no auto from low stock).
+    if (workshop.category === 'mothers') return false;
     if (workshop.price_per === 'workshop' || hideRemainingSpots(workshop)) return false;
     var spots = spotsOf(workshop);
     return spots != null && spots > 0 && spots <= 3;
@@ -1085,7 +1100,8 @@
     var showSpots = spots != null && workshop.price_per !== 'workshop' && !hideRemainingSpots(workshop);
 
     var body = '';
-    if (!packs.length) {
+    // Mothers embroidery: price is only in the page head; CTA is the button.
+    if (!packs.length && !isMothersEmbroidery(workshop)) {
       body +=
         '<div class="workshop-booking__head">' +
         '<span class="workshop-booking__price">₪' + escapeHtml(price) + '</span>' +
@@ -1138,10 +1154,19 @@
     if (price > 0 && !soldOut && !workshop.registration_not_open) {
       var packs = packsForBooking(workshop);
       var shown = packs.length ? fromPrice(workshop) : price;
-      priceLine =
-        '<div class="project-price">' +
-        (packs.length ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
-        '</div>';
+      var perSession = !packs.length ? perSessionPrice(workshop) : 0;
+      if (perSession > 0) {
+        priceLine =
+          '<div class="project-price project-price--sessions">' +
+          '<span class="project-price__main">4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש</span>' +
+          '<span class="project-price__detail">(סה״כ ₪' + escapeHtml(shown) + ')</span>' +
+          '</div>';
+      } else {
+        priceLine =
+          '<div class="project-price">' +
+          (packs.length ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
+          '</div>';
+      }
     }
 
     var content = workshop.registration_not_open

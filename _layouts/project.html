@@ -13,21 +13,34 @@ layout: default
 {%- comment -%}
   Mothers embroidery courses (category: mothers): do not publish the remaining
   count while more than 4 places are free. At 4 or fewer, show it again.
+  "מקומות אחרונים" is opt-in only (admin checkbox) — never auto from stock,
+  so a stale flag or low stock cannot flash the red badge on refresh.
 {%- endcomment -%}
 {%- if page.category == 'mothers' and spots != nil and spots > 4 -%}
   {%- assign hide_remaining_spots = true -%}
 {%- endif -%}
-{%- unless page.price_per == 'workshop' or hide_remaining_spots -%}
+{%- unless page.price_per == 'workshop' or hide_remaining_spots or page.category == 'mothers' -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
 {%- endunless -%}
 {%- assign booking_in_cart = false -%}
 {%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
 {%- assign price_unit = 'למשתתפת' -%}
 {%- if page.price_per == 'workshop' %}{% assign price_unit = 'לסדנה' %}{% endif -%}
+{%- comment -%}
+  Mothers embroidery courses (אמהות רוקמות): multi-session package.
+  Same title heuristic as FAQ / WhatsApp / booking split — not pamper mornings.
+{%- endcomment -%}
+{%- assign mothers_embroidery = false -%}
+{%- if page.category == 'mothers' -%}
+  {%- assign _mothers_title = page.title | default: '' -%}
+  {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
+    {%- assign mothers_embroidery = true -%}
+  {%- endif -%}
+{%- endif -%}
 
 {% include workshop-event-schema.html %}
 
-<div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop">
+<div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ page.category }}" data-last-places="{% if last_places %}true{% else %}false{% endif %}">
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
@@ -60,7 +73,22 @@ layout: default
       {%- endfor -%}
       <div class="project-price">מ־₪{{ from_price }} {{ price_unit }}</div>
       {% else %}
-      <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}</div>
+      {%- comment -%}
+        Mothers embroidery is always 4 meetings: lead with sessions + ₪/meeting
+        (round-half-up, 1090 → 273), total in parentheses underneath.
+      {%- endcomment -%}
+      {%- assign per_session = nil -%}
+      {%- if mothers_embroidery and workshop.price -%}
+        {%- assign per_session = workshop.price | plus: 2 | divided_by: 4 -%}
+      {%- endif -%}
+      <div class="project-price{% if per_session and per_session > 0 %} project-price--sessions{% endif %}">
+        {% if per_session and per_session > 0 %}
+        <span class="project-price__main">4 מפגשים · {{ per_session }} ₪ למפגש</span>
+        <span class="project-price__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>)</span>
+        {% else %}
+        <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}
+        {% endif %}
+      </div>
       {% endif %}
     {% endif %}
   </div>
@@ -72,13 +100,10 @@ layout: default
   {%- endcomment -%}
   {%- assign mothers_course_split = false -%}
   {%- unless page.registration_not_open -%}
-    {%- if page.category == 'mothers' -%}
-      {%- assign _mothers_title = page.title | default: '' -%}
-      {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
-        {%- assign _content_parts = content | split: '<h3' -%}
-        {%- if _content_parts.size > 1 -%}
-          {%- assign mothers_course_split = true -%}
-        {%- endif -%}
+    {%- if mothers_embroidery -%}
+      {%- assign _content_parts = content | split: '<h3' -%}
+      {%- if _content_parts.size > 1 -%}
+        {%- assign mothers_course_split = true -%}
       {%- endif -%}
     {%- endif -%}
   {%- endunless -%}

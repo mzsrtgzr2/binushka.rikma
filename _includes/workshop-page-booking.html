@@ -39,7 +39,11 @@
       </div>
       {% endif %}
       <div class="workshop-booking">
-        {% unless workshop.variants %}
+        {%- comment -%}
+          Mothers embroidery: price lives only in the page head — booking CTA
+          is the register button (and WhatsApp note), without repeating ₪.
+        {%- endcomment -%}
+        {% unless workshop.variants or mothers_course_whatsapp %}
         <div class="workshop-booking__head">
           <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>
           <span class="workshop-booking__per">{{ price_unit }}</span>

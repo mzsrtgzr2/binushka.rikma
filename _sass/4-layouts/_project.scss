@@ -64,6 +64,31 @@
   @media only screen and (max-width: $mobile) {
     font-size: 20px;
   }
+
+  /* Mothers embroidery: yellow highlight on the per-session line */
+  &--sessions {
+    color: var(--heading-font-color);
+  }
+
+  .project-price__main {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--brand-color);
+    color: var(--heading-font-color);
+    line-height: 1.3;
+  }
+
+  .project-price__detail {
+    display: block;
+    margin-top: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-alt-color);
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 14px;
+    }
+  }
 }
 
 .project-faq {
@@ -198,6 +223,15 @@
     font-size: 32px;
     font-weight: 700;
     color: var(--brand-color);
+    line-height: 1.25;
+  }
+
+  .workshop-booking__detail {
+    display: block;
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-alt-color);
   }
 
   .workshop-booking__per {

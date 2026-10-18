@@ -1157,8 +1157,8 @@
       var perSession = !packs.length ? perSessionPrice(workshop) : 0;
       if (perSession > 0) {
         priceLine =
-          '<div class="project-price">' +
-          '4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש' +
+          '<div class="project-price project-price--sessions">' +
+          '<span class="project-price__main">4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש</span>' +
           '<span class="project-price__detail">(סה״כ ₪' + escapeHtml(shown) + ')</span>' +
           '</div>';
       } else {

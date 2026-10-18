@@ -81,9 +81,9 @@ layout: default
       {%- if mothers_embroidery and workshop.price -%}
         {%- assign per_session = workshop.price | plus: 2 | divided_by: 4 -%}
       {%- endif -%}
-      <div class="project-price">
+      <div class="project-price{% if per_session and per_session > 0 %} project-price--sessions{% endif %}">
         {% if per_session and per_session > 0 %}
-        4 מפגשים · {{ per_session }} ₪ למפגש
+        <span class="project-price__main">4 מפגשים · {{ per_session }} ₪ למפגש</span>
         <span class="project-price__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>)</span>
         {% else %}
         <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}

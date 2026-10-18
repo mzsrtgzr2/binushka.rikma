@@ -40,9 +40,24 @@
       {% endif %}
       <div class="workshop-booking">
         {% unless workshop.variants %}
+        {%- comment -%}
+          Mothers embroidery: lead with sessions + ₪/meeting (same as page-head),
+          total underneath. Round-half-up: 1090 → 273.
+        {%- endcomment -%}
+        {%- assign per_session = nil -%}
+        {%- if mothers_course_whatsapp and workshop.price -%}
+          {%- assign per_session = workshop.price | plus: 2 | divided_by: 4 -%}
+        {%- endif -%}
         <div class="workshop-booking__head">
+          {% if per_session and per_session > 0 %}
+          <div class="workshop-booking__price">
+            4 מפגשים · {{ per_session }} ₪ למפגש
+            <span class="workshop-booking__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }})</span>
+          </div>
+          {% else %}
           <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>
           <span class="workshop-booking__per">{{ price_unit }}</span>
+          {% endif %}
         </div>
         {% endunless %}
         <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' or hide_remaining_spots %} hidden{% endif %}>

@@ -1100,11 +1100,21 @@
 
     var body = '';
     if (!packs.length) {
-      body +=
-        '<div class="workshop-booking__head">' +
-        '<span class="workshop-booking__price">₪' + escapeHtml(price) + '</span>' +
-        '<span class="workshop-booking__per">' + priceUnit(workshop) + '</span>' +
-        '</div>';
+      var perSession = perSessionPrice(workshop);
+      if (perSession > 0) {
+        body +=
+          '<div class="workshop-booking__head">' +
+          '<div class="workshop-booking__price">' +
+          '4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש' +
+          '<span class="workshop-booking__detail">(סה״כ ₪' + escapeHtml(price) + ' ' + priceUnit(workshop) + ')</span>' +
+          '</div></div>';
+      } else {
+        body +=
+          '<div class="workshop-booking__head">' +
+          '<span class="workshop-booking__price">₪' + escapeHtml(price) + '</span>' +
+          '<span class="workshop-booking__per">' + priceUnit(workshop) + '</span>' +
+          '</div>';
+      }
     }
 
     if (showSpots) {

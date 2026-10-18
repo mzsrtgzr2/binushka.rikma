@@ -419,13 +419,27 @@ test('every visible workshop is in the cart at the page price', () => {
     assert.equal(row.price, page.price);
     assert.equal(row.stock ?? null, page.stock ?? null);
     const bodyPrice = store.workshopBodyPrice(raw);
-    assert.ok(bodyPrice > 0, `${page.slug} should list a מחיר on the page`);
-    assert.equal(row.price, bodyPrice, `${page.slug} cart price should match the page`);
+    // Mothers embroidery courses show price in the page head from cart_price;
+    // the details block omits **מחיר:** so it is not repeated three times.
+    const mothersEmbroidery =
+      /category:\s*mothers\b/.test(raw) &&
+      /title:\s*.*(?:רקמה|רוקמות)/.test(raw);
+    if (mothersEmbroidery) {
+      assert.ok(row.price > 0, `${page.slug} should have a cart price`);
+    } else {
+      assert.ok(bodyPrice > 0, `${page.slug} should list a מחיר on the page`);
+      assert.equal(row.price, bodyPrice, `${page.slug} cart price should match the page`);
+    }
   });
   external.forEach(({ page, raw }) => {
     assert.equal(PRODUCTS[page.id], undefined, `${page.slug} registers externally and should stay out of the cart`);
     assert.ok(page.form_url, `${page.slug} should have an external registration link`);
-    assert.ok(store.workshopBodyPrice(raw) > 0, `${page.slug} should still list a מחיר on the page`);
+    const mothersEmbroidery =
+      /category:\s*mothers\b/.test(raw) &&
+      /title:\s*.*(?:רקמה|רוקמות)/.test(raw);
+    if (!mothersEmbroidery) {
+      assert.ok(store.workshopBodyPrice(raw) > 0, `${page.slug} should still list a מחיר on the page`);
+    }
   });
   hidden.forEach(({ page }) => {
     assert.equal(PRODUCTS[page.id], undefined, `${page.slug} is hidden and should stay out of the cart`);

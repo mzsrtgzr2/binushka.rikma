@@ -534,7 +534,6 @@
         '**תאריכי המפגשים:** {{MEETINGS}}  \n' +
         '**מיקום:** אייזנברג, רחובות  \n' +
         '**שעה:** 10:00-12:30  \n' +
-        '**מחיר:** 1090 ש"ח למשתתפת, לכל 4 המפגשים.  \n' +
         '**מספר משתתפות:** עד 8\n\n' +
         '### מה נלמד בסדנה?\n\n' +
         '- יסודות הרקמה.\n' +
@@ -1099,22 +1098,13 @@
     var showSpots = spots != null && workshop.price_per !== 'workshop' && !hideRemainingSpots(workshop);
 
     var body = '';
-    if (!packs.length) {
-      var perSession = perSessionPrice(workshop);
-      if (perSession > 0) {
-        body +=
-          '<div class="workshop-booking__head">' +
-          '<div class="workshop-booking__price">' +
-          '4 מפגשים · ' + escapeHtml(perSession) + ' ₪ למפגש' +
-          '<span class="workshop-booking__detail">(סה״כ ₪' + escapeHtml(price) + ')</span>' +
-          '</div></div>';
-      } else {
-        body +=
-          '<div class="workshop-booking__head">' +
-          '<span class="workshop-booking__price">₪' + escapeHtml(price) + '</span>' +
-          '<span class="workshop-booking__per">' + priceUnit(workshop) + '</span>' +
-          '</div>';
-      }
+    // Mothers embroidery: price is only in the page head; CTA is the button.
+    if (!packs.length && !isMothersEmbroidery(workshop)) {
+      body +=
+        '<div class="workshop-booking__head">' +
+        '<span class="workshop-booking__price">₪' + escapeHtml(price) + '</span>' +
+        '<span class="workshop-booking__per">' + priceUnit(workshop) + '</span>' +
+        '</div>';
     }
 
     if (showSpots) {

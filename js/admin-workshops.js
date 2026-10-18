@@ -978,6 +978,20 @@
     return workshop.price_per === 'workshop' ? 'לסדנה' : 'למשתתפת';
   }
 
+  /** Mothers embroidery course (not a one-off pamper morning). */
+  function isMothersEmbroidery(workshop) {
+    if (workshop.category !== 'mothers') return false;
+    var title = String(workshop.title || '');
+    return title.indexOf('רקמה') !== -1 || title.indexOf('רוקמות') !== -1;
+  }
+
+  /** Round-half-up ₪ per meeting for the 4-session mothers embroidery package. */
+  function perSessionPrice(workshop) {
+    var price = effectivePrice(workshop);
+    if (!(price > 0) || !isMothersEmbroidery(workshop)) return 0;
+    return Math.round(price / 4);
+  }
+
   function spotsOf(workshop) {
     var raw = workshop.spots;
     if (raw == null || raw === '') return null;
@@ -1138,9 +1152,13 @@
     if (price > 0 && !soldOut && !workshop.registration_not_open) {
       var packs = packsForBooking(workshop);
       var shown = packs.length ? fromPrice(workshop) : price;
+      var perSession = !packs.length ? perSessionPrice(workshop) : 0;
       priceLine =
         '<div class="project-price">' +
         (packs.length ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
+        (perSession > 0
+          ? '<span class="project-price__per-session">(' + escapeHtml(perSession) + ' ₪ למפגש)</span>'
+          : '') +
         '</div>';
     }
 

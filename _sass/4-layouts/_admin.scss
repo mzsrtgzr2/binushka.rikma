@@ -1763,6 +1763,14 @@
   font-size: 20px;
 }
 
+.admin-preview .project-price__per-session {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-alt-color);
+}
+
 .admin-preview .project-image-container {
   display: block;
 }

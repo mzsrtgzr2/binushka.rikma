@@ -24,6 +24,17 @@ layout: default
 {%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
 {%- assign price_unit = 'למשתתפת' -%}
 {%- if page.price_per == 'workshop' %}{% assign price_unit = 'לסדנה' %}{% endif -%}
+{%- comment -%}
+  Mothers embroidery courses (אמהות רוקמות): multi-session package.
+  Same title heuristic as FAQ / WhatsApp / booking split — not pamper mornings.
+{%- endcomment -%}
+{%- assign mothers_embroidery = false -%}
+{%- if page.category == 'mothers' -%}
+  {%- assign _mothers_title = page.title | default: '' -%}
+  {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
+    {%- assign mothers_embroidery = true -%}
+  {%- endif -%}
+{%- endif -%}
 
 {% include workshop-event-schema.html %}
 
@@ -60,7 +71,20 @@ layout: default
       {%- endfor -%}
       <div class="project-price">מ־₪{{ from_price }} {{ price_unit }}</div>
       {% else %}
-      <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}</div>
+      {%- comment -%}
+        Mothers embroidery is always 4 meetings; show round-half-up ₪/meeting
+        under the yellow total (1090 → 273), matching the page body copy.
+      {%- endcomment -%}
+      {%- assign per_session = nil -%}
+      {%- if mothers_embroidery and workshop.price -%}
+        {%- assign per_session = workshop.price | plus: 2 | divided_by: 4 -%}
+      {%- endif -%}
+      <div class="project-price">
+        <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}
+        {% if per_session and per_session > 0 %}
+        <span class="project-price__per-session">({{ per_session }} ₪ למפגש)</span>
+        {% endif %}
+      </div>
       {% endif %}
     {% endif %}
   </div>
@@ -72,13 +96,10 @@ layout: default
   {%- endcomment -%}
   {%- assign mothers_course_split = false -%}
   {%- unless page.registration_not_open -%}
-    {%- if page.category == 'mothers' -%}
-      {%- assign _mothers_title = page.title | default: '' -%}
-      {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
-        {%- assign _content_parts = content | split: '<h3' -%}
-        {%- if _content_parts.size > 1 -%}
-          {%- assign mothers_course_split = true -%}
-        {%- endif -%}
+    {%- if mothers_embroidery -%}
+      {%- assign _content_parts = content | split: '<h3' -%}
+      {%- if _content_parts.size > 1 -%}
+        {%- assign mothers_course_split = true -%}
       {%- endif -%}
     {%- endif -%}
   {%- endunless -%}

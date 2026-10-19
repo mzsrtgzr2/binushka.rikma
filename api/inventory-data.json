@@ -402,9 +402,9 @@
     "workshop-mothers-1-6": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה2 בנובמבר",
       "price": 1090,
-      "stock": 4,
+      "stock": 3,
       "outOfStock": false,
-      "limitedStock": false
+      "limitedStock": true
     },
     "workshop-rehovot-04-12": {
       "name": "סדנת רקמה של שישי בבוקר — ב18.12 ברחובות",

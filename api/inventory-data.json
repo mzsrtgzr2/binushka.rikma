@@ -455,6 +455,13 @@
       "outOfStock": false,
       "limitedStock": false
     },
+    "workshop-mothers-4-1": {
+      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה4 בינואר",
+      "price": 1090,
+      "stock": 8,
+      "outOfStock": false,
+      "limitedStock": false
+    },
     "workshop-rehovot-15-1": {
       "name": "סדנת רקמה של שישי בבוקר — ב15.1 בהוד השרון",
       "price": 330,
@@ -466,13 +473,6 @@
       "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב4.12 שישי בבוקר",
       "price": 500,
       "stock": 4,
-      "outOfStock": false,
-      "limitedStock": false
-    },
-    "workshop-mothers-4-1": {
-      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה4 בינואר",
-      "price": 1090,
-      "stock": 8,
       "outOfStock": false,
       "limitedStock": false
     }

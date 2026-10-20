@@ -32,7 +32,7 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 10,
+    "stock": 9,
     "variants": {
       "one": {
         "name": "משתתפת אחת",
@@ -51,7 +51,7 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 6,
+    "stock": 5,
     "variants": {
       "one": {
         "name": "משתתפת אחת",
@@ -77,7 +77,7 @@
     "price": 1090,
     "kind": "workshop",
     "shipping": false,
-    "stock": 8
+    "stock": 7
   },
   "workshop-private-workshop": {
     "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",

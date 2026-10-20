@@ -296,7 +296,7 @@ gallery:
   <div class="text-center animate">
     <h3 class="hero__title">שאלות נפוצות</h3>
   </div>
-  {% include section-accordion.html %}
+  {% include section-accordion.html context="retreat" %}
 </section>
 {% endif %}
 

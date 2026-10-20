@@ -301,6 +301,30 @@
     Analytics.viewItem({ id: id, name: product.name, price: price, kind: product.kind });
   }
 
+  /*
+   * FAQ accordion: which question was opened, on which page. The question
+   * text is the grouping key in Mixpanel; faq_total normalizes pages that
+   * have more or fewer questions.
+   */
+  function trackFaq() {
+    var inputs = document.querySelectorAll(
+      '.jekyllcodex_accordion input[type="checkbox"][data-faq-question]'
+    );
+    Array.prototype.forEach.call(inputs, function (input) {
+      input.addEventListener('change', function () {
+        if (!input.checked) return;
+        var props = {
+          question: input.getAttribute('data-faq-question'),
+          faq_index: Number(input.getAttribute('data-faq-index')) || undefined,
+          faq_total: Number(input.getAttribute('data-faq-total')) || undefined,
+          faq_context: input.getAttribute('data-faq-context') || undefined,
+          page_path: location.pathname,
+        };
+        send('faq_open', props);
+      });
+    });
+  }
+
   /* WhatsApp and mail links are the main off-site contact routes. */
   function trackContactLinks() {
     document.addEventListener('click', function (e) {
@@ -320,6 +344,7 @@
   function init() {
     trackLists();
     trackDetail();
+    trackFaq();
     trackContactLinks();
   }
 

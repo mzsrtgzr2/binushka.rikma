@@ -42,6 +42,7 @@
 | `contact_click` | לחיצה על וואטסאפ / מייל / טלפון | `method` |
 | `newsletter_signup` | הרשמה לניוזלטר הצליחה | `source` (`home`, `footer`, `modal`, `subscribe_page`, `store_card`, `product_restock`, `product_variant`, `workshop_card`, `workshop_page`, `workshop_opening`) |
 | `newsletter_signup_error` | הרשמה לניוזלטר נכשלה | `reason`, `source` |
+| `faq_open` | פתחו שאלה ב-FAQ | `question` (נוסח השאלה), `faq_index`, `faq_total`, `faq_context` (`home` / `retreat` / קטגוריית הסדנה), `page_path` |
 | `purchase_untracked` | הגיעו ל-`/thanks/` בלי הזמנה שמורה בדפדפן | `reason` |
 
 השדות בעברית (`first_invalid_field: "טלפון"`) כדי שהדוחות יהיו קריאים בלי תרגום.
@@ -76,6 +77,10 @@
 | `add_payment_info` ← `purchase` | תקלת סליקה או נטישה בדף של Grow | `checkout_error` עם `stage=payment` ו-`error_message` |
 
 Insights ← טבלה: Breakdown לפי `first_invalid_field`, פילטר `checkout_error`. אותה טבלה עם `reason` ופילטר `add_to_cart_blocked` מראה ביקוש שנחסם בגלל מלאי.
+
+### ד. איזו שאלת FAQ מעניינת את הגולשות
+
+כל פתיחה של שאלה שולחת `faq_open` עם נוסח השאלה ב-`question`. ב-Mixpanel: **Insights** ← אירוע `faq_open` ← Breakdown לפי `question`. זה מדרג את השאלות שנפתחות הכי הרבה, ופילטר `faq_context` מפריד בין דף הבית, עמוד הסדנה וקטגוריית הסדנה. אירוע autocapture של לחיצה על אותה שאלה ייספר בנפרד — לדירוג השאלות להשתמש ב-`faq_open` בלבד.
 
 אפשר לסמן את `purchase`, `begin_checkout` ו-`add_to_cart` ב-Lexicon כדי שיהיו קלים למציאה. תיאורי Lexicon: [Lexicon](https://docs.mixpanel.com/docs/data-governance/lexicon).
 

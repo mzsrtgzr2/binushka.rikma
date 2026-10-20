@@ -8,13 +8,13 @@ function plain(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function loadAnalytics() {
+function loadAnalytics(elementsBySelector = {}) {
   const events = [];
   const document = {
     readyState: 'complete',
     getElementById: () => null,
     querySelector: () => null,
-    querySelectorAll: () => [],
+    querySelectorAll: (selector) => elementsBySelector[selector] || [],
     addEventListener: () => {},
   };
   const storage = new Map();
@@ -120,4 +120,37 @@ test('empty strings are omitted and tracking does nothing without Mixpanel', () 
     context.Analytics.addToCart({ id: 'kit', name: 'Kit', price: 10, quantity: 1 });
   });
   assert.equal(eventsWithoutSdk.length, 0);
+});
+
+test('faq_open reports the opened question and its page context', () => {
+  const listeners = [];
+  const attrs = {
+    'data-faq-question': 'האם צריך ידע מקדים?',
+    'data-faq-index': '2',
+    'data-faq-total': '8',
+    'data-faq-context': 'mothers-pamper',
+  };
+  const input = {
+    checked: false,
+    getAttribute: (name) => attrs[name] || null,
+    addEventListener: (name, fn) => {
+      if (name === 'change') listeners.push(fn);
+    },
+  };
+  const { events } = loadAnalytics({
+    '.jekyllcodex_accordion input[type="checkbox"][data-faq-question]': [input],
+  });
+
+  input.checked = true;
+  listeners.forEach((fn) => fn());
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].name, 'faq_open');
+  assert.deepEqual(plain(events[0].props), {
+    question: 'האם צריך ידע מקדים?',
+    faq_index: 2,
+    faq_total: 8,
+    faq_context: 'mothers-pamper',
+    page_path: '/',
+  });
 });

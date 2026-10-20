@@ -28,7 +28,13 @@
     },
     persistence: "localStorage",
     record_sessions_percent: 100,
-    record_heatmap_data: true
+    record_heatmap_data: true,
+    /* Session Replay masks all text by default, which makes recordings
+       impossible to understand. Show page text, but keep form inputs and
+       the personal gift message masked. */
+    record_mask_all_text: false,
+    record_mask_all_inputs: true,
+    record_mask_text_selector: [".thanks-gift__message"]
   });
   mixpanel.register({ platform: "web" });
 </script>

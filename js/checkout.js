@@ -8,6 +8,7 @@
     if (!form) return;
 
   var messageEl = document.getElementById('checkout-form-message');
+  var installmentsNote = document.getElementById('checkout-installments-note');
   var linesEl = document.getElementById('checkout-lines');
   var emptyEl = document.getElementById('checkout-empty');
   var subtotalRow = document.getElementById('checkout-subtotal-row');
@@ -119,6 +120,32 @@
     messageEl.className = 'checkout-form__message checkout-form__message--' + type;
     messageEl.style.display = text ? 'block' : 'none';
     if (text) messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /* The Morning payment page chooses the actual number; this only tells the
+     shopper installments exist before she reaches it. */
+  function showInstallmentNote(maxPayments) {
+    if (!installmentsNote) return;
+    var count = Number(maxPayments);
+    if (!Number.isInteger(count) || count < 2) return;
+    installmentsNote.textContent =
+      'אפשר לפרוס את התשלום לעד ' +
+      count +
+      ' תשלומים בדף התשלום המאובטח, בכפוף לאישור חברת האשראי.';
+    installmentsNote.hidden = false;
+  }
+
+  function loadPaymentOptions() {
+    fetch('/api/checkout/', { headers: { Accept: 'application/json' } })
+      .then(function (res) {
+        return res.ok ? res.json() : null;
+      })
+      .then(function (body) {
+        if (body) showInstallmentNote(body.maxPayments);
+      })
+      .catch(function () {
+        /* keep the note hidden if checkout config is unavailable */
+      });
   }
 
   function showCouponMessage(text, type) {
@@ -691,6 +718,7 @@
     }
     if (initialItems.length) {
       track('beginCheckout', initialItems, window.StoreCart ? StoreCart.subtotal() : 0);
+      loadPaymentOptions();
     } else {
       track('track', 'checkout_error', { stage: 'arrival', reason: 'empty_cart' });
     }

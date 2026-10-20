@@ -63,12 +63,14 @@ preview/sandbox cart, set **Preview** (and leave Production for later):
 | `MORNING_API_KEY_SECRET` | same. Paste the raw secret — no wrapping quotes in the Vercel UI |
 | `MORNING_PLUGIN_ID` | Grow production plugin. **Not sent in sandbox** — it 404s there |
 | `MORNING_SANDBOX_PLUGIN_ID` | sandbox Grow plugin `facd67fd-5082-496c-917f-830f0d7449e3` (already the checkout default) |
+| `MORNING_MAX_PAYMENTS` | Maximum installments offered on the payment page. Default 12; set 1 to disable installments |
 
 Changing env vars does not update an already-built Preview. Redeploy the
 git branch (or use Vercel → Deployments → Redeploy) after saving them.
 
-`GET /api/checkout/` returns `{ env, hasKeyId, hasSecret, keyIdPrefix }` so
+`GET /api/checkout/` returns `{ env, hasKeyId, hasSecret, keyIdPrefix, maxPayments }` so
 you can confirm Preview picked up the sandbox pair without printing secrets.
+The checkout page uses `maxPayments` to show the installments note.
 
 Gift cards: the customer picks an amount (₪50–₪2,000) and it goes through the
 same Morning cart as other products. Checkout sends that custom sum as an

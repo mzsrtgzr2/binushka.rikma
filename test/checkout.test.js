@@ -71,21 +71,32 @@ test('payment form payload for sandbox uses the sandbox plugin and no catalog it
   assert.ok(payload.income.every((row) => Number(row.price) !== 0));
   assert.equal(payload.income.length, 1);
   assert.equal(payload.amount, 220);
-  assert.equal(payload.maxPayments, 1);
+  assert.equal(payload.maxPayments, 12);
 });
 
-test('payment form uses 12 installments only when MORNING_MAX_PAYMENTS is set', () => {
+test('payment form honors MORNING_MAX_PAYMENTS and clamps bad values', () => {
   const order = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
   const { customer } = checkout.readCustomer(customerBody);
-  const payload = checkout.buildPaymentFormPayload({
-    order,
-    customer,
-    env: 'sandbox',
-    envVars: { MORNING_MAX_PAYMENTS: '12' },
-    successUrl: 'https://example.com/thanks/',
-    failureUrl: 'https://example.com/checkout/',
-  });
-  assert.equal(payload.maxPayments, 12);
+  const payloadFor = (envVars) =>
+    checkout.buildPaymentFormPayload({
+      order,
+      customer,
+      env: 'sandbox',
+      envVars,
+      successUrl: 'https://example.com/thanks/',
+      failureUrl: 'https://example.com/checkout/',
+    });
+
+  assert.equal(payloadFor({ MORNING_MAX_PAYMENTS: '6' }).maxPayments, 6);
+  assert.equal(payloadFor({ MORNING_MAX_PAYMENTS: '1' }).maxPayments, 1);
+  assert.equal(payloadFor({ MORNING_MAX_PAYMENTS: '0' }).maxPayments, 1);
+  assert.equal(payloadFor({ MORNING_MAX_PAYMENTS: '99' }).maxPayments, 36);
+  assert.equal(payloadFor({ MORNING_MAX_PAYMENTS: 'abc' }).maxPayments, 12);
+});
+
+test('resolveMaxPayments defaults to installments and exposes no secret', () => {
+  assert.equal(checkout.resolveMaxPayments({}), 12);
+  assert.equal(checkout.resolveMaxPayments({ MORNING_MAX_PAYMENTS: '3' }), 3);
 });
 
 test('pickup checkout skips address fields', () => {
@@ -191,6 +202,7 @@ test('public env status never includes secrets', () => {
     hasSandboxPluginId: false,
     sendsPluginId: true,
     blockedProductionPlugin: true,
+    maxPayments: 12,
   });
   assert.equal(JSON.stringify(status).includes('super-secret'), false);
 });

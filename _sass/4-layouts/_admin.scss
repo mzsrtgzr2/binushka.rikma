@@ -1738,13 +1738,25 @@
 }
 
 .admin-preview .registration-full,
-.admin-preview .registration-full-text {
+.admin-preview .registration-full-text,
+.admin-preview .last-places-badge {
   font-size: 15px;
 }
 
 .admin-preview .registration-full {
   bottom: 10px;
   right: 10px;
+  padding: 4px 10px;
+}
+
+/* Sold-out shares last-places' size/placement (see _projects.scss); in
+   the preview it also carries .registration-full (bottom: 10px), so the
+   bottom offset has to be cleared. */
+.admin-preview .last-places-badge,
+.admin-preview .registration-full.sold-out-badge {
+  top: 10px;
+  right: 10px;
+  bottom: auto;
   padding: 4px 10px;
 }
 

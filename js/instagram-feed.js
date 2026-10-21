@@ -99,7 +99,7 @@ class InstagramFeed {
     this.container.innerHTML = `
       <div class="instagram-placeholder" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
         <div style="font-size: 3rem; margin-bottom: 1rem;">📸</div>
-        <h4>עקבו אחריי באינסטגרם</h4>
+        <h4>עקבי אחריי באינסטגרם</h4>
         <p>הציצו בתמונות האחרונות שלי</p>
         <a href="https://www.instagram.com/${this.config.account}" 
            target="_blank" 

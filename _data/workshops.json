@@ -79,6 +79,12 @@
     "shipping": false,
     "stock": 7
   },
+  "workshop-private-lesson": {
+    "name": "שיעור רקמה פרטי — בזמן שמתאים לשתינו",
+    "price": 350,
+    "kind": "workshop",
+    "shipping": false
+  },
   "workshop-private-workshop": {
     "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",
     "price": 2800,

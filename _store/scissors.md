@@ -22,7 +22,7 @@ variants:
       - /images/store/scissors/screenshot-2026-10-04-at-15-02-33-mutrvlbp.jpg
       - /images/store/scissors/screenshot-2026-10-04-at-15-02-58-mutrvlbp.jpg
       - /images/store/scissors/screenshot-2026-09-23-at-21-50-57-mueib4k5.jpg
-    description: "קלאסיות יפות, תהנו."
+    description: "קלאסיות יפות, תהני."
   9-2:
     name: מספרי ציפור 9 ס״מ
     price: 70

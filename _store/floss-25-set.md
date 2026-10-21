@@ -36,7 +36,7 @@ variants:
     image: /images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-19-mue250c8.jpg
     gallery:
       - /images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-12-mue250c9.png
-    description: "חוטים של חברת dmc הצרפתית עשויים מ100% כותנה.\nיכולים לשמש לרקמה על בגדים, תיקים, נעליים וכו.\nתהנו :)"
+    description: "חוטים של חברת dmc הצרפתית עשויים מ100% כותנה.\nיכולים לשמש לרקמה על בגדים, תיקים, נעליים וכו.\nתהני :)"
   set-30:
     name: סט 30 גוונים
     price: 130

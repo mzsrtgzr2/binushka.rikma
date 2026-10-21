@@ -4,9 +4,21 @@
 
 // Spaces
 $base-spacing-unit: 32px;
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+$space-7: 32px;
+$space-8: 40px;
+$space-9: 48px;
+$space-10: 64px;
+$space-11: 80px;
+$space-12: 96px;
 
 // Border radius
-$global-radius: 8px;
+$global-radius: 12px;
 
 // Transition
 $global-transition: all .35s;
@@ -23,12 +35,12 @@ $base-font-family: 'Assistant', Helvetica Neue, Helvetica, Arial, sans-serif;
 $base-line-height: 1.7;
 
 // Headings
-$heading-font-weight: 300;
+$heading-font-weight: 400;
 $heading-font-family: 'Assistant', Helvetica Neue, Helvetica, Arial, sans-serif;
 
-$font-size-h1:  36px;
-$font-size-h2:  28px;
-$font-size-h3:  24px;
+$font-size-h1:  42px;
+$font-size-h2:  32px;
+$font-size-h3:  25px;
 $font-size-h4:  20px;
 $font-size-h5:  18px;
 $font-size-h6:  16px;

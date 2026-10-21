@@ -26,6 +26,7 @@ layout: default
 {%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
 {%- assign price_unit = 'למשתתפת' -%}
 {%- if page.price_per == 'workshop' %}{% assign price_unit = 'לסדנה' %}{% endif -%}
+{%- if page.price_unit %}{% assign price_unit = page.price_unit %}{% endif -%}
 {%- comment -%}
   Mothers embroidery courses (אמהות רוקמות): multi-session package.
   Same title heuristic as FAQ / WhatsApp / booking split — not pamper mornings.

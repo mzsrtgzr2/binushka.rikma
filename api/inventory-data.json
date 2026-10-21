@@ -469,6 +469,13 @@
       "outOfStock": false,
       "limitedStock": false
     },
+    "workshop-private-lesson": {
+      "name": "שיעור רקמה פרטי — בזמן שמתאים לשתינו",
+      "price": 350,
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": false
+    },
     "workshop-hosting-04-12": {
       "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב4.12 שישי בבוקר",
       "price": 500,

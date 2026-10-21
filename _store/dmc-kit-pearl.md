@@ -11,7 +11,7 @@ in_cart: false
 noindex: true
 sitemap: false
 stock: 2
-order: 31
+order: 29
 preorder: false
 limited_edition: false
 gallery:

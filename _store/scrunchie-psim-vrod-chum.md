@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 43
+order: 40
 scrunchie_type: כותנה
 scrunchie_color: ורוד
 fabric_country: שווייץ

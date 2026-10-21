@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 26
+order: 25
 scrunchie_type: כותנה
 scrunchie_color: בז'
 fabric_country:

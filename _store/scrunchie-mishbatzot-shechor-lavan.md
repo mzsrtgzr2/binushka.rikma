@@ -12,15 +12,15 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: fancy
-order: 37
+order: 35
 scrunchie_type: תחרה
 scrunchie_color: שחור
 fabric_country: שווייץ
+limited_edition: false
+preorder: false
 gallery:
   - /images/scrunchies/gallery/scrunchie-mishbatzot-shechor-lavan-2.png
 category: scrunchies-gallery
-limited_edition: false
-preorder: false
 ---
 
 סקראנצ'י Fancy מבד כותנה במשבצות שחור־לבן עם תחרה לבנה. בד משווייץ. תפורה בעבודת יד — פריט יחיד.

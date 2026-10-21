@@ -5,14 +5,12 @@ image: /images/scrunchies/gallery/scrunchie-mishbatzot-vrod-lavan-1.png
 price: ₪30
 cart_price: 30
 stock: 1
-limited_stock: true
+limited_stock: false
 out_of_stock: false
-hide: true
-noindex: true
-sitemap: false
+hide: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 33
+order: 30
 scrunchie_type: כותנה
 scrunchie_color: ורוד
 fabric_country:

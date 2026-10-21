@@ -12,13 +12,13 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 42
+order: 39
 scrunchie_type: רקמה
 scrunchie_color: ירוק
 fabric_country:
-category: scrunchies-gallery
 limited_edition: false
 preorder: false
+category: scrunchies-gallery
 ---
 
 סקראנצ'י מבד ירוק עמוק עם רקמת איקס עדינה. גודל גדול. תפורה בעבודת יד.

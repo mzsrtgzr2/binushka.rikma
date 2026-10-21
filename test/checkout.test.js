@@ -405,3 +405,29 @@ test('checkout preview-coupon rejects an empty code without opening Grow', async
   assert.equal(res.statusCode, 400);
   assert.match(res.body.error, /קופון/);
 });
+
+test('installments are clamped server-side to the configured max', () => {
+  assert.equal(checkout.resolveInstallments(undefined, 12), 12);
+  assert.equal(checkout.resolveInstallments('7', 12), 7);
+  assert.equal(checkout.resolveInstallments('99', 12), 12);
+  assert.equal(checkout.resolveInstallments('0', 12), 1);
+  assert.equal(checkout.resolveInstallments('-3', 12), 1);
+  assert.equal(checkout.resolveInstallments('abc', 12), 1);
+  assert.equal(checkout.resolveInstallments(5, 5), 5);
+  assert.equal(checkout.resolveInstallments(3, 1), 1);
+});
+
+test('payment form payload uses the shopper-chosen installments', () => {
+  const order = buildOrder([{ id: 'fox', quantity: 1 }], 'pickup');
+  const { customer } = checkout.readCustomer(customerBody);
+  const payload = checkout.buildPaymentFormPayload({
+    order,
+    customer,
+    env: 'production',
+    envVars: { MORNING_MAX_PAYMENTS: '12' },
+    successUrl: 'https://example.com/thanks',
+    failureUrl: 'https://example.com/fail',
+    installments: 7,
+  });
+  assert.equal(payload.maxPayments, 7);
+});

@@ -15,8 +15,6 @@ menu__settings:
     #   url: '/'
     - title: סדנאות
       url: '/projects/'
-    - title: ביקורות
-      url: '/reviews/'
     - title: 'חנות'
       url: '/store/'
     - title: 'הסקראנצ׳י'

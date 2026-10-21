@@ -593,19 +593,6 @@
   "special-embroidery-kits": {
     "name": "ערכות רקמה מיוחדות",
     "variants": {
-      "tablecloth-autumn": {
-        "name": "מפה יפהיפיה – דוגמת סתיו שלכת",
-        "price": 160,
-        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-56-mui93a0t.jpg",
-        "description": "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
-        "stock": 0,
-        "preorder": true,
-        "gallery": [
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui93a0u.jpg",
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-07-mui93a0u.jpg",
-          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg"
-        ]
-      },
       "dmc-flowers": {
         "name": "ערכת רקמה עם 2 דוגמאות",
         "price": 100,
@@ -615,6 +602,48 @@
         "gallery": [
           "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg",
           "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg"
+        ]
+      },
+      "trimits-elephants": {
+        "name": "ערכת רקמה מלונדון – דוגמת פילים",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg",
+        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg"
+        ]
+      },
+      "trimits-butterfly": {
+        "name": "ערכת רקמה מלונדון – דוגמת פרפר",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg",
+        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
+        "stock": 2,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg",
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
+        ]
+      },
+      "kit-all-inclusive": {
+        "name": "ערכת רקמה הכל כלול",
+        "price": 210,
+        "image": "/images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg",
+        "description": "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים.",
+        "gallery": [
+          "/images/gallery/kit.jpeg"
+        ]
+      },
+      "tablecloth-autumn": {
+        "name": "מפה יפהיפיה – דוגמת סתיו שלכת",
+        "price": 160,
+        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-56-mui93a0t.jpg",
+        "description": "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
+        "stock": 0,
+        "gallery": [
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui93a0u.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-07-mui93a0u.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg"
         ]
       },
       "dmc-pearl": {
@@ -628,36 +657,6 @@
           "/images/store/dmc-kit-pearl/screenshot-2026-09-23-at-22-31-14-muei2kk4.jpg",
           "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-25-mui9lg05.jpg",
           "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-48-03-mui9nxtz.jpg"
-        ]
-      },
-      "trimits-elephants": {
-        "name": "ערכת רקמה מלונדון – דוגמת פילים",
-        "price": 100,
-        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg",
-        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
-        "stock": 1,
-        "gallery": [
-          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg"
-        ]
-      },
-      "kit-all-inclusive": {
-        "name": "ערכת רקמה הכל כלול",
-        "price": 210,
-        "image": "/images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg",
-        "description": "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים.",
-        "gallery": [
-          "/images/gallery/kit.jpeg"
-        ]
-      },
-      "trimits-butterfly": {
-        "name": "ערכת רקמה מלונדון – דוגמת פרפר",
-        "price": 100,
-        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg",
-        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
-        "stock": 2,
-        "gallery": [
-          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg",
-          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
         ]
       },
       "tablecloth-mono": {
@@ -674,12 +673,12 @@
       }
     },
     "variant_order": [
-      "tablecloth-autumn",
       "dmc-flowers",
       "trimits-elephants",
-      "kit-all-inclusive",
       "trimits-butterfly",
+      "kit-all-inclusive",
       "tablecloth-mono",
+      "tablecloth-autumn",
       "dmc-pearl"
     ],
     "category": "kits",

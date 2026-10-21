@@ -340,24 +340,23 @@
       "limitedStock": true,
       "name": "ערכות רקמה מיוחדות",
       "variants": {
-        "tablecloth-autumn": {
-          "stock": 0,
-          "preorder": true
-        },
         "dmc-flowers": {
           "stock": 3
-        },
-        "dmc-pearl": {
-          "stock": 0
         },
         "trimits-elephants": {
           "stock": 1
         },
+        "trimits-butterfly": {
+          "stock": 2
+        },
         "kit-all-inclusive": {
           "stock": null
         },
-        "trimits-butterfly": {
-          "stock": 2
+        "tablecloth-autumn": {
+          "stock": 0
+        },
+        "dmc-pearl": {
+          "stock": 0
         },
         "tablecloth-mono": {
           "stock": 0,

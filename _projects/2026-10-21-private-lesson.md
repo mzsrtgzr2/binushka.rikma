@@ -4,9 +4,7 @@ subtitle: בזמן שמתאים לשתינו
 location: "רח׳ אייזנברג, רחובות"
 category: all-levels
 image: '/images/gallery/workshop.jpeg'
-gallery:
-  - '/images/gallery/6A0F9AB8-9045-4401-BF34-5DA77DA4C596_1_105_c.jpeg'
-  - '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
+hide_testimonials: true
 permalink: /projects/private-lesson/
 registration_full: false
 hide: false
@@ -14,7 +12,7 @@ cart_price: 350
 price_per: workshop
 price_unit: לשיעור
 booking_cta: הזמיני שיעור
-faq_category: private
+faq_category: private-lesson
 order: 13
 ---
 

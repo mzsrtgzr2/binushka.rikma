@@ -12,6 +12,7 @@ cart_price: 350
 price_per: workshop
 price_unit: לשיעור
 booking_cta: הזמיני שיעור
+booking_note: "ההרשמה עוברת לסל הקניות, אפשר להוסיף שיעורים או מוצרים מהחנות ולשלם בתשלום מאובטח אחד."
 faq_category: private-lesson
 variants:
   single:

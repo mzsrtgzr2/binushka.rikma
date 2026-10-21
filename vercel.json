@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "f=$(git diff --name-only ${VERCEL_GIT_PREVIOUS_SHA:-HEAD^} HEAD); [ -n \"$f\" ] || exit 1; ! echo \"$f\" | grep -qvE '^(README\\.md|[A-Z][A-Z0-9_]*\\.md|LICENSE|docs/.*|\\.github/.*)$'",
   "framework": "jekyll",
   "installCommand": "npm install --omit=dev && bundle install",
     "buildCommand": "node scripts/build-catalog.js && node scripts/write-sentry-data.js && JEKYLL_ENV=production bundle exec jekyll build",

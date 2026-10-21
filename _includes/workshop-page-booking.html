@@ -67,14 +67,14 @@
             <span class="workshop-booking__pack-name">{{ pack[1].name }}</span>
             <span class="workshop-booking__pack-price">₪{{ pack[1].price }}</span>
             {% if pack_places > 1 and pack_save > 0 %}
-            <span class="workshop-booking__pack-save">חוסכות ₪{{ pack_save }}</span>
+            <span class="workshop-booking__pack-save">חוסכת ₪{{ pack_save }}</span>
             {% endif %}
           </button>
           {% endfor %}
         </div>
         {% else %}
         <button type="button" class="button button--primary section-button" data-cart-add="{{ workshop_id }}" data-analytics="workshop_register">
-          {% if page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
+          {% if page.booking_cta %}{{ page.booking_cta }}{% elsif page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
         </button>
         {% endif %}
         {% if mothers_course_whatsapp %}
@@ -84,7 +84,7 @@
         </p>
         {% else %}
         <p class="workshop-booking__note">
-          ההרשמה עוברת לסל הקניות — אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.
+          {% if page.booking_note %}{{ page.booking_note }}{% else %}ההרשמה עוברת לסל הקניות, אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.{% endif %}
         </p>
         {% endif %}
       </div>

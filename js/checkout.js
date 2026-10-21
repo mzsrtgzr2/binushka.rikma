@@ -122,17 +122,29 @@
     if (text) messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  /* The Morning payment page chooses the actual number; this only tells the
-     shopper installments exist before she reaches it. */
-  function showInstallmentNote(maxPayments) {
-    if (!installmentsNote) return;
+  /* Morning's payment form takes the actual number of installments, so the
+     shopper picks the count here and we send it with the order. */
+  var installmentsGroup = document.getElementById('checkout-installments-group');
+  var installmentsSelect = document.getElementById('checkout-installments');
+
+  function showInstallmentOptions(maxPayments) {
     var count = Number(maxPayments);
     if (!Number.isInteger(count) || count < 2) return;
-    installmentsNote.textContent =
-      'אפשר לפרוס את התשלום לעד ' +
-      count +
-      ' תשלומים בדף התשלום המאובטח, בכפוף לאישור חברת האשראי.';
-    installmentsNote.hidden = false;
+    if (!installmentsGroup || !installmentsSelect) return;
+    installmentsSelect.innerHTML = '';
+    for (var i = 1; i <= count; i++) {
+      var option = document.createElement('option');
+      option.value = String(i);
+      option.textContent = i === 1 ? 'תשלום אחד' : i + ' תשלומים';
+      installmentsSelect.appendChild(option);
+    }
+    installmentsSelect.value = '1';
+    installmentsGroup.hidden = false;
+    if (installmentsNote) {
+      installmentsNote.textContent =
+        'אפשר לפרוס לעד ' + count + ' תשלומים, בכפוף לאישור חברת האשראי.';
+      installmentsNote.hidden = false;
+    }
   }
 
   function loadPaymentOptions() {
@@ -141,10 +153,10 @@
         return res.ok ? res.json() : null;
       })
       .then(function (body) {
-        if (body) showInstallmentNote(body.maxPayments);
+        if (body) showInstallmentOptions(body.maxPayments);
       })
       .catch(function () {
-        /* keep the note hidden if checkout config is unavailable */
+        /* keep the picker hidden if checkout config is unavailable */
       });
   }
 
@@ -618,6 +630,9 @@
       zip: needAddress ? data.zip || '' : '',
       country: needAddress ? data.country : data.country || 'IL',
     };
+    if (installmentsSelect && installmentsGroup && !installmentsGroup.hidden) {
+      payload.installments = Number(installmentsSelect.value) || 1;
+    }
     if (appliedCoupon && appliedCoupon.code) payload.couponCode = appliedCoupon.code;
     else if (data.couponCode) payload.couponCode = String(data.couponCode).trim();
     var hasScrunchie = items.some(function (item) {

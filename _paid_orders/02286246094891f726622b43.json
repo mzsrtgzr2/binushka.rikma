@@ -1,0 +1,13 @@
+{
+  "orderId": "02286246094891f726622b43",
+  "documentId": "2698588d-4b31-4063-a169-ffb55c676390",
+  "amount": 80,
+  "purchases": [
+    {
+      "slug": "stickers",
+      "quantity": 1,
+      "variant": "type-3"
+    }
+  ],
+  "paidAt": "2026-10-21T11:06:08.876Z"
+}

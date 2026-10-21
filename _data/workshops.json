@@ -14,11 +14,11 @@
     "stock": 4
   },
   "workshop-monthly-meeting": {
-    "name": "מפגש רקמה ברחובות — רביעי בבוקר אחת לחודש",
+    "name": "מפגש רקמה ברחובות — שלישי בבוקר אחת לחודש",
     "price": 110,
     "kind": "workshop",
     "shipping": false,
-    "stock": 5
+    "stock": 6
   },
   "workshop-mothers-1-6": {
     "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה2 בנובמבר",

@@ -1,9 +1,18 @@
 ---
 title: מפגש רקמה ברחובות
 date: 2025-10-21 11:00:00 +0300
-subtitle: רביעי בבוקר אחת לחודש
+subtitle: שלישי בבוקר אחת לחודש
 location: "רח׳ אייזנברג, רחובות"
 category: advanced
+image: /images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg
+permalink: /projects/monthly-meeting/
+form_url: "https://pages.greeninvoice.co.il/payments/links/59988810-26f7-4902-9e5d-0d9a5cb1d8ac"
+registration_full: false
+hide: false
+cart_price: 110
+spots: 6
+order: 10
+last_places: false
 filter_months:
   - "01"
   - "02"
@@ -17,14 +26,6 @@ filter_months:
   - "10"
   - "11"
   - "12"
-image: '/images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg'
-permalink: /projects/monthly-meeting/
-form_url: https://pages.greeninvoice.co.il/payments/links/59988810-26f7-4902-9e5d-0d9a5cb1d8ac
-registration_full: false
-hide: false
-cart_price: 110
-spots: 5
-order: 10
 ---
 
 ## פרטי מפגשי רקמה למנוסות
@@ -32,7 +33,7 @@ order: 10
 **מיקום:** רח׳ אייזנברג, רחובות  
 **שעה:** 11:00-13:00  
 **מחיר:** 110 ש"ח למשתתף  
-**מספר משתתפות:** עד 8  
+**מספר משתתפות:** עד 10  
 
 ### למי המפגש מתאים?
 
@@ -44,13 +45,13 @@ order: 10
 - - ללא תינוקות מגיל זחילה ומעלה.
 
 ### מתי מתקיימים המפגשים הקרובים?
-- המפגש של חודש אוקטובר יתקיים ביום רביעי ה21.10.
 - המפגש של חודש נובמבר יתקיים ביום רביעי ה25.11.
-- המפגש של חודש דצמבר יתקיים ביום רביעי ה16.12.
+- המפגש של חודש דצמבר יתקיים ביום שלישי ה15.12.
+- המפגש של חודש ינואר יתקיים ביום שלישי ה5.1.
 
 ### מה תקבלו במפגש?
 
 - חוטים לשימוש חופשי במהלך השיעור (של חברת DMC הצרפתית).
 - שימוש בצבעי מים, דפים, מכחולים.
-- עוגיות מעשה ידיי.
+- עוגיות מאפה ידיי.
 - חברותא של רוקמות, מיוחדת במינה. לצד קפה ומאפה משובחים.

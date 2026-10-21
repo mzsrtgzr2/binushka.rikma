@@ -5,6 +5,35 @@
   @media only screen and (max-width: $mobile) {
     margin-bottom: 48px;
   }
+
+  /* Workshops list (#230): tighten the white space inside each card and
+     between cards — the defaults stacked .project__footer's margin on top
+     of .project__add's, leaving an oversized gap above the CTA. Spacing is
+     reduced, not removed. Scoped here so the homepage cards and the admin
+     preview keep their existing rhythm. */
+  .project {
+    margin-bottom: 24px;
+  }
+
+  .project__info {
+    margin-top: 16px;
+
+    .project__category {
+      margin-bottom: 8px;
+    }
+
+    .project__title {
+      margin-bottom: 10px;
+    }
+
+    .project__footer {
+      margin-top: 10px;
+    }
+
+    .project__add {
+      margin-top: 8px;
+    }
+  }
 }
 
 .workshop-filter-empty {

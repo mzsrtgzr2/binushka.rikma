@@ -116,6 +116,7 @@
   max-height: 64px;
   width: auto;
   display: block;
+  mix-blend-mode: multiply;
 }
 
 @media only screen and (max-width: $desktop) {

@@ -22,7 +22,7 @@ menu__settings:
       icon: '/images/scrunchies/nav-icon.png'
     # - url: '/about/'
       #   title: 'קצת עלי'
-    - title: 'צרו קשר'
+    - title: 'צרי קשר'
       url: '/contact/'
     # - title: 'Pages'
     #   submenu:
@@ -181,7 +181,7 @@ footer_menu__settings:
       url: '/projects/'
     - title: 'חנות'
       url: '/store/'
-    - title: 'צרו קשר'
+    - title: 'צרי קשר'
       url: '/contact/'
 
 footer_legal__settings:
@@ -203,7 +203,7 @@ instagram:
   enabled: true
   account: "bina.lir.cakes.embroidery"
   posts_count: 6
-  title: "עקבו אחריי באינסטגרם"
+  title: "עקבי אחריי באינסטגרם"
   description: "השראה, רקמות ועוד הרבה דברים יפים"
 
 #-------------------------------

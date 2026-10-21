@@ -1060,9 +1060,10 @@
   function cardHtml(workshop) {
     var image = workshop.image ? previewSrc(workshop.image) : '';
     var badge = badgeText(workshop);
-    // Mirrors project-card.html: last-places gets its own black badge in
-    // the top-right corner of the image, sold-out is black on light gray,
-    // and the opening-soon badge keeps the old .registration-full.
+    // Mirrors project-card.html: last-places (black) and sold-out (black
+    // on light gray, via .sold-out-badge) share the same small badge in
+    // the top-right corner of the image; only the opening-soon badge
+    // keeps the old large bottom-right .registration-full.
     var badgeClass = 'registration-full';
     if (!workshop.registration_not_open && isSoldOut(workshop)) {
       badgeClass += ' sold-out-badge';

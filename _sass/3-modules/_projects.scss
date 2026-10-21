@@ -223,15 +223,19 @@
   z-index: 2;
 }
 
-/* "Last places" sits in the top-right corner of the workshop image,
-   white on black (like a "LAST CHANCE" label) — distinct from the
-   sold-out / opening-soon badge, which keeps .registration-full. */
-.last-places-badge {
+/* "Last places" and sold-out ("אין מקומות פנויים") share the same size
+   and placement: a small badge in the top-right corner of the workshop
+   image. They differ only in colours — white on black (like a "LAST
+   CHANCE" label) for last places, black on light gray (#e1e1e2, from the
+   reviewer's swatch) for sold-out. Only the opening-soon badge keeps the
+   larger bottom-right .registration-full. */
+.last-places-badge,
+.registration-full.sold-out-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #000;
-  color: #fff;
+  /* .registration-full also sets bottom: 20px — sold-out must not keep it. */
+  bottom: auto;
   padding: 6px 12px;
   border-radius: 4px;
   font-size: 16px;
@@ -240,9 +244,11 @@
   z-index: 2;
 }
 
-/* Sold-out ("אין מקומות פנויים") — black on light gray (#e1e1e2, from the
-   reviewer's swatch). Same placement/size as .registration-full; only the
-   opening-soon badge keeps the red-on-translucent-white colours. */
+.last-places-badge {
+  background: #000;
+  color: #fff;
+}
+
 .registration-full.sold-out-badge {
   background: #e1e1e2;
   color: #000;

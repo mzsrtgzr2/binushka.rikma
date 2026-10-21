@@ -1749,9 +1749,14 @@
   padding: 4px 10px;
 }
 
-.admin-preview .last-places-badge {
+/* Sold-out shares last-places' size/placement (see _projects.scss); in
+   the preview it also carries .registration-full (bottom: 10px), so the
+   bottom offset has to be cleared. */
+.admin-preview .last-places-badge,
+.admin-preview .registration-full.sold-out-badge {
   top: 10px;
   right: 10px;
+  bottom: auto;
   padding: 4px 10px;
 }
 

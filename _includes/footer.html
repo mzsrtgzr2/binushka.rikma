@@ -21,18 +21,56 @@
           <div class="container">
             <div class="row">
       
-              <div class="col col-12">
+              <div class="col col-8 col-d-12">
                 <div class="footer__author">
                   
                   <div class="footer__author-info">
+                    <h3 class="footer__author-name">בינושקה אומנות הרקמה </h3>
                     <p class="footer__author-bio">
 
                                               
                     </p>
-                    {% include email-signup.html %}
+                    <p>
+                    {% include social-nav.html %}
+                    </p>
+                    {% include newsletter-page-flags.html %}
+                    {% unless newsletter_subscribe_page %}
+                    {% include newsletter-signup.html source="footer" class="newsletter-signup--footer" %}
+                    {% endunless %}
                   </div>
                 </div>
               </div>
+      
+              <div class="col col-2 col-d-12">
+                <nav class="footer__nav" aria-label="ניווט האתר">
+                  <ul class="footer__nav-list list-reset">
+                    {% for item in site.data.settings.footer_menu__settings.menu__items %}
+                    <li class="footer__nav-item">
+                      <a href="{{ item.url | relative_url }}" class="footer__nav-link" data-analytics="footer_nav" data-nav-path="{{ item.url }}">{{ item.title }}</a>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </nav>
+              </div>
+
+              {% if site.data.settings.footer_legal__settings.menu__items %}
+              <div class="col col-2 col-d-12">
+                <nav class="footer__nav footer__nav--legal" aria-label="{{ site.data.settings.footer_legal__settings.title | default: 'מידע נוסף' }}">
+                  {% if site.data.settings.footer_legal__settings.title %}
+                  <h4 class="footer__nav-title">{{ site.data.settings.footer_legal__settings.title }}</h4>
+                  {% endif %}
+                  <ul class="footer__nav-list list-reset">
+                    {% for item in site.data.settings.footer_legal__settings.menu__items %}
+                    {% unless item.url == '/newsletter/' and site.data.settings.newsletter.enabled == false %}
+                    <li class="footer__nav-item">
+                      <a href="{{ item.url | relative_url }}" class="footer__nav-link" data-analytics="footer_legal" data-nav-path="{{ item.url }}">{{ item.title }}</a>
+                    </li>
+                    {% endunless %}
+                    {% endfor %}
+                  </ul>
+                </nav>
+              </div>
+              {% endif %}
       
             </div>
           </div>
@@ -47,7 +85,22 @@
       <div class="col col-12">
         <div class="footer__info">
           <div class="footer__info-box">
-            <div class="copyright">{{site.time | date: '%Y'}} &copy; <a href="/">{{site.data.settings.title}}</a></div>
+            <div class="footer__info-start">
+              <div class="copyright">{{site.time | date: '%Y'}} &copy; <a href="/" data-analytics="logo_home">{{site.data.settings.title}}</a></div>
+              {% if site.data.settings.footer_legal__settings.menu__items %}
+              <nav class="footer__legal" aria-label="מסמכי האתר">
+                <ul class="footer__legal-list list-reset">
+                  {% for item in site.data.settings.footer_legal__settings.menu__items %}
+                  {% unless item.url == '/newsletter/' and site.data.settings.newsletter.enabled == false %}
+                  <li class="footer__legal-item">
+                    <a href="{{ item.url | relative_url }}" class="footer__legal-link" data-analytics="footer_legal" data-nav-path="{{ item.url }}">{{ item.title }}</a>
+                  </li>
+                  {% endunless %}
+                  {% endfor %}
+                </ul>
+              </nav>
+              {% endif %}
+            </div>
             <div class="top" title="Top"><i class="ion ion-ios-arrow-up"></i></div>
           </div>
         </div>

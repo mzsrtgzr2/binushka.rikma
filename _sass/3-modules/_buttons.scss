@@ -36,6 +36,20 @@
     box-shadow: none;
   }
 
+  /* Sold-out workshop waitlist — same size as primary, quieter tone */
+  &--waitlist {
+    padding: 18px 38px;
+    color: var(--dark);
+    background-color: transparent;
+    border: 2px solid var(--dark);
+    box-sizing: border-box;
+
+    &:hover {
+      color: var(--dark);
+      background: var(--background-alt-color);
+    }
+  }
+
   &--small {
     padding: 12px 18px;
   }

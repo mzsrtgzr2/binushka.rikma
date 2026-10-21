@@ -5,9 +5,12 @@
       <div class="header__inner col col-12">
 
         <div class="logo">
-          <a class="logo__link" href="{{ site.baseurl }}/">
-            <span class="logo__title">בינה ליר</span><br>
-            <span class="logo__subtitle">רוקמת להנעתה</span>
+          <a class="logo__link" href="{{ site.baseurl }}/" data-analytics="logo_home">
+          {% if site.data.settings.logo %}
+            <img class="logo__image" src="{{ site.baseurl }}{{ site.data.settings.logo }}" alt="{{ site.data.settings.title }}">
+          {% else %}
+            {{ site.data.settings.title }}
+          {% endif %}
           </a>
         </div>
 
@@ -16,7 +19,7 @@
             <div class="nav__icon-close">
               <i class="ion ion-md-close"></i>
             </div>
-            <div class="nav__title">תפריט</div>
+            <div class="nav__title">Menu</div>
             <ul class="nav__list list-reset">
 
               {% for item in site.data.settings.menu__settings.menu__items %}
@@ -25,13 +28,17 @@
                   <span class="nav__link dropdown-toggle">{{ item.title }} <i class="ion ion-ios-arrow-down arrow-down"></i></span>
                   <div class="dropdown-menu">
                     {% for submenu-item in item.submenu %}
-                      <a href="{{ submenu-item.url }}" class="nav__link{% if page.url == submenu-item.url %} active-link{% endif %}">{{submenu-item.title}}</a>
+                      <a href="{{ submenu-item.url }}" class="nav__link{% if page.url == submenu-item.url %} active-link{% endif %}" data-analytics="nav" data-nav-path="{{ submenu-item.url }}">{{submenu-item.title}}</a>
                     {% endfor %}
                   </div>
                 </li>
                 {% else %}
                 <li class="nav__item">
-                  <a href="{{ item.url | relative_url }}" class="nav__link{% if page.url == item.url %} active-link{% endif %}">{{ item.title }}</a>
+                  <a href="{{ item.url | relative_url }}" class="nav__link{% if item.icon %} nav__link--icon{% endif %}{% if page.url == item.url %} active-link{% endif %}" data-analytics="nav" data-nav-path="{{ item.url }}">
+                    {% if item.icon %}
+                    <img class="nav__item-icon" src="{{ item.icon | relative_url }}" alt="" width="20" height="20" decoding="async">
+                    {% endif %}{{ item.title }}
+                  </a>
                 </li>
                 {% endif %}
               {% endfor %}
@@ -40,6 +47,7 @@
         </nav>
 
         <div class="nav-button">
+          {% include store-cart-widget.html %}
           {% include social-nav.html %}
 
           <i class="nav__icon icon__menu ion ion-md-menu"></i>

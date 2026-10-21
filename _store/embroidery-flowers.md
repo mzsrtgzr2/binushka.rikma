@@ -1,13 +1,18 @@
 ---
 title: זר פרחים רקום
 date: 2025-01-20 10:00:00 +0300
-subtitle:  פספרטו ועץ טבעי
-image: '/images/gallery/embroidery-flowers.jpeg'
+subtitle: פספרטו ועץ טבעי
+image: /images/gallery/embroidery-flowers.jpeg
 price: ₪300
 out_of_stock: true
 limited_stock: false
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+cart_price: 300
+order: 13
+preorder: true
+limited_edition: false
+category: embroidered-works
 ---
 
 ## רקמת פרחים עדינה, ממוסגרת בעבודת יד

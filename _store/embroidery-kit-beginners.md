@@ -2,12 +2,19 @@
 title: ערכת רקמה למתחילים
 date: 2024-09-15 10:00:00 +0300
 subtitle: במקום לצפות במהדורה המרכזית
-image: '/images/gallery/flowers-kit.jpeg'
+image: /images/gallery/flowers-kit.jpeg
 price: ₪60
 out_of_stock: false
 limited_stock: false
 hide: true
+in_cart: false
 form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
+order: 47
+noindex: true
+sitemap: false
+limited_edition: false
+preorder: false
+category: kits
 ---
 
 ## ערכת רקמה למתחילים

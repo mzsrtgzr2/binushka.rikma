@@ -1,0 +1,14 @@
+{
+  "orderId": "daea31217123d207dd88a1a1",
+  "documentId": "1a074086-1047-4d6b-807f-38b6f3bad7fb",
+  "amount": 90,
+  "purchases": [
+    {
+      "slug": "special-embroidery-kits",
+      "quantity": 1,
+      "variant": "dmc-pearl"
+    }
+  ],
+  "paidAt": "2026-10-10T08:09:19.034Z",
+  "coupon": "KIT25"
+}

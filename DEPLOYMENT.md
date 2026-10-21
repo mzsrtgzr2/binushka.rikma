@@ -1,0 +1,303 @@
+# Deployment: Vercel
+
+Production is Vercel. GitHub Pages is no longer the host. `vercel.json` holds the build
+settings; there is nothing to type in the Vercel dashboard.
+
+| Setting | Value | Where it comes from |
+| --- | --- | --- |
+| Framework preset | Jekyll | `vercel.json` → `framework` |
+| Install command | `bundle install` | `vercel.json` → `installCommand` |
+| Build command | `node scripts/build-catalog.js && node scripts/write-sentry-data.js && JEKYLL_ENV=production bundle exec jekyll build` | `vercel.json` → `buildCommand` |
+| Output directory | `_site` | `vercel.json` → `outputDirectory` |
+| Production branch | `master` | Vercel project settings |
+
+`cleanUrls` and `trailingSlash` keep URL shapes matching what GitHub Pages used (`/terms/`,
+`/store/`, `/thanks/`).
+
+Checkout, prices, admin, newsletter, and the Morning payment callback are one
+serverless function, `api/[...path].mjs`. Hobby deployments reject more than 12
+functions, and every file under `api/` counts, so the handlers live in `lib/routes/`
+and the function routes on the path. Public URLs are unchanged: the browser still
+posts to `/api/checkout/`. Coupon preview and coupon admin reuse `/api/checkout`
+and `/api/admin` so the deploy stays at one function.
+
+`vercel.json` rewrites `/api/:path*/` to `/api/:path*` so `trailingSlash` does not 308
+that function. Vercel still only invokes the catch-all for a single segment, so
+`/api/newsletter/subscribe` and `/api/newsletter/unsubscribe` (the signup form and
+the links already sent in mail) are rewritten first to `/api/newsletter-subscribe`
+and `/api/newsletter-unsubscribe`. The `?t=` token stays on the request. Tests
+live under `test/` and run with `node --test`; they are not uploaded as functions.
+
+## Error reporting (Sentry)
+
+Set `SENTRY_DSN` in Vercel → Project → Settings → Environment Variables
+(Project Settings → Client Keys in Sentry). The same variable covers the
+browser and the API function. Leave it empty and both stay off: local
+`jekyll build` and a deploy without the variable do not load the SDK.
+
+The build writes `_data/sentry.yml` from that variable. The file is
+gitignored. It only contains the public DSN, the environment
+(`production` / `preview` / `development`), and the git SHA when Vercel
+provides one.
+
+Browser errors and logs load from `browser.sentry-cdn.com` (SDK 11.0.0,
+no session replay). `console.log`, `console.warn`, and `console.error` in
+the browser are Sentry Logs. The API function does the same, and a
+`console.error` is also an Issue (Morning, stock, admin, newsletter, and
+anything the handler itself throws). Request bodies, cookies, and shopper
+details are not attached. Analytics debug lines are dropped.
+
+## Store cart
+
+Grow approved the site for clearing and pointed us at the Green Invoice payment-form API
+(not WooCommerce / Wix / Shopify). The cart collects Grow-required customer details on
+`/checkout/`, then the server builds the payment form.
+
+Set these in Vercel → Project → Settings → Environment Variables. For the
+preview/sandbox cart, set **Preview** (and leave Production for later):
+
+| Variable | What it is |
+| --- | --- |
+| `MORNING_ENV` | `sandbox` while testing. `production` only when charging real cards |
+| `MORNING_API_KEY_ID` | Morning sandbox keys while `MORNING_ENV=sandbox` |
+| `MORNING_API_KEY_SECRET` | same. Paste the raw secret — no wrapping quotes in the Vercel UI |
+| `MORNING_PLUGIN_ID` | Grow production plugin. **Not sent in sandbox** — it 404s there |
+| `MORNING_SANDBOX_PLUGIN_ID` | sandbox Grow plugin `facd67fd-5082-496c-917f-830f0d7449e3` (already the checkout default) |
+| `MORNING_MAX_PAYMENTS` | Maximum installments offered on the payment page. Default 12; set 1 to disable installments |
+
+Changing env vars does not update an already-built Preview. Redeploy the
+git branch (or use Vercel → Deployments → Redeploy) after saving them.
+
+`GET /api/checkout/` returns `{ env, hasKeyId, hasSecret, keyIdPrefix, maxPayments }` so
+you can confirm Preview picked up the sandbox pair without printing secrets.
+The checkout page uses `maxPayments` to show the installments note.
+
+Gift cards: the customer picks an amount (₪50–₪2,000) and it goes through the
+same Morning cart as other products. Checkout sends that custom sum as an
+income line (no Morning catalog UUID).
+
+Scrunchies: three fixed variants (regular ₪30, large ₪45, fancy ₪85). Checkout
+sends a server-validated variant id, never a client price. An optional fabric
+note from the checkout form is appended to the Morning income description.
+
+## Store catalog
+
+`_store/<slug>.md` is the only catalog you edit. Front matter is the product:
+title, photos, stock, and the price charged at checkout.
+
+- A normal product with `price: ₪240` is in the cart on the next deploy. No
+  JSON edit.
+- Gift cards use `variable: true` plus `min_price` / `max_price` / `presets`.
+- Scrunchies (or any multi-type product) use a `variants:` block.
+- A page that should not be buyable, even if it shows a ₪ price, sets
+  `in_cart: false`.
+
+`_data/catalog.json` and `api/catalog-data.json` are generated from those
+pages (`scripts/build-catalog.js`) during the Vercel build and again whenever
+`/admin/store/` saves. Do not hand-edit them.
+
+## Store admin (`/admin/store/`)
+
+The backoffice is split into sections that share one login and one session:
+`/admin/store/`, `/admin/workshops/` and `/admin/newsletter/`, with tabs
+between them. `/admin/` redirects to the store, so an old bookmark still lands
+somewhere sensible.
+
+
+A password-protected Hebrew backoffice for **every** store product: create,
+update, delete, prices charged at checkout, gift-card amounts, scrunchie
+variants, page text, and stock/visibility. It is not linked from the public
+menu. After save it commits `_store/<slug>.md` and regenerates the catalog
+JSON snapshots so Vercel rebuilds.
+
+Set these on **Production** (and Preview if you want to try it there):
+
+| Variable | What it is |
+| --- | --- |
+| `ADMIN_PASSWORD` | Shared password for every `/admin/` section |
+| `GITHUB_TOKEN` | Fine-grained PAT with **Contents: Read and write** on this repo |
+| `GITHUB_BRANCH` | Usually `master`. Ignored on a preview, which writes to the branch it was deployed from |
+| `GITHUB_REPO` | Optional `owner/repo`. Vercel already sets the git owner/slug |
+
+For local `vercel dev`, set `ADMIN_LOCAL_ROOT` to the repo root so saves write
+the markdown (and regenerated catalog JSON) on disk instead of GitHub.
+
+The number saved in the admin is the number charged at checkout. Morning is
+payments and invoices only. It is not the store catalog.
+
+## Who edits products
+
+**GitHub:** add or edit `_store/<slug>.md`. Copy an existing product page,
+change the title / `price: ₪…` / photos. That is enough for the store grid
+and checkout. Do not edit `catalog.json`.
+
+**Admin (`/admin/store/`, password):** the same data, with a form. Use it for
+photos, stock, hide, gift-card amounts, and scrunchie variants.
+
+**Photos:** `/admin/store/` → תמונות. Upload from the computer, reorder, first photo is
+the main store image. Extra photos are `gallery` on the product page. Files are
+committed under `images/store/<slug>/`.
+
+**Stock / hide:** same `/admin/store/` screen. Morning’s item API has no inventory
+field. Grow is payments only — it is not a catalog.
+
+To add a new cart product: either `/admin/store/` → מוצר חדש, or a new markdown
+file in `_store/`. Morning does not need a matching item to charge.
+
+## Workshop catalog
+
+`_projects/<date>-<slug>.md` is a workshop: front matter for what the site and
+the cart need, Markdown for what the day itself is. Jekyll drops the date
+prefix, so `_projects/2026-03-04-rehovot-spring.md` is served at the page's
+`permalink` and is `workshop-rehovot-spring` in the cart.
+
+- `cart_price` is the price charged at checkout. A ₪ figure that appears only
+  in the page text is prose, not a price — it is never sold from.
+- `spots` is inventory. Checkout refuses to over-book it and `api/admin.js`
+  counts it down after a booking, so a full workshop stops selling itself.
+- `price_per: workshop` prices the whole session rather than a place. Those
+  have no places to count, so they take no `spots` and no packs.
+- `variants:` are registration packs — one place at one price, two together at
+  another. A pack's `places` is how much of `spots` it consumes.
+- `hide` keeps the page (old links and paid bookings still have to resolve)
+  but takes the workshop out of the list, the cart and search results.
+
+`_data/workshops.json` and `api/workshops-data.json` are generated from those
+pages, the same way the store catalog is. Do not hand-edit them.
+
+## Workshop admin (`/admin/workshops/`)
+
+The same login as the rest of the backoffice. The list shows every workshop,
+open ones first, and edits places and full/hidden in place. Opening one gives
+the full editor: details, Markdown body with a live preview of both the card
+and the page, image upload, price, packs and status.
+
+Saving commits `_projects/<date>-<slug>.md` and regenerates both workshop
+catalog snapshots in the same commit, so the cart can never offer a price the
+page does not show. Uploaded images are committed under
+`images/workshops/<year-month>/`.
+
+A workshop's slug, filename and permalink are its identity and never move on
+an edit — changing the date or the title only changes the page. A workshop
+that has already run should be hidden rather than deleted: its URL may be in a
+confirmation mail somebody paid against.
+
+Needs the same variables as the store admin (`ADMIN_PASSWORD`, `GITHUB_TOKEN`,
+`GITHUB_BRANCH`, `GITHUB_REPO`), or `ADMIN_LOCAL_ROOT` for `vercel dev`.
+
+## Newsletter
+
+The newsletter has no provider: issues are files in `_newsletter/`, the
+subscriber list is in Vercel Blob, and mail goes out through Gmail.
+`NEWSLETTER_SETUP.md` covers the full setup; these are the deployment-side
+details.
+
+Set these per environment. Preview needs its own copy — Vercel does not share
+environment variables between Preview and Production:
+
+| Variable | What it is |
+| --- | --- |
+| `BLOB_READ_WRITE_TOKEN` | added automatically when a Blob store is connected to the project |
+| `NEWSLETTER_SECRET` | `openssl rand -hex 32`; signs unsubscribe links |
+| `GMAIL_USER` | the sending address |
+| `GMAIL_APP_PASSWORD` | 16-character app password, not the account password |
+| `ORDER_NOTIFY_EMAIL` | optional inbox for completed-order summaries; defaults to `GMAIL_USER` |
+| `SITE_URL` | `https://rikma.binushka.com` |
+| `NEWSLETTER_DAILY_CAP` | optional; defaults to 400 recipients per send |
+
+The same Gmail account also sends the studio a detailed order summary after
+each paid checkout (and after a ₪0 / skipped checkout). Checkout stores the
+full customer snapshot in private Blob until Morning confirms payment; free
+checkouts mail immediately. Without `GMAIL_USER` / `GMAIL_APP_PASSWORD` the
+sale still completes and the mail is skipped.
+
+Until the first three are set the signup form answers "ההרשמה לניוזלטר לא זמינה
+כרגע". The pages still build and render, so a preview without them shows the
+layout but cannot collect an address. The archive and teaser are rendered at
+build time from `_newsletter/`, so they work in any environment regardless.
+
+As with the cart, changing env vars does not update an already-built Preview —
+redeploy the branch afterwards.
+
+`GET /api/newsletter/subscribe/` returns
+`{ configured, hasSubscriberStore, hasSigningSecret, hasMailer }` so you can
+confirm an environment picked them up without printing any value.
+
+**Preview shares Production's list and mailbox** if you give it the same
+variables. A signup on a preview deploy lands on the real list, and a send goes
+to real people. Either leave the Blob token out of Preview, or connect a second
+Blob store to it.
+
+`SITE_URL` matters most here: without it a send triggered from a preview puts
+`*.vercel.app` links inside mail that real readers receive.
+
+## Local development
+
+```bash
+bundle install
+node scripts/build-catalog.js   # refresh catalog JSON from _store/*.md
+bundle exec jekyll serve        # http://localhost:4000
+```
+
+Or with Docker: `docker compose up` (serves on http://localhost:4001).
+
+## Point the custom domain at Vercel
+
+Do these in order. Changing DNS **before** merging this branch (which deletes the Pages `CNAME`
+file) keeps the site up: Vercel serves as soon as DNS flips, and Pages is cleaned up afterwards.
+Merging first while DNS still points at GitHub is what caused the 404 last time.
+
+### 1. Add the domain in Vercel
+
+Open the **project** (not the team) → **Settings** → **Domains** in the left sidebar.
+A reload may be needed if that page 404s. Direct path: `/<team>/<project>/settings/domains`.
+
+**Add** `rikma.binushka.com`. Copy the CNAME target Vercel shows. If you would rather not copy
+the long project-specific host, `cname.vercel-dns.com` is the generic value and still works.
+
+Vercel will say "Invalid Configuration" until step 2. That is expected.
+
+### 2. Change the WordPress.com DNS record
+
+`binushka.com` uses WordPress.com nameservers, so the record is edited there, not at GitHub or
+Vercel.
+
+WordPress.com → **Upgrades → Domains → binushka.com → DNS records**.
+
+Edit the existing `rikma` CNAME. Do not add a second one.
+
+| Field | Set to |
+| --- | --- |
+| Type | CNAME |
+| Name / host | `rikma` (not the full hostname) |
+| Points to | the value from step 1, for example `cname.vercel-dns.com` |
+| TTL | leave as-is (3600 is fine) |
+
+WordPress.com sometimes treats a target without a trailing dot as relative. If the saved record
+shows something like `cname.vercel-dns.com.binushka.com`, edit it again and add a trailing dot:
+`cname.vercel-dns.com.`
+
+### 3. Confirm Vercel is answering
+
+Wait until the Vercel domain page says "Valid Configuration" (often a few minutes; up to an hour
+because the old TTL is 3600).
+
+```bash
+dig rikma.binushka.com CNAME +short      # expect a vercel-dns host, not github.io
+curl -sSI https://rikma.binushka.com | grep -i server   # expect: server: Vercel
+```
+
+Also load https://rikma.binushka.com in a browser and check the padlock.
+
+### 4. Merge this change, then turn Pages off
+
+This branch deletes the repo `CNAME` file so GitHub Pages stops claiming the hostname. Merge it
+**after** step 3.
+
+Then GitHub → repo **Settings → Pages** → clear the custom domain field → set **Source** to
+**None**.
+
+### Rollback
+
+Point the `rikma` CNAME back at `<user>.github.io.`, restore a repo file named `CNAME` containing
+`rikma.binushka.com`, and set Pages Source to `master` / root.

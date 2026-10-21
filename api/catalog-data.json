@@ -1,0 +1,752 @@
+{
+  "birth-hoop": {
+    "name": "תעודת לידה רקומה",
+    "price": 450,
+    "category": "birth-gifts",
+    "categories": [
+      "birth-gifts",
+      "embroidered-works"
+    ]
+  },
+  "dmc-etoile-set": {
+    "name": "סט חוטים מנצנצים",
+    "price": 330,
+    "category": "threads"
+  },
+  "embroidery-books": {
+    "name": "ספרי רקמה",
+    "variants": {
+      "365": {
+        "name": "רקמה בכל יום! 365 רקמות פרקטיות",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-24-at-18-50-19-mufplh68.jpg",
+        "description": "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)",
+        "stock": 4,
+        "preorder": true,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-25-at-23-29-18-muhf0vew.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-01-mufplh69.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-18-50-33-mufplh69.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-06-mufplh6b.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-17-30-16-mufplh6c.png"
+        ]
+      },
+      "380": {
+        "name": "380 רקמות חתולים",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-26-at-13-54-35-mui9x0mx.png",
+        "description": "הספר האחרון שקניתי והוא פשוט מטריף.\nהרבה השראה ורקמות מצחיקות של חתולים בכל מיני תנוחות של חתולים.\nתהנו. יש רק אחד :)\nאת הרקמה בתמונה השנייה רקמה נעמה בחוג לרוקמות מנוסות אצלי ברחובות.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-23-at-22-29-44-muei03em.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-54-43-mui9x0mx.jpg"
+        ]
+      },
+      "type-6": {
+        "name": "רקמות החיים ויום יום על פי יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-10-02-at-20-28-23-mur8mwk5.jpg",
+        "description": "הספר האחרון של יומיקו שמלווה אותי בכל טיול בזמן האחרון.\nאת כוס המרטיני רקמתי מתוך הספר בטיול האחרון ללונדון.\nיש בו אלמנטים כמעט מכל תחום - טבע, תעופה, מוזיקה, אוכל..",
+        "stock": 3,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-27-12-mur8kvr3.jpg",
+          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-28-33-mur8mwk6.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-18-53-14-mufpr95m.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-18-52-20-mufpr95l.jpg"
+        ]
+      },
+      "paintwiththread": {
+        "name": "paint with thread",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-23-at-22-23-35-muehtzc2.jpg",
+        "description": "ספרה הראשון של אמילי פריס.\nבזכותה התנסיתי והתאהבתי בתך ארוך-קצר.\nנותנת הרבה במה לרקום באופן אינטואטיבי ומספרת את הסיפור שלה תוך כדי.\nבסוף הספר יש את כל הדוגמאות שהיא רוקמת בדפים שניתן לתלוש ולגהץ את הדוגמא על איזה בד שרוצים!!!!! קסם.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-23-at-22-23-44-muehtzc2.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-23-at-22-24-01-muehtzc3.jpg"
+        ]
+      },
+      "type-3": {
+        "name": "עונות השנה לפי יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-24-at-15-24-12-mufibpec.jpg",
+        "description": "המון השראה, צבעים וכרגיל יומיקו מדהימה אותי.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-15-26-17-mufibped.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-15-26-24-mufibpee.jpg"
+        ]
+      },
+      "type-4": {
+        "name": "רקמה חזרתית של יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-24-at-15-30-34-mufig8tg.jpg",
+        "description": "כמה רוגע אפשר לייצר בחזרתיות הזו של יומיקו, רקעים, עצים, חיים.\nספר עם המון השראה וייחודיות.\nהרקמה בתמונה היא של שירן במפגשי אמהות רוקמות, בהשראת הספר והחיים.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-43-45-mur967sm.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-15-30-24-mufig8th.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-24-at-17-31-10-muhf8vkc.jpg"
+        ]
+      },
+      "type-7": {
+        "name": "רקמות חיות על פי יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-25-at-23-09-05-muhei8a9.jpg",
+        "description": "כמה מפתיע ומשמח ספר יכול להיות?\nפיל בקרקס או קוף על ענף עם בננה ביד.. תרקמו מה שתרצו מהספר היפהיפה הזה של יומיקו.\nהרבה תך שרשרת המדיטטיבי נוכח בעבודות של יומיקו וגם כאן בספר הרקמה של החיות.\nבתמונות אפשר לראות את הינשוף שרקמתי בהשראת הספר, עם חוטים מנצנצים של dmc מסדרת etoile.",
+        "stock": 3,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-41-26-mur93b6h.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-23-at-22-32-12-muhei8a9.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-25-at-23-14-39-muhei8a9.png",
+          "/images/store/embroidery-books/screenshot-2026-09-25-at-23-15-10-muhei8aa.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-11-35-24-mui8agq3.jpg",
+          "/images/store/embroidery-books/screenshot-2026-10-02-at-20-41-34-mur93b6i.jpg"
+        ]
+      },
+      "type-8": {
+        "name": "רקמה יפנית מודרנית בשני צבעים מאת יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-25-at-23-19-42-muhf0vex.jpg",
+        "description": "ספר השראה והדרכה לרקמה בסגנון יפני נקי ומינימליסטי, עם מגוון דוגמאות דו־צבעוניות פשוטות ומקסימות.\nמתאים למי שאוהבת רקמה עכשווית, מדויקת ושקטה, ולמי שמחפשת פרויקטים קטנים שאפשר לשלב על בגדים, תיקי בד, כלי טקסטיל ועוד.\nכולל הסברים מלאים כמו בכל הספרים של יומיקו.\nספר שכיף לדפדף בו גם כשלא מחפשים פרויקט ספציפי ופשוט לקבל חשק לרקום.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-25-at-23-33-22-muhf4wfb.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-08-03-mui8agq4.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-08-11-mui8agq4.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-09-12-mui8agq4.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-10-49-mui8fy5k.jpg"
+        ]
+      },
+      "type-9": {
+        "name": "רקמות בוטניות של יומיקו",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-16-mui8fy5k.jpg",
+        "description": "ספר יפהפה של Yumiko Higuchi, שמחבר בין אהבתה למוטיבים מהטבע לבין משחק בחומר ובטקסטורה.\n\nבספר תמצאי 39 פרויקטים של פרחים, עלים ומוטיבים בוטניים, שנרקמו בסוגים שונים של חוטים – מצמר וכותנה ועד פרל קוטון וחוטים מטאליים. כל סוג חוט נותן לרקמה אופי אחר, והספר מראה איך לעבוד איתם ולנצל את התכונות שלהם לטובת התוצאה הסופית.\n\nההסברים ברורים ומלווים בתצלומים, תרשימים והוראות שלב־אחר־שלב, כך שהוא מתאים גם למי שרק מתחילה להתנסות ברקמה וגם למי שכבר רוקמת ורוצה להכניס קצת יותר עומק, חומריות וטקסטורה לעבודות שלה.\n\nספר שכיף לפתוח בשביל פרויקט אחד – ולהישאר בו עוד קצת רק בשביל להסתכל.",
+        "stock": 2,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-46-mui8gwqe.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-40-mui8fy5k.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-53-mui8gwqf.jpg",
+          "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-34-mui8ne4o.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "380",
+      "type-6",
+      "paintwiththread",
+      "type-3",
+      "type-4",
+      "type-7",
+      "type-8",
+      "type-9",
+      "365"
+    ],
+    "category": "books"
+  },
+  "embroidery-case": {
+    "name": "קלמר פשתן עם רקמת כותנה",
+    "price": 160,
+    "category": "embroidered-works"
+  },
+  "embroidery-flowers": {
+    "name": "זר פרחים רקום",
+    "price": 300,
+    "category": "embroidered-works"
+  },
+  "embroidery-tshirt": {
+    "name": "רקמה בהזמנה אישית",
+    "price": 100,
+    "category": "embroidered-works"
+  },
+  "fabrics": {
+    "name": "ריבועי בד לרקמה",
+    "variants": {
+      "type-1": {
+        "name": "דריל צבע לבן",
+        "price": 10,
+        "image": "/images/store/fabrics/screenshot-2026-09-24-at-15-38-17-mufir18h.jpg",
+        "description": "גודל ריבוע לפחות 25*25 ס״מ",
+        "stock": 96
+      },
+      "type-2": {
+        "name": "דריל צבע טבעי - קרם",
+        "price": 10,
+        "image": "/images/store/fabrics/screenshot-2026-09-24-at-15-38-09-mufir18i.jpg",
+        "description": "גודל ריבוע לפחות 25*25 ס״מ",
+        "stock": 98
+      },
+      "type-3": {
+        "name": "גולמי - פשתן",
+        "price": 10,
+        "image": "/images/store/fabrics/screenshot-2026-09-25-at-20-15-20-muh89n5h.jpg",
+        "description": "ריבוע 25*25 לפחות",
+        "gallery": [
+          "/images/store/fabrics/screenshot-2026-09-25-at-20-20-16-muh89n5h.jpg",
+          "/images/store/fabrics/screenshot-2026-09-25-at-20-20-30-muh89n5i.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "type-1",
+      "type-2",
+      "type-3"
+    ],
+    "category": "fabrics"
+  },
+  "floss-25-set": {
+    "name": "חוטי מולינה dmc",
+    "variants": {
+      "dmc": {
+        "name": "דוללה בודדת של dmc",
+        "price": 5,
+        "image": "/images/store/floss-25-set/screenshot-2026-09-28-at-10-54-17-mukyl4x4.jpg",
+        "description": "בקופה כיתבי לי את הצבע שתירצי, לפי גוון או מספר מדוייק."
+      },
+      "custom-25": {
+        "name": "סט של 25 — שאני מרכיבה לך",
+        "price": 100,
+        "image": "/images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg",
+        "description": "הצבעים שאני משתמשת בהם הכי הרבה בסט מעולה למתחילות, מתקדמות.\nכולל שחור, לבן, ecru, ירוקים, כחולים, צהובים, אדומים. ועוד :)",
+        "units": 25,
+        "stock": 18,
+        "gallery": [
+          "/images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg"
+        ]
+      },
+      "original-27": {
+        "name": "מארז מקורי — 27 גוונים",
+        "price": 120,
+        "image": "/images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-19-mue250c8.jpg",
+        "description": "חוטים של חברת dmc הצרפתית עשויים מ100% כותנה.\nיכולים לשמש לרקמה על בגדים, תיקים, נעליים וכו.\nתהנו :)",
+        "units": 27,
+        "stock": 1,
+        "gallery": [
+          "/images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-12-mue250c9.png"
+        ]
+      },
+      "set-30": {
+        "name": "סט 30 גוונים",
+        "price": 130,
+        "image": "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg",
+        "description": "חוטי כותנה 100% של חברת dmc הצרפתית, סט גוונים שימושי ויפה לרקמת צמחים, טבע, יום יום ובגדול הכל :)",
+        "units": 30,
+        "stock": 1,
+        "gallery": [
+          "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "dmc",
+      "custom-25",
+      "original-27",
+      "set-30"
+    ],
+    "category": "threads"
+  },
+  "flower-bag": {
+    "name": "תיק בד לזר פרחים",
+    "variants": {
+      "type-2": {
+        "name": "פרחוני גווני צהוב וירוק",
+        "price": 240,
+        "image": "/images/store/flower-bag/screenshot-2026-09-22-at-14-54-13-mucouc2f.jpg",
+        "description": "יפהיפה, בד שמזכיר לי את הסדינים והמפות של סבתא רוזה.\nשימוש כיפי, מועיל לעולם, בלי לבזבז שקיות.\nניתן לכבס בקלות במכונה.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/flower-bag/screenshot-2026-09-22-at-12-05-46-mucouc2g.jpg"
+        ]
+      },
+      "type-1": {
+        "name": "בד פרחוני תכלת אפרסק",
+        "price": 240,
+        "image": "/images/store/flower-bag/flower-bag-mucouc2e.jpg",
+        "description": "עוד בד יפהיפה שהתגלגל לידיי והיה ברור שצריך להפוך לתיק מנשא לפרחים.\nשילוב צבעים נעים ובגדול זה חתיכת פיס אופנתי.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/flower-bag/screenshot-2026-09-21-at-21-21-45-mucouc2f.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "type-2",
+      "type-1"
+    ],
+    "category": "embroidered-works"
+  },
+  "flowers-yumiko-1": {
+    "name": "פרחים בהשראת הטבע ויומיקו",
+    "price": 300,
+    "category": "embroidered-works"
+  },
+  "fox": {
+    "name": "רקמת שועל משמח",
+    "price": 220,
+    "category": "embroidered-works"
+  },
+  "gift-card": {
+    "name": "גיפט קארד",
+    "variable": true,
+    "min_price": 50,
+    "max_price": 2000,
+    "presets": [
+      100,
+      150,
+      200,
+      250,
+      300,
+      500
+    ],
+    "category": "gift-card",
+    "categories": [
+      "gift-card",
+      "birth-gifts"
+    ]
+  },
+  "hoops": {
+    "name": "חישוקי רקמה מעץ",
+    "variants": {
+      "13": {
+        "name": "קוטר 13 ס״מ",
+        "price": 35,
+        "image": "/images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg",
+        "description": "אני הכי אוהבת את חישוק 13 ס״מ!\nלא גדול מידי ולא קטן מידי.\nגודל מעולה גם למי שרוצה לרקום על חולצה ולמתוח חלק קטן יותר מהבד.\nמיוצר ע״י חברת vog מעץ אשוח.",
+        "gallery": [
+          "/images/store/hoops/screenshot-2026-09-23-at-15-50-13-mue3pll1.jpg"
+        ]
+      },
+      "16": {
+        "name": "קוטר 16 ס״מ",
+        "price": 35,
+        "image": "/images/store/hoops/screenshot-2026-09-24-at-15-42-15-mufiv0hq.jpg",
+        "description": "מיוצר ע״י חברת vog מעץ אשוח."
+      },
+      "19": {
+        "name": "קוטר 19 ס״מ",
+        "price": 40,
+        "image": "/images/store/hoops/screenshot-2026-09-23-at-23-12-50-muejkbfi.jpg",
+        "description": "מיוצר ע״י חברת vog מעץ אשוח."
+      },
+      "22": {
+        "name": "קוטר 22 ס״מ",
+        "price": 40,
+        "image": "/images/store/hoops/screenshot-2026-09-25-at-20-24-06-muh8dexe.jpg",
+        "description": "חישוק לרקמה גדול ואיכותי של vog.",
+        "stock": 2
+      },
+      "oval-16x10cm": {
+        "name": "אובאלי 16X10 ס״מ",
+        "price": 35,
+        "image": "/images/store/oval-hoop/screenshot-2026-09-23-at-18-49-00-muea6x4t.jpg",
+        "description": "חישוק אובאלי מעץ בוק איכותי.",
+        "gallery": [
+          "/images/store/oval-hoop/screenshot-2026-09-23-at-18-41-15-muea6x4s.jpg"
+        ]
+      },
+      "oval-21x13cm": {
+        "name": "אובאלי 21X13 ס״מ",
+        "price": 35,
+        "image": "/images/store/oval-hoop/screenshot-2026-09-23-at-18-49-38-muea6x4u.jpg",
+        "description": "חישוק אובאלי מעץ בוק איכותי."
+      },
+      "type-6": {
+        "name": "חישוק מתומן לא פחות ולא יותר",
+        "price": 45,
+        "image": "/images/store/hoops/screenshot-2026-09-24-at-23-01-27-mufyyrii.jpg",
+        "description": "גדול ויפה, נהניתי מאוד לרקום בו ולתת במתנה כשהתארחנו בפסח.\nאת הרקמה ראיתי באתר של dmc, כוס לא סימטרית עם פרחים מיוחדים, התאימה בול לחישוק המתומן.\nרוחב 18 ס״מ\nאורך 26 ס״מ",
+        "stock": 3,
+        "gallery": [
+          "/images/store/hoops/screenshot-2026-09-24-at-23-01-08-mufyyrij.jpg",
+          "/images/store/hoops/screenshot-2026-09-24-at-23-01-17-mufyyrij.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "13",
+      "16",
+      "oval-16x10cm",
+      "oval-21x13cm",
+      "19",
+      "22",
+      "type-6"
+    ],
+    "category": "hoops"
+  },
+  "needle": {
+    "name": "מחט לרקמה",
+    "price": 2,
+    "category": "needles"
+  },
+  "needle-threader": {
+    "name": "משחיל חוט למחט",
+    "price": 3,
+    "category": "threads",
+    "categories": [
+      "threads",
+      "needles",
+      "beginners"
+    ]
+  },
+  "pencil-case": {
+    "name": "קלמר קנבס לרקמה",
+    "price": 20,
+    "category": "fabrics"
+  },
+  "portrait": {
+    "name": "מסגרת רקומה",
+    "price": 250,
+    "category": "embroidered-works"
+  },
+  "prym-marker-purple": {
+    "name": "טוש לבדים",
+    "variants": {
+      "water": {
+        "name": "יורד במים",
+        "price": 30,
+        "image": "/images/store/water-marker/screenshot-2026-09-23-at-22-22-56-muejch5n.jpg",
+        "description": "טוש תכלת של חברת prym — יורד במים.",
+        "gallery": [
+          "/images/store/water-marker/screenshot-2026-09-23-at-23-08-59-muejds6g.jpg"
+        ]
+      },
+      "disappearing": {
+        "name": "מתנדף מעצמו",
+        "price": 30,
+        "image": "/images/store/prym-marker-purple/screenshot-2026-09-23-at-22-03-45-mueh62us.jpg",
+        "description": "מתנדף מעצמו או במים. מתאים לשימוש על כל הבדים - כותנה, קנבס, חולצות וכו.",
+        "gallery": [
+          "/images/store/prym-marker-purple/screenshot-2026-09-23-at-15-10-48-mue2d7ma.png",
+          "/images/store/prym-marker-purple/screenshot-2026-09-23-at-23-02-36-muej5m4e.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "water",
+      "disappearing"
+    ],
+    "category": "markers-stickers",
+    "categories": [
+      "markers-stickers",
+      "beginners"
+    ]
+  },
+  "scissors": {
+    "name": "מספרי רקמה איכותיות",
+    "variants": {
+      "9": {
+        "name": "עגולות גודל 9 ס״מ",
+        "price": 70,
+        "image": "/images/store/scissors/screenshot-2026-10-04-at-15-03-06-mutrvlbp.jpg",
+        "description": "קלאסיות יפות, תהנו.",
+        "gallery": [
+          "/images/store/scissors/screenshot-2026-10-04-at-15-02-33-mutrvlbp.jpg",
+          "/images/store/scissors/screenshot-2026-10-04-at-15-02-58-mutrvlbp.jpg",
+          "/images/store/scissors/screenshot-2026-09-23-at-21-50-57-mueib4k5.jpg"
+        ]
+      },
+      "9-2": {
+        "name": "מספרי ציפור 9 ס״מ",
+        "price": 70,
+        "image": "/images/store/scissors/screenshot-2026-09-23-at-21-58-39-mueib4k6.jpg",
+        "description": "חביבות הקהל ללא ספק, זהובות יפות מדוייקות.",
+        "stock": 3
+      },
+      "type-3": {
+        "name": "הזוג המלכותי",
+        "price": 70,
+        "image": "/images/store/scissors/screenshot-2026-09-23-at-23-03-34-muej8ry3.jpg",
+        "description": "גיליתי אותן בצ׳כיה לפני שנה ומאז לא מצאתי כאלה בארץ! סוף סוף הצלחתי לשים ידיי על 2 זוגות.\nגם הן בגודל 9 ס״מ.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/scissors/screenshot-2026-09-23-at-22-01-39-muej8ry4.jpg"
+        ]
+      },
+      "victorinox": {
+        "name": "מספרי רקמה חסידה מוזהבים Victorinox",
+        "price": 110,
+        "image": "/images/store/scissors/screenshot-2026-10-04-at-14-59-58-mutrsqcp.jpg",
+        "description": "יש מספריים שקונים כי צריך מספריים, ויש כאלה שפשוט כיף להחזיק ליד הרקמה. מיוצרות באיטליה.\nמספרי הרקמה של Victorinox הם מספריים מחושלים בעיצוב חסידה קלאסי, עם ידיות מצופות זהב ולהבים חדים ומדויקים. הם מתאימים במיוחד לחיתוך חוטי רקמה, בד ועבודות תפירה ורקמה עדינות.\nקטנים מספיק כדי להיכנס לכל קלמר רקמה, יפים מספיק כדי להשאיר אותם על שולחן העבודה.\n\nפרטים:\nVictorinox\nדגם: 8.1040.12",
+        "stock": 1,
+        "gallery": [
+          "/images/store/scissors/screenshot-2026-10-04-at-15-00-08-mutrsqcp.jpg",
+          "/images/store/scissors/screenshot-2026-10-04-at-15-00-40-mutrsqcp.jpg"
+        ]
+      },
+      "singer": {
+        "name": "מספרי רקמה פרחוניות של singer",
+        "price": 80,
+        "image": "/images/store/scissors/screenshot-2026-09-24-at-15-32-45-mufij4sz.jpg",
+        "description": "איך אפשר שלא להתאהב בך\nגודל 10.1 cm",
+        "stock": 0
+      }
+    },
+    "variant_order": [
+      "9",
+      "9-2",
+      "type-3",
+      "victorinox",
+      "singer"
+    ],
+    "category": "tools"
+  },
+  "scrunchie-chuma-pirchonit-fableism": {
+    "name": "סקראנצ'י חומה פרחונית Fableism",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-lavavot-yerukim": {
+    "name": "סקראנצ'י לבבות ירוקים",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-mishbatzot-shechor-lavan": {
+    "name": "סקראנצ'י משבצות שחור לבן",
+    "price": 85,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-mishbatzot-vrod-lavan": {
+    "name": "סקראנצ'י משבצות ורוד לבן",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-mishbatzot-vrod-lavan-large": {
+    "name": "סקראנצ'י משבצות ורוד לבן",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-nimrim-adilit": {
+    "name": "סקראנצ'י נמרים אצילית",
+    "price": 85,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-prachim-yapaniyim": {
+    "name": "סקראנצ'י פרחים יפניים",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-psim-turquiz": {
+    "name": "סקראנצ'י פסים טורקיז",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-psim-vrod-chum": {
+    "name": "סקראנצ'י פסים ורוד חום",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-rikmat-prachim-bezh-regular": {
+    "name": "סקראנצ'י רקמת פרחים בז׳",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-rikmat-prachim-shechora-regular": {
+    "name": "סקראנצ'י רקמת פרחים שחורה",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-tarnegolim": {
+    "name": "סקראנצ'י תרנגולים",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-yarok-amok": {
+    "name": "סקראנצ'י ירוק עמוק",
+    "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-yarok-amok-large": {
+    "name": "סקראנצ'י ירוק עמוק",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchies": {
+    "name": "סקראנצ'יז בעבודת יד",
+    "variants": {
+      "regular": {
+        "name": "סקראנצ'י גודל רגיל",
+        "price": 30,
+        "image": "/images/scrunchies/variant-regular.jpeg",
+        "description": "הגומייה הקלאסית לגודל רגיל"
+      },
+      "large": {
+        "name": "סקראנצ'י לארג'",
+        "price": 45,
+        "image": "/images/scrunchies/variant-large.jpeg",
+        "description": "גדולה יותר, נוכחות על השיער"
+      },
+      "fancy": {
+        "name": "Fancy סקראנצ'י",
+        "price": 85,
+        "image": "/images/scrunchies/variant-fancy.jpeg",
+        "description": "תחרה ופרטים מיוחדים"
+      }
+    },
+    "variant_order": [
+      "regular",
+      "large",
+      "fancy"
+    ],
+    "category": "embroidered-works"
+  },
+  "special-embroidery-kits": {
+    "name": "ערכות רקמה מיוחדות",
+    "variants": {
+      "tablecloth-autumn": {
+        "name": "מפה יפהיפיה – דוגמת סתיו שלכת",
+        "price": 160,
+        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-56-mui93a0t.jpg",
+        "description": "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
+        "stock": 1,
+        "preorder": true,
+        "gallery": [
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui93a0u.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-07-mui93a0u.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg"
+        ]
+      },
+      "dmc-flowers": {
+        "name": "ערכת רקמה עם 2 דוגמאות",
+        "price": 100,
+        "image": "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-40-mue2vvu5.jpg",
+        "description": "ערכת רקמה כיפית מבית DMC שהבאתי מלונדון.\nכוללת בד, חישוק וחוטים תואמים, עם הסבר ל־2 דוגמאות שונות.",
+        "stock": 3,
+        "gallery": [
+          "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg",
+          "/images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg"
+        ]
+      },
+      "dmc-pearl": {
+        "name": "רקמת סתיו מבית DMC",
+        "price": 120,
+        "image": "/images/store/dmc-kit-pearl/screenshot-2026-09-23-at-15-15-02-mue2n4gg.png",
+        "description": "ערכת רקמה יפהיפיה מבית DMC שהבאתי מהטיול האחרון בלונדון.\nהתוצאה משמחת והתהליך כיפי.",
+        "stock": 0,
+        "gallery": [
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-34-mui9lg06.jpg",
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-23-at-22-31-14-muei2kk4.jpg",
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-25-mui9lg05.jpg",
+          "/images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-48-03-mui9nxtz.jpg"
+        ]
+      },
+      "trimits-elephants": {
+        "name": "ערכת רקמה מלונדון – דוגמת פילים",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg",
+        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg"
+        ]
+      },
+      "kit-all-inclusive": {
+        "name": "ערכת רקמה הכל כלול",
+        "price": 210,
+        "image": "/images/store/kit/screenshot-2026-10-01-at-12-01-32-mupb50fi.jpg",
+        "description": "ערכת רקמה מפנקת בהתאמה אישית.\nכוללת מספריים של DMC, 8 חוטי DMC לבחירה, חישוק VOG מעץ אלון, משחיל, מגנט למחט, 2 מחטים, בד 25×25, ומדבקות או טוש לבדים.",
+        "gallery": [
+          "/images/gallery/kit.jpeg"
+        ]
+      },
+      "trimits-butterfly": {
+        "name": "ערכת רקמה מלונדון – דוגמת פרפר",
+        "price": 100,
+        "image": "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-12-mutybzqn.jpg",
+        "description": "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו.",
+        "stock": 2,
+        "gallery": [
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-00-59-mutybzqn.jpg",
+          "/images/store/trimits-kit-elephant/screenshot-2026-10-04-at-18-01-05-mutybzqn.jpg"
+        ]
+      },
+      "tablecloth-mono": {
+        "name": "מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה",
+        "price": 160,
+        "image": "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg",
+        "description": "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת.",
+        "stock": 0,
+        "preorder": true,
+        "gallery": [
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg",
+          "/images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "tablecloth-autumn",
+      "dmc-flowers",
+      "trimits-elephants",
+      "kit-all-inclusive",
+      "trimits-butterfly",
+      "tablecloth-mono",
+      "dmc-pearl"
+    ],
+    "category": "kits",
+    "categories": [
+      "kits",
+      "beginners"
+    ]
+  },
+  "stickers": {
+    "name": "מדבקות לרקמה",
+    "variants": {
+      "type-4": {
+        "name": "דף מדבקה לרקמה - ריק, להדפסה בבית",
+        "price": 25,
+        "image": "",
+        "description": "הדפים מתאימים לשימוש במדפסת הביתית.\nגודל הדף letter - 21.59 × 27.94 cm."
+      },
+      "type-1": {
+        "name": "דף מדבקות חיות ים",
+        "price": 50,
+        "image": "/images/store/stickers/screenshot-2026-09-23-at-22-11-03-muehnd9s.jpg",
+        "description": ""
+      },
+      "type-2": {
+        "name": "דף מדבקות עציצים",
+        "price": 50,
+        "image": "/images/store/stickers/screenshot-2026-09-23-at-22-18-31-muehnd9s.jpg",
+        "description": "בתמונות, הרקמה של הילית לאחר שימוש במדבקות ושטיפתן במים.",
+        "gallery": [
+          "/images/store/stickers/screenshot-2026-09-23-at-23-10-22-muejgum3.jpg",
+          "/images/store/stickers/screenshot-2026-09-23-at-23-10-40-muejgum4.jpg"
+        ]
+      },
+      "type-3": {
+        "name": "דף מדבקות רקמה בהזמנה אישית",
+        "price": 80,
+        "image": "/images/store/stickers/screenshot-2026-09-26-at-13-48-36-mui9p58w.jpg",
+        "description": "אשמח להפוך את פנטזיית היצירה שלכם למציאות :)\nשלחו לי מה שתרצו ואדפיס לכם על דף ייעודי לרקמה.\nמתאים לרקמה על חולצות, תיקים, בד מתוח על חישוק, קלמרים.\nבתמונות ניתן לראות מדבקות שהוזמנו ואת תהליך הרקמה שלהן.\nהמדבקה נשטפת במים והחוטים נשארים יפים ומבריקים כי חוטי dmc הם 100% כותנה וניתן לשטוף ולכבס אותם ללא דאגה.\n\nלאחר התשלום אשלח לכם הודעה ונמשיך את התהליך.",
+        "gallery": [
+          "/images/store/stickers/screenshot-2026-09-25-at-18-54-24-muh59pdt.jpg",
+          "/images/store/stickers/screenshot-2026-09-25-at-18-54-40-muh59pdu.jpg",
+          "/images/store/stickers/screenshot-2026-09-25-at-18-51-48-muh59pdt.jpg",
+          "/images/store/stickers/screenshot-2026-09-25-at-18-49-53-muh7vdxb.jpg",
+          "/images/store/stickers/screenshot-2026-09-25-at-18-54-03-muh7vdxb.jpg"
+        ]
+      }
+    },
+    "variant_order": [
+      "type-4",
+      "type-1",
+      "type-2",
+      "type-3"
+    ],
+    "category": "markers-stickers"
+  },
+  "voucher-gift": {
+    "name": "שובר מתנה - בוקר פינוק לאמהות",
+    "price": 330,
+    "category": "gift-card",
+    "categories": [
+      "gift-card",
+      "birth-gifts"
+    ]
+  },
+  "yam": {
+    "name": "רקמת בטטה מושרשת",
+    "price": 300,
+    "category": "embroidered-works"
+  }
+}

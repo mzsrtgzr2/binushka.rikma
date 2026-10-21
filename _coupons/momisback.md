@@ -1,0 +1,12 @@
+---
+code: MOMISBACK
+type: percent
+value: 5
+active: true
+applies_to: category
+category: workshops
+products: workshop-mothers-30-12, workshop-hosting-04-12, workshop-mothers-11-11-2
+uses: 1
+note: "מבצע לאמהות חוזרות"
+---
+

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "jekyll",
+  "installCommand": "npm install --omit=dev && bundle install",
+    "buildCommand": "node scripts/build-catalog.js && node scripts/write-sentry-data.js && JEKYLL_ENV=production bundle exec jekyll build",
+  "outputDirectory": "_site",
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "functions": {
+    "api/*.mjs": {
+      "includeFiles": "{_store,_projects,_coupons}/**",
+      "excludeFiles": "{images,_site,vendor,.git,js,_sass,_layouts,_includes,_pages,_posts,css,test}/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/newsletter/subscribe", "destination": "/api/newsletter-subscribe" },
+    { "source": "/api/newsletter/subscribe/", "destination": "/api/newsletter-subscribe" },
+    { "source": "/api/newsletter/unsubscribe", "destination": "/api/newsletter-unsubscribe" },
+    { "source": "/api/newsletter/unsubscribe/", "destination": "/api/newsletter-unsubscribe" },
+    { "source": "/api/:path*/", "destination": "/api/:path*" }
+  ],
+  "redirects": [
+    { "source": "/admin", "destination": "/admin/store/", "permanent": false },
+    { "source": "/admin/", "destination": "/admin/store/", "permanent": false },
+    { "source": "/scrunchies-gallery", "destination": "/store/scrunchies/", "permanent": true },
+    { "source": "/scrunchies-gallery/", "destination": "/store/scrunchies/", "permanent": true }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self'; base-uri 'self'; object-src 'none'" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" },
+        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "Referrer-Policy", "value": "same-origin" }
+      ]
+    },
+    {
+      "source": "/images/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/(favicon.ico|hero4.png)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    }
+  ]
+}

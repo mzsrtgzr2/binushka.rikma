@@ -1,0 +1,175 @@
+---
+layout: default
+---
+
+<div class="scrunchies-hero">
+  {% if page.hero_image %}
+  <img class="scrunchies-hero__bg lazy" data-src="{{ page.hero_image | relative_url }}" alt="{{ page.title }}">
+  {% endif %}
+  <div class="scrunchies-hero__content container">
+    <h1 class="scrunchies-hero__title">{{ page.title }}</h1>
+    {% if page.subtitle %}
+    <p class="scrunchies-hero__subtitle">{{ page.subtitle }}</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if page.model_image %}
+<div class="container animate">
+  <div class="scrunchies-models">
+    <div class="scrunchies-models__text">
+      <h2>טבעי. אותנטי. מקורי.</h2>
+      <p>כל סקראנצ'י נולדת מבד שבחרתי בקפידה — ללא תפירה תעשייתית, ללא שכפול. משהו שמרגיש מיוחד.</p>
+    </div>
+    <div class="scrunchies-models__photo">
+      <img class="lazy" data-src="{{ page.model_image | relative_url }}" alt="">
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="container">
+  <div class="scrunchies-story animate">
+    {% if page.lifestyle_image %}
+    <div class="scrunchies-story__img">
+      <img class="lazy" data-src="{{ page.lifestyle_image | relative_url }}" alt="">
+    </div>
+    {% endif %}
+    <div class="scrunchies-story__text">
+      {{ content }}
+    </div>
+  </div>
+</div>
+
+{% if page.gallery %}
+<div class="scrunchies-gallery animate">
+  {% for img in page.gallery %}
+  <div class="scrunchies-gallery__item">
+    <img class="lazy" data-src="{{ img | relative_url }}" alt="סקראנצ'י">
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if page.stockists %}
+<div class="scrunchies-stockists-band animate">
+  <div class="container">
+    <section class="scrunchies-stockists">
+      <p class="scrunchies-stockists__eyebrow">לקנות בחנות</p>
+      <h2 class="scrunchies-stockists__title">{{ page.stockists_title | default: 'איפה אפשר למצוא את הסקראנצ׳י שלי?' }}</h2>
+      {% if page.stockists_subtitle %}
+      <p class="scrunchies-stockists__subtitle">{{ page.stockists_subtitle }}</p>
+      {% endif %}
+      <div class="scrunchies-stockists__grid">
+        {% for stockist in page.stockists %}
+        {% for location in stockist.locations %}
+        {% if location.url %}
+        <a class="scrunchies-stockist scrunchies-stockist--link" href="{{ location.url }}" target="_blank" rel="noopener">
+        {% else %}
+        <div class="scrunchies-stockist">
+        {% endif %}
+          <div class="scrunchies-stockist__logo{% if location.logo_fill %} scrunchies-stockist__logo--fill{% endif %}">
+            {% if location.logo %}
+            <img class="lazy" data-src="{{ location.logo | relative_url }}" alt="{{ location.name }}">
+            {% else %}
+            <span class="scrunchies-stockist__monogram">{{ location.name | slice: 0 }}</span>
+            {% endif %}
+          </div>
+          <h3 class="scrunchies-stockist__name">{{ location.name }}</h3>
+          <p class="scrunchies-stockist__city">{{ stockist.city }}</p>
+          {% if location.url %}
+          <p class="scrunchies-stockist__link">{% if location.url contains 'instagram' %}לאינסטגרם{% else %}לאתר{% endif %}</p>
+          {% endif %}
+        {% if location.url %}
+        </a>
+        {% else %}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endif %}
+
+{% assign cart_meta = site.data.catalog.scrunchies %}
+{% if site.data.store-cart.enabled and cart_meta.variants %}
+<div class="container scrunchies-variants-section animate" data-product-id="scrunchies">
+  <p class="scrunchies-variants-section__eyebrow">הזמנה ישירה</p>
+  <h2 class="scrunchies-variants-section__title">בחרי סוג</h2>
+  <p class="scrunchies-variants-section__subtitle">כל סקראנצ'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>
+  <div class="scrunchies-variants">
+    {% assign variant_ids = cart_meta.variant_order %}
+    {% if variant_ids == nil or variant_ids.size == 0 %}
+      {% assign variant_ids = '' | split: '' %}
+      {% for variant in cart_meta.variants %}
+        {% assign variant_ids = variant_ids | push: variant[0] %}
+      {% endfor %}
+    {% endif %}
+    {% for vid in variant_ids %}
+    {% assign v = cart_meta.variants[vid] %}
+    {% if v %}
+    {% assign v_sold_out = false %}
+    {% assign v_preorder = false %}
+    {% assign v_limited = false %}
+    {% if v.stock != nil and v.stock != blank %}
+      {% if v.stock == 0 %}
+        {% if page.preorder or v.preorder %}
+          {% assign v_preorder = true %}
+        {% else %}
+          {% assign v_sold_out = true %}
+        {% endif %}
+      {% elsif v.stock <= 3 %}
+        {% assign v_limited = true %}
+      {% endif %}
+    {% endif %}
+    <article class="scrunchies-variant" data-variant-id="{{ vid }}">
+      {% if v.image %}
+      <div class="scrunchies-variant__photo">
+        <img class="lazy" data-src="{{ v.image | relative_url }}" alt="{{ v.name }}">
+      </div>
+      {% endif %}
+      {% if v.gallery %}
+      <div class="scrunchies-variant__gallery">
+        {% for gimg in v.gallery %}
+        <img class="lazy" data-src="{{ gimg | relative_url }}" alt="{{ v.name }}">
+        {% endfor %}
+      </div>
+      {% endif %}
+      <h3 class="scrunchies-variant__name">{{ v.name }}</h3>
+      {% if v.description %}
+      <p class="scrunchies-variant__desc">{{ v.description }}</p>
+      {% endif %}
+      <div class="scrunchies-variant__price">₪{{ v.price }}</div>
+      {% if v_sold_out %}
+      <div class="scrunchies-variant__stock out-of-stock-text">אזל מהמלאי</div>
+      {% elsif v_preorder %}
+      <div class="scrunchies-variant__stock preorder-text">הזמיני מראש</div>
+      {% elsif v_limited %}
+      <div class="scrunchies-variant__stock limited-stock-text">{% if v.stock == 1 %}אחרון במלאי{% else %}מלאי מוגבל{% endif %}</div>
+      {% endif %}
+      <button type="button" class="button button--primary" data-cart-add="scrunchies" data-cart-variant="{{ vid }}"{% if v_sold_out %} hidden{% endif %}>
+        {% if v_preorder %}הזמיני מראש{% else %}הוסיפי לסל{% endif %}
+      </button>
+      {% if v_sold_out %}
+      {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" %}
+      {% else %}
+      {% include newsletter-notify-button.html intent="restock" source="product_variant" analytics="newsletter_restock" hide="1" %}
+      {% endif %}
+      <p class="scrunchies-variant__note">הרכישה היא לפי המלאי הקיים. לאחר ההזמנה <a href="https://wa.me/972544247753?text={{ 'הי בינושקה, הזמנתי סקראנצ׳י ואשמח לראות את הבדים הזמינים' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ</a> כדי לראות את הבדים הזמינים.</p>
+    </article>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="container scrunchies-cta animate">
+  <p class="scrunchies-cta__eyebrow">הזמנה ישירה</p>
+  <p class="scrunchies-cta__text">כל סקראנצ'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>
+  <a href="{{ page.form_url }}" class="button button--primary scrunchies-cta__btn" target="_blank" rel="noopener">להזמנה ותשלום</a>
+  <p class="scrunchies-cta__note">הרכישה היא לפי המלאי הקיים. לאחר ההזמנה <a href="https://wa.me/972544247753?text={{ 'הי בינושקה, הזמנתי סקראנצ׳י ואשמח לראות את הבדים הזמינים' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ</a> כדי לראות את הבדים הזמינים.</p>
+</div>
+{% endif %}
+
+{% include store-shipping.html %}

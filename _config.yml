@@ -1,7 +1,7 @@
 #-------------------------------
 # General Site Settings
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://rikma.binushka.com" # the base hostname & protocol for your site, e.g. http://example.com
 
 
 #-------------------------------
@@ -31,6 +31,9 @@ collections:
   store:
     output: true
     permalink: /store/:slug
+  newsletter:
+    output: true
+    permalink: /newsletter/:slug
 
 # Pages Path
 defaults:
@@ -58,7 +61,45 @@ defaults:
       type: "store"
     values:
       layout: "store-item"
+  - scope:
+      path: ""
+      type: "newsletter"
+    values:
+      layout: "newsletter-issue"
 
 sass:
   sass_dir: _sass
   style: compressed
+
+
+#-------------------------------
+# Files that are tooling, not site content
+exclude:
+  - .jekyll-cache/
+  - .sass-cache/
+  - .vercel/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - .vercelignore
+  - vercel.json
+  - docker-compose.yml
+  - README.md
+  - DEPLOYMENT.md
+  - GROW_PAYMENTS_SETUP.md
+  - INSTAGRAM_SETUP.md
+  - NEWSLETTER_SETUP.md
+  - api/
+  # Imported by the newsletter functions in api/, so it must not be published
+  # either.
+  - lib/
+  - test/
+  - scripts/
+  # Coupon codes are admin-only; checkout loads them from the function bundle.
+  - _coupons/
+  - .env.example

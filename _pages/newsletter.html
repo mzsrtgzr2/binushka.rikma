@@ -1,0 +1,54 @@
+---
+layout: page
+title: הניוזלטר
+description: עדכונים על סדנאות חדשות, מוצרים ורעיונות לרקמה - ישירות למייל, בלי ספאם.
+---
+
+{% assign newsletter = site.data.settings.newsletter %}
+
+{% if newsletter.enabled %}
+
+<div class="newsletter-page">
+
+  {% assign sent_issues = site.newsletter | where: 'status', 'sent' | sort: 'date' | reverse %}
+  <section class="newsletter-page__section newsletter-page__section--archive">
+    <h2 class="newsletter-page__heading">גיליונות אחרונים</h2>
+    {% if sent_issues.size > 0 %}
+      <div class="newsletter-teaser__grid">
+        {% for issue in sent_issues %}
+          {% include newsletter-teaser-card.html issue=issue %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="newsletter-page__intro">עוד אין גיליון שנשלח. טיוטה לא מופיעה כאן.</p>
+    {% endif %}
+  </section>
+
+  <section class="newsletter-page__section newsletter-page__section--unsubscribe">
+    <h2 class="newsletter-page__heading">ביטול הרשמה</h2>
+    <p class="newsletter-page__intro">
+      בכל מייל שאני שולחת יש קישור להסרה בלחיצה אחת. אם נוח לך יותר, אפשר גם להסיר את הכתובת כאן
+      ולא לקבל ממני יותר מיילים.
+    </p>
+
+    <form class="newsletter-signup__form" data-newsletter-unsubscribe-form novalidate>
+      <div class="newsletter-signup__field">
+        <input type="email"
+               name="email"
+               class="form__input newsletter-signup__input"
+               placeholder="{{ newsletter.placeholder }}"
+               aria-label="{{ newsletter.placeholder }}"
+               autocomplete="email"
+               required>
+        <button type="submit" class="button newsletter-signup__button newsletter-signup__button--quiet">
+          הסירי אותי
+        </button>
+      </div>
+
+      <p class="newsletter-status" data-newsletter-status role="status" aria-live="polite" hidden></p>
+    </form>
+  </section>
+
+</div>
+
+{% endif %}

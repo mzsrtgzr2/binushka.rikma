@@ -6,12 +6,15 @@ layout: default
   <div class="row">
 
     <div class="col col-12">
+      {% include newsletter-page-flags.html %}
+      {% unless newsletter_hidden %}
       <div class="page-head">
         <h1 class="page-title">{{ page.title | escape }}</h1>
         {% if page.description %}
           <p class="page-description">{{ page.description }}</p>
         {% endif %}
       </div>
+      {% endunless %}
     </div>
 
     {%if page.image %}

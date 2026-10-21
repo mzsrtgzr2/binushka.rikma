@@ -1,0 +1,103 @@
+{%- comment -%}
+  Event JSON-LD for Google rich results (date / price / location).
+  Skipped for hidden / noindex workshop pages.
+{%- endcomment -%}
+{%- if page.hide or page.noindex -%}
+{%- elsif page.date -%}
+{%- assign event_location = page.location | default: '' | strip -%}
+{%- if event_location == blank -%}
+  {%- assign plain_body = content | strip_html -%}
+  {%- assign loc_chunks = plain_body | split: 'מיקום:' -%}
+  {%- if loc_chunks.size > 1 -%}
+    {%- comment -%} Body lines use two trailing spaces as a break (kramdown). {%- endcomment -%}
+    {%- assign event_location = loc_chunks[1] | strip | split: '  ' | first | strip -%}
+  {%- endif -%}
+{%- endif -%}
+{%- if event_location == blank -%}
+  {%- assign event_location = 'אייזנברג, רחובות' -%}
+{%- endif -%}
+
+{%- assign event_name = page.title -%}
+{%- if page.subtitle and page.subtitle != blank -%}
+  {%- assign event_name = page.title | append: ' — ' | append: page.subtitle -%}
+{%- endif -%}
+
+{%- assign event_description = page.subtitle | default: '' | strip -%}
+{%- if event_description == blank -%}
+  {%- assign event_description = site.data.settings.description | default: '' | strip -%}
+{%- endif -%}
+
+{%- assign event_price = nil -%}
+{%- if workshop and workshop.price -%}
+  {%- assign event_price = workshop.price | plus: 0 -%}
+{%- elsif page.cart_price -%}
+  {%- assign event_price = page.cart_price | plus: 0 -%}
+{%- endif -%}
+{%- if workshop and workshop.variants -%}
+  {%- assign event_price = workshop.price | plus: 0 -%}
+  {%- for pack in workshop.variants -%}
+    {%- assign pack_places = pack[1].places | default: 1 | plus: 0 -%}
+    {%- if pack_places < 1 -%}{%- assign pack_places = 1 -%}{%- endif -%}
+    {%- assign pack_each = pack[1].price | plus: 0 | divided_by: pack_places -%}
+    {%- if pack_each > 0 and pack_each < event_price -%}
+      {%- assign event_price = pack_each -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- assign event_availability = 'https://schema.org/InStock' -%}
+{%- if page.registration_not_open -%}
+  {%- assign event_availability = 'https://schema.org/PreOrder' -%}
+{%- elsif sold_out -%}
+  {%- assign event_availability = 'https://schema.org/SoldOut' -%}
+{%- endif -%}
+
+{%- assign event_locality = '' -%}
+{%- if event_location contains 'תל אביב' -%}
+  {%- assign event_locality = 'תל אביב' -%}
+{%- elsif event_location contains 'רחובות' -%}
+  {%- assign event_locality = 'רחובות' -%}
+{%- endif -%}
+
+{%- assign event_url = page.url | absolute_url -%}
+{%- assign event_start = page.date | date_to_xmlschema -%}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": {{ event_name | jsonify }},
+  "startDate": {{ event_start | jsonify }},
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "location": {
+    "@type": "Place",
+    "name": {{ event_location | jsonify }},
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": {{ event_location | jsonify }}{% if event_locality != blank %},
+      "addressLocality": {{ event_locality | jsonify }}{% endif %},
+      "addressCountry": "IL"
+    }
+  }{% if page.image %},
+  "image": [
+    {{ page.image | absolute_url | jsonify }}
+  ]{% endif %}{% if event_description != blank %},
+  "description": {{ event_description | jsonify }}{% endif %},
+  "url": {{ event_url | jsonify }}{% if event_price and event_price > 0 %},
+  "offers": {
+    "@type": "Offer",
+    "url": {{ event_url | jsonify }},
+    "price": {{ event_price }},
+    "priceCurrency": "ILS",
+    "availability": {{ event_availability | jsonify }}
+  }{% endif %},
+  "organizer": {
+    "@type": "Organization",
+    "name": {{ site.data.settings.title | jsonify }},
+    "url": {{ '/' | absolute_url | jsonify }}
+  },
+  "inLanguage": "he"
+}
+</script>
+{%- endif -%}

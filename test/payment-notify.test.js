@@ -1,0 +1,320 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const notify = require('../lib/routes/payment-notify');
+const checkout = require('../lib/routes/checkout');
+const admin = require('../lib/routes/admin');
+const coupons = require('../lib/coupons');
+const { signOrder, verifyOrder, newOrderId } = require('../lib/order-token');
+
+const SECRET = 'order-secret-for-tests';
+
+const FOX = `---
+title: רקמת שועל משמח
+price: ₪220
+out_of_stock: false
+limited_stock: true
+stock: 2
+---
+
+body
+`;
+
+function stockOf(root) {
+  return admin.parseProduct('fox', fs.readFileSync(path.join(root, '_store', 'fox.md'), 'utf8')).stock;
+}
+
+function mockRes() {
+  return {
+    statusCode: 200,
+    body: null,
+    setHeader() {},
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(body) {
+      this.body = body;
+      return this;
+    },
+  };
+}
+
+let root;
+let realFetchDocument;
+const savedEnv = {};
+
+test.beforeEach(() => {
+  root = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-notify-'));
+  fs.mkdirSync(path.join(root, '_store'));
+  fs.writeFileSync(path.join(root, '_store', 'fox.md'), FOX);
+  for (const key of ['ORDER_SIGNING_SECRET', 'ADMIN_LOCAL_ROOT', 'MORNING_API_KEY_SECRET']) {
+    savedEnv[key] = process.env[key];
+  }
+  process.env.ORDER_SIGNING_SECRET = SECRET;
+  process.env.ADMIN_LOCAL_ROOT = root;
+  realFetchDocument = notify.morning.fetchDocument;
+});
+
+test.afterEach(() => {
+  notify.morning.fetchDocument = realFetchDocument;
+  for (const [key, value] of Object.entries(savedEnv)) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+function orderToken(overrides = {}) {
+  return signOrder(process.env, {
+    orderId: newOrderId(),
+    purchases: [{ slug: 'fox', quantity: 1 }],
+    amount: 220,
+    ...overrides,
+  });
+}
+
+async function callNotify(token, body = { documentId: 'doc-12345678' }) {
+  const res = mockRes();
+  await notify({ method: 'POST', headers: {}, query: { order: token }, body }, res);
+  return res;
+}
+
+test('opening a payment form does not touch stock', async () => {
+  const purchases = checkout.inventoryPurchases({ lines: [{ id: 'fox', quantity: 1 }] });
+  assert.deepEqual(purchases, [{ slug: 'fox', quantity: 1 }]);
+  const url = checkout.notifyUrlFor({ VERCEL_ENV: 'production', SITE_URL: 'https://rikma.binushka.com' }, 'tok');
+  assert.equal(url, 'https://rikma.binushka.com/api/payment-notify/?order=tok');
+  assert.equal(stockOf(root), 2);
+});
+
+test('a preview hears about its own payments', () => {
+  const url = checkout.notifyUrlFor({ VERCEL_ENV: 'preview', VERCEL_URL: 'shop-abc.vercel.app' }, 'tok');
+  assert.equal(url, 'https://shop-abc.vercel.app/api/payment-notify/?order=tok');
+});
+
+test('a confirmed payment decrements stock once, even when Morning retries', async () => {
+  notify.morning.fetchDocument = async (id) => ({ id, amount: 220, creationDate: Math.floor(Date.now() / 1000) });
+  const token = orderToken();
+
+  const first = await callNotify(token);
+  assert.equal(first.statusCode, 200);
+  assert.deepEqual(first.body.changed, ['fox']);
+  assert.equal(stockOf(root), 1);
+
+  const retry = await callNotify(token);
+  assert.equal(retry.statusCode, 200);
+  assert.equal(retry.body.duplicate, true);
+  assert.equal(stockOf(root), 1);
+
+  const { orderId } = verifyOrder(process.env, token);
+  const marker = JSON.parse(fs.readFileSync(path.join(root, admin.paidOrderPath(orderId)), 'utf8'));
+  assert.equal(marker.documentId, 'doc-12345678');
+});
+
+test('a forged or tampered order token is refused', async () => {
+  let fetched = false;
+  notify.morning.fetchDocument = async () => {
+    fetched = true;
+    return { amount: 220 };
+  };
+  const token = orderToken();
+  const [body, sig] = token.split('.');
+  const tampered = `${Buffer.from(
+    JSON.stringify({ ...JSON.parse(Buffer.from(body, 'base64url')), p: [['fox', 2]] })
+  ).toString('base64url')}.${sig}`;
+
+  for (const bad of [tampered, 'nope', '', `${body}.${sig}x`]) {
+    const res = await callNotify(bad);
+    assert.equal(res.statusCode, 403, bad);
+  }
+  const otherSecret = signOrder({ ORDER_SIGNING_SECRET: 'attacker' }, {
+    orderId: newOrderId(),
+    purchases: [{ slug: 'fox', quantity: 2 }],
+    amount: 1,
+  });
+  assert.equal((await callNotify(otherSecret)).statusCode, 403);
+  assert.equal(fetched, false);
+  assert.equal(stockOf(root), 2);
+});
+
+test('a callback without a real Morning document changes nothing', async () => {
+  notify.morning.fetchDocument = async () => null;
+  const res = await callNotify(orderToken());
+  assert.equal(res.statusCode, 400);
+  assert.equal(stockOf(root), 2);
+});
+
+test('a document for a different amount changes nothing', async () => {
+  notify.morning.fetchDocument = async () => ({ amount: 10, payment: [{ price: 10 }] });
+  const res = await callNotify(orderToken());
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.code, 'amount-mismatch');
+  assert.equal(stockOf(root), 2);
+});
+
+test('an old document cannot be replayed against a new order', async () => {
+  const lastWeek = Math.floor((Date.now() - 3 * 24 * 60 * 60 * 1000) / 1000);
+  notify.morning.fetchDocument = async () => ({ amount: 220, creationDate: lastWeek });
+  const res = await callNotify(orderToken());
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.code, 'document-predates-order');
+  assert.equal(stockOf(root), 2);
+});
+
+test('a Morning outage asks for a retry instead of dropping the order', async () => {
+  notify.morning.fetchDocument = async () => {
+    const err = new Error('down');
+    err.retry = true;
+    throw err;
+  };
+  const res = await callNotify(orderToken());
+  assert.equal(res.statusCode, 502);
+  assert.equal(stockOf(root), 2);
+});
+
+test('the Morning callback body is read as a form or JSON', () => {
+  assert.equal(notify.documentIdFrom(notify.readForm('documentId=abc-12345678&x=1')), 'abc-12345678');
+  assert.equal(notify.documentIdFrom(notify.readForm('{"document":{"id":"abc-12345678"}}')), 'abc-12345678');
+  assert.equal(notify.documentIdFrom(notify.readForm({ documentId: '../etc' })), null);
+});
+
+test('only POST is accepted, and a callback needs a document id', async () => {
+  const get = mockRes();
+  await notify({ method: 'GET', headers: {}, query: { order: orderToken() } }, get);
+  assert.equal(get.statusCode, 405);
+
+  const missing = await callNotify(orderToken(), {});
+  assert.equal(missing.statusCode, 400);
+  assert.equal(missing.body.code, 'no-document');
+  assert.equal(stockOf(root), 2);
+});
+
+test('a burst from one address is throttled before stock moves', async () => {
+  let last;
+  for (let i = 0; i < 61; i += 1) {
+    const res = mockRes();
+    await notify(
+      {
+        method: 'POST',
+        headers: { 'x-forwarded-for': '198.51.100.8' },
+        query: { order: 'nope' },
+        body: {},
+      },
+      res
+    );
+    last = res;
+  }
+  assert.equal(last.statusCode, 429);
+  assert.equal(stockOf(root), 2);
+});
+
+test('Morning is asked to retry when this deploy has no API key', async () => {
+  const keyId = process.env.MORNING_API_KEY_ID;
+  delete process.env.MORNING_API_KEY_ID;
+  delete process.env.MORNING_API_KEY_SECRET;
+  notify.morning.fetchDocument = realFetchDocument;
+  try {
+    const res = await callNotify(orderToken());
+    assert.equal(res.statusCode, 502);
+    assert.equal(res.body.code, 'retry');
+    assert.equal(stockOf(root), 2);
+  } finally {
+    if (keyId === undefined) delete process.env.MORNING_API_KEY_ID;
+    else process.env.MORNING_API_KEY_ID = keyId;
+  }
+});
+
+test('expired order tokens are refused', () => {
+  const token = orderToken({ issuedAt: Date.now() - 8 * 24 * 60 * 60 * 1000 });
+  assert.equal(verifyOrder(process.env, token), null);
+});
+
+test('a paid order with a coupon bumps uses once', async () => {
+  fs.mkdirSync(path.join(root, '_coupons'));
+  fs.writeFileSync(
+    path.join(root, '_coupons', 'save10.md'),
+    coupons.serialize({ code: 'SAVE10', type: 'percent', value: 10, active: true })
+  );
+  notify.morning.fetchDocument = async (id) => ({
+    id,
+    amount: 198,
+    creationDate: Math.floor(Date.now() / 1000),
+  });
+  const token = orderToken({ amount: 198, coupon: 'save10' });
+  assert.equal(verifyOrder(process.env, token).coupon, 'SAVE10');
+
+  const first = await callNotify(token, { documentId: 'doc-coupon12' });
+  assert.equal(first.statusCode, 200);
+  const after = coupons.parse(
+    'save10',
+    fs.readFileSync(path.join(root, '_coupons', 'save10.md'), 'utf8')
+  );
+  assert.equal(after.uses, 1);
+
+  const retry = await callNotify(token, { documentId: 'doc-coupon12' });
+  assert.equal(retry.statusCode, 200);
+  assert.equal(retry.body.duplicate, true);
+  const again = coupons.parse(
+    'save10',
+    fs.readFileSync(path.join(root, '_coupons', 'save10.md'), 'utf8')
+  );
+  assert.equal(again.uses, 1);
+
+  const { orderId } = verifyOrder(process.env, token);
+  const marker = JSON.parse(fs.readFileSync(path.join(root, admin.paidOrderPath(orderId)), 'utf8'));
+  assert.equal(marker.coupon, 'SAVE10');
+});
+
+test('a confirmed payment emails the owner the pending order snapshot', async () => {
+  const sent = [];
+  const realSend = notify.orderMail.sendOrderSummary;
+  const realRead = notify.pendingOrders.read;
+  const realRemove = notify.pendingOrders.remove;
+  notify.orderMail.sendOrderSummary = async (snapshot, opts) => {
+    sent.push({ snapshot, opts });
+    return { ok: true };
+  };
+  notify.pendingOrders.read = async (_env, orderId) => ({
+    orderId,
+    customer: {
+      name: 'נועה כהן',
+      email: 'noa@example.com',
+      phone: '0501234567',
+      address: 'אייזנברג 39',
+      city: 'רחובות',
+      zip: '7620000',
+      country: 'IL',
+    },
+    shippingLabel: 'משלוח - שליח עד הבית',
+    lines: [{ description: 'fox', quantity: 1, price: 220 }],
+    subtotal: 220,
+    shipping: 0,
+    discount: 0,
+    total: 220,
+    notes: { packAsGift: true, giftMessage: 'מזל טוב' },
+  });
+  notify.pendingOrders.remove = async () => ({ ok: true });
+  notify.morning.fetchDocument = async (id) => ({
+    id,
+    amount: 220,
+    creationDate: Math.floor(Date.now() / 1000),
+  });
+
+  try {
+    const token = orderToken();
+    const res = await callNotify(token);
+    assert.equal(res.statusCode, 200);
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0].snapshot.customer.email, 'noa@example.com');
+    assert.equal(sent[0].snapshot.notes.giftMessage, 'מזל טוב');
+    assert.equal(sent[0].opts.documentId, 'doc-12345678');
+    assert.equal(stockOf(root), 1);
+  } finally {
+    notify.orderMail.sendOrderSummary = realSend;
+    notify.pendingOrders.read = realRead;
+    notify.pendingOrders.remove = realRemove;
+  }
+});

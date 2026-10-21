@@ -5,11 +5,13 @@
 
 <body>
 
-  {% if site.data.settings.google-analytics %}
-    {% include google-analytics.html %}
+  {% if site.data.settings.mixpanel-token %}
+    {% include mixpanel.html %}
+  {% endif %}
+  {% if site.data.settings.clarity %}
+    {% include clarity.html %}
   {% endif %}
 
-  {% include top-shipping-banner.html %}
   {% include header.html %}
 
   <!-- begin content -->
@@ -20,9 +22,24 @@
 
   {% include footer.html %}
   {% include floater.html %}
+  {% include store-cart-catalog.html %}
 
   <script src="{{ site.baseurl }}/js/scripts.js"></script>
   <script src="{{ site.baseurl }}/js/common.js"></script>
+  <script src="{{ site.baseurl }}/js/product-gallery.js?v=gallery-target" defer></script>
+  <script src="{{ site.baseurl }}/js/related-products.js" defer></script>
+  <script src="{{ site.baseurl }}/js/analytics.js" defer></script>
+  {% if site.data.store-cart.enabled %}
+  <script src="{{ site.baseurl }}/js/store-cart.js" defer></script>
+  {% endif %}
+  {% if page.url == '/checkout/' or page.url == '/checkout' %}
+  <script src="{{ site.baseurl }}/js/checkout.js" defer></script>
+  {% endif %}
+  {% if page.url == '/thanks/' or page.url == '/thanks' %}
+  <script src="{{ site.baseurl }}/js/thanks.js" defer></script>
+  {% endif %}
+  {% include newsletter-config.html %}
+  {% include newsletter-modal.html %}
 </body>
 
 </html>

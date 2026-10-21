@@ -2,12 +2,17 @@
 title: רקמת בטטה מושרשת
 date: 2025-01-20 10:00:00 +0300
 subtitle: בעבודת יד עדינה
-image: '/images/gallery/yam.png'
+image: /images/gallery/yam.png
 price: ₪300
 out_of_stock: true
 limited_stock: true
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+order: 18
+cart_price: 300
+limited_edition: false
+preorder: false
+category: embroidered-works
 ---
 
 ## רקמת בטטה מושרשת בעבודת יד עדינה

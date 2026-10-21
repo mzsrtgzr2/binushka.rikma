@@ -1,0 +1,57 @@
+---
+layout: default
+---
+
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+
+<div class="post-head">
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        <div class="post-info">
+          <p class="newsletter-issue__eyebrow">
+            {% if page.status == 'sent' %}
+              {{ newsletter.section.teaser_label }}
+            {% else %}
+              טיוטה — עוד לא נשלח
+            {% endif %}
+          </p>
+
+          <h1 class="post-title">{{ page.title | escape }}</h1>
+
+          {% if page.subtitle %}
+            <p class="newsletter-issue__subtitle">{{ page.subtitle }}</p>
+          {% endif %}
+
+          <div class="post-meta">
+            <time class="post-date" datetime="{{ page.date | date_to_xmlschema }}">
+              {% include hebrew-date.html date=page.date %}
+            </time>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if page.thumbnail %}
+  <div class="container">
+    <div class="row">
+      <div class="col col-12">
+        <div class="post-image animate">
+          <img src="{{ page.thumbnail | relative_url }}" alt="{{ page.title }}">
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<div class="container animate">
+  <article class="post newsletter-issue">
+    <div class="post__content">
+      {{ content }}
+    </div>
+  </article>
+</div>
+{% endif %}

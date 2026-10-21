@@ -1,0 +1,37 @@
+{
+  "orderId": "409382acc3c50f882ee53bf4",
+  "documentId": "1f9755dc-93e0-4f1e-9962-760e7fb1e002",
+  "amount": 25,
+  "purchases": [
+    {
+      "slug": "dmc-etoile-set",
+      "quantity": 1
+    },
+    {
+      "slug": "fabrics",
+      "quantity": 1,
+      "variant": "type-2"
+    },
+    {
+      "slug": "scrunchie-lavavot-chumim",
+      "quantity": 1
+    },
+    {
+      "slug": "floss-25-set",
+      "quantity": 1,
+      "variant": "dmc"
+    },
+    {
+      "slug": "hoops",
+      "quantity": 1,
+      "variant": "oval-16x10cm"
+    },
+    {
+      "slug": "embroidery-books",
+      "quantity": 1,
+      "variant": "type-4"
+    }
+  ],
+  "paidAt": "2026-10-11T09:30:48.665Z",
+  "coupon": "SHACHAR660"
+}

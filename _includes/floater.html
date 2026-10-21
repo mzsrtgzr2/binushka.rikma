@@ -20,7 +20,15 @@ body {
  text-align: center;
  font-size: 30px;
  box-shadow: 2px 2px 3px #999;
- z-index: 100;
+ /* Above header (1202) and cart FAB (1205) so the icon stays visible */
+ z-index: 1210;
+}
+
+/* Mobile: sit above the cart FAB stacked on the same side */
+@media only screen and (max-width: 1024px) {
+ .floating {
+  bottom: 112px; /* 40 + 60 cart + 12 gap */
+ }
 }
 
 .fab-icon {

@@ -18,7 +18,7 @@ layout: default
 <div class="container">
   {% assign is_fully_booked = retreat_page.fully_booked | default: false %}
   <div class="retreat-banner animate {% if is_fully_booked %}retreat-banner--fully-booked{% endif %}">
-    <a href="/retreat/" class="retreat-banner__link">
+    <a href="/retreat/" class="retreat-banner__link" data-analytics="retreat_banner">
       <div class="retreat-banner__image-wrapper">
         <img src="/images/retreat-banner.png" alt="ריטריט אומנות" class="retreat-banner__image">
       </div>
@@ -47,33 +47,118 @@ layout: default
 {% endif %}
 
 <div class="projects-page container animate">
-  <div class="row">
-    {% assign sorted = site.projects | sort: 'date'  %}
-    {% for project in sorted %}
-      {% unless project.hide %}
-        <article class="project col col-4 col-d-6 col-t-12{% if project.registration_full %} project--full{% endif %}">
-          <div class="project__content">
-            <div class="project__info">
-              <div class="project__status-slot">
-                {% if project.registration_full %}
-                  <div class="project__status">אין מקומות פנויים</div>
-                {% elsif project.last_places %}
-                  <div class="project__status">מקומות אחרונים</div>
-                {% endif %}
-              </div>
-              <h3 class="project__title"><a href="{{project.url}}">{{ project.title }}</a></h3>
-              {% if project.subtitle %}
-              <div class="project__subtitle">{{ project.subtitle }}</div>
+  <div class="store-layout">
+    <div class="store-menu-backdrop" id="workshop-menu-backdrop" hidden></div>
+    <nav class="store-menu" id="workshop-menu" aria-label="סינון סדנאות">
+      <div class="store-menu__header">
+        <h2 class="store-menu__title">קטגוריות</h2>
+        <button type="button" class="store-menu__close" id="workshop-menu-close" aria-label="סגירת קטגוריות">&times;</button>
+      </div>
+      <div class="store-menu__body" id="workshop-filters">
+        <div class="store-menu__group">
+          <button
+            type="button"
+            class="store-menu__link is-active"
+            data-workshop-category=""
+            data-analytics="workshop_filter_category"
+            aria-pressed="true"
+          >
+            <span class="store-menu__label">כל הסדנאות</span>
+          </button>
+        </div>
+        {% for category in site.data.workshop-categories %}
+        <div class="store-menu__group">
+          <button
+            type="button"
+            class="store-menu__link"
+            data-workshop-category="{{ category[0] }}"
+            data-analytics="workshop_filter_category"
+            aria-pressed="false"
+          >
+            <span class="store-menu__label">{{ category[1] }}</span>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    </nav>
+
+    <div class="store-layout__main">
+      <div class="store-toolbar">
+        <button
+          type="button"
+          class="store-toolbar__filters"
+          id="workshop-menu-toggle"
+          aria-expanded="false"
+          aria-controls="workshop-menu"
+          data-analytics="workshop_menu_open"
+        >
+          קטגוריות
+        </button>
+        <label class="store-toolbar__sort" for="workshop-month">
+          <span class="store-toolbar__label">בחירת חודש</span>
+          <select id="workshop-month" class="store-toolbar__select" name="workshop-month" data-analytics="workshop_filter_month">
+            <option value="" selected>הכל</option>
+            {% comment %}
+              Show only the next 4 months (current + 3), wrapping past December.
+            {% endcomment %}
+            {% assign current_month = 'now' | date: '%m' | plus: 0 %}
+            {% for offset in (0..3) %}
+              {% assign month_num = current_month | plus: offset %}
+              {% if month_num > 12 %}
+                {% assign month_num = month_num | minus: 12 %}
               {% endif %}
-            </div>
-            <a href="{{project.url}}" class="project__image">
-              <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
-            </a>
-          </div>
-        </article>
-      {% endunless %}
-    {% endfor %}
+              {% assign month_key = month_num | plus: 100 | append: '' | slice: 1, 2 %}
+              <option value="{{ month_key }}">{{ site.data.months[month_key] }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <div class="row" id="workshops-grid">
+        {% comment %}
+          Public list is chronological (next workshop first), with open
+          workshops before sold-out. Manual backoffice `order` is ignored.
+          The ongoing advanced circle and the private workshop stay at the
+          end — circle first, then private.
+        {% endcomment %}
+        {% assign projects_dated = '' | split: '' %}
+        {% assign pinned_monthly = '' | split: '' %}
+        {% assign pinned_private = '' | split: '' %}
+        {% assign projects_sorted = site.projects | sort: 'date' %}
+        {% for project in projects_sorted %}
+          {% if project.slug == 'monthly-meeting' %}
+            {% assign pinned_monthly = pinned_monthly | push: project %}
+          {% elsif project.slug == 'private-workshop' %}
+            {% assign pinned_private = pinned_private | push: project %}
+          {% else %}
+            {% assign projects_dated = projects_dated | push: project %}
+          {% endif %}
+        {% endfor %}
+        {% assign projects_open = '' | split: '' %}
+        {% assign projects_full = '' | split: '' %}
+        {% for project in projects_dated %}
+          {% assign workshop_id = 'workshop-' | append: project.slug %}
+          {% assign workshop = site.data.workshops[workshop_id] %}
+          {% assign is_full = false %}
+          {% if project.registration_full %}{% assign is_full = true %}{% endif %}
+          {% if workshop.stock == 0 %}{% assign is_full = true %}{% endif %}
+          {% if is_full %}
+            {% assign projects_full = projects_full | push: project %}
+          {% else %}
+            {% assign projects_open = projects_open | push: project %}
+          {% endif %}
+        {% endfor %}
+        {% assign projects_dated = projects_open | concat: projects_full %}
+        {% assign projects_ordered = projects_dated | concat: pinned_monthly | concat: pinned_private %}
+
+        {% for project in projects_ordered %}
+          {% unless project.hide %}
+            {% include project-card.html project=project %}
+          {% endunless %}
+        {% endfor %}
+      </div>
+      <p class="workshop-filter-empty" id="workshop-filter-empty" hidden>אין סדנאות שמתאימות לסינון כרגע.</p>
+    </div>
   </div>
 </div>
-
-
+<script src="{{ site.baseurl }}/js/workshop-filter.js" defer></script>

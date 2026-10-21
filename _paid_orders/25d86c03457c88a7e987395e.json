@@ -1,0 +1,33 @@
+{
+  "orderId": "25d86c03457c88a7e987395e",
+  "documentId": "5d4b9799-1dbc-40e7-900b-ef74ba66f10b",
+  "amount": 200,
+  "purchases": [
+    {
+      "slug": "hoops",
+      "quantity": 1,
+      "variant": "13"
+    },
+    {
+      "slug": "hoops",
+      "quantity": 1,
+      "variant": "oval-16x10cm"
+    },
+    {
+      "slug": "fabrics",
+      "quantity": 2,
+      "variant": "type-1"
+    },
+    {
+      "slug": "fabrics",
+      "quantity": 1,
+      "variant": "type-2"
+    },
+    {
+      "slug": "floss-25-set",
+      "quantity": 1,
+      "variant": "custom-25"
+    }
+  ],
+  "paidAt": "2026-10-07T12:40:42.324Z"
+}

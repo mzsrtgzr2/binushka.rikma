@@ -1,0 +1,108 @@
+{%- comment -%}
+  Registration / waitlist CTA on a workshop page.
+  Relies on layout assigns: workshop_id, workshop, sold_out, booking_in_cart,
+  price_unit, spots, hide_remaining_spots.
+
+  Mothers embroidery courses (אמהות רוקמות): soft WhatsApp help under the
+  register button. Same title heuristic as FAQ/testimonials — not pamper mornings.
+{%- endcomment -%}
+{%- assign mothers_course_whatsapp = false -%}
+{%- if page.category == 'mothers' -%}
+  {%- assign _mothers_title = page.title | default: '' -%}
+  {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
+    {%- assign mothers_course_whatsapp = true -%}
+  {%- endif -%}
+{%- endif -%}
+{% unless page.registration_not_open %}
+<div class="project-content animate">
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      {% if sold_out %}
+      <div class="workshop-booking workshop-booking--waitlist">
+        {% include workshop-waitlist-button.html title=page.title class="section-button" source="workshop_page" %}
+        <p class="workshop-booking__note">
+          {% if site.data.settings.newsletter.enabled %}
+          הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.
+          {% else %}
+          הסדנה מלאה כרגע. שלחי הודעה בוואטסאפ ואעדכן אותך אם מתפנה מקום.
+          {% endif %}
+        </p>
+      </div>
+      {% elsif booking_in_cart %}
+      {% if site.data.settings.newsletter.enabled %}
+      <div class="workshop-booking workshop-booking--waitlist" data-newsletter-notify-slot="workshop" hidden>
+        {% include workshop-waitlist-button.html title=page.title class="section-button" source="workshop_page" %}
+        <p class="workshop-booking__note">
+          הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.
+        </p>
+      </div>
+      {% endif %}
+      <div class="workshop-booking">
+        {%- comment -%}
+          Mothers embroidery: price lives only in the page head — booking CTA
+          is the register button (and WhatsApp note), without repeating ₪.
+        {%- endcomment -%}
+        {% unless workshop.variants or mothers_course_whatsapp %}
+        <div class="workshop-booking__head">
+          <span class="workshop-booking__price" data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>
+          <span class="workshop-booking__per">{{ price_unit }}</span>
+        </div>
+        {% endunless %}
+        <p class="workshop-booking__spots" data-product-stock="{{ workshop_id }}"{% if spots == nil or page.price_per == 'workshop' or hide_remaining_spots %} hidden{% endif %}>
+          {%- if spots != nil and page.price_per != 'workshop' and hide_remaining_spots != true -%}
+            {%- if spots == 1 -%}מקום אחרון — נותר 1{%- elsif spots <= 3 -%}מקומות אחרונים — נותרו {{ spots }}{%- else -%}נותרו {{ spots }} מקומות{%- endif -%}
+          {%- endif -%}
+        </p>
+        {% if workshop.variants %}
+        <div class="workshop-booking__packs">
+          {% for pack in workshop.variants %}
+          {%- assign pack_places = pack[1].places | default: 1 -%}
+          {%- assign pack_each = pack[1].price | plus: 0 -%}
+          {%- if pack_places > 1 -%}
+            {%- assign pack_full = workshop.price | times: pack_places -%}
+            {%- assign pack_save = pack_full | minus: pack_each -%}
+          {%- endif -%}
+          <button type="button" class="button button--primary workshop-booking__pack" data-cart-add="{{ workshop_id }}" data-cart-variant="{{ pack[0] }}" data-analytics="workshop_register_pack">
+            <span class="workshop-booking__pack-name">{{ pack[1].name }}</span>
+            <span class="workshop-booking__pack-price">₪{{ pack[1].price }}</span>
+            {% if pack_places > 1 and pack_save > 0 %}
+            <span class="workshop-booking__pack-save">חוסכות ₪{{ pack_save }}</span>
+            {% endif %}
+          </button>
+          {% endfor %}
+        </div>
+        {% else %}
+        <button type="button" class="button button--primary section-button" data-cart-add="{{ workshop_id }}" data-analytics="workshop_register">
+          {% if page.price_per == 'workshop' %}הזמיני סדנה זו{% else %}הרשמי לסדנה זו{% endif %}
+        </button>
+        {% endif %}
+        {% if mothers_course_whatsapp %}
+        <p class="workshop-booking__note workshop-booking__note--whatsapp">
+          <span class="workshop-booking__whatsapp-question">מתלבטת אם הקורס מתאים לך ולתינוק שלך?</span>
+          <a class="workshop-booking__whatsapp-link" href="https://wa.me/972544247753?text={{ 'הי בינושקה, מתלבטת אם קורס אמהות רוקמות מתאים לי ואשמח לעזרה' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ ואשמח לעזור 💗</a>
+        </p>
+        {% else %}
+        <p class="workshop-booking__note">
+          ההרשמה עוברת לסל הקניות — אפשר להוסיף עוד משתתפות, סדנאות או מוצרים מהחנות ולשלם הכל בתשלום מאובטח אחד.
+        </p>
+        {% endif %}
+      </div>
+      {% elsif page.form_url %}
+      <div class="section__navigation">
+          <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank" rel="noopener" data-analytics="workshop_external_register">
+          הרשמי לסדנה זו
+        </a>
+        {% if mothers_course_whatsapp %}
+        <p class="workshop-booking__note workshop-booking__note--whatsapp">
+          <span class="workshop-booking__whatsapp-question">מתלבטת אם הקורס מתאים לך ולתינוק שלך?</span>
+          <a class="workshop-booking__whatsapp-link" href="https://wa.me/972544247753?text={{ 'הי בינושקה, מתלבטת אם קורס אמהות רוקמות מתאים לי ואשמח לעזרה' | url_encode }}" target="_blank" rel="noopener" data-analytics="contact_whatsapp">כתבי לי בוואטסאפ ואשמח לעזור 💗</a>
+        </p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</div>
+{% endunless %}

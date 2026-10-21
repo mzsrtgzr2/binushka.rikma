@@ -2,12 +2,29 @@
 title: גיפט קארד
 date: 2023-01-20 10:00:00 +0300
 subtitle: מתנה שהיא זמן איכות ופינוק
-image: '/images/gallery/giftcard.jpg'
+image: /images/gallery/giftcard.jpg
 price: כל סכום לבחירתך
 out_of_stock: false
 limited_stock: false
 hide: false
+variable: true
+min_price: 50
+max_price: 2000
 form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
+order: 23
+limited_edition: false
+preorder: false
+category: gift-card
+categories:
+  - gift-card
+  - birth-gifts
+presets:
+  - 100
+  - 150
+  - 200
+  - 250
+  - 300
+  - 500
 ---
 
 ## גיפט קארד למי שצריכה פינוק
@@ -26,5 +43,5 @@ form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
 - מתאים לימי הולדת, לידה, חג, תודה מיוחדת או פשוט כי מגיע לה.
 
 ### אני רוצה!! מה עכשיו?
-- כנסי ללינק למטה, מלאי את כל הפרטים והשובר בדרך אלייך.
-- הגיפט קארד נשלח דיגיטלית (או מודפס – לבחירתך), וניתן למימוש בכל פעילות או מוצר מהסטודיו.
+- בחרי סכום למטה והוסיפי לסל.
+- בקופה ממלאים פרטים, והגיפט קארד נשלח דיגיטלית (או מודפס – לבחירתך), וניתן למימוש בכל פעילות או מוצר מהסטודיו.

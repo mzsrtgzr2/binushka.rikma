@@ -1,0 +1,118 @@
+# Social proof on workshop pages (/projects/...).
+# Matched by page.testimonials_category, else by page.category
+# (with pampering mothers mornings auto-routed — see include).
+# Optional per-page front matter: hide_testimonials: true
+#   or testimonials_category: <key> to override.
+#
+# Event types (keep these distinct):
+#   mothers         — קורס רקמה אמהות רוקמות (עם תינוקות)
+#   mothers-pamper  — בוקר פינוק לאמהות (הרצאת מנחת חוץ + בראנץ׳, לא רקמה)
+#   all-levels      — סדנת רקמה לכל הרמות (לא תינוקות / אמהות)
+#   advanced        — חוג רקמה למנוסות (שעתיים, למי שכבר רקמה)
+#   beginners       — סדנאות למתחילות (למשל קרושה)
+#   hosting         — סדנת אירוח / אפייה
+
+title: מה אומרות משתתפות
+
+categories:
+  # קורס רקמה אמהות רוקמות — כמה מפגשים, רקמה עם התינוק
+  mothers:
+    title: מה אומרות אמהות מהקורס
+    quotes:
+      - name: תמרה
+        text: יצאתי עם רקמה שעשיתי בעצמי, ועם קבוצה חמה של אמהות. בדיוק מה שהייתי צריכה בחל״ד.
+      - name: אופירה
+        text: התינוק איתי והרקמה זורמת. בינה מלמדת בסבלנות ומארחת כמו מלכה, ארבעה מפגשים שעפו.
+      - name: הילית
+        text: שעתיים וחצי לעצמי בלי רגשות אשם, ובסוף יש לי חישוק רקום. ממליצה בחום לכל אמא בקורס.
+    photos:
+      - src: /images/gallery/mothers-nika.jpeg
+        alt: רקמה מקורס אמהות רוקמות
+      - src: /images/gallery/mothers-ofira.jpeg
+        alt: משתתפת בקורס אמהות רוקמות
+      - src: /images/gallery/mothers-ilit.jpeg
+        alt: יצירה מקורס אמהות קודם
+
+  # בוקר פינוק לאמהות — הרצאה של מנחת חוץ + בראנץ׳ מפנק (לא סדנת רקמה)
+  mothers-pamper:
+    title: מה אומרות אמהות מבוקר הפינוק
+    quotes:
+      - name: הדר
+        text: בראנץ׳ מפנק, שיחה פתוחה עם מנחה חיצונית, ומקום באמת להוריד את השריון. לא יצירה — פינוק אמיתי.
+      - name: מיכל
+        text: יצאתי עם תובנות על אמהות וזוגיות, ועם תחושה שמישהי בישלה ופינקה אותי. בדיוק מה שצריך בחל״ד.
+      - name: נועה
+        text: מעגל קטן, בלי שיפוטיות, ואוכל מושקע. המנחה דיברה בגובה העיניים — ממליצה לכל אמא שצריכה אוויר.
+    photos:
+      - src: /images/gallery/mothers-with-dina.png
+        alt: בוקר פינוק לאמהות עם מנחת חוץ
+      - src: /images/gallery/mothers-with-bar.png
+        alt: בראנץ׳ בבוקר פינוק לאמהות
+      - src: /images/gallery/mothers-with-shirley.jpg
+        alt: מעגל אמהות בבוקר פינוק
+
+  # סדנת רקמה לכל הרמות — לא קשור לתינוקות ואמהות
+  all-levels:
+    title: מה אומרות משתתפות הסדנה
+    quotes:
+      - name: ענת
+        text: היה מושלם, מזמן לא נהניתי ככה, בינה את אלופה, מעניינת ומרתקת, מסבירת פנים, תודה על הכל!!!
+      - name: רותם
+        text: בינה תודה רבה שאירחת אותנו ברוחב לב ובשמחה. האנרגיה שלך מורגשת בצורה הטובה ביותר. רואים שאת עושה מה שאת אוהבת
+      - name: עפרי
+        text: תודה רבה, בינה, כל כך נהניתי, שהמשכתי לרקום בבית, עד שסיימתי והגעתי לשביעות הרצון המוחלט 😍 ממש רוצה להמשיך💫
+    photos:
+      - src: /images/gallery/0F1BD3D5-F89B-4428-A805-798B1EAFB17D_1_105_c.jpeg
+        alt: סדנת רקמה לכל הרמות
+      - src: /images/gallery/BF743E15-F934-494D-B258-BBABA4DFCD3D_1_105_c.jpeg
+        alt: שולחן רקמה בסדנה
+      - src: /images/gallery/6A0F9AB8-9045-4401-BF34-5DA77DA4C596_1_105_c.jpeg
+        alt: אווירה מסדנת רקמה
+
+  # חוג רקמה למנוסות — כשעתיים, למי שכבר רקמה בעבר
+  advanced:
+    title: מה אומרות רוקמות מנוסות
+    quotes:
+      - name: שירה
+        text: סוף סוף מפגש למי שכבר רוקמת. שעתיים של תכים חדשים וחברה, בלי לחזור ליסודות.
+      - name: הילה
+        text: החוג החודשי הפך להרגל שלי — מביאה עבודה מהבית, מתקדמת ושואלת שאלות בלי בושה.
+      - name: עדי
+        text: בדיוק לרמה של מי שיש לה ניסיון. קצב נעים, שולחן משותף, ושעתיים שעוברות מהר מדי.
+    photos:
+      - src: /images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg
+        alt: חוג רקמה למנוסות
+      - src: /images/gallery/embroidery-flowers.jpeg
+        alt: רקמה פרחונית ממפגש קודם
+      - src: /images/gallery/B5366D5C-D3A1-4A50-9C2A-67D1B1144C34_1_105_c.jpeg
+        alt: פרטי רקמה מחוג למנוסות
+
+  beginners:
+    title: מה אומרות מי שהתחילו אצלנו
+    quotes:
+      - name: נועה
+        text: מעולם לא החזקתי מסרגה, ובסוף יצאתי עם סלסלה. הכל היה ברור, איטי ונעים.
+      - name: מיכל
+        text: אווירה ביתית, חומרים מוכנים וכיבוד מפנק. בדיוק סדנה למי שפוחדת להתחיל.
+    photos:
+      - src: /images/gallery/crochet-with-noa.png
+        alt: סדנת קרושה למתחילות
+      - src: /images/gallery/workshop.jpeg
+        alt: שולחן עבודה מסדנה קודמת
+      - src: /images/gallery/1.jpeg
+        alt: יצירה מסדנה למתחילות
+
+  hosting:
+    title: מה אומרות מי שהתארחו בסדנה
+    quotes:
+      - name: עדי
+        text: למדתי איך להכין בראנץ׳ בלי להילחץ ביום האירוח. יצאתי עם מאפים ועם ביטחון.
+      - name: תמר
+        text: סדנה מעשית לגמרי — בצק, עוגיות וטיפים להגשה. והשולחן היה חלום.
+    photos:
+      - src: /images/workshops/2026-12/hosting-brunch-01.jpg
+        alt: שולחן בראנץ׳ מסדנת אירוח
+      - src: /images/workshops/2026-12/hosting-brunch-03.jpg
+        alt: מאפים מסדנת אירוח קודמת
+      - src: /images/workshops/2026-12/hosting-brunch-07.jpg
+        alt: הכנות מראש בסדנת אירוח

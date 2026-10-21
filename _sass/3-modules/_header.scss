@@ -2,10 +2,11 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 1202;
   backdrop-filter: saturate(140%) blur(8px);
   background: rgba(252, 250, 247, 0.86);
   border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 1px 0 var(--border-color);
   overflow: hidden;
 
   .container-big {
@@ -296,6 +297,17 @@
           .arrow-down {
             display: none;
           }
+
+          &.nav__link--icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2em;
+          }
+        }
+
+        .nav__item-icon {
+          width: 1em;
+          height: 1em;
         }
       }
     }
@@ -421,6 +433,19 @@
         }
       }
 
+      &.nav__link--icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2em;
+      }
+    }
+
+    .nav__item-icon {
+      display: block;
+      width: 1em;
+      height: 1em;
+      flex-shrink: 0;
+      object-fit: contain;
     }
 
     &.dropdown {
@@ -527,6 +552,7 @@
 .nav-button {
   display: flex;
   align-items: center;
+  gap: 12px;
   font-size: 19px;
   color: var(--link-color);
   border-radius: 50%;

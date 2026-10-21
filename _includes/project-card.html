@@ -1,0 +1,72 @@
+{%- assign project = include.project -%}
+{%- assign workshop_slug = project.slug | default: project.basename | remove: '.md' -%}
+{%- assign workshop_id = 'workshop-' | append: workshop_slug -%}
+{%- assign workshop = site.data.workshops[workshop_id] -%}
+{%- assign spots = workshop.stock -%}
+{%- assign sold_out = project.registration_full -%}
+{%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
+{%- assign last_places = project.last_places -%}
+{%- assign hide_remaining_spots = project.hide_remaining_spots -%}
+{%- if project.category == 'mothers' and spots != nil and spots > 4 -%}
+  {%- assign hide_remaining_spots = true -%}
+{%- endif -%}
+{%- comment -%}
+  Mothers: "מקומות אחרונים" only when the admin checkbox is on — not from stock.
+{%- endcomment -%}
+{%- unless project.price_per == 'workshop' or hide_remaining_spots or project.category == 'mothers' -%}
+{%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
+{%- endunless -%}
+{%- assign booking_in_cart = false -%}
+{%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
+{%- assign category_label = '' -%}
+{%- if project.category and site.data.workshop-categories[project.category] -%}
+{%- assign category_label = site.data.workshop-categories[project.category] -%}
+{%- endif -%}
+{%- assign filter_month_keys = '' | split: '' -%}
+{%- if project.filter_months and project.filter_months.size > 0 -%}
+  {%- for month in project.filter_months -%}
+    {%- assign padded_month = month | plus: 0 | plus: 100 | append: '' | slice: 1, 2 -%}
+    {%- assign filter_month_keys = filter_month_keys | push: padded_month -%}
+  {%- endfor -%}
+{%- elsif project.date -%}
+  {%- assign date_month = project.date | date: '%m' -%}
+  {%- assign filter_month_keys = filter_month_keys | push: date_month -%}
+{%- endif -%}
+<article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-analytics="workshop_card" data-category="{{ project.category }}" data-last-places="{% if last_places %}true{% else %}false{% endif %}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
+  <div class="project__content">
+    <a href="{{ project.url }}" class="project__image" data-analytics="workshop_card_image">
+      <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
+      {% if project.registration_not_open %}
+        <div class="registration-full">ההרשמה תיפתח בקרוב</div>
+      {% elsif sold_out %}
+        <div class="registration-full sold-out-badge">אין מקומות פנויים</div>
+      {% elsif last_places %}
+        <div class="last-places-badge">{% if spots == 1 %}מקום אחרון{% else %}מקומות אחרונים{% endif %}</div>
+      {% endif %}
+    </a>
+    <div class="project__info">
+      {% if category_label != '' %}
+      <div class="project__category">{{ category_label }}</div>
+      {% endif %}
+      <h3 class="project__title"><a href="{{ project.url }}" data-analytics="workshop_card_title">{{ project.title }}</a></h3>
+      {% if project.subtitle %}
+      <div class="project__subtitle">{{ project.subtitle }}</div>
+      {% endif %}
+      {% if project.registration_not_open %}
+        {% if site.data.settings.newsletter.enabled %}
+        <div class="project__footer">
+          {% include newsletter-notify-button.html intent="opening" source="workshop_opening" class="project__add" analytics="newsletter_workshop_opening" %}
+        </div>
+        {% endif %}
+      {% elsif sold_out %}
+        <div class="project__footer">
+          {% include workshop-waitlist-button.html title=project.title class="project__add" source="workshop_card" %}
+        </div>
+      {% elsif booking_in_cart or project.form_url %}
+        <div class="project__footer">
+          <a href="{{ project.url }}" class="button button--primary project__add" data-analytics="workshop_more_details">פרטים נוספים</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</article>

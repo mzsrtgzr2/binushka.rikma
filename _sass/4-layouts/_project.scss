@@ -1,4 +1,35 @@
 /* Project */
+
+/* External http(s) links in workshop copy — blue so registration / Instagram
+   links read as clickable (default --link-color matches body text). Skip
+   .button so the yellow CTA keeps its black label. */
+.project-content {
+  a[href^="http://"]:not(.button),
+  a[href^="https://"]:not(.button) {
+    color: #1a5fb4;
+    border-bottom: 1px solid rgba(26, 95, 180, 0.35);
+
+    &:hover {
+      color: #0d3d8c;
+      border-bottom-color: #0d3d8c;
+    }
+  }
+}
+
+/* FAQ answers: cancellation / terms links must read clearly as links
+   (blue + underline). Default --link-color matches body text. */
+.project-faq {
+  a:not(.button) {
+    color: #1a5fb4;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: #0d3d8c;
+    }
+  }
+}
+
 .project-subtitle {
   margin: 20px 0 0;
   font-size: 18px;
@@ -9,6 +40,287 @@
 
   @media only screen and (max-width: $mobile) {
     font-size: 16px;
+  }
+}
+
+.project-category {
+  display: inline-block;
+  margin: 14px 0 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--background-alt-color);
+  color: var(--heading-font-color);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.project-price {
+  margin: 16px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--brand-color);
+
+  @media only screen and (max-width: $mobile) {
+    font-size: 20px;
+  }
+
+  /* Mothers embroidery: yellow highlight on the per-session line */
+  &--sessions {
+    color: var(--heading-font-color);
+  }
+
+  .project-price__main {
+    display: inline-block;
+    padding: 6px 14px;
+    background: var(--brand-color);
+    color: var(--heading-font-color);
+    line-height: 1.3;
+  }
+
+  .project-price__detail {
+    display: block;
+    margin-top: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-alt-color);
+
+    @media only screen and (max-width: $mobile) {
+      font-size: 14px;
+    }
+  }
+}
+
+.project-faq {
+  margin: 48px 0;
+}
+
+/* Social proof: quotes + previous-workshop photos, by category */
+.workshop-proof {
+  max-width: 780px;
+  margin: 56px auto 48px;
+  padding: 0 16px;
+}
+
+.workshop-proof__head {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.workshop-proof__title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+
+  @media only screen and (max-width: $mobile) {
+    font-size: 24px;
+  }
+}
+
+.workshop-proof__quotes {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+
+  @media only screen and (min-width: $tablet) {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+}
+
+.workshop-proof__quote {
+  margin: 0;
+  padding: 0 4px;
+}
+
+.workshop-proof__text {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  quotes: none;
+
+  p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text-color);
+
+    &::before {
+      content: '״';
+    }
+
+    &::after {
+      content: '״';
+    }
+  }
+}
+
+.workshop-proof__name {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--heading-font-color);
+}
+
+.workshop-proof__photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  @media only screen and (max-width: $mobile) {
+    grid-template-columns: repeat(2, 1fr);
+
+    .workshop-proof__photo:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+      max-width: 70%;
+      margin: 0 auto;
+    }
+  }
+}
+
+.workshop-proof__photo {
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--background-alt-color);
+  border-radius: 8px;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* Workshop booking: the cart entry point on a workshop page */
+.workshop-booking {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  border: 1px solid var(--background-alt-color);
+  border-radius: 12px;
+  text-align: center;
+  background: var(--background-color);
+
+  &.workshop-booking--waitlist .button {
+    margin-top: 0;
+  }
+
+  .workshop-booking__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .workshop-booking__price {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--brand-color);
+    line-height: 1.25;
+  }
+
+  .workshop-booking__detail {
+    display: block;
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-alt-color);
+  }
+
+  .workshop-booking__per {
+    font-size: 16px;
+    color: var(--text-alt-color);
+  }
+
+  .workshop-booking__spots {
+    margin: 8px 0 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #d97706;
+  }
+
+  .button {
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .workshop-booking__packs {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .workshop-booking__pack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0;
+    padding: 16px 18px;
+    line-height: 1.3;
+  }
+
+  .workshop-booking__pack-name {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .workshop-booking__pack-price {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .workshop-booking__pack-save {
+    font-size: 13px;
+    font-weight: 600;
+    color: #067647;
+  }
+
+  .workshop-booking__note {
+    margin: 16px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-alt-color);
+
+    a {
+      color: var(--text-color);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+
+      &:hover {
+        color: var(--link-color-hover);
+      }
+    }
+  }
+
+  @media only screen and (max-width: $mobile) {
+    padding: 22px 18px;
+  }
+}
+
+.workshop-booking__note--whatsapp {
+  .workshop-booking__whatsapp-question {
+    display: block;
+  }
+
+  .workshop-booking__whatsapp-link {
+    display: inline-block;
+    margin-top: 4px;
+    color: var(--text-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:hover {
+      color: var(--link-color-hover);
+    }
   }
 }
 

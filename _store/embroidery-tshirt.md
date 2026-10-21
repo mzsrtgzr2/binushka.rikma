@@ -2,12 +2,17 @@
 title: רקמה בהזמנה אישית
 date: 2024-01-20 10:00:00 +0300
 subtitle: על כל פריט לבוש שתרצו
-image: '/images/gallery/tshirt.jpg'
+image: /images/gallery/tshirt.jpg
 price: ₪100
 out_of_stock: false
 limited_stock: false
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+order: 17
+cart_price: 100
+limited_edition: false
+preorder: false
+category: embroidered-works
 ---
 
 ## רקמה על פריט לבוש בהזמנה אישית

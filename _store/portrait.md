@@ -1,25 +1,30 @@
 ---
 title: מסגרת רקומה
 date: 2024-01-20 10:00:00 +0300
-subtitle: עם כל תמונה שתבחרי
-image: '/images/gallery/portrait.png'
+subtitle: עם כל תמונה שתבחרו
+image: /images/gallery/portrait.png
 price: ₪250
 out_of_stock: false
 limited_stock: false
+limited_edition: true
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+order: 14
+cart_price: 250
+preorder: false
+category: embroidered-works
 ---
 
-## מסגרת רקומה מחוטי כותנה יפהיפיים, בשילוב תמונה שלך
+## מסגרת רקומה מחוטי כותנה יפהיפיים, בשילוב תמונה שלכם
 
 **מחיר:** ₪250
 
 ### מצאת את המתנה המושלמת!
 
 - רקמה בעבודת יד, ייחודית🪴.
-- מותאמת אישית לך🎩.
+- מותאמת אישית לכם🎩.
 - אין לאף אחד כזו💫.
-- ניתן לבחור בעצמך את פלטת הצבעים או לסמוך עליי.
+- ניתן לבחור בעצמכם את פלטת הצבעים או לסמוך עליי.
 - קוטר 18-20 cm.
 
 ### למי השירות מתאים?

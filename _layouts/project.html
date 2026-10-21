@@ -2,44 +2,163 @@
 layout: default
 ---
 
-<div class="container">
+{%- assign workshop_slug = page.slug | default: page.basename | remove: '.md' -%}
+{%- assign workshop_id = 'workshop-' | append: workshop_slug -%}
+{%- assign workshop = site.data.workshops[workshop_id] -%}
+{%- assign spots = workshop.stock -%}
+{%- assign sold_out = page.registration_full -%}
+{%- if spots == 0 %}{% assign sold_out = true %}{% endif -%}
+{%- assign last_places = page.last_places -%}
+{%- assign hide_remaining_spots = page.hide_remaining_spots -%}
+{%- comment -%}
+  Mothers embroidery courses (category: mothers): do not publish the remaining
+  count while more than 4 places are free. At 4 or fewer, show it again.
+  "מקומות אחרונים" is opt-in only (admin checkbox) — never auto from stock,
+  so a stale flag or low stock cannot flash the red badge on refresh.
+{%- endcomment -%}
+{%- if page.category == 'mothers' and spots != nil and spots > 4 -%}
+  {%- assign hide_remaining_spots = true -%}
+{%- endif -%}
+{%- unless page.price_per == 'workshop' or hide_remaining_spots or page.category == 'mothers' -%}
+{%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
+{%- endunless -%}
+{%- assign booking_in_cart = false -%}
+{%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
+{%- assign price_unit = 'למשתתפת' -%}
+{%- if page.price_per == 'workshop' %}{% assign price_unit = 'לסדנה' %}{% endif -%}
+{%- comment -%}
+  Mothers embroidery courses (אמהות רוקמות): multi-session package.
+  Same title heuristic as FAQ / WhatsApp / booking split — not pamper mornings.
+{%- endcomment -%}
+{%- assign mothers_embroidery = false -%}
+{%- if page.category == 'mothers' -%}
+  {%- assign _mothers_title = page.title | default: '' -%}
+  {%- if _mothers_title contains 'רקמה' or _mothers_title contains 'רוקמות' -%}
+    {%- assign mothers_embroidery = true -%}
+  {%- endif -%}
+{%- endif -%}
+
+{% include workshop-event-schema.html %}
+
+<div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ page.category }}" data-last-places="{% if last_places %}true{% else %}false{% endif %}">
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>
-    {% if page.registration_full %}
+    {% if page.registration_not_open %}
+      <div class="registration-full-text">ההרשמה תיפתח בקרוב</div>
+    {% elsif sold_out %}
       <div class="registration-full-text">אין מקומות פנויים</div>
-    {% elsif page.last_places %}
-      <div class="registration-full-text">מקומות אחרונים</div>
+    {% elsif last_places %}
+      <div class="registration-full-text">{% if spots == 1 %}מקום אחרון{% else %}מקומות אחרונים{% endif %}</div>
+    {% endif %}
+
+    {% if page.category and site.data.workshop-categories[page.category] %}
+      <p class="project-category">{{ site.data.workshop-categories[page.category] }}</p>
     {% endif %}
 
     {% if page.subtitle %}
       <p class="project-subtitle">{{ page.subtitle }}</p>
     {% endif %}
-  </div>
 
-
-  <div class="project-content animate">
-    {{ content }}
-  </div>
-
-  {% unless page.registration_full %}
-  <div class="project-content animate">
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <div class="section__navigation">
-            <a href="{{page.form_url}}" class="button button--primary section-button" target="_blank">
-            הרשמי לסדנה זו
-          </a>
-        </div>
+    {% if booking_in_cart and sold_out == false and page.registration_not_open != true %}
+      {% if workshop.variants %}
+      {%- assign from_price = workshop.price | plus: 0 -%}
+      {%- for pack in workshop.variants -%}
+        {%- assign pack_places = pack[1].places | default: 1 | plus: 0 -%}
+        {%- if pack_places < 1 -%}{%- assign pack_places = 1 -%}{%- endif -%}
+        {%- assign pack_each = pack[1].price | plus: 0 | divided_by: pack_places -%}
+        {%- if pack_each > 0 and pack_each < from_price -%}
+          {%- assign from_price = pack_each -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <div class="project-price">מ־₪{{ from_price }} {{ price_unit }}</div>
+      {% else %}
+      {%- comment -%}
+        Mothers embroidery is always 4 meetings: lead with sessions + ₪/meeting
+        (round-half-up, 1090 → 273), total in parentheses underneath.
+      {%- endcomment -%}
+      {%- assign per_session = nil -%}
+      {%- if mothers_embroidery and workshop.price -%}
+        {%- assign per_session = workshop.price | plus: 2 | divided_by: 4 -%}
+      {%- endif -%}
+      <div class="project-price{% if per_session and per_session > 0 %} project-price--sessions{% endif %}">
+        {% if per_session and per_session > 0 %}
+        <span class="project-price__main">4 מפגשים · {{ per_session }} ₪ למפגש</span>
+        <span class="project-price__detail">(סה״כ <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span>)</span>
+        {% else %}
+        <span data-product-price="{{ workshop_id }}">₪{{ workshop.price }}</span> {{ price_unit }}
+        {% endif %}
       </div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+
+  {%- comment -%}
+    Mothers embroidery: booking CTA (with WhatsApp) goes right after
+    פרטי הסדנה, before curriculum sections. Other workshops unchanged.
+  {%- endcomment -%}
+  {%- assign mothers_course_split = false -%}
+  {%- unless page.registration_not_open -%}
+    {%- if mothers_embroidery -%}
+      {%- assign _content_parts = content | split: '<h3' -%}
+      {%- if _content_parts.size > 1 -%}
+        {%- assign mothers_course_split = true -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endunless -%}
+
+  <div class="project-content animate">
+    {% if page.registration_not_open %}
+      <p>פרטי הסדנה יפורסמו בקרוב.</p>
+      {% if site.data.settings.newsletter.enabled %}
+      <div class="workshop-booking workshop-booking--waitlist">
+        {% include newsletter-notify-button.html intent="opening" source="workshop_opening" class="section-button" analytics="newsletter_workshop_opening" %}
+        <p class="workshop-booking__note">
+          כשההרשמה תיפתח אכתוב על זה בניוזלטר, יחד עם סדנאות ומוצרים נוספים. מייל אחד מדי פעם, בלי להציף.
+        </p>
+      </div>
+      {% endif %}
+    {% elsif mothers_course_split %}
+      {{ _content_parts.first }}
+    {% else %}
+      {{ content }}
+    {% endif %}
+  </div>
+
+  {% include workshop-page-booking.html %}
+
+  {% if mothers_course_split %}
+  <div class="project-content animate">
+    {% for part in _content_parts %}
+      {% unless forloop.first %}<h3{{ part }}{% endunless %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% include workshop-testimonials.html %}
+
+  {% include workshop-faq.html %}
+
+  {% include workshop-page-booking.html %}
+
+  {% if page.gallery %}
+  <div class="project-gallery animate">
+    {% if page.image %}
+      {% unless page.gallery contains page.image %}
+      <div class="project-gallery__item">
+        <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
+      </div>
+      {% endunless %}
+    {% endif %}
+    {% for gimg in page.gallery %}
+    <div class="project-gallery__item">
+      <img class="lazy" data-src="{{site.baseurl}}{{gimg}}" alt="{{page.title}}">
     </div>
+    {% endfor %}
   </div>
-  </div>
-  {% endunless %}
-
-
-  {% if page.image %}
+  {% include workshop-page-booking.html %}
+  {% elsif page.image %}
   <div class="project-content animate">
   <div class="container">
   <div class="row">
@@ -47,18 +166,12 @@ layout: default
       <div class="page-image animate">
         <div class="project-image-container">
           <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
-          {% if page.registration_full %}
-            <div class="registration-full">אין מקומות פנויים</div>
-          {% elsif page.last_places %}
-            <div class="registration-full">מקומות אחרונים</div>
-          {% endif %}
         </div>
       </div>
     </div>
   </div>
   </div>
   </div>
-
   {% endif %}
 
   <!-- Project Navigation -->
@@ -97,7 +210,7 @@ layout: default
             {% assign prev_project = visible_projects[prev_index] %}
             {% assign next_project = visible_projects[next_index] %}
             
-            <a href="{{ prev_project.permalink }}" class="project-navigation__button project-navigation__button--prev">
+            <a href="{{ prev_project.permalink }}" class="project-navigation__button project-navigation__button--prev" data-analytics="workshop_nav_prev">
               <div class="project-navigation__thumbnail">
                 <img src="{{ prev_project.image }}" alt="{{ prev_project.title }}">
               </div>
@@ -105,7 +218,7 @@ layout: default
               <span class="project-navigation__text">{{ prev_project.title }}</span>
             </a>
             
-            <a href="{{ next_project.permalink }}" class="project-navigation__button project-navigation__button--next">
+            <a href="{{ next_project.permalink }}" class="project-navigation__button project-navigation__button--next" data-analytics="workshop_nav_next">
               <span class="project-navigation__text">{{ next_project.title }}</span>
               <span class="project-navigation__arrow">←</span>
               <div class="project-navigation__thumbnail">
@@ -133,3 +246,5 @@ layout: default
   {% endif %} -->
 
 </div>
+
+{% include section-instagram.html %}

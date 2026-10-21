@@ -1,0 +1,30 @@
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+{% assign modal = newsletter.modal %}
+<div class="newsletter-modal"
+     id="newsletter-modal"
+     hidden
+     data-restock-button="{{ modal.restock.button }}"
+     data-workshop-button="{{ modal.workshop.button }}"
+     data-opening-button="{{ modal.opening.button }}">
+  <div class="newsletter-modal__backdrop" data-newsletter-close></div>
+  <div class="newsletter-modal__panel"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="newsletter-modal-title"
+       aria-describedby="newsletter-modal-description">
+    <button type="button"
+            class="newsletter-modal__close"
+            data-newsletter-close
+            aria-label="{{ modal.close }}"
+            data-analytics="newsletter_modal_close">&times;</button>
+    <h2 class="newsletter-modal__title" id="newsletter-modal-title" data-newsletter-modal-title>
+      {{ modal.title }}
+    </h2>
+    <p class="newsletter-modal__description" id="newsletter-modal-description" data-newsletter-modal-description>
+      {{ modal.description }}
+    </p>
+    {% include newsletter-signup.html source="modal" hide_heading=true class="newsletter-signup--modal" %}
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,1966 @@
+/**
+ * Store backoffice: login, list, create / update / delete products and stock.
+ * Workshops have their own section at /admin/workshops/.
+ */
+(function () {
+  var loginForm = document.getElementById('admin-login');
+  var loginMessage = document.getElementById('admin-login-message');
+  var board = document.getElementById('admin-board');
+  var boardMessage = document.getElementById('admin-board-message');
+  var listView = document.getElementById('admin-list-view');
+  var listEl = document.getElementById('admin-list');
+  var saveBtn = document.getElementById('admin-save');
+  var newBtn = document.getElementById('admin-new');
+  var logoutBtn = document.getElementById('admin-logout');
+  var editor = document.getElementById('admin-editor');
+  var editorTitle = document.getElementById('admin-editor-title');
+  var editorMessage = document.getElementById('admin-editor-message');
+  var editorSave = document.getElementById('admin-editor-save');
+  var editorCancel = document.getElementById('admin-editor-cancel');
+  var editorDelete = document.getElementById('admin-editor-delete');
+  var variantsEl = document.getElementById('admin-variants');
+  var addVariantBtn = document.getElementById('admin-add-variant');
+  var slugInput = document.getElementById('admin-slug');
+  var kindSelect = document.getElementById('admin-kind');
+  var photosEl = document.getElementById('admin-photos');
+  var photoFiles = document.getElementById('admin-photo-files');
+  var photosMessage = document.getElementById('admin-photos-message');
+  var previewCard = document.getElementById('admin-preview-card');
+  var previewPage = document.getElementById('admin-preview-page');
+  if (!loginForm || !board || !editor || !photosEl) return;
+
+  var products = [];
+  var original = {};
+  var originalOrder = '';
+  var reorder = null;
+  var variantReorder = null;
+  var editingNew = false;
+  var saveHint = '';
+  var photoItems = [];
+  var variantPhotos = new WeakMap();
+  var previewTimer;
+  var MAX_VARIANT_PHOTOS = 8;
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : String(s);
+    return d.innerHTML;
+  }
+
+  function show(el, text, type) {
+    if (!el) return;
+    if (!text) {
+      el.hidden = true;
+      el.textContent = '';
+      return;
+    }
+    el.hidden = false;
+    el.textContent = text;
+    el.className = 'admin-message admin-message--' + (type || 'info');
+  }
+
+  function statusErrorMessage(status) {
+    if (status === 413) return 'הבקשה גדולה מדי — נסי להקטין תמונות או להעלות פחות בבת אחת';
+    if (status === 401) return 'צריך להתחבר מחדש';
+    if (status === 502 || status === 503) return 'השרת לא הצליח לשמור כרגע. נסי שוב בעוד רגע';
+    if (status >= 500) return 'שגיאת שרת בשמירה. נסי שוב בעוד רגע';
+    return 'לא הצלחנו לשמור. בדקי את השדות וניסי שוב';
+  }
+
+  function api(method, body) {
+    var opts = { method: method, credentials: 'same-origin', cache: 'no-store', headers: {} };
+    if (body) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(body);
+    }
+    return fetch('/api/admin/', opts).then(function (res) {
+      return res.text().then(function (text) {
+        var data = {};
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            data = {};
+          }
+        }
+        if (!res.ok) {
+          var err = new Error(data.error || statusErrorMessage(res.status));
+          err.field = data.field || null;
+          err.status = res.status;
+          throw err;
+        }
+        return data;
+      });
+    });
+  }
+
+  function clearFieldErrors() {
+    if (!editor) return;
+    Array.prototype.forEach.call(editor.querySelectorAll('.form__input--error'), function (el) {
+      el.classList.remove('form__input--error');
+      el.removeAttribute('aria-invalid');
+    });
+    Array.prototype.forEach.call(editor.querySelectorAll('[data-field-error]'), function (el) {
+      el.hidden = true;
+      el.textContent = '';
+    });
+  }
+
+  function setFieldError(el, message) {
+    if (!el || !message) return;
+    el.classList.add('form__input--error');
+    el.setAttribute('aria-invalid', 'true');
+    var group = el.closest('.form__group') || el.parentElement;
+    if (!group) return;
+    var msg = group.querySelector('[data-field-error]');
+    if (!msg) {
+      msg = document.createElement('p');
+      msg.className = 'admin-field-error';
+      msg.setAttribute('data-field-error', '');
+      group.appendChild(msg);
+    }
+    msg.textContent = message;
+    msg.hidden = false;
+  }
+
+  function focusField(el) {
+    if (!el) return;
+    try {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      el.scrollIntoView(true);
+    }
+    window.setTimeout(function () {
+      try {
+        el.focus({ preventScroll: true });
+      } catch (e2) {
+        try {
+          el.focus();
+        } catch (e3) {}
+      }
+    }, 80);
+  }
+
+  function fieldEl(name) {
+    if (name === 'slug') return slugInput;
+    if (name === 'title') return document.getElementById('admin-title');
+    if (name === 'cart_price') return document.getElementById('admin-cart-price');
+    if (name === 'min_price') return document.getElementById('admin-min-price');
+    if (name === 'max_price') return document.getElementById('admin-max-price');
+    if (name === 'stock') return document.getElementById('admin-stock');
+    if (name === 'category') return document.getElementById('admin-category');
+    if (name === 'photos') return photoFiles || photosEl;
+    if (name === 'variants') {
+      return (variantsEl && variantsEl.querySelector('[data-v="price"]')) || addVariantBtn || variantsEl;
+    }
+    return null;
+  }
+
+  function inferFieldFromMessage(message) {
+    var msg = String(message || '');
+    if (/מזהה מוצר|כבר יש מוצר עם המזהה|מוצר לא מוכר/.test(msg)) return 'slug';
+    if (/חסר שם/.test(msg)) return 'title';
+    if (/סוג אחד עם מחיר|תמונות לכל סוג/.test(msg)) return 'variants';
+    if (/גיפט קארד|סכום/.test(msg)) return 'min_price';
+    if (/מחיר לא תקין/.test(msg)) return 'cart_price';
+    if (/מלאי/.test(msg)) return 'stock';
+    if (/קטגוריה/.test(msg)) return 'category';
+    if (/תמונ|jpg|png|webp|gif/.test(msg)) return 'photos';
+    return null;
+  }
+
+  function showEditorError(message, field) {
+    var text = message || 'לא הצלחנו לשמור';
+    var target = fieldEl(field) || fieldEl(inferFieldFromMessage(text));
+    clearFieldErrors();
+    show(editorMessage, text, 'error');
+    if (target) {
+      setFieldError(target, text);
+      focusField(target);
+    }
+  }
+
+  function validateEditor() {
+    var errors = [];
+    var slug = slugInput.value.trim().toLowerCase();
+    if (!slug) {
+      errors.push({ el: slugInput, message: 'חסר מזהה מוצר' });
+    } else if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) {
+      errors.push({
+        el: slugInput,
+        message: 'מזהה מוצר לא תקין (באנגלית, אותיות קטנות ומקפים)',
+      });
+    }
+
+    var titleEl = document.getElementById('admin-title');
+    if (!titleEl.value.trim()) {
+      errors.push({ el: titleEl, message: 'חסר שם למוצר' });
+    }
+
+    var kind = kindSelect.value;
+    if (kind === 'fixed') {
+      var cartPriceEl = document.getElementById('admin-cart-price');
+      if (!(Number(cartPriceEl.value) > 0)) {
+        errors.push({ el: cartPriceEl, message: 'יש להזין מחיר גדול מ-0' });
+      }
+    }
+
+    if (kind === 'variable') {
+      var minEl = document.getElementById('admin-min-price');
+      var maxEl = document.getElementById('admin-max-price');
+      var min = Number(minEl.value);
+      var max = Number(maxEl.value);
+      if (!(min > 0)) {
+        errors.push({ el: minEl, message: 'סכום מינימום חייב להיות גדול מ-0' });
+      }
+      if (!(max >= min) || !(max > 0)) {
+        errors.push({ el: maxEl, message: 'סכום מקסימום חייב להיות לפחות כמו המינימום' });
+      }
+    }
+
+    if (kind === 'variants') {
+      var rows = variantsEl.querySelectorAll('.admin-variant');
+      var pricedCount = 0;
+      Array.prototype.forEach.call(rows, function (row, index) {
+        var priceInput = row.querySelector('[data-v="price"]');
+        var nameInput = row.querySelector('[data-v="name"]');
+        var priceRaw = priceInput ? String(priceInput.value || '').trim() : '';
+        var name = nameInput ? String(nameInput.value || '').trim() : '';
+        var price = Number(priceRaw);
+        var label = 'סוג ' + (index + 1);
+        if (priceRaw !== '' && !(price > 0)) {
+          errors.push({
+            el: priceInput,
+            message: label + ': המחיר חייב להיות מספר שלם גדול מ-0',
+          });
+        } else if (price > 0) {
+          pricedCount += 1;
+        } else if (name) {
+          errors.push({
+            el: priceInput,
+            message: label + ': חסר מחיר (חייב להיות גדול מ-0)',
+          });
+        }
+        var stockInput = row.querySelector('[data-v="stock"]');
+        var stockRaw = stockInput ? String(stockInput.value || '').trim() : '';
+        if (stockRaw !== '') {
+          var stock = Number(stockRaw);
+          if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+            errors.push({
+              el: stockInput,
+              message: label + ': כמות מלאי לא תקינה (0–99999)',
+            });
+          }
+        }
+      });
+      if (!pricedCount) {
+        var firstPrice = variantsEl.querySelector('[data-v="price"]');
+        var already = errors.some(function (item) {
+          return item.el === firstPrice;
+        });
+        if (!already) {
+          errors.push({
+            el: firstPrice || addVariantBtn,
+            message: 'צריך לפחות סוג אחד עם מחיר גדול מ-0',
+          });
+        }
+      }
+    }
+
+    var stockEl = document.getElementById('admin-stock');
+    if (
+      stockEl &&
+      !stockEl.disabled &&
+      kind !== 'variants' &&
+      String(stockEl.value || '').trim() !== ''
+    ) {
+      var stock = Number(stockEl.value);
+      if (!Number.isInteger(stock) || stock < 0 || stock > 99999) {
+        errors.push({ el: stockEl, message: 'כמות מלאי לא תקינה (0–99999)' });
+      }
+    }
+
+    return errors;
+  }
+
+  function applyValidationErrors(errors) {
+    clearFieldErrors();
+    if (!errors.length) return;
+    errors.forEach(function (item) {
+      setFieldError(item.el, item.message);
+    });
+    var first = errors[0];
+    var summary =
+      errors.length === 1
+        ? first.message
+        : 'יש ' + errors.length + ' בעיות לתיקון. הראשונה: ' + first.message;
+    show(editorMessage, summary, 'error');
+    focusField(first.el);
+  }
+
+  function snapshot(list) {
+    var map = {};
+    (list || []).forEach(function (p) {
+      map[p.slug] = {
+        out_of_stock: Boolean(p.out_of_stock),
+        limited_stock: Boolean(p.limited_stock),
+        preorder: Boolean(p.preorder),
+        hide: Boolean(p.hide),
+        stock: p.stock == null || p.stock === '' ? null : Number(p.stock),
+      };
+    });
+    return map;
+  }
+
+  function orderOf(list) {
+    return (list || []).map(function (p) { return p.slug; }).join('|');
+  }
+
+  function isDirty() {
+    if (orderOf(products) !== originalOrder) return true;
+
+    return products.some(function (p) {
+      var orig = original[p.slug] || {};
+      var stock = p.stock == null || p.stock === '' ? null : Number(p.stock);
+      var origStock = orig.stock == null || orig.stock === '' ? null : Number(orig.stock);
+      return (
+        Boolean(p.out_of_stock) !== Boolean(orig.out_of_stock) ||
+        Boolean(p.limited_stock) !== Boolean(orig.limited_stock) ||
+        Boolean(p.preorder) !== Boolean(orig.preorder) ||
+        Boolean(p.hide) !== Boolean(orig.hide) ||
+        stock !== origStock
+      );
+    });
+  }
+
+  function statusLabel(p) {
+    if (p.hide) return 'מוסתר';
+    if ((p.out_of_stock || p.stock === 0) && p.preorder) return 'הזמנה מראש';
+    if (p.out_of_stock || p.stock === 0) return 'אזל';
+    if (p.kind === 'variants' && p.variants && p.variants.length) {
+      var tracked = p.variants.filter(function (v) {
+        return v && v.stock != null && v.stock !== '';
+      });
+      if (tracked.length) {
+        var total = tracked.reduce(function (sum, v) {
+          return sum + Number(v.stock);
+        }, 0);
+        return 'מלאי: ' + total;
+      }
+    }
+    if (p.stock != null && p.stock !== '') return 'מלאי: ' + p.stock;
+    if (p.limited_stock) return 'מלאי מוגבל';
+    return 'במלאי';
+  }
+
+  function kindLabel(p) {
+    if (p.kind === 'variable') return 'גיפט קארד';
+    if (p.kind === 'variants') return 'כמה סוגים';
+    if (p.kind === 'fixed') return 'מחיר קבוע';
+    return 'דף בלי סל';
+  }
+
+  function categoryLabel(p) {
+    var labels = {
+      'embroidery-supplies': 'ציוד רקמה',
+      'works-for-sale': 'עבודות למכירה',
+      threads: 'חוטים',
+      hoops: 'חישוקים',
+      needles: 'מחטים',
+      tools: 'מספריים',
+      'markers-stickers': 'טושים ומדבקות',
+      fabrics: 'בדים',
+      kits: 'ערכות רקמה',
+      books: 'ספרי רקמה',
+      beginners: 'למתחילות',
+      'gift-card': 'גיפט קארד',
+      'birth-gifts': 'מתנות ללידה',
+      'embroidered-works': 'עבודות רקומות',
+    };
+    var cats =
+      p.categories && p.categories.length
+        ? p.categories
+        : p.category
+          ? [p.category]
+          : [];
+    return cats
+      .map(function (cat) {
+        return labels[cat] || '';
+      })
+      .filter(Boolean)
+      .join(' · ');
+  }
+
+  function categoryCheckboxes() {
+    return document.querySelectorAll('#admin-category input[type="checkbox"][name="category"]');
+  }
+
+  function readSelectedCategories() {
+    return Array.prototype.map
+      .call(categoryCheckboxes(), function (box) {
+        return box.checked ? box.value : '';
+      })
+      .filter(Boolean);
+  }
+
+  function setSelectedCategories(categories) {
+    var selected = Object.create(null);
+    (categories || []).forEach(function (cat) {
+      if (cat) selected[cat] = true;
+    });
+    categoryCheckboxes().forEach(function (box) {
+      box.checked = Boolean(selected[box.value]);
+    });
+  }
+
+  function priceLabel(p) {
+    if (p.kind === 'variable') {
+      if (p.min_price && p.max_price) return '₪' + p.min_price + ' – ₪' + p.max_price;
+      return 'סכום לבחירה';
+    }
+    if (p.kind === 'variants' && p.variants && p.variants.length) {
+      var prices = p.variants.map(function (v) {
+        return Number(v.price);
+      }).filter(function (n) {
+        return n > 0;
+      });
+      if (!prices.length) return '';
+      var min = Math.min.apply(null, prices);
+      var max = Math.max.apply(null, prices);
+      return min === max ? '₪' + min : '₪' + min + ' – ₪' + max;
+    }
+    if (p.cart_price > 0) return '₪' + p.cart_price;
+    return p.price_display || '';
+  }
+
+  function productCardImage(p) {
+    if (p && p.image) return p.image;
+    var variants = (p && p.variants) || [];
+    for (var i = 0; i < variants.length; i++) {
+      var row = variants[i];
+      if (!row) continue;
+      if (row.image) return typeof row.image === 'string' ? row.image : row.image.path || row.image.preview || '';
+      if (row.images && row.images.length) {
+        var first = row.images[0];
+        return typeof first === 'string' ? first : (first && (first.path || first.preview)) || '';
+      }
+    }
+    return '';
+  }
+
+  function savedMessage(data, fallback) {
+    if (data && data.target === 'local') {
+      return fallback || 'נשמר. רענון החנות יופיע אחרי שהאתר נבנה מחדש.';
+    }
+    return fallback || 'נשמר. האתר יתעדכן אחרי הבילד ב-Vercel (בדרך כלל עד דקה-שתיים).';
+  }
+
+  /** The arrows, the grip and the position this row is currently in. */
+  function orderControlsHtml(index) {
+    return (
+      '<div class="admin-card__order">' +
+      '<button type="button" class="admin-card__move" data-move="up" title="העלאה" aria-label="העלאה">↑</button>' +
+      '<span class="admin-card__rank" dir="ltr">' + (index + 1) + '</span>' +
+      '<button type="button" class="admin-card__move" data-move="down" title="הורדה" aria-label="הורדה">↓</button>' +
+      '<span class="admin-card__grip" data-drag-handle draggable="true" title="גרירה" aria-hidden="true">⠿</span>' +
+      '</div>'
+    );
+  }
+
+  function render() {
+    listEl.innerHTML = products
+      .map(function (p, index) {
+        var thumb = productCardImage(p);
+        var img = thumb
+          ? '<img class="admin-card__thumb" src="' + escapeHtml(thumb) + '" alt="">'
+          : '<span class="admin-card__thumb admin-card__thumb--empty"></span>';
+        var price = priceLabel(p);
+        return (
+          '<li class="admin-card" data-slug="' +
+          escapeHtml(p.slug) +
+          '">' +
+          orderControlsHtml(index) +
+          img +
+          '<div class="admin-card__body">' +
+          '<div class="admin-card__head">' +
+          '<strong>' +
+          escapeHtml(p.title) +
+          '</strong>' +
+          '<span class="admin-card__badge">' +
+          statusLabel(p) +
+          '</span>' +
+          '</div>' +
+          '<p class="admin-card__meta">' +
+          escapeHtml(kindLabel(p)) +
+          (categoryLabel(p) ? ' · ' + escapeHtml(categoryLabel(p)) : '') +
+          (price ? ' · ' + escapeHtml(price) : '') +
+          '</p>' +
+          '<label class="admin-stock">כמות במלאי' +
+          '<input type="number" class="admin-stock__input" data-stock min="0" step="1" dir="ltr" ' +
+          'placeholder="—"' +
+          (p.stock != null && p.stock !== '' ? ' value="' + escapeHtml(p.stock) + '"' : '') +
+          (p.kind === 'variable' || p.kind === 'content' || p.kind === 'variants' ? ' disabled' : '') +
+          '></label>' +
+          '<label class="admin-check"><input type="checkbox" data-flag="out_of_stock"' +
+          (p.out_of_stock ? ' checked' : '') +
+          '> אזל מהמלאי</label>' +
+          '<label class="admin-check"><input type="checkbox" data-flag="preorder"' +
+          (p.preorder ? ' checked' : '') +
+          '> הזמיני מראש</label>' +
+          '<label class="admin-check"><input type="checkbox" data-flag="limited_stock"' +
+          (p.limited_stock ? ' checked' : '') +
+          '> מלאי מוגבל</label>' +
+          '<label class="admin-check"><input type="checkbox" data-flag="hide"' +
+          (p.hide ? ' checked' : '') +
+          '> הסתר מהחנות</label>' +
+          '<button type="button" class="admin-card__edit" data-edit="' +
+          escapeHtml(p.slug) +
+          '">עריכה</button>' +
+          '</div></li>'
+        );
+      })
+      .join('');
+    if (reorder) reorder.refresh();
+    saveBtn.disabled = !isDirty();
+  }
+
+  /** Renumber in place: re-rendering here would take the focus off the arrow. */
+  function syncRanks() {
+    Array.prototype.forEach.call(listEl.querySelectorAll('.admin-card__rank'), function (el, index) {
+      el.textContent = index + 1;
+    });
+  }
+
+  function showBoard() {
+    loginForm.hidden = true;
+    board.hidden = false;
+    logoutBtn.hidden = false;
+  }
+
+  function showLogin() {
+    loginForm.hidden = false;
+    board.hidden = true;
+    logoutBtn.hidden = true;
+    products = [];
+    closeEditor();
+  }
+
+  function showList() {
+    editor.hidden = true;
+    listView.hidden = false;
+  }
+
+  function closeEditor() {
+    showList();
+    show(editorMessage, '', '');
+    show(photosMessage, '', '');
+    editor.reset();
+    editor.classList.remove('admin-editor--variants');
+    variantsEl.innerHTML = '';
+    photoItems = [];
+    renderPhotos();
+    slugInput.readOnly = false;
+    kindSelect.disabled = false;
+    editorDelete.hidden = true;
+  }
+
+  function variantImageSrc(image) {
+    if (!image) return '';
+    if (typeof image === 'string') return image;
+    if (image.preview) return image.preview;
+    if (image.upload && image.upload.data) return image.upload.data;
+    if (image.path) return image.path;
+    return '';
+  }
+
+  function variantImagesFromRow(row) {
+    row = row || {};
+    if (row.images && row.images.length) {
+      return row.images.map(function (item) {
+        if (typeof item === 'string') return { path: item, preview: item };
+        return item;
+      });
+    }
+    var list = [];
+    if (row.image) {
+      if (typeof row.image === 'string') list.push({ path: row.image, preview: row.image });
+      else list.push(row.image);
+    }
+    (row.gallery || []).forEach(function (pathName) {
+      list.push({ path: pathName, preview: pathName });
+    });
+    return list;
+  }
+
+  function variantPhotosHtml(items) {
+    if (!items || !items.length) {
+      return '<p class="admin-hint admin-variant__photos-empty">עדיין אין תמונות לסוג הזה.</p>';
+    }
+    return (
+      '<div class="admin-variant__photos">' +
+      items
+        .map(function (item, i) {
+          var src = item.preview || item.path || '';
+          return (
+            '<article class="admin-variant__photo' +
+            (i === 0 ? ' admin-variant__photo--main' : '') +
+            '">' +
+            (src
+              ? '<img class="admin-variant__thumb" src="' + escapeHtml(src) + '" alt="">'
+              : '<span class="admin-variant__thumb admin-variant__thumb--empty" aria-hidden="true"></span>') +
+            (i === 0 ? '<span class="admin-variant__photo-badge">ראשית</span>' : '') +
+            '<div class="admin-variant__photo-actions">' +
+            (i === 0
+              ? ''
+              : '<button type="button" class="admin-variant__photo-btn" data-variant-photo-main="' +
+                i +
+                '">הפוך לראשית</button>') +
+            '<button type="button" class="admin-variant__photo-btn" data-variant-photo-up="' +
+            i +
+            '"' +
+            (i === 0 ? ' disabled' : '') +
+            '>ימינה</button>' +
+            '<button type="button" class="admin-variant__photo-btn" data-variant-photo-down="' +
+            i +
+            '"' +
+            (i === items.length - 1 ? ' disabled' : '') +
+            '>שמאלה</button>' +
+            '<button type="button" class="admin-variant__photo-btn admin-variant__photo-btn--danger" data-variant-photo-remove="' +
+            i +
+            '">הסרה</button>' +
+            '</div></article>'
+          );
+        })
+        .join('') +
+      '</div>'
+    );
+  }
+
+  function variantRowHtml(row, index) {
+    row = row || {};
+    var n = (index == null ? 0 : index) + 1;
+    var images = variantImagesFromRow(row);
+    return (
+      '<div class="admin-variant" data-variant-index="' +
+      n +
+      '">' +
+      '<div class="admin-variant__heading">' +
+      '<div class="admin-variant__heading-start">' +
+      orderControlsHtml(index) +
+      '<p class="admin-variant__label">סוג ' +
+      n +
+      '</p>' +
+      '</div>' +
+      '<button type="button" class="admin-variant__remove" data-remove-variant>הסרת סוג</button>' +
+      '</div>' +
+      '<div class="form__group">' +
+      '<label class="form__label">שם הסוג</label>' +
+      '<input class="form__input" data-v="name" placeholder="למשל: קטיפה אדומה" value="' +
+      escapeHtml(row.name || '') +
+      '">' +
+      '</div>' +
+      '<div class="admin-grid">' +
+      '<div class="form__group">' +
+      '<label class="form__label">מחיר (₪)</label>' +
+      '<input class="form__input" data-v="price" type="number" min="1" step="1" dir="ltr" placeholder="30" value="' +
+      escapeHtml(row.price || '') +
+      '">' +
+      '</div>' +
+      '<div class="form__group">' +
+      '<label class="form__label">מלאי</label>' +
+      '<input class="form__input" data-v="stock" type="number" min="0" step="1" dir="ltr" placeholder="ריק = בלי מעקב" value="' +
+      (row.stock != null && row.stock !== '' ? escapeHtml(row.stock) : '') +
+      '">' +
+      '<p class="admin-hint">כמות מהסוג הזה שאפשר לקנות.</p>' +
+      '<label class="admin-check"><input type="checkbox" data-v="preorder"' +
+      (row.preorder ? ' checked' : '') +
+      '> הזמיני מראש</label>' +
+      '<p class="admin-hint">מאפשר לקנות גם כשאין מלאי מהסוג הזה.</p>' +
+      '</div>' +
+      '<div class="form__group">' +
+      '<label class="form__label">מזהה פנימי</label>' +
+      '<input class="form__input" data-v="id" dir="ltr" placeholder="regular" value="' +
+      escapeHtml(row.id || '') +
+      '">' +
+      '<p class="admin-hint">אופציונלי. באנגלית בלבד — אם ריק נייצר אוטומטית.</p>' +
+      '</div>' +
+      '</div>' +
+      '<div class="form__group">' +
+      '<label class="form__label">תיאור</label>' +
+      '<textarea class="form__input admin-body-input admin-variant__description" data-v="description" rows="12" placeholder="תיאור מלא לסוג — אפשר לכתוב טקסט ארוך בכמה שורות">' +
+      escapeHtml(row.description || '') +
+      '</textarea>' +
+      '</div>' +
+      '<div class="form__group admin-variant__image-group">' +
+      '<label class="form__label">תמונות</label>' +
+      '<p class="admin-hint">אפשר כמה תמונות לכל סוג. הראשונה היא הראשית בסל ובכרטיס — אפשר לשנות סדר, להפוך לראשית או להסיר.</p>' +
+      '<div class="admin-variant__image" data-variant-photos>' +
+      variantPhotosHtml(images) +
+      '<div class="admin-variant__image-actions">' +
+      '<label class="button admin-upload-btn">' +
+      'העלאת תמונות' +
+      '<input type="file" data-v-image-file accept="image/jpeg,image/png,image/webp,image/gif" multiple>' +
+      '</label>' +
+      '</div></div></div></div>'
+    );
+  }
+
+  function getVariantPhotoItems(row) {
+    if (!variantPhotos.has(row)) variantPhotos.set(row, []);
+    return variantPhotos.get(row);
+  }
+
+  function moveVariantPhoto(row, from, to) {
+    var items = getVariantPhotoItems(row);
+    if (to < 0 || to >= items.length) return;
+    var item = items.splice(from, 1)[0];
+    items.splice(to, 0, item);
+    renderVariantPhotos(row);
+    schedulePreview();
+  }
+
+  function renderVariantPhotos(row) {
+    var box = row.querySelector('[data-variant-photos]');
+    if (!box) return;
+    var actions = box.querySelector('.admin-variant__image-actions');
+    var listHtml = variantPhotosHtml(getVariantPhotoItems(row));
+    var tmp = document.createElement('div');
+    tmp.innerHTML = listHtml;
+    Array.prototype.slice
+      .call(box.querySelectorAll('.admin-variant__photos, .admin-variant__photos-empty'))
+      .forEach(function (el) {
+        el.remove();
+      });
+    while (tmp.firstChild) {
+      box.insertBefore(tmp.firstChild, actions);
+    }
+  }
+
+  function renderVariants(rows) {
+    var list = rows && rows.length ? rows : [{}];
+    variantsEl.innerHTML = list
+      .map(function (row, index) {
+        return variantRowHtml(row, index);
+      })
+      .join('');
+    Array.prototype.forEach.call(variantsEl.querySelectorAll('.admin-variant'), function (el, index) {
+      variantPhotos.set(el, variantImagesFromRow(list[index] || {}));
+    });
+    if (variantReorder) variantReorder.refresh();
+  }
+
+  function renumberVariants() {
+    Array.prototype.forEach.call(variantsEl.querySelectorAll('.admin-variant'), function (row, index) {
+      var label = row.querySelector('.admin-variant__label');
+      if (label) label.textContent = 'סוג ' + (index + 1);
+      var rank = row.querySelector('.admin-card__rank');
+      if (rank) rank.textContent = index + 1;
+      row.setAttribute('data-variant-index', String(index + 1));
+    });
+    if (variantReorder) variantReorder.refresh();
+  }
+
+  function readVariantImages(row) {
+    return getVariantPhotoItems(row).map(function (item) {
+      if (item.upload) return { upload: item.upload };
+      return { path: item.path };
+    });
+  }
+
+  function readVariants() {
+    return Array.prototype.map.call(variantsEl.querySelectorAll('.admin-variant'), function (row) {
+      var images = readVariantImages(row);
+      var stockRaw = ((row.querySelector('[data-v="stock"]') || {}).value || '').trim();
+      return {
+        id: (row.querySelector('[data-v="id"]') || {}).value,
+        name: (row.querySelector('[data-v="name"]') || {}).value,
+        price: (row.querySelector('[data-v="price"]') || {}).value,
+        stock: stockRaw === '' ? null : stockRaw,
+        preorder: Boolean((row.querySelector('[data-v="preorder"]') || {}).checked),
+        images: images,
+        image: images[0] || '',
+        gallery: images.slice(1),
+        description: (row.querySelector('[data-v="description"]') || {}).value,
+      };
+    });
+  }
+
+  function parsePresets(raw) {
+    return String(raw || '')
+      .split(/[,\s]+/)
+      .map(function (n) {
+        return Number(n);
+      })
+      .filter(function (n) {
+        return Number.isInteger(n) && n > 0;
+      });
+  }
+
+  function renderPhotos() {
+    if (!photoItems.length) {
+      photosEl.innerHTML = '<p class="admin-hint">עדיין אין תמונות. הוסיפי קבצים מהמחשב.</p>';
+      schedulePreview();
+      return;
+    }
+    photosEl.innerHTML = photoItems
+      .map(function (item, i) {
+        var src = item.preview || item.path || '';
+        return (
+          '<article class="admin-photo' +
+          (i === 0 ? ' admin-photo--main' : '') +
+          '">' +
+          (src
+            ? '<img class="admin-photo__img" src="' + escapeHtml(src) + '" alt="">'
+            : '<span class="admin-photo__img admin-photo__img--empty"></span>') +
+          (i === 0 ? '<span class="admin-photo__badge">מרכזית</span>' : '') +
+          '<div class="admin-photo__actions">' +
+          (i === 0
+            ? ''
+            : '<button type="button" class="admin-photo__btn" data-photo-main="' +
+              i +
+              '">הפוך למרכזית</button>') +
+          '<button type="button" class="admin-photo__btn" data-photo-up="' +
+          i +
+          '"' +
+          (i === 0 ? ' disabled' : '') +
+          '>ימינה</button>' +
+          '<button type="button" class="admin-photo__btn" data-photo-down="' +
+          i +
+          '"' +
+          (i === photoItems.length - 1 ? ' disabled' : '') +
+          '>שמאלה</button>' +
+          '<button type="button" class="admin-photo__btn admin-photo__btn--danger" data-photo-remove="' +
+          i +
+          '">הסרה</button>' +
+          '</div></article>'
+        );
+      })
+      .join('');
+    schedulePreview();
+  }
+
+  function movePhoto(from, to) {
+    if (to < 0 || to >= photoItems.length) return;
+    var item = photoItems.splice(from, 1)[0];
+    photoItems.splice(to, 0, item);
+    renderPhotos();
+  }
+
+  function readFileAsPhoto(file) {
+    return new Promise(function (resolve, reject) {
+      if (!/^image\/(jpeg|jpg|png|webp|gif)$/i.test(file.type)) {
+        reject(new Error('רק jpg, png, webp או gif'));
+        return;
+      }
+      var reader = new FileReader();
+      reader.onerror = function () {
+        reject(new Error('לא הצלחנו לקרוא את הקובץ'));
+      };
+      reader.onload = function () {
+        var dataUrl = String(reader.result || '');
+        var finish = function (data, mime, filename) {
+          if (data.length > 3500000) {
+            reject(new Error('תמונה גדולה מדי (עד 2.5MB אחרי דחיסה)'));
+            return;
+          }
+          resolve({
+            path: '',
+            preview: data,
+            upload: { filename: filename, mime: mime, data: data },
+          });
+        };
+        // Keep small files and animated GIFs as-is. Large still images are
+        // re-encoded as JPEG — canvas PNG export ignores quality and stays huge.
+        if (file.type === 'image/gif' || file.size < 900000) {
+          finish(dataUrl, file.type, file.name);
+          return;
+        }
+        var img = new Image();
+        img.onload = function () {
+          var max = 1600;
+          var w = img.width;
+          var h = img.height;
+          if (w > max || h > max) {
+            var scale = Math.min(max / w, max / h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          var mime = 'image/jpeg';
+          var qualities = [0.82, 0.7, 0.55, 0.4];
+          var compressed = '';
+          for (var i = 0; i < qualities.length; i++) {
+            compressed = canvas.toDataURL(mime, qualities[i]);
+            if (compressed.length <= 3500000) break;
+          }
+          var filename = String(file.name || 'photo').replace(/\.[^.]+$/, '.jpg');
+          finish(compressed, mime, filename);
+        };
+        img.onerror = function () {
+          reject(new Error('לא הצלחנו לעבד את התמונה'));
+        };
+        img.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function syncKindFields() {
+    var kind = kindSelect.value;
+    document.querySelectorAll('[data-kind-fields]').forEach(function (el) {
+      el.hidden = el.getAttribute('data-kind-fields') !== kind;
+    });
+    editor.classList.toggle('admin-editor--variants', kind === 'variants');
+    var stockInput = document.getElementById('admin-stock');
+    var stockGroup = stockInput && stockInput.closest('.form__group');
+    if (stockInput) {
+      stockInput.disabled =
+        kind === 'variable' || kind === 'content' || kind === 'variants' || slugInput.value === 'gift-card';
+    }
+    if (stockGroup) {
+      stockGroup.hidden = kind === 'variants';
+    }
+  }
+
+  /** Quantity drives «אזל מהמלאי»: 0 → on, >0 → off; empty/untracked leaves the flag alone. */
+  function syncEditorOutOfStock(stock, fallback) {
+    var box = document.getElementById('admin-out-of-stock');
+    if (!box) return;
+    if (stock === 0 || stock === '0') box.checked = true;
+    else if (stock != null && stock !== '' && Number(stock) > 0) box.checked = false;
+    else if (fallback != null) box.checked = Boolean(fallback);
+  }
+
+  function fillEditor(product, isNew) {
+    editingNew = Boolean(isNew);
+    editorTitle.textContent = isNew ? 'מוצר חדש' : 'עריכת ' + (product.title || product.slug);
+    slugInput.value = product.slug || '';
+    slugInput.readOnly = !isNew;
+    document.getElementById('admin-title').value = product.title || '';
+    document.getElementById('admin-subtitle').value = product.subtitle || '';
+    photoItems = (product.photos && product.photos.length ? product.photos : product.image ? [product.image] : []).map(
+      function (pathName) {
+        return { path: pathName, preview: pathName };
+      }
+    );
+    renderPhotos();
+    kindSelect.value = product.kind || 'fixed';
+    kindSelect.disabled = product.slug === 'gift-card' || product.slug === 'scrunchies';
+    setSelectedCategories(
+      product.categories && product.categories.length
+        ? product.categories
+        : product.category
+          ? [product.category]
+          : []
+    );
+    document.getElementById('admin-cart-price').value = product.cart_price > 0 ? product.cart_price : '';
+    document.getElementById('admin-min-price').value = product.min_price > 0 ? product.min_price : '';
+    document.getElementById('admin-max-price').value = product.max_price > 0 ? product.max_price : '';
+    document.getElementById('admin-presets').value = (product.presets || []).join(', ');
+    document.getElementById('admin-body').value = product.body || '';
+    document.getElementById('admin-stock').value =
+      product.stock != null && product.stock !== '' ? product.stock : '';
+    document.getElementById('admin-stock').disabled =
+      product.kind === 'variable' ||
+      product.kind === 'content' ||
+      product.kind === 'variants' ||
+      product.slug === 'gift-card';
+    syncEditorOutOfStock(product.stock, Boolean(product.out_of_stock));
+    document.getElementById('admin-preorder').checked = Boolean(product.preorder);
+    document.getElementById('admin-limited-stock').checked = Boolean(product.limited_stock);
+    document.getElementById('admin-hide').checked = Boolean(product.hide);
+    renderVariants(product.variants);
+    editorDelete.hidden = isNew;
+    syncKindFields();
+    clearFieldErrors();
+    show(editorMessage, '', '');
+    show(photosMessage, '', '');
+    updatePreview();
+  }
+
+  function variantsHaveStock(rows) {
+    return (rows || []).some(function (row) {
+      return row && row.stock != null && String(row.stock).trim() !== '';
+    });
+  }
+
+  function readEditor() {
+    var kind = kindSelect.value;
+    var variants = readVariants();
+    var stockRaw = document.getElementById('admin-stock').value;
+    var stock =
+      kind === 'variable' ||
+      kind === 'content' ||
+      kind === 'variants' ||
+      slugInput.value.trim().toLowerCase() === 'gift-card'
+        ? null
+        : stockRaw;
+    if (kind === 'variants' && !variantsHaveStock(variants) && String(stockRaw || '').trim() !== '') {
+      stock = stockRaw;
+    }
+    var outOfStock = document.getElementById('admin-out-of-stock').checked;
+    if (stock === 0 || stock === '0') outOfStock = true;
+    else if (stock != null && stock !== '' && Number(stock) > 0) outOfStock = false;
+    if (kind === 'variants' && variantsHaveStock(variants)) {
+      var stocks = variants
+        .map(function (row) {
+          if (row.stock == null || String(row.stock).trim() === '') return null;
+          return Number(row.stock);
+        })
+        .filter(function (n) {
+          return n != null && Number.isInteger(n);
+        });
+      if (stocks.length && stocks.every(function (n) {
+        return n === 0;
+      })) {
+        outOfStock = true;
+      } else if (stocks.some(function (n) {
+        return n > 0;
+      })) {
+        outOfStock = false;
+      }
+    }
+    return {
+      slug: slugInput.value.trim().toLowerCase(),
+      title: document.getElementById('admin-title').value,
+      subtitle: document.getElementById('admin-subtitle').value,
+      photos: photoItems.map(function (item) {
+        if (item.upload) return { upload: item.upload };
+        return { path: item.path };
+      }),
+      kind: kind,
+      categories: readSelectedCategories(),
+      cart_price: document.getElementById('admin-cart-price').value,
+      min_price: document.getElementById('admin-min-price').value,
+      max_price: document.getElementById('admin-max-price').value,
+      presets: parsePresets(document.getElementById('admin-presets').value),
+      variants: variants,
+      body: document.getElementById('admin-body').value,
+      stock: stock,
+      out_of_stock: outOfStock,
+      limited_stock: document.getElementById('admin-limited-stock').checked,
+      preorder: document.getElementById('admin-preorder').checked,
+      hide: document.getElementById('admin-hide').checked,
+    };
+  }
+
+  function displayPriceFor(input) {
+    if (input.kind === 'variable') return 'כל סכום לבחירתך';
+    if (input.kind === 'variants') {
+      var prices = (input.variants || [])
+        .map(function (v) {
+          return Number(v.price);
+        })
+        .filter(function (n) {
+          return n > 0;
+        });
+      if (!prices.length) return '';
+      var min = Math.min.apply(null, prices);
+      var max = Math.max.apply(null, prices);
+      return min === max ? '₪' + min : '₪' + min + ' – ₪' + max;
+    }
+    if (input.kind === 'content') return '';
+    var n = Number(input.cart_price);
+    return n > 0 ? '₪' + n : '';
+  }
+
+  function inlineMarkdown(s) {
+    return escapeHtml(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function renderMarkdown(src) {
+    var text = String(src || '')
+      .replace(/\r\n/g, '\n')
+      .trim();
+    if (!text) return '';
+    return text
+      .split(/\n{2,}/)
+      .map(function (block) {
+        var lines = block.split('\n');
+        var first = lines[0] || '';
+        if (/^### /.test(first)) {
+          return (
+            '<h3>' +
+            inlineMarkdown(first.replace(/^### /, '')) +
+            '</h3>' +
+            (lines.length > 1 ? '<p>' + lines.slice(1).map(inlineMarkdown).join('<br>') + '</p>' : '')
+          );
+        }
+        if (/^## /.test(first)) {
+          return (
+            '<h2>' +
+            inlineMarkdown(first.replace(/^## /, '')) +
+            '</h2>' +
+            (lines.length > 1 ? '<p>' + lines.slice(1).map(inlineMarkdown).join('<br>') + '</p>' : '')
+          );
+        }
+        if (lines.every(function (line) {
+          return /^[-*] /.test(line);
+        })) {
+          return (
+            '<ul>' +
+            lines
+              .map(function (line) {
+                return '<li>' + inlineMarkdown(line.replace(/^[-*] /, '')) + '</li>';
+              })
+              .join('') +
+            '</ul>'
+          );
+        }
+        return '<p>' + lines.map(inlineMarkdown).join('<br>') + '</p>';
+      })
+      .join('');
+  }
+
+  function limitedStockCopy(stock) {
+    return Number(stock) === 1 ? 'אחרון במלאי' : 'מלאי מוגבל';
+  }
+
+  function stockOverlay(p) {
+    if ((p.out_of_stock || p.stock === 0) && p.preorder) return '<div class="preorder">הזמיני מראש</div>';
+    if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock">אזל מהמלאי</div>';
+    if (p.limited_stock && p.kind !== 'variants') {
+      return '<div class="limited-stock">' + limitedStockCopy(p.stock) + '</div>';
+    }
+    return '';
+  }
+
+  function stockText(p) {
+    if ((p.out_of_stock || p.stock === 0) && p.preorder) return '<div class="preorder-text">הזמיני מראש</div>';
+    if (p.out_of_stock || p.stock === 0) return '<div class="out-of-stock-text">אזל מהמלאי</div>';
+    if (p.limited_stock && p.kind !== 'variants') {
+      return '<div class="limited-stock-text">' + limitedStockCopy(p.stock) + '</div>';
+    }
+    return '';
+  }
+
+  function variantStockLabel(v, className, allowPreorder) {
+    var stock = v && v.stock;
+    var cls = className || 'store-variant__stock';
+    var preorder = Boolean(allowPreorder) || Boolean(v && v.preorder);
+    if (stock === 0 || stock === '0') {
+      if (preorder) {
+        return '<div class="' + cls + ' preorder-text">הזמיני מראש</div>';
+      }
+      return '<div class="' + cls + ' out-of-stock-text">אזל מהמלאי</div>';
+    }
+    var n = Number(stock);
+    if (Number.isInteger(n) && n > 0 && n <= 3) {
+      return '<div class="' + cls + ' limited-stock-text">' + limitedStockCopy(n) + '</div>';
+    }
+    return '';
+  }
+
+  function fakeButton(label, extraClass) {
+    return (
+      '<button type="button" class="button button--primary' +
+      (extraClass ? ' ' + extraClass : '') +
+      '" tabindex="-1" aria-hidden="true">' +
+      escapeHtml(label) +
+      '</button>'
+    );
+  }
+
+  function isUnavailable(p) {
+    return (p.out_of_stock || p.stock === 0) && !p.preorder;
+  }
+
+  function isPreorder(p) {
+    return (p.out_of_stock || p.stock === 0) && Boolean(p.preorder);
+  }
+
+  function addToCartLabel(preorder) {
+    return preorder ? 'הזמיני מראש' : 'הוסיפי לסל';
+  }
+
+  function storeCardCta(p) {
+    if (p.kind === 'content') return '';
+    if (isUnavailable(p)) return fakeButton('עדכני אותי כשחוזר למלאי', 'store-item__add');
+    if (p.kind === 'variable') return fakeButton('בחרי סכום', 'store-item__add');
+    if (p.kind === 'variants') return fakeButton('בחרי סוג', 'store-item__add');
+    return fakeButton(addToCartLabel(isPreorder(p)), 'store-item__add');
+  }
+
+  function variantCardsHtml(p, scrunchie) {
+    return (p.variants || [])
+      .filter(function (v) {
+        return v.name || v.price || v.id;
+      })
+      .slice()
+      .sort(function (a, b) {
+        function unavailable(v) {
+          return (
+            (Number(v.stock) === 0 || v.stock === '0') &&
+            !v.preorder &&
+            !p.preorder
+          );
+        }
+        var aOut = unavailable(a);
+        var bOut = unavailable(b);
+        if (aOut !== bOut) return aOut ? 1 : -1;
+        var pa = Number(a && a.price) || 0;
+        var pb = Number(b && b.price) || 0;
+        return pa - pb;
+      })
+      .map(function (v) {
+        var name = v.name || v.id || '';
+        var sources = [];
+        if (v.images && v.images.length) {
+          v.images.forEach(function (item) {
+            var src = variantImageSrc(item);
+            if (src) sources.push(src);
+          });
+        } else {
+          var main = variantImageSrc(v.image);
+          if (main) sources.push(main);
+          (v.gallery || []).forEach(function (pathName) {
+            if (pathName) sources.push(pathName);
+          });
+        }
+        var img = '';
+        if (sources.length) {
+          if (scrunchie) {
+            img =
+              '<div class="scrunchies-variant__photo"><img src="' +
+              escapeHtml(sources[0]) +
+              '" alt=""></div>' +
+              (sources.length > 1
+                ? '<div class="scrunchies-variant__gallery">' +
+                  sources
+                    .slice(1)
+                    .map(function (src) {
+                      return '<img src="' + escapeHtml(src) + '" alt="">';
+                    })
+                    .join('') +
+                  '</div>'
+                : '');
+          } else {
+            img = variantGalleryHtml(sources, name);
+          }
+        }
+        if (scrunchie) {
+          var scrunchiePreorder =
+            (Number(v.stock) === 0 || v.stock === '0') &&
+            (Boolean(p.preorder) || Boolean(v.preorder));
+          var scrunchieSold =
+            (Number(v.stock) === 0 || v.stock === '0') && !scrunchiePreorder;
+          return (
+            '<article class="scrunchies-variant">' +
+            img +
+            '<h3 class="scrunchies-variant__name">' +
+            escapeHtml(name) +
+            '</h3>' +
+            (v.description
+              ? '<p class="scrunchies-variant__desc">' + escapeHtml(v.description) + '</p>'
+              : '') +
+            (v.price ? '<div class="scrunchies-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
+            variantStockLabel(v, 'scrunchies-variant__stock', p.preorder) +
+            fakeButton(scrunchieSold ? 'עדכני אותי כשחוזר למלאי' : addToCartLabel(scrunchiePreorder)) +
+            '</article>'
+          );
+        }
+        var variantPreorder =
+          (Number(v.stock) === 0 || v.stock === '0') &&
+          (Boolean(p.preorder) || Boolean(v.preorder));
+        var variantSold =
+          (Number(v.stock) === 0 || v.stock === '0') && !variantPreorder;
+        return (
+          '<article class="store-variant">' +
+          img +
+          '<div class="store-variant__info">' +
+          '<h3 class="store-variant__name">' +
+          escapeHtml(name) +
+          '</h3>' +
+          (v.description ? '<p class="store-variant__desc">' + escapeHtml(v.description) + '</p>' : '') +
+          (v.price ? '<div class="store-variant__price">₪' + escapeHtml(v.price) + '</div>' : '') +
+          variantStockLabel(v, null, p.preorder) +
+          '</div>' +
+          fakeButton(variantSold ? 'עדכני אותי כשחוזר למלאי' : addToCartLabel(variantPreorder)) +
+          '</article>'
+        );
+      })
+      .join('');
+  }
+
+  function productCartHtml(p) {
+    if (p.kind === 'content') return '';
+    if (isUnavailable(p)) return fakeButton('עדכני אותי כשחוזר למלאי', 'section-button');
+    if (p.kind === 'variable') {
+      var chips = (p.presets || [])
+        .map(function (n) {
+          return '<span class="gift-amount__chip">₪' + escapeHtml(n) + '</span>';
+        })
+        .join('');
+      return (
+        '<div class="gift-amount">' +
+        '<p class="gift-amount__label">בחרי סכום לגיפט קארד</p>' +
+        (chips ? '<div class="gift-amount__chips">' + chips + '</div>' : '') +
+        '<label class="gift-amount__custom"><span>' +
+        (p.min_price || p.max_price
+          ? 'או סכום אחר (₪' +
+            escapeHtml(p.min_price || '') +
+            '–₪' +
+            escapeHtml(p.max_price || '') +
+            ')'
+          : 'או סכום אחר') +
+        '</span><input class="form__input gift-amount__input" disabled placeholder="₪"></label>' +
+        fakeButton(addToCartLabel(isPreorder(p)), 'section-button is-preview-disabled') +
+        '</div>'
+      );
+    }
+    if (p.kind === 'variants') {
+      var scrunchie = p.slug === 'scrunchies';
+      var rows = variantCardsHtml(p, scrunchie);
+      if (!rows) return '';
+      if (scrunchie) {
+        return (
+          '<div class="scrunchies-variants-section">' +
+          '<h2 class="scrunchies-variants-section__title">בחרי סוג</h2>' +
+          '<p class="scrunchies-variants-section__subtitle">כל סקראנצ\'י נתפרת בעבודת יד ובכמויות קטנות, ולכן הדוגמאות הזמינות משתנות כל הזמן.</p>' +
+          '<div class="scrunchies-variants">' +
+          rows +
+          '</div></div>'
+        );
+      }
+      return '<div class="store-variants">' + rows + '</div>';
+    }
+    return fakeButton(addToCartLabel(isPreorder(p)), 'section-button');
+  }
+
+  function galleryHtml(paths, scrunchie) {
+    if (!paths || !paths.length) return '';
+    if (scrunchie) {
+      return (
+        '<div class="scrunchies-gallery">' +
+        paths
+          .map(function (src) {
+            return (
+              '<div class="scrunchies-gallery__item"><img src="' +
+              escapeHtml(src) +
+              '" alt=""></div>'
+            );
+          })
+          .join('') +
+        '</div>'
+      );
+    }
+    return productGalleryHtml('', paths, '');
+  }
+
+  function galleryThumbsHtml(images) {
+    if (!images || images.length < 2) return '';
+    return (
+      '<div class="product-gallery__thumbs" role="list">' +
+      images
+        .map(function (src, index) {
+          var active = index === 0;
+          return (
+            '<button type="button" class="product-gallery__thumb' +
+            (active ? ' is-active' : '') +
+            '" data-gallery-src="' +
+            escapeHtml(src) +
+            '" aria-label="תמונה ' +
+            (index + 1) +
+            '" aria-pressed="' +
+            (active ? 'true' : 'false') +
+            '"><img src="' +
+            escapeHtml(src) +
+            '" alt=""></button>'
+          );
+        })
+        .join('') +
+      '</div>'
+    );
+  }
+
+  function galleryNavHtml(images) {
+    if (!images || images.length < 2) return '';
+    return (
+      '<button type="button" class="product-gallery__nav product-gallery__nav--prev" data-gallery-prev aria-label="תמונה קודמת"></button>' +
+      '<button type="button" class="product-gallery__nav product-gallery__nav--next" data-gallery-next aria-label="תמונה הבאה"></button>'
+    );
+  }
+
+  function variantGalleryHtml(sources, alt) {
+    var images = [];
+    (sources || []).forEach(function (src) {
+      if (src && images.indexOf(src) === -1) images.push(src);
+    });
+    if (!images.length) return '';
+    return (
+      '<div class="product-gallery product-gallery--variant" data-product-gallery>' +
+      '<div class="product-gallery__stage">' +
+      '<img class="product-gallery__image" data-gallery-main src="' +
+      escapeHtml(images[0]) +
+      '" alt="' +
+      escapeHtml(alt || '') +
+      '">' +
+      galleryNavHtml(images) +
+      '</div>' +
+      galleryThumbsHtml(images) +
+      '</div>'
+    );
+  }
+
+  function productGalleryHtml(mainSrc, galleryPaths, stockHtml) {
+    var images = [];
+    function pushUnique(src) {
+      if (!src || images.indexOf(src) !== -1) return;
+      images.push(src);
+    }
+    pushUnique(mainSrc);
+    (galleryPaths || []).forEach(pushUnique);
+    if (!images.length) return '';
+
+    return (
+      '<div class="product-gallery" data-product-gallery>' +
+      '<div class="product-gallery__stage store-item-image-container">' +
+      '<img class="product-gallery__image" data-gallery-main src="' +
+      escapeHtml(images[0]) +
+      '" alt="">' +
+      (stockHtml || '') +
+      galleryNavHtml(images) +
+      '</div>' +
+      galleryThumbsHtml(images) +
+      '</div>'
+    );
+  }
+
+  function previewState() {
+    var data = readEditor();
+    var photos = photoItems
+      .map(function (item) {
+        return item.preview || item.path || '';
+      })
+      .filter(Boolean);
+    data.image = photos[0] || productCardImage(data) || '';
+    data.gallery = photos.slice(1);
+    data.price = displayPriceFor(data);
+    return data;
+  }
+
+  function storeCardHtml(p) {
+    var img = p.image
+      ? '<img src="' + escapeHtml(p.image) + '" alt="">'
+      : '';
+    var price = p.price
+      ? '<div class="store-item__price">' + escapeHtml(p.price) + '</div>'
+      : '';
+    var cta = storeCardCta(p);
+    return (
+      '<article class="store-item' +
+      (p.hide ? ' is-preview-hidden' : '') +
+      '">' +
+      '<div class="store-item__content">' +
+      '<div class="store-item__image">' +
+      img +
+      stockOverlay(p) +
+      '</div>' +
+      '<div class="store-item__info">' +
+      '<h3 class="store-item__title"><span>' +
+      escapeHtml(p.title || 'שם המוצר') +
+      '</span></h3>' +
+      (p.subtitle ? '<div class="store-item__subtitle">' + escapeHtml(p.subtitle) + '</div>' : '') +
+      '<div class="store-item__footer">' +
+      price +
+      cta +
+      '</div></div></div></article>'
+    );
+  }
+
+  function productPageHtml(p) {
+    var scrunchie = p.slug === 'scrunchies';
+    var body = renderMarkdown(p.body);
+    var cart = productCartHtml(p);
+    if (scrunchie) {
+      return (
+        (p.image
+          ? '<div class="scrunchies-hero"><img class="scrunchies-hero__bg" src="' +
+            escapeHtml(p.image) +
+            '" alt=""><div class="scrunchies-hero__content"><h1 class="scrunchies-hero__title">' +
+            escapeHtml(p.title || 'שם המוצר') +
+            '</h1>' +
+            (p.subtitle
+              ? '<p class="scrunchies-hero__subtitle">' + escapeHtml(p.subtitle) + '</p>'
+              : '') +
+            '</div></div>'
+          : '<div class="page-head"><h1 class="page-title">' +
+            escapeHtml(p.title || 'שם המוצר') +
+            '</h1>' +
+            (p.subtitle ? '<p class="store-item-subtitle">' + escapeHtml(p.subtitle) + '</p>' : '') +
+            '</div>') +
+        (body ? '<div class="scrunchies-story"><div class="scrunchies-story__text">' + body + '</div></div>' : '') +
+        galleryHtml(p.gallery, true) +
+        (cart ? '<div class="store-item-content">' + cart + '</div>' : '')
+      );
+    }
+    var mainImage = productGalleryHtml(p.image, p.gallery, stockOverlay(p));
+    return (
+      '<div class="store-item-layout">' +
+      '<div class="store-item-layout__details">' +
+      '<div class="page-head">' +
+      '<h1 class="page-title">' +
+      escapeHtml(p.title || 'שם המוצר') +
+      '</h1>' +
+      stockText(p) +
+      (p.subtitle ? '<p class="store-item-subtitle">' + escapeHtml(p.subtitle) + '</p>' : '') +
+      (body ? '<div class="store-item-content admin-preview__markdown">' + body + '</div>' : '') +
+      (p.price ? '<div class="store-item-price">' + escapeHtml(p.price) + '</div>' : '') +
+      '</div>' +
+      (cart ? '<div class="store-item-layout__actions store-item__cart-actions">' + cart + '</div>' : '') +
+      '</div>' +
+      (mainImage ? '<div class="store-item-layout__media">' + mainImage + '</div>' : '') +
+      '</div>'
+    );
+  }
+
+  function updatePreview() {
+    if (!previewCard || !previewPage || editor.hidden) return;
+    var p = previewState();
+    var hiddenNote = p.hide
+      ? '<p class="admin-preview__hidden">מוסתר מהחנות — הלקוחות לא יראו את המוצר ברשימה</p>'
+      : '';
+    previewCard.innerHTML =
+      '<h3 class="admin-preview__label">בחנות</h3>' + hiddenNote + storeCardHtml(p);
+    previewPage.innerHTML =
+      '<h3 class="admin-preview__label">דף המוצר</h3>' +
+      (p.slug
+        ? '<p class="admin-preview__url" dir="ltr">/store/' + escapeHtml(p.slug) + '/</p>'
+        : '') +
+      '<div class="admin-preview__page">' +
+      productPageHtml(p) +
+      '</div>';
+  }
+
+  function schedulePreview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(updatePreview, 50);
+  }
+
+  function loadBoard() {
+    return api('GET').then(function (data) {
+      products = data.products || [];
+      original = snapshot(products);
+      originalOrder = orderOf(products);
+      showBoard();
+      showList();
+      render();
+      if (saveHint) {
+        show(boardMessage, saveHint, 'ok');
+        saveHint = '';
+      } else {
+        show(boardMessage, '', '');
+      }
+    });
+  }
+
+  // Save and "edit while the board is dirty" can both call this. Run them one
+  // after another so two requests don't race the same GitHub branch.
+  var stockSaveQueue = Promise.resolve();
+
+  function saveStock() {
+    var run = stockSaveQueue.then(function () {
+      return saveStockNow();
+    });
+    stockSaveQueue = run.then(
+      function () {},
+      function () {}
+    );
+    return run;
+  }
+
+  function saveStockNow() {
+    saveBtn.disabled = true;
+    show(boardMessage, 'שומרת…', 'info');
+
+    // The position is the row's place in this list, so saving is what turns a
+    // drag into the order the shop will show.
+    var payload = products.map(function (p, index) {
+      return {
+        slug: p.slug,
+        stock: p.stock,
+        out_of_stock: p.out_of_stock,
+        limited_stock: p.limited_stock,
+        preorder: p.preorder,
+        hide: p.hide,
+        order: index + 1
+      };
+    });
+
+    return api('POST', { action: 'save', products: payload }).then(function (data) {
+      original = snapshot(products);
+      originalOrder = orderOf(products);
+      render();
+      var n = (data.changed || []).length;
+      var msg =
+        n === 0
+          ? 'אין שינויים לשמור'
+          : savedMessage(data);
+      show(boardMessage, msg, n === 0 ? 'info' : 'ok');
+      return data;
+    });
+  }
+
+  function openEditor(isNew, product) {
+    var go = function () {
+      fillEditor(product || { kind: 'fixed', variants: [] }, isNew);
+      listView.hidden = true;
+      editor.hidden = false;
+      window.scrollTo(0, 0);
+    };
+    if (isDirty()) {
+      return saveStock()
+        .then(go)
+        .catch(function (err) {
+          show(boardMessage, err.message || 'לא הצלחנו לשמור מלאי לפני העריכה', 'error');
+        });
+    }
+    go();
+  }
+
+  function loginQueryMessage(login) {
+    if (!login) return '';
+    if (login.kind === 'locked') return 'יותר מדי ניסיונות שגויים. נסי שוב בעוד כמה דקות';
+    if (login.kind === 'ok') {
+      return 'הסיסמה נכונה, אבל הדפדפן לא שמר את החיבור. נסי שוב מאותו חלון, בלי מצב פרטי.';
+    }
+    if (login.kind !== 'error') return '';
+    var message = 'סיסמה שגויה';
+    if (login.envName && login.envName !== 'production') {
+      message += '. ב-Preview הסיסמה היא ADMIN_PASSWORD של סביבת Preview, לא של Production. אחרי שינוי צריך Redeploy.';
+    }
+    return message;
+  }
+
+  function takeLoginQuery() {
+    var params = new URLSearchParams(window.location.search);
+    var kind = params.get('login');
+    var login = kind === 'error' || kind === 'locked' || kind === 'ok' ? { kind: kind, envName: params.get('env') || '' } : null;
+    if (login && history.replaceState) history.replaceState({}, '', window.location.pathname);
+    return login;
+  }
+
+  listEl.addEventListener('change', function (event) {
+    var stockInput = event.target.closest('input[data-stock]');
+    if (stockInput) {
+      var stockCard = stockInput.closest('[data-slug]');
+      var stockProduct = products.find(function (p) {
+        return p.slug === stockCard.getAttribute('data-slug');
+      });
+      if (!stockProduct) return;
+      var raw = stockInput.value.trim();
+      if (raw === '') {
+        stockProduct.stock = null;
+      } else {
+        var n = Number(raw);
+        if (!Number.isInteger(n) || n < 0) {
+          stockInput.value = stockProduct.stock != null ? stockProduct.stock : '';
+          return;
+        }
+        stockProduct.stock = n;
+        if (n === 0) stockProduct.out_of_stock = true;
+        else if (n > 0) stockProduct.out_of_stock = false;
+      }
+      render();
+      return;
+    }
+    var input = event.target.closest('input[data-flag]');
+    if (!input) return;
+    var card = input.closest('[data-slug]');
+    var product = products.find(function (p) {
+      return p.slug === card.getAttribute('data-slug');
+    });
+    if (!product) return;
+    product[input.getAttribute('data-flag')] = input.checked;
+    render();
+  });
+
+  listEl.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-edit]');
+    if (!btn) return;
+    var product = products.find(function (p) {
+      return p.slug === btn.getAttribute('data-edit');
+    });
+    if (product) openEditor(false, product);
+  });
+
+  if (window.AdminReorder) {
+    reorder = AdminReorder.attach(listEl, {
+      itemSelector: '.admin-card',
+      onChange: function (slugs) {
+        products = slugs
+          .map(function (slug) {
+            return products.find(function (p) { return p.slug === slug; });
+          })
+          .filter(Boolean);
+        syncRanks();
+        saveBtn.disabled = !isDirty();
+      }
+    });
+    variantReorder = AdminReorder.attach(variantsEl, {
+      itemSelector: '.admin-variant',
+      keyAttribute: 'data-variant-index',
+      onChange: function () {
+        renumberVariants();
+        schedulePreview();
+      }
+    });
+  }
+
+  saveBtn.addEventListener('click', function () {
+    saveStock().catch(function (err) {
+      show(boardMessage, err.message || 'לא הצלחנו לשמור', 'error');
+      saveBtn.disabled = !isDirty();
+    });
+  });
+
+  newBtn.addEventListener('click', function () {
+    openEditor(true, { kind: 'fixed', variants: [{}] });
+  });
+
+  kindSelect.addEventListener('change', function () {
+    syncKindFields();
+    schedulePreview();
+  });
+
+  document.getElementById('admin-stock').addEventListener('input', function () {
+    syncEditorOutOfStock(this.value);
+  });
+  document.getElementById('admin-stock').addEventListener('change', function () {
+    syncEditorOutOfStock(this.value);
+  });
+
+  slugInput.addEventListener('input', function () {
+    if (slugInput.readOnly) return;
+    slugInput.value = slugInput.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+  });
+
+  addVariantBtn.addEventListener('click', function () {
+    var nextIndex = variantsEl.querySelectorAll('.admin-variant').length;
+    variantsEl.insertAdjacentHTML('beforeend', variantRowHtml({}, nextIndex));
+    renumberVariants();
+    schedulePreview();
+  });
+
+  variantsEl.addEventListener('click', function (event) {
+    var mainPhoto = event.target.closest('[data-variant-photo-main]');
+    var upPhoto = event.target.closest('[data-variant-photo-up]');
+    var downPhoto = event.target.closest('[data-variant-photo-down]');
+    var removePhoto = event.target.closest('[data-variant-photo-remove]');
+    if (mainPhoto || upPhoto || downPhoto || removePhoto) {
+      var photoRow = (mainPhoto || upPhoto || downPhoto || removePhoto).closest('.admin-variant');
+      if (!photoRow) return;
+      if (mainPhoto) {
+        moveVariantPhoto(photoRow, Number(mainPhoto.getAttribute('data-variant-photo-main')), 0);
+        return;
+      }
+      if (upPhoto) {
+        var fromUp = Number(upPhoto.getAttribute('data-variant-photo-up'));
+        moveVariantPhoto(photoRow, fromUp, fromUp - 1);
+        return;
+      }
+      if (downPhoto) {
+        var fromDown = Number(downPhoto.getAttribute('data-variant-photo-down'));
+        moveVariantPhoto(photoRow, fromDown, fromDown + 1);
+        return;
+      }
+      getVariantPhotoItems(photoRow).splice(Number(removePhoto.getAttribute('data-variant-photo-remove')), 1);
+      renderVariantPhotos(photoRow);
+      schedulePreview();
+      return;
+    }
+    var btn = event.target.closest('[data-remove-variant]');
+    if (!btn) return;
+    var row = btn.closest('.admin-variant');
+    if (row) row.remove();
+    if (!variantsEl.querySelector('.admin-variant')) {
+      renderVariants([{}]);
+    } else {
+      renumberVariants();
+    }
+    schedulePreview();
+  });
+
+  variantsEl.addEventListener('change', function (event) {
+    var fileInput = event.target.closest('[data-v-image-file]');
+    if (!fileInput) return;
+    var row = fileInput.closest('.admin-variant');
+    var files = Array.prototype.slice.call(fileInput.files || []);
+    fileInput.value = '';
+    if (!row || !files.length) return;
+    var items = getVariantPhotoItems(row);
+    var room = MAX_VARIANT_PHOTOS - items.length;
+    if (room <= 0) {
+      show(editorMessage, 'אפשר עד ' + MAX_VARIANT_PHOTOS + ' תמונות לכל סוג', 'error');
+      return;
+    }
+    files = files.slice(0, room);
+    show(editorMessage, 'טוענת תמונות…', 'info');
+    Promise.all(files.map(readFileAsPhoto))
+      .then(function (added) {
+        variantPhotos.set(row, items.concat(added));
+        renderVariantPhotos(row);
+        show(editorMessage, '', '');
+        schedulePreview();
+      })
+      .catch(function (err) {
+        show(editorMessage, err.message || 'לא הצלחנו להוסיף תמונה', 'error');
+      });
+  });
+
+  photosEl.addEventListener('click', function (event) {
+    var main = event.target.closest('[data-photo-main]');
+    var up = event.target.closest('[data-photo-up]');
+    var down = event.target.closest('[data-photo-down]');
+    var remove = event.target.closest('[data-photo-remove]');
+    if (main) {
+      movePhoto(Number(main.getAttribute('data-photo-main')), 0);
+      return;
+    }
+    if (up) {
+      var fromUp = Number(up.getAttribute('data-photo-up'));
+      movePhoto(fromUp, fromUp - 1);
+      return;
+    }
+    if (down) {
+      var fromDown = Number(down.getAttribute('data-photo-down'));
+      movePhoto(fromDown, fromDown + 1);
+      return;
+    }
+    if (remove) {
+      photoItems.splice(Number(remove.getAttribute('data-photo-remove')), 1);
+      renderPhotos();
+    }
+  });
+
+  photoFiles.addEventListener('change', function () {
+    var files = Array.prototype.slice.call(photoFiles.files || []);
+    photoFiles.value = '';
+    if (!files.length) return;
+    var room = 8 - photoItems.length;
+    if (room <= 0) {
+      show(photosMessage || editorMessage, 'אפשר עד 8 תמונות', 'error');
+      return;
+    }
+    files = files.slice(0, room);
+    show(photosMessage || editorMessage, 'טוענת תמונות…', 'info');
+    Promise.all(files.map(readFileAsPhoto))
+      .then(function (items) {
+        photoItems = photoItems.concat(items);
+        renderPhotos();
+        show(
+          photosMessage || editorMessage,
+          items.length === 1
+            ? 'התמונה נוספה. לחצי «שמירת מוצר» כדי להעלות לאתר.'
+            : 'התמונות נוספו. לחצי «שמירת מוצר» כדי להעלות לאתר.',
+          'ok'
+        );
+      })
+      .catch(function (err) {
+        show(photosMessage || editorMessage, err.message || 'לא הצלחנו להוסיף תמונה', 'error');
+      });
+  });
+
+  editor.addEventListener('input', function () {
+    clearFieldErrors();
+    if (editorMessage && !editorMessage.hidden && /admin-message--error/.test(editorMessage.className)) {
+      show(editorMessage, '', '');
+    }
+    schedulePreview();
+  });
+  editor.addEventListener('change', function () {
+    clearFieldErrors();
+    if (editorMessage && !editorMessage.hidden && /admin-message--error/.test(editorMessage.className)) {
+      show(editorMessage, '', '');
+    }
+    schedulePreview();
+  });
+
+  editor.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var validationErrors = validateEditor();
+    if (validationErrors.length) {
+      applyValidationErrors(validationErrors);
+      editorSave.disabled = false;
+      return;
+    }
+    editorSave.disabled = true;
+    clearFieldErrors();
+    show(editorMessage, 'שומרת…', 'info');
+    api('POST', { action: 'upsert', isNew: editingNew, product: readEditor() })
+      .then(function (data) {
+        saveHint = savedMessage(data, editingNew ? 'המוצר נוסף.' : 'המוצר עודכן.');
+        if (data.target === 'local') {
+          saveHint += ' רענון החנות יופיע אחרי שהאתר נבנה מחדש.';
+        } else {
+          saveHint += ' האתר יתעדכן אחרי הבילד ב-Vercel.';
+        }
+        return loadBoard();
+      })
+      .catch(function (err) {
+        showEditorError(err.message || 'לא הצלחנו לשמור', err.field || null);
+      })
+      .finally(function () {
+        editorSave.disabled = false;
+      });
+  });
+
+  editorCancel.addEventListener('click', function () {
+    closeEditor();
+    render();
+  });
+
+  editorDelete.addEventListener('click', function () {
+    var slug = slugInput.value.trim();
+    var title = document.getElementById('admin-title').value || slug;
+    if (!window.confirm('למחוק את "' + title + '"? זה מוחק את הדף ואת המוצר מהסל.')) return;
+    editorDelete.disabled = true;
+    show(editorMessage, 'מוחקת…', 'info');
+    api('POST', { action: 'delete', slug: slug })
+      .then(function (data) {
+        saveHint = savedMessage(data, 'המוצר נמחק.');
+        return loadBoard();
+      })
+      .catch(function (err) {
+        show(editorMessage, err.message || 'לא הצלחנו למחוק', 'error');
+      })
+      .finally(function () {
+        editorDelete.disabled = false;
+      });
+  });
+
+  logoutBtn.addEventListener('click', function () {
+    var form = document.createElement('form');
+    form.method = 'post';
+    form.action = loginForm.getAttribute('action') || '/api/admin/';
+    [['action', 'logout'], ['next', window.location.pathname]].forEach(function (pair) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = pair[0];
+      input.value = pair[1];
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  });
+
+  loadBoard().catch(function (err) {
+    var login = takeLoginQuery();
+    if (!err || err.status === 401) {
+      showLogin();
+      var message = loginQueryMessage(login);
+      if (message) show(loginMessage, message, login.kind === 'ok' ? 'info' : 'error');
+      return;
+    }
+    showBoard();
+    var boardText = (err && err.message) || 'לא הצלחנו לטעון את הניהול. נסי לרענן.';
+    if (login && login.kind === 'ok') boardText = 'התחברת. ' + boardText;
+    show(boardMessage, boardText, 'error');
+  });
+})();

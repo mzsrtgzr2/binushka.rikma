@@ -1,0 +1,30 @@
+name: "Ask Cursor to make a site change"
+description: "Describe a small site change in plain language and let Cursor prepare a PR."
+title: "[Cursor task]: "
+labels:
+  - cursor-task
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for changes you want Cursor to prepare automatically.
+
+        After you submit it, Cursor will open a pull request and Vercel will build a preview.
+        The preview link and Cursor status updates will be posted back here on this issue.
+        Keep commenting on this issue to ask for tweaks, or comment `/approve` here when it looks good.
+  - type: textarea
+    id: request
+    attributes:
+      label: What should change?
+      description: Describe the desired change in plain language. Screenshots are welcome.
+      placeholder: "Example: On the homepage, change the main button text to \"Book a workshop\" and make it easier to see on mobile."
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Any extra context?
+      description: Optional links, examples, screenshots, exact text, colors, or pages that matter.
+      placeholder: "Example: The page is https://rikma.binushka.com/store/. Keep the Hebrew wording friendly."
+    validations:
+      required: false

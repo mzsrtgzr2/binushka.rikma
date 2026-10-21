@@ -1,0 +1,1191 @@
+(function () {
+  var catalogEl = document.getElementById('store-cart-catalog');
+  if (!catalogEl) return;
+
+  var catalog = [];
+  try {
+    catalog = JSON.parse(catalogEl.textContent);
+  } catch (e) {
+    console.error('Store cart: invalid catalog JSON', e);
+    return;
+  }
+
+  var byId = {};
+  catalog.forEach(function (p) {
+    if (p.stock === 0) p.outOfStock = true;
+    byId[p.id] = p;
+  });
+
+  var STORAGE_KEY = 'binushka-store-cart-v1';
+  var COUPON_KEY = 'binushka-coupon-v1';
+
+  function track(method, a, b, c) {
+    if (!window.Analytics || typeof Analytics[method] !== 'function') return;
+    Analytics[method](a, b, c);
+  }
+
+  /* Describes one cart line for analytics, independent of what is in the cart. */
+  function lineForAnalytics(id, extra, quantity) {
+    var p = byId[id];
+    if (!p) return null;
+    var variant = p.variants && extra ? p.variants[extra] : null;
+    return {
+      id: id,
+      name: variant && p.kind === 'workshop' ? p.name + ' — ' + variant.name : variant ? variant.name : p.name,
+      price: linePrice(p, extra),
+      quantity: quantity || 1,
+      variant: p.variants ? extra : undefined,
+      amount: p.variable ? extra : undefined,
+      kind: p.kind || 'product',
+    };
+  }
+
+  function loadCart() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return {};
+      var data = JSON.parse(raw);
+      return data && typeof data === 'object' ? data : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveCart(cart) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  }
+
+  function loadCoupon() {
+    try {
+      var raw = localStorage.getItem(COUPON_KEY);
+      if (!raw) return null;
+      var data = JSON.parse(raw);
+      if (!data || !data.code) return null;
+      return {
+        code: String(data.code).trim().toUpperCase(),
+        discount: Number(data.discount) || 0,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveCoupon(coupon) {
+    try {
+      if (!coupon || !coupon.code) {
+        localStorage.removeItem(COUPON_KEY);
+        return;
+      }
+      localStorage.setItem(
+        COUPON_KEY,
+        JSON.stringify({
+          code: String(coupon.code).trim().toUpperCase(),
+          discount: Number(coupon.discount) || 0,
+        })
+      );
+    } catch (e) {
+      /* private mode / quota */
+    }
+  }
+
+  function clearCoupon() {
+    saveCoupon(null);
+  }
+
+  function parseCartKey(key) {
+    if (byId[key]) return { id: key, amount: null, variant: null };
+    var parts = String(key).split(':');
+    if (parts.length < 2) return { id: key, amount: null, variant: null };
+    var extra = parts[parts.length - 1];
+    var id = parts.slice(0, -1).join(':');
+    var p = byId[id];
+    if (p && p.variants) return { id: id, amount: null, variant: extra };
+    var amount = Number(extra);
+    return { id: id, amount: Number.isFinite(amount) ? amount : null, variant: null };
+  }
+
+  function cartExtra(parsed) {
+    return parsed.variant || parsed.amount;
+  }
+
+  function lineKey(id, extra) {
+    var p = byId[id];
+    if (p && (p.variable || p.variants)) return id + ':' + extra;
+    return id;
+  }
+
+  function validGiftAmount(p, amount) {
+    var n = Number(amount);
+    if (!p || !p.variable || !Number.isInteger(n)) return false;
+    return n >= Number(p.minPrice) && n <= Number(p.maxPrice);
+  }
+
+  function validVariant(p, variant) {
+    return !!(p && p.variants && variant && p.variants[variant] && Number(p.variants[variant].price) > 0);
+  }
+
+  function linePrice(p, extra) {
+    if (p.variable) return Number(extra);
+    if (p.variants && extra && p.variants[extra]) return Number(p.variants[extra].price);
+    return p.price;
+  }
+
+  function cartCount(cart) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      return sum + (cart[key] || 0);
+    }, 0);
+  }
+
+  function cartTotal(cart) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      var p = byId[parsed.id];
+      if (!p || cart[key] < 1) return sum;
+      return sum + linePrice(p, cartExtra(parsed)) * cart[key];
+    }, 0);
+  }
+
+  function cartItems(cart) {
+    return Object.keys(cart)
+      .map(function (key) {
+        var parsed = parseCartKey(key);
+        var p = byId[parsed.id];
+        if (!p || cart[key] < 1) return null;
+        if (p.variable && !validGiftAmount(p, parsed.amount)) return null;
+        if (p.variants && !validVariant(p, parsed.variant)) return null;
+        var extra = cartExtra(parsed);
+        var price = linePrice(p, extra);
+        var variant = p.variants && parsed.variant ? p.variants[parsed.variant] : null;
+        return {
+          id: parsed.id,
+          key: key,
+          quantity: cart[key],
+          name: variant && p.kind === 'workshop' ? p.name + ' — ' + variant.name : variant ? variant.name : p.name,
+          price: price,
+          amount: p.variable ? parsed.amount : undefined,
+          variant: parsed.variant || undefined,
+          places: variantPlaces(p, parsed.variant),
+          url: p.url,
+          image: (variant && variant.image) || p.image || '',
+          kind: p.kind || 'product',
+          requiresShipping: p.requiresShipping !== false,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function safeSitePath(url) {
+    var value = String(url || '');
+    if (!value || value.charAt(0) !== '/' || value.charAt(1) === '/') return '';
+    if (value.indexOf('\\') !== -1 || /[\s<>"'`]/.test(value)) return '';
+    return value;
+  }
+
+  function hasPerVariantStock(p) {
+    if (!p || !p.variants || p.kind === 'workshop') return false;
+    return Object.keys(p.variants).some(function (id) {
+      return typeof p.variants[id].stock === 'number';
+    });
+  }
+
+  /** Shop products with types (not workshop packs). Limited stock is per type. */
+  function isMultiTypeProduct(p) {
+    return Boolean(p && p.kind !== 'workshop' && p.variants && Object.keys(p.variants).length);
+  }
+
+  function isLowStock(stock) {
+    return typeof stock === 'number' && stock > 0 && stock <= 3;
+  }
+
+  /** Customer-facing limited-stock copy: last unit vs low stock. */
+  function limitedStockLabel(stock, workshop) {
+    if (workshop) return stock === 1 ? 'מקום אחרון' : 'מקומות אחרונים';
+    if (stock === 1) return 'אחרון במלאי';
+    return 'מלאי מוגבל';
+  }
+
+  function availableStock(p, variantId) {
+    if (!p) return 0;
+    if (hasPerVariantStock(p)) {
+      if (!variantId || !p.variants[variantId]) return 0;
+      var row = p.variants[variantId];
+      if (typeof row.stock === 'number') {
+        if (row.stock <= 0 && (p.preorder || row.preorder)) return Infinity;
+        return row.stock;
+      }
+      return Infinity;
+    }
+    if (p.outOfStock || p.stock === 0) {
+      if (p.preorder) return Infinity;
+      return 0;
+    }
+    if (typeof p.stock === 'number') return p.stock;
+    return Infinity;
+  }
+
+  function variantPlaces(p, variantId) {
+    if (!p || p.kind !== 'workshop') return 1;
+    var row = p.variants && variantId ? p.variants[variantId] : null;
+    var n = Number(row && row.places);
+    return n > 0 && Number.isInteger(n) ? n : 1;
+  }
+
+  function linePlaces(p, parsed, qty) {
+    return variantPlaces(p, parsed && parsed.variant) * (qty || 0);
+  }
+
+  function productQtyInCart(cart, id) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      if (parsed.id !== id) return sum;
+      return sum + (cart[key] || 0);
+    }, 0);
+  }
+
+  function productPlacesInCart(cart, id, variantId) {
+    return Object.keys(cart).reduce(function (sum, key) {
+      var parsed = parseCartKey(key);
+      if (parsed.id !== id) return sum;
+      if (variantId && hasPerVariantStock(byId[id]) && parsed.variant !== variantId) return sum;
+      return sum + linePlaces(byId[parsed.id], parsed, cart[key] || 0);
+    }, 0);
+  }
+
+  /* Reports why an add failed, so lost demand shows up next to add_to_cart. */
+  function blocked(id, extra, reason) {
+    var line = lineForAnalytics(id, extra, 1);
+    if (line) track('track', 'add_to_cart_blocked', {
+      item_id: line.id,
+      item_name: line.name,
+      item_variant: line.variant || (line.amount ? '₪' + line.amount : undefined),
+      reason: reason,
+    });
+    return false;
+  }
+
+  function addToCart(id, delta, extra) {
+    var p = byId[id];
+    if (!p) return false;
+    if (!hasPerVariantStock(p) && (p.outOfStock || p.stock === 0) && !p.preorder) {
+      return blocked(id, extra, 'out_of_stock');
+    }
+    if (p.variable && !validGiftAmount(p, extra)) return blocked(id, extra, 'invalid_amount');
+    if (p.variants && !validVariant(p, extra)) return blocked(id, extra, 'no_variant_selected');
+    if (hasPerVariantStock(p) && availableStock(p, extra) <= 0) return blocked(id, extra, 'out_of_stock');
+    var key = lineKey(id, extra);
+    var cart = loadCart();
+    var next = (cart[key] || 0) + delta;
+    if (next < 1) delete cart[key];
+    else {
+      var max = availableStock(p, extra);
+      var each = variantPlaces(p, extra);
+      var others = productPlacesInCart(cart, id, hasPerVariantStock(p) ? extra : null) - (cart[key] || 0) * each;
+      if (Number.isFinite(max) && others + next * each > max) return blocked(id, extra, 'stock_limit');
+      cart[key] = next;
+    }
+    saveCart(cart);
+    renderWidget();
+    var line = lineForAnalytics(id, extra, Math.abs(delta));
+    if (line) track(delta > 0 ? 'addToCart' : 'removeFromCart', line);
+    return true;
+  }
+
+  function clampCartToStock() {
+    var cart = loadCart();
+    var changed = false;
+    Object.keys(cart).forEach(function (key) {
+      var parsed = parseCartKey(key);
+      var p = byId[parsed.id];
+      if (!p) return;
+      var max = availableStock(p, parsed.variant);
+      var each = variantPlaces(p, parsed.variant);
+      if (max <= 0) {
+        delete cart[key];
+        changed = true;
+        return;
+      }
+      if (Number.isFinite(max)) {
+        var maxPkgs = Math.floor(max / each);
+        if (maxPkgs <= 0) {
+          delete cart[key];
+          changed = true;
+        } else if (cart[key] > maxPkgs) {
+          cart[key] = maxPkgs;
+          changed = true;
+        }
+      }
+    });
+    // Second pass: shared stock across variant lines for the same product
+    // (skipped when each type tracks its own quantity)
+    var byProduct = {};
+    Object.keys(cart).forEach(function (key) {
+      var parsed = parseCartKey(key);
+      if (!byProduct[parsed.id]) byProduct[parsed.id] = [];
+      byProduct[parsed.id].push(key);
+    });
+    Object.keys(byProduct).forEach(function (id) {
+      var p = byId[id];
+      if (hasPerVariantStock(p)) return;
+      var max = availableStock(p);
+      if (!Number.isFinite(max)) return;
+      var keys = byProduct[id];
+      var total = keys.reduce(function (sum, key) {
+        return sum + linePlaces(p, parseCartKey(key), cart[key] || 0);
+      }, 0);
+      if (total <= max) return;
+      var remaining = max;
+      keys.forEach(function (key) {
+        var parsed = parseCartKey(key);
+        var each = variantPlaces(p, parsed.variant);
+        if (remaining < each) {
+          delete cart[key];
+          changed = true;
+          return;
+        }
+        var maxPkgs = Math.floor(remaining / each);
+        if (cart[key] > maxPkgs) {
+          cart[key] = maxPkgs;
+          changed = true;
+        }
+        remaining -= (cart[key] || 0) * each;
+      });
+    });
+    if (changed) saveCart(cart);
+    return changed;
+  }
+
+  function ensureOverlay(container, className, text) {
+    if (!container) return;
+    var existing = container.querySelector('.out-of-stock, .limited-stock, .preorder');
+    if (existing) existing.parentNode.removeChild(existing);
+    if (!text) return;
+    var el = document.createElement('div');
+    el.className = className;
+    el.textContent = text;
+    container.appendChild(el);
+  }
+
+  function ensureStockText(host, soldOut, preorder, limited, stock) {
+    if (!host) return;
+    var existing = host.querySelector('.out-of-stock-text, .limited-stock-text, .preorder-text');
+    if (existing) existing.parentNode.removeChild(existing);
+    var workshop = Boolean(host.closest('[data-product-kind="workshop"]'));
+    /* Workshop pages already show one .registration-full-text line from Liquid.
+       Sync that line — never stack a second sold-out message under the subtitle. */
+    if (workshop) {
+      var badge = host.querySelector('.registration-full-text');
+      if (badge && /תיפתח/.test(badge.textContent || '')) return;
+      var workshopLabel = soldOut
+        ? 'אין מקומות פנויים'
+        : limited
+          ? limitedStockLabel(stock, true)
+          : '';
+      if (!workshopLabel) {
+        if (badge) badge.parentNode.removeChild(badge);
+        return;
+      }
+      if (badge) {
+        badge.textContent = workshopLabel;
+        return;
+      }
+      var sold = document.createElement('div');
+      sold.className = 'registration-full-text';
+      sold.textContent = workshopLabel;
+      var title = host.querySelector('.page-title');
+      if (title) host.insertBefore(sold, title.nextSibling);
+      else host.insertBefore(sold, host.firstChild);
+      return;
+    }
+    if (!soldOut && !preorder && !limited) return;
+    var el = document.createElement('div');
+    if (soldOut) {
+      el.className = 'out-of-stock-text';
+      el.textContent = 'אזל מהמלאי';
+    } else if (preorder) {
+      el.className = 'preorder-text';
+      el.textContent = 'הזמיני מראש';
+    } else {
+      el.className = 'limited-stock-text';
+      el.textContent = limitedStockLabel(stock, false);
+    }
+    var price = host.querySelector('.store-item-price, [data-product-price]');
+    if (price && price.parentNode === host) host.insertBefore(el, price);
+    else host.appendChild(el);
+  }
+
+  function ensureVariantStockText(host, soldOut, preorder, limited, stock) {
+    if (!host) return;
+    var existing = host.querySelector('.store-variant__stock, .scrunchies-variant__stock');
+    if (existing) existing.parentNode.removeChild(existing);
+    if (!soldOut && !preorder && !limited) return;
+    var el = document.createElement('div');
+    var onScrunchie = Boolean(host.closest('.scrunchies-variant'));
+    var base = onScrunchie ? 'scrunchies-variant__stock ' : 'store-variant__stock ';
+    if (soldOut) {
+      el.className = base + 'out-of-stock-text';
+      el.textContent = 'אזל מהמלאי';
+    } else if (preorder) {
+      el.className = base + 'preorder-text';
+      el.textContent = 'הזמיני מראש';
+    } else {
+      el.className = base + 'limited-stock-text';
+      el.textContent = limitedStockLabel(stock, false);
+    }
+    var price = host.querySelector('.store-variant__price, .scrunchies-variant__price');
+    if (price && price.parentNode === host) {
+      if (price.nextSibling) host.insertBefore(el, price.nextSibling);
+      else host.appendChild(el);
+    } else {
+      host.appendChild(el);
+    }
+  }
+
+  function addToCartLabel(preorder) {
+    return preorder ? 'הזמיני מראש' : 'הוסיפי לסל';
+  }
+
+  function newsletterModal() {
+    return document.getElementById('newsletter-modal');
+  }
+
+  function newsletterButtonLabel(intent) {
+    var modal = newsletterModal();
+    if (!modal) return '';
+    return modal.getAttribute('data-' + intent + '-button') || '';
+  }
+
+  function ensureNotifyButton(host, opts) {
+    if (!host || !newsletterModal()) return null;
+    var existing = host.querySelector('[data-newsletter-open]');
+    if (existing) {
+      existing.hidden = false;
+      return existing;
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = opts.className || 'button button--primary newsletter-notify';
+    btn.setAttribute('data-newsletter-open', '');
+    btn.setAttribute('data-newsletter-intent', opts.intent);
+    btn.setAttribute('data-newsletter-source', opts.source);
+    btn.setAttribute('data-analytics', opts.analytics || 'newsletter_notify');
+    btn.textContent = newsletterButtonLabel(opts.intent) || 'הירשמי לניוזלטר';
+    host.appendChild(btn);
+    return btn;
+  }
+
+  /* Shop cards built as sold-out have no add-to-cart CTA. Show the newsletter
+     restock button instead, and restore a cart CTA if live stock returns. */
+  function ensureStoreCardCta(root, p, soldOut, preorder) {
+    if (!root || !root.classList.contains('store-item')) return;
+    var footer = root.querySelector('.store-item__footer');
+    if (!footer) return;
+    var cartCta = footer.querySelector('.store-item__add:not([data-newsletter-open])');
+    var notify = footer.querySelector('[data-newsletter-open]');
+    if (soldOut) {
+      if (cartCta) cartCta.parentNode.removeChild(cartCta);
+      ensureNotifyButton(footer, {
+        intent: 'restock',
+        source: 'store_card',
+        className: 'button button--primary store-item__add newsletter-notify',
+        analytics: 'newsletter_restock'
+      });
+      return;
+    }
+    if (notify) notify.parentNode.removeChild(notify);
+    if (cartCta) return;
+    if (p.variable || p.variants) {
+      var pick = document.createElement('a');
+      pick.href = p.url || '#';
+      pick.className = 'button button--primary store-item__add';
+      pick.setAttribute('data-analytics', p.variable ? 'product_choose_amount' : 'product_choose_variant');
+      pick.textContent = p.variable ? 'בחרי סכום' : 'בחרי סוג';
+      footer.appendChild(pick);
+      return;
+    }
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'button button--primary store-item__add';
+    btn.setAttribute('data-cart-add', p.id);
+    btn.setAttribute('data-analytics', 'add_to_cart');
+    btn.textContent = addToCartLabel(preorder);
+    footer.appendChild(btn);
+  }
+
+  function ensureWorkshopNotify(root, p, soldOut) {
+    if (!root || !p || p.kind !== 'workshop') return;
+    var notOpen = root.querySelector('.registration-full, .registration-full-text');
+    if (notOpen && /תיפתח/.test(notOpen.textContent || '')) return;
+
+    if (root.classList.contains('project')) {
+      var footer = root.querySelector('.project__footer');
+      var cartBtn = root.querySelector('[data-cart-add], a[data-analytics="workshop_choose_pack"]');
+      if (soldOut) {
+        if (cartBtn && cartBtn.parentNode) cartBtn.parentNode.removeChild(cartBtn);
+        if (!footer) {
+          var info = root.querySelector('.project__info');
+          if (!info) return;
+          footer = document.createElement('div');
+          footer.className = 'project__footer';
+          info.appendChild(footer);
+        }
+        ensureNotifyButton(footer, {
+          intent: 'workshop',
+          source: 'workshop_card',
+          className: 'button button--primary project__add newsletter-notify',
+          analytics: 'newsletter_workshop'
+        });
+        return;
+      }
+      if (footer) {
+        var cardNotify = footer.querySelector('[data-newsletter-open]');
+        if (cardNotify) cardNotify.parentNode.removeChild(cardNotify);
+      }
+      return;
+    }
+
+    root.querySelectorAll('[data-newsletter-notify-slot="workshop"]').forEach(function (waitlist) {
+      waitlist.hidden = !soldOut;
+    });
+    root.querySelectorAll('.workshop-booking:not(.workshop-booking--waitlist)').forEach(function (register) {
+      register.hidden = soldOut;
+    });
+  }
+
+  function setCartAddLabel(btn, preorder) {
+    if (!btn || btn.tagName !== 'BUTTON') return;
+    if (btn.classList.contains('is-stock-limit') || btn.classList.contains('is-added')) return;
+    var label = addToCartLabel(preorder);
+    btn.textContent = label;
+    btn.setAttribute('data-label-orig', label);
+  }
+
+  function updateStockUi() {
+    Object.keys(byId).forEach(function (id) {
+      var p = byId[id];
+      var perVariant = hasPerVariantStock(p);
+      var multiType = isMultiTypeProduct(p);
+      var stockGone = perVariant
+        ? Object.keys(p.variants).every(function (vid) {
+            return typeof p.variants[vid].stock === 'number' && p.variants[vid].stock <= 0;
+          })
+        : Boolean(p.outOfStock) || p.stock === 0;
+      var preorder =
+        stockGone &&
+        p.kind !== 'workshop' &&
+        (Boolean(p.preorder) ||
+          (perVariant &&
+            Object.keys(p.variants).length > 0 &&
+            Object.keys(p.variants).every(function (vid) {
+              var row = p.variants[vid];
+              if (!(typeof row.stock === 'number' && row.stock <= 0)) return true;
+              return Boolean(row.preorder) || Boolean(p.preorder);
+            })));
+      var soldOut = stockGone && !preorder;
+      var limited = Boolean(p.limitedStock) && !stockGone;
+      if (perVariant && !stockGone) {
+        limited = Object.keys(p.variants).some(function (vid) {
+          return isLowStock(p.variants[vid].stock);
+        });
+      }
+      /* Multi-type: never badge the shop card / page hero — only each type. */
+      var showLimitedBadge = limited && !multiType;
+      var workshop = p.kind === 'workshop';
+      var overlayClass = soldOut ? 'out-of-stock' : preorder ? 'preorder' : 'limited-stock';
+
+      document.querySelectorAll('[data-product-id="' + id + '"]').forEach(function (root) {
+        /* Mothers: "מקומות אחרונים" only when Liquid/admin marked data-last-places.
+           Other workshops: keep auto low-stock, and honor an explicit mark so the
+           red badge does not flash off before live stock arrives. */
+        var lastPlacesAttr = root.getAttribute('data-last-places');
+        var mothers = root.getAttribute('data-category') === 'mothers';
+        var workshopLimited = false;
+        if (workshop && !stockGone) {
+          if (mothers) workshopLimited = lastPlacesAttr === 'true';
+          else {
+            workshopLimited =
+              lastPlacesAttr === 'true' || Boolean(p.limitedStock) || isLowStock(p.stock);
+          }
+        }
+        var badgeLimited = workshop ? workshopLimited : showLimitedBadge;
+        var overlayLabel = soldOut
+          ? workshop
+            ? 'אין מקומות פנויים'
+            : 'אזל מהמלאי'
+          : preorder
+            ? 'הזמיני מראש'
+            : badgeLimited
+              ? limitedStockLabel(p.stock, workshop)
+              : '';
+        root.setAttribute('data-sold-out', soldOut ? 'true' : 'false');
+        root.setAttribute('data-preorder', preorder ? 'true' : 'false');
+        ensureOverlay(root.querySelector('.store-item__image, .store-item-image-container'), overlayClass, overlayLabel);
+        ensureStoreCardCta(root, p, soldOut, preorder);
+        ensureWorkshopNotify(root, p, soldOut);
+        if (root.querySelector('.page-head')) {
+          ensureStockText(root.querySelector('.page-head'), soldOut, preorder, badgeLimited, p.stock);
+          var pageActions = root.querySelector('[data-cart-actions]');
+          if (pageActions && !multiType) pageActions.hidden = soldOut;
+          var pageNotify = root.querySelector('[data-newsletter-notify-slot="product"]');
+          if (pageNotify) {
+            var hasVariantCards = Boolean(root.querySelector('.store-variant, .scrunchies-variant'));
+            pageNotify.hidden = hasVariantCards ? true : !soldOut;
+          }
+        }
+      });
+
+      document.querySelectorAll('[data-cart-add="' + id + '"]').forEach(function (btn) {
+        if (id === 'gift-card') return;
+        var variantId = btn.getAttribute('data-cart-variant');
+        var need = variantPlaces(p, variantId);
+        var max = availableStock(p, variantId);
+        var disabled = perVariant
+          ? !Number.isFinite(max)
+            ? false
+            : max < need
+          : soldOut || (typeof p.stock === 'number' && p.stock < need && !p.preorder);
+        btn.disabled = disabled;
+        if (disabled) btn.setAttribute('aria-disabled', 'true');
+        else btn.removeAttribute('aria-disabled');
+
+        if (multiType && variantId && p.variants[variantId]) {
+          var vStock = p.variants[variantId].stock;
+          var vStockGone = typeof vStock === 'number' && vStock <= 0;
+          var vPreorder = vStockGone && (Boolean(p.preorder) || Boolean(p.variants[variantId].preorder));
+          var vSoldOut = vStockGone && !vPreorder;
+          var vLimited = isLowStock(vStock);
+          var card = btn.closest('.store-variant, .scrunchies-variant');
+          var info = card && (card.querySelector('.store-variant__info') || card);
+          ensureVariantStockText(info, vSoldOut, vPreorder, vLimited, vStock);
+          if (p.kind !== 'workshop') setCartAddLabel(btn, vPreorder);
+          if (card) {
+            btn.hidden = vSoldOut;
+            if (vSoldOut) {
+              ensureNotifyButton(card, {
+                intent: 'restock',
+                source: 'product_variant',
+                className: 'button button--primary newsletter-notify',
+                analytics: 'newsletter_restock'
+              });
+            } else {
+              var variantNotify = card.querySelector('[data-newsletter-open]');
+              if (variantNotify) variantNotify.hidden = true;
+            }
+          }
+        } else if (p.kind !== 'workshop') {
+          setCartAddLabel(btn, preorder);
+        }
+      });
+
+      if (multiType) reorderVariantCards(id, p);
+    });
+  }
+
+  /* Keep the merchant's catalog order; only sink sold-out types when live
+     stock changes mid-session (same rule as catalog variant_order). */
+  function reorderVariantCards(productId, p) {
+    if (!p || !p.variants) return;
+    var preferred = Array.isArray(p.variant_order) ? p.variant_order : [];
+    document.querySelectorAll('[data-product-id="' + productId + '"]').forEach(function (root) {
+      var container = root.querySelector('.store-variants, .scrunchies-variants');
+      if (!container) return;
+      var cards = Array.prototype.slice.call(
+        container.querySelectorAll('.store-variant[data-variant-id], .scrunchies-variant[data-variant-id]')
+      );
+      if (cards.length < 2) return;
+      var rank = {};
+      preferred.forEach(function (id, index) {
+        rank[String(id)] = index;
+      });
+      cards.forEach(function (card, index) {
+        var id = card.getAttribute('data-variant-id');
+        if (rank[id] == null) rank[id] = preferred.length + index;
+      });
+      cards.sort(function (a, b) {
+        var aId = a.getAttribute('data-variant-id');
+        var bId = b.getAttribute('data-variant-id');
+        var aRow = p.variants[aId] || {};
+        var bRow = p.variants[bId] || {};
+        function unavailable(row) {
+          return (
+            typeof row.stock === 'number' &&
+            row.stock <= 0 &&
+            !row.preorder &&
+            !p.preorder
+          );
+        }
+        var aOut = unavailable(aRow);
+        var bOut = unavailable(bRow);
+        if (aOut !== bOut) return aOut ? 1 : -1;
+        return (rank[aId] || 0) - (rank[bId] || 0);
+      });
+      cards.forEach(function (card) {
+        container.appendChild(card);
+      });
+    });
+  }
+
+  function flashStockLimit(triggerEl) {
+    if (!triggerEl || !triggerEl.classList) return;
+    var prev = triggerEl.getAttribute('data-label-orig') || triggerEl.textContent;
+    triggerEl.setAttribute('data-label-orig', prev);
+    var product = byId[triggerEl.getAttribute('data-cart-add')];
+    triggerEl.textContent =
+      product && product.kind === 'workshop' ? 'אין מספיק מקומות' : 'אין מספיק מלאי';
+    triggerEl.classList.add('is-stock-limit');
+    window.setTimeout(function () {
+      triggerEl.textContent = triggerEl.getAttribute('data-label-orig') || prev;
+      triggerEl.classList.remove('is-stock-limit');
+    }, 1600);
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /* Matches $desktop in _sass/1-tools/_grid.scss — floating cart FAB layout */
+  function isFloatingCartLayout() {
+    return window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+  }
+
+  function imageUrlFromEl(img) {
+    if (!img) return '';
+    return img.getAttribute('data-src') || img.currentSrc || img.src || '';
+  }
+
+  function isInViewport(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var r = el.getBoundingClientRect();
+    return r.width > 8 && r.height > 8 && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+  }
+
+  function findAddSource(id, triggerEl) {
+    var img = null;
+    var card = triggerEl && triggerEl.closest ? triggerEl.closest('.store-item') : null;
+    if (card) img = card.querySelector('.store-item__image img');
+    if (!img && triggerEl && triggerEl.closest) {
+      var variantCard = triggerEl.closest('.scrunchies-variant, .store-variant');
+      if (variantCard) img = variantCard.querySelector('img');
+    }
+    if (!img) img = document.querySelector('.store-item-image-container img');
+    var url = imageUrlFromEl(img) || (byId[id] && byId[id].image) || '';
+    var originEl = triggerEl;
+    if (img && isInViewport(img)) originEl = img;
+    return { url: url, originEl: originEl || (els.toggle) };
+  }
+
+  function bumpCart() {
+    if (!els.toggle) return;
+    els.toggle.classList.remove('is-bump');
+    if (els.count) els.count.classList.remove('is-pop');
+    void els.toggle.offsetWidth;
+    els.toggle.classList.add('is-bump');
+    if (els.count && !els.count.hidden) els.count.classList.add('is-pop');
+    window.setTimeout(function () {
+      els.toggle.classList.remove('is-bump');
+      if (els.count) els.count.classList.remove('is-pop');
+    }, 600);
+  }
+
+  function flyToCart(id, triggerEl, onDone) {
+    var done = typeof onDone === 'function' ? onDone : function () {};
+    var cartBtn = els.toggle;
+    if (!cartBtn || prefersReducedMotion() || !window.Element || !Element.prototype.animate) {
+      bumpCart();
+      done();
+      return;
+    }
+
+    var source = findAddSource(id, triggerEl);
+    var origin = source.originEl || triggerEl || cartBtn;
+    var start = origin.getBoundingClientRect();
+    var end = cartBtn.getBoundingClientRect();
+    if (!start.width || !end.width) {
+      bumpCart();
+      done();
+      return;
+    }
+
+    var startX = start.left + start.width / 2;
+    var startY = start.top + start.height / 2;
+    var endX = end.left + end.width / 2;
+    var endY = end.top + end.height / 2;
+    var size = Math.max(64, Math.min(104, Math.min(start.width, start.height) * 0.55));
+
+    var flyer = document.createElement('div');
+    flyer.className = 'store-cart-flyer';
+    flyer.setAttribute('aria-hidden', 'true');
+    flyer.style.width = size + 'px';
+    flyer.style.height = size + 'px';
+    flyer.style.left = startX + 'px';
+    flyer.style.top = startY + 'px';
+    flyer.style.transform = 'translate(-50%, -50%) scale(1)';
+    if (source.url) flyer.style.backgroundImage = 'url("' + source.url.replace(/"/g, '\\"') + '")';
+    document.body.appendChild(flyer);
+
+    var dx = endX - startX;
+    var dy = endY - startY;
+    var arc = (dx < 0 ? -1 : 1) * Math.min(90, Math.abs(dx) * 0.18);
+
+    function startAnim() {
+      var anim;
+      try {
+        anim = flyer.animate(
+          [
+            { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
+            {
+              transform:
+                'translate(-50%, -50%) translate(' +
+                (dx * 0.45 + arc) +
+                'px, ' +
+                (dy * 0.35 - 48) +
+                'px) scale(0.78) rotate(-14deg)',
+              opacity: 1,
+              offset: 0.52,
+            },
+            {
+              transform:
+                'translate(-50%, -50%) translate(' + dx + 'px, ' + dy + 'px) scale(0.2) rotate(16deg)',
+              opacity: 0.35,
+              offset: 1,
+            },
+          ],
+          { duration: 900, easing: 'cubic-bezier(0.45, 0.05, 0.22, 1)', fill: 'forwards' }
+        );
+      } catch (e) {
+        if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+        bumpCart();
+        done();
+        return;
+      }
+
+      var finished = false;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        if (flyer.parentNode) flyer.parentNode.removeChild(flyer);
+        bumpCart();
+        window.setTimeout(done, 180);
+      }
+
+      if (anim && anim.finished) {
+        anim.finished.then(finish).catch(finish);
+      } else if (anim) {
+        anim.onfinish = finish;
+      }
+      window.setTimeout(finish, 980);
+    }
+
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(startAnim);
+    });
+  }
+
+  var els = {
+    root: document.getElementById('store-cart'),
+    toggle: document.getElementById('store-cart-toggle'),
+    panel: document.getElementById('store-cart-panel'),
+    backdrop: document.getElementById('store-cart-backdrop'),
+    close: document.getElementById('store-cart-close'),
+    count: document.getElementById('store-cart-count'),
+    lines: document.getElementById('store-cart-lines'),
+    empty: document.getElementById('store-cart-empty'),
+    total: document.getElementById('store-cart-total'),
+    checkout: document.getElementById('store-cart-checkout'),
+  };
+
+  var headerHost = els.root && els.root.parentElement;
+  var headerNextSibling = els.root && els.root.nextSibling;
+
+  function syncCartPlacement() {
+    if (!els.root || !headerHost) return;
+    if (isFloatingCartLayout()) {
+      if (els.root.parentElement !== document.body) {
+        document.body.appendChild(els.root);
+      }
+      els.root.classList.add('store-cart--floating');
+    } else {
+      if (els.root.parentElement !== headerHost) {
+        if (headerNextSibling && headerNextSibling.parentElement === headerHost) {
+          headerHost.insertBefore(els.root, headerNextSibling);
+        } else {
+          headerHost.appendChild(els.root);
+        }
+      }
+      els.root.classList.remove('store-cart--floating');
+    }
+  }
+
+  function openPanel() {
+    if (!els.panel) return;
+    var cart = loadCart();
+    track('viewCart', cartItems(cart), cartTotal(cart));
+    els.panel.hidden = false;
+    els.backdrop.hidden = false;
+    els.toggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('store-cart-open');
+    /* Header cart can be off-screen; floating FAB is always in view */
+    if (!isFloatingCartLayout() && els.toggle && els.toggle.scrollIntoView) {
+      els.toggle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function closePanel() {
+    if (!els.panel) return;
+    els.panel.hidden = true;
+    els.backdrop.hidden = true;
+    els.toggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('store-cart-open');
+  }
+
+  function renderWidget() {
+    if (!els.root) return;
+    var cart = loadCart();
+    var count = cartCount(cart);
+    var total = cartTotal(cart);
+
+    els.count.textContent = String(count);
+    els.count.hidden = count === 0;
+    els.total.textContent = '₪' + total;
+    els.empty.hidden = count > 0;
+    els.checkout.classList.toggle('is-ready', count > 0);
+    if (count === 0) {
+      els.checkout.setAttribute('aria-disabled', 'true');
+    } else {
+      els.checkout.removeAttribute('aria-disabled');
+    }
+    els.lines.innerHTML = '';
+
+    cartItems(cart).forEach(function (item) {
+      var li = document.createElement('li');
+      li.className = 'store-cart__line';
+      var p = byId[item.id];
+      var max = availableStock(p, item.variant);
+      var each = variantPlaces(p, item.variant);
+      var atMax =
+        Number.isFinite(max) &&
+        productPlacesInCart(cart, item.id, hasPerVariantStock(p) ? item.variant : null) + each > max;
+      var stockHintText = atMax
+        ? item.kind === 'workshop'
+          ? max === 1
+            ? 'נשאר מקום אחד לסדנה הזו'
+            : 'נשארו רק ' + max + ' מקומות לסדנה הזו'
+          : 'יש רק ' + max + ' במלאי — אי אפשר להוסיף עוד'
+        : '';
+      var thumb = item.image
+        ? '<img class="store-cart__thumb" src="' + escapeHtml(item.image) + '" alt="">'
+        : '<span class="store-cart__thumb store-cart__thumb--empty" aria-hidden="true"></span>';
+      li.innerHTML =
+        thumb +
+        '<div class="store-cart__line-info">' +
+        '<a href="' +
+        escapeHtml(safeSitePath(item.url) || '#') +
+        '">' +
+        escapeHtml(item.name) +
+        '</a>' +
+        '<span class="store-cart__line-price">₪' + item.price * item.quantity + '</span>' +
+        '</div>' +
+        '<div class="store-cart__line-actions' + (atMax ? ' is-at-max' : '') + '">' +
+        '<div class="store-cart__qty-row">' +
+        '<button type="button" class="store-cart__qty" data-action="dec" data-analytics="cart_qty_dec" data-id="' + escapeHtml(item.key) + '" aria-label="הפחתה">−</button>' +
+        '<span class="store-cart__qty-val">' + item.quantity + '</span>' +
+        '<button type="button" class="store-cart__qty" data-action="inc" data-analytics="cart_qty_inc" data-id="' + escapeHtml(item.key) + '"' +
+        (atMax ? ' disabled title="' + escapeHtml(stockHintText) + '"' : '') +
+        ' aria-label="' + (atMax ? escapeHtml(stockHintText) : 'הוספה') + '">+</button>' +
+        '<button type="button" class="store-cart__remove" data-action="remove" data-analytics="cart_remove" data-id="' + escapeHtml(item.key) + '" aria-label="הסרה">×</button>' +
+        '</div>' +
+        (atMax
+          ? '<span class="store-cart__stock-hint">' + escapeHtml(stockHintText) + '</span>'
+          : '') +
+        '</div>';
+      els.lines.appendChild(li);
+    });
+  }
+
+  window.StoreCart = {
+    STORAGE_KEY: STORAGE_KEY,
+    COUPON_KEY: COUPON_KEY,
+    load: loadCart,
+    save: saveCart,
+    loadCoupon: loadCoupon,
+    saveCoupon: saveCoupon,
+    clearCoupon: clearCoupon,
+    add: function (id, triggerEl, extra) {
+      var p = byId[id];
+      if (p && p.variable && (extra == null || extra === '')) {
+        var input = document.getElementById('gift-card-amount');
+        extra = input ? Number(input.value) : NaN;
+      }
+      if (p && p.variants && (extra == null || extra === '')) {
+        extra = triggerEl && triggerEl.getAttribute ? triggerEl.getAttribute('data-cart-variant') : '';
+      }
+      if (!addToCart(id, 1, extra)) {
+        flashStockLimit(triggerEl);
+        return;
+      }
+      if (triggerEl && triggerEl.classList) {
+        triggerEl.classList.add('is-added');
+        window.setTimeout(function () {
+          triggerEl.classList.remove('is-added');
+        }, 900);
+      }
+      flyToCart(id, triggerEl, openPanel);
+    },
+    items: function () {
+      return cartItems(loadCart());
+    },
+    subtotal: function () {
+      return cartTotal(loadCart());
+    },
+    catalog: byId,
+    clear: function () {
+      localStorage.removeItem(STORAGE_KEY);
+      clearCoupon();
+      renderWidget();
+    },
+  };
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-cart-add]');
+    if (btn) {
+      e.preventDefault();
+      StoreCart.add(btn.getAttribute('data-cart-add'), btn);
+    }
+  });
+
+  if (els.lines) {
+    els.lines.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-action]');
+      if (!t) return;
+      var key = t.getAttribute('data-id');
+      var parsed = parseCartKey(key);
+      var action = t.getAttribute('data-action');
+      if (action === 'inc') addToCart(parsed.id, 1, cartExtra(parsed));
+      if (action === 'dec') addToCart(parsed.id, -1, cartExtra(parsed));
+      if (action === 'remove') {
+        var cart = loadCart();
+        var removed = lineForAnalytics(parsed.id, cartExtra(parsed), cart[key] || 1);
+        delete cart[key];
+        saveCart(cart);
+        renderWidget();
+        if (removed) track('removeFromCart', removed);
+      }
+    });
+  }
+
+  if (els.toggle) {
+    els.toggle.addEventListener('click', function () {
+      if (els.panel.hidden) openPanel();
+      else closePanel();
+    });
+  }
+  if (els.close) els.close.addEventListener('click', closePanel);
+  if (els.backdrop) els.backdrop.addEventListener('click', closePanel);
+  if (els.checkout) {
+    els.checkout.addEventListener('click', function (e) {
+      var cart = loadCart();
+      if (cartCount(cart) === 0) {
+        e.preventDefault();
+        return;
+      }
+      /* Paired with begin_checkout on /checkout/ to expose the drop between them. */
+      track('track', 'cart_checkout_click', {
+        currency: 'ILS',
+        value: cartTotal(cart),
+        items_count: cartCount(cart),
+      });
+    });
+  }
+
+  function syncGiftAmountUi() {
+    var input = document.getElementById('gift-card-amount');
+    var addBtn = document.querySelector('[data-cart-add="gift-card"]');
+    if (!input) return;
+    var amount = Number(input.value);
+    var ok = validGiftAmount(byId['gift-card'], amount);
+    if (addBtn) addBtn.disabled = !ok;
+    document.querySelectorAll('[data-gift-amount]').forEach(function (chip) {
+      chip.classList.toggle('is-selected', Number(chip.getAttribute('data-gift-amount')) === amount);
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var chip = e.target.closest('[data-gift-amount]');
+    if (!chip) return;
+    e.preventDefault();
+    var input = document.getElementById('gift-card-amount');
+    if (!input) return;
+    input.value = chip.getAttribute('data-gift-amount');
+    syncGiftAmountUi();
+  });
+
+  var giftInput = document.getElementById('gift-card-amount');
+  if (giftInput) {
+    giftInput.addEventListener('input', syncGiftAmountUi);
+    giftInput.addEventListener('change', syncGiftAmountUi);
+    syncGiftAmountUi();
+  }
+
+  renderWidget();
+  updateStockUi();
+  window.dispatchEvent(new Event('binushka:stock'));
+  syncCartPlacement();
+  if (window.matchMedia) {
+    var floatingMq = window.matchMedia('(max-width: 1024px)');
+    if (floatingMq.addEventListener) {
+      floatingMq.addEventListener('change', syncCartPlacement);
+    } else if (floatingMq.addListener) {
+      floatingMq.addListener(syncCartPlacement);
+    }
+  }
+
+  fetch('/api/prices/')
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (data) {
+      var products = data && data.products;
+      if (!products) return;
+      Object.keys(products).forEach(function (id) {
+        var live = products[id];
+        if (!byId[id] || !live) return;
+        if (!byId[id].variable && !byId[id].variants && Number(live.price) > 0) {
+          byId[id].price = Number(live.price);
+        }
+        if (live.name) byId[id].name = live.name;
+        if (typeof live.stock === 'number') byId[id].stock = live.stock;
+        else if (live.stock === null) delete byId[id].stock;
+        if (typeof live.outOfStock === 'boolean') byId[id].outOfStock = live.outOfStock;
+        if (typeof live.limitedStock === 'boolean') byId[id].limitedStock = live.limitedStock;
+        if (typeof live.preorder === 'boolean') byId[id].preorder = live.preorder;
+        if (live.variants && byId[id].variants) {
+          Object.keys(live.variants).forEach(function (vid) {
+            if (!byId[id].variants[vid]) return;
+            var vLive = live.variants[vid];
+            if (!vLive) return;
+            if (typeof vLive.stock === 'number') byId[id].variants[vid].stock = vLive.stock;
+            else if (vLive.stock === null) delete byId[id].variants[vid].stock;
+            if (typeof vLive.preorder === 'boolean') byId[id].variants[vid].preorder = vLive.preorder;
+          });
+        }
+        if (byId[id].stock === 0) byId[id].outOfStock = true;
+      });
+      document.querySelectorAll('[data-product-price]').forEach(function (el) {
+        var id = el.getAttribute('data-product-price');
+        if (byId[id] && !byId[id].variable && !byId[id].variants) el.textContent = '₪' + byId[id].price;
+      });
+      clampCartToStock();
+      updateStockUi();
+      renderWidget();
+      window.dispatchEvent(new Event('binushka:stock'));
+      window.dispatchEvent(new Event('binushka:prices'));
+    })
+    .catch(function () {
+      /* keep the prices baked into the page */
+    });
+})();

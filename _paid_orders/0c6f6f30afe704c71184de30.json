@@ -1,0 +1,13 @@
+{
+  "orderId": "0c6f6f30afe704c71184de30",
+  "documentId": "dcde5267-68bc-425d-807c-54f43c012258",
+  "amount": 475,
+  "purchases": [
+    {
+      "slug": "workshop-hosting-04-12",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-10-10T13:04:06.254Z",
+  "coupon": "MOMISBACK"
+}

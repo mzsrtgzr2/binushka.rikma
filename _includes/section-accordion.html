@@ -15,10 +15,19 @@
         });
     });
 </script>
+{%- if include.accordion_items -%}
+  {%- assign accordion_list = include.accordion_items -%}
+{%- else -%}
+  {%- assign accordion_list = page.accordion -%}
+{%- endif -%}
 <div class="accordion-wrapper">
     <ul class="jekyllcodex_accordion">
-        {% for item in page.accordion %}
-            <li><input id="accordion{{ forloop.index }}" type="checkbox" /><label for="accordion{{ forloop.index }}">{{ item.title }}</label><div>{{ item.content | markdownify }}</div></li>
+        {% for item in accordion_list %}
+            <li><input id="accordion{{ forloop.index }}" type="checkbox"
+                data-faq-question="{{ item.title | escape }}"
+                data-faq-index="{{ forloop.index }}"
+                data-faq-total="{{ accordion_list.size }}"
+                data-faq-context="{{ include.context | default: page.category | default: page.title | escape }}" /><label for="accordion{{ forloop.index }}">{{ item.title }}</label><div>{{ item.content | markdownify }}</div></li>
         {% endfor %}
     </ul>
 </div>

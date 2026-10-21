@@ -2,12 +2,17 @@
 title: רקמת שועל משמח
 date: 2024-01-20 10:00:00 +0300
 subtitle: בטכניקת פאנץ׳ נידל
-image: '/images/gallery/fox.png' 
+image: /images/gallery/fox.png
 price: ₪220
 out_of_stock: false
 limited_stock: true
+limited_edition: true
 hide: false
 form_url: https://pay.grow.link/fd64f6cc8d8dec817cd211c09477d780-MjI1MDc0Mw
+order: 19
+cart_price: 220
+preorder: false
+category: embroidered-works
 ---
 
 ## שועל משמח רקום בטכניקת punch needle

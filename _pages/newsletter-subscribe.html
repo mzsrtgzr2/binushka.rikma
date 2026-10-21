@@ -1,0 +1,20 @@
+---
+layout: default
+title: הירשמי לניוזלטר
+description: עדכונים על סדנאות, מוצרים חדשים, ומלאי שחוזר — מייל אחד מדי פעם, בלי להציף.
+permalink: /subscribe/
+---
+
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+<div class="container">
+  <div class="page-head">
+    <h1 class="page-title">{{ newsletter.title }}</h1>
+    <p class="page-description">{{ newsletter.description }}</p>
+  </div>
+</div>
+
+<div class="container animate newsletter-subscribe-page">
+  {% include newsletter-signup.html source="subscribe_page" hide_heading=true class="newsletter-signup--page" %}
+</div>
+{% endif %}

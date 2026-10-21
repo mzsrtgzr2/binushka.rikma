@@ -2,12 +2,19 @@
 title: ערכת רקמה מתקדמת
 date: 2024-01-20 10:00:00 +0300
 subtitle: ערכה מקצועית לרקמה מתקדמת
-image: '/images/gallery/flowers-kit.jpeg'
+image: /images/gallery/flowers-kit.jpeg
 price: ₪180
 out_of_stock: false
 limited_stock: true
 hide: true
+in_cart: false
 form_url: https://meshulam.co.il/purchase?b=e724a14322581f536aade6113065a9d9
+order: 48
+noindex: true
+sitemap: false
+limited_edition: false
+preorder: false
+category: kits
 ---
 
 ## ערכת רקמה מתקדמת

@@ -4,6 +4,8 @@
 
 html {
   direction: ltr;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -12,6 +14,7 @@ body {
   font-size: $base-font-size;
   line-height: $base-line-height;
   overflow-x: hidden;
+  max-width: 100%;
   color: var(--text-color);
   background-color: var(--background-color);
   -webkit-font-smoothing: antialiased;

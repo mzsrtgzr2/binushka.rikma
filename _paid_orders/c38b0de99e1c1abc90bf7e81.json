@@ -1,0 +1,29 @@
+{
+  "orderId": "c38b0de99e1c1abc90bf7e81",
+  "documentId": "2768fef7-651b-46e2-ae0c-0b8ea1845453",
+  "amount": 210,
+  "purchases": [
+    {
+      "slug": "special-embroidery-kits",
+      "quantity": 1,
+      "variant": "tablecloth-mono"
+    },
+    {
+      "slug": "fabrics",
+      "quantity": 1,
+      "variant": "type-3"
+    },
+    {
+      "slug": "fabrics",
+      "quantity": 1,
+      "variant": "type-1"
+    },
+    {
+      "slug": "prym-marker-purple",
+      "quantity": 1,
+      "variant": "disappearing"
+    }
+  ],
+  "paidAt": "2026-10-10T10:05:51.687Z",
+  "coupon": "KIT25"
+}

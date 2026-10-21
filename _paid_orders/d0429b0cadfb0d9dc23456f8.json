@@ -1,0 +1,21 @@
+{
+  "orderId": "d0429b0cadfb0d9dc23456f8",
+  "documentId": "c112c209-5dd8-4597-b378-ad6244fe3038",
+  "amount": 235,
+  "purchases": [
+    {
+      "slug": "special-embroidery-kits",
+      "quantity": 1,
+      "variant": "dmc-pearl"
+    },
+    {
+      "slug": "scrunchie-rikmat-prachim-bezh",
+      "quantity": 1
+    },
+    {
+      "slug": "scrunchie-prachim-yapaniyim",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-10-08T16:18:20.767Z"
+}

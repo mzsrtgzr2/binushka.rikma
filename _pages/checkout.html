@@ -1,0 +1,290 @@
+---
+layout: default
+title: עמוד תשלום
+description: השלימי את הפרטים שלך לפני המעבר לתשלום מאובטח
+permalink: /checkout/
+---
+
+<div class="container">
+  <div class="page-head">
+    <h1 class="page-title">{{ page.title }}</h1>
+    <p class="page-description">{{ page.description }}</p>
+  </div>
+</div>
+
+<div class="checkout-page container animate">
+  <div class="checkout-content">
+
+    <section class="checkout-summary" id="checkout-summary">
+      <h2>סיכום ההזמנה</h2>
+      <p class="checkout-summary__note" id="checkout-empty" hidden>
+        הסל ריק. <a href="{{ '/store/' | relative_url }}">חזרה לחנות</a>
+      </p>
+      <ul class="checkout-lines" id="checkout-lines"></ul>
+      <p class="checkout-subtotal" id="checkout-subtotal-row" hidden>סה״כ מוצרים: <strong id="checkout-subtotal">₪0</strong></p>
+      <p class="checkout-discount" id="checkout-discount-row" hidden>הנחה: <strong id="checkout-discount">−₪0</strong></p>
+      <p class="checkout-after-discount" id="checkout-after-discount-row" hidden>סה״כ לאחר ההנחה: <strong id="checkout-after-discount">₪0</strong></p>
+    </section>
+
+    <section class="checkout-form-section" id="checkout-form-section">
+      <form class="checkout-form" id="checkout-form" novalidate>
+
+        <div class="checkout-coupon" id="checkout-coupon">
+          <label class="form__label" for="checkout-coupon-code">קוד קופון או גיפט קארד</label>
+          <div class="checkout-coupon__row">
+            <input
+              type="text"
+              id="checkout-coupon-code"
+              name="couponCode"
+              class="form__input checkout-coupon__input"
+              dir="ltr"
+              autocomplete="off"
+              maxlength="32"
+              placeholder="אם יש לך קוד"
+            >
+            <button type="button" class="button" id="checkout-coupon-apply" data-analytics="checkout_coupon_apply">החלי</button>
+            <button type="button" class="button checkout-coupon__clear" id="checkout-coupon-clear" data-analytics="checkout_coupon_clear" hidden>הסירי</button>
+          </div>
+          <p class="checkout-coupon__message" id="checkout-coupon-message" hidden></p>
+        </div>
+
+        <h2>פרטים אישיים לתשלום</h2>
+        <p class="checkout-form-section__note">
+          יש למלא את הפרטים הבאים לפני המעבר לדף התשלום המאובטח.
+          הם נשמרים במכשיר הזה בלבד, לרכישה הבאה.
+        </p>
+
+        <div class="row">
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-first-name">שם פרטי *</label>
+              <input
+                type="text"
+                id="checkout-first-name"
+                name="firstName"
+                class="form__input"
+                placeholder="שם פרטי"
+                autocomplete="given-name"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-last-name">שם משפחה *</label>
+              <input
+                type="text"
+                id="checkout-last-name"
+                name="lastName"
+                class="form__input"
+                placeholder="שם משפחה"
+                autocomplete="family-name"
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-phone">טלפון (ללא קידומת בינלאומית) *</label>
+              <input
+                type="tel"
+                id="checkout-phone"
+                name="phone"
+                class="form__input"
+                placeholder="לדוגמה: 0501234567"
+                autocomplete="tel-national"
+                pattern="0[0-9]{8,9}"
+                title="יש להזין מספר טלפון ישראלי, ללא קידומת בינלאומית, לדוגמה 0501234567"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="col col-6 col-d-12">
+            <div class="form__group">
+              <label class="form__label" for="checkout-email">כתובת אימייל *</label>
+              <input
+                type="email"
+                id="checkout-email"
+                name="email"
+                class="form__input"
+                placeholder="name@example.com"
+                autocomplete="email"
+                required
+              >
+            </div>
+          </div>
+        </div>
+
+        <p class="checkout-shipping__none" id="checkout-no-shipping" hidden>
+          ההזמנה כוללת הרשמה לסדנאות בלבד — אין מה לשלוח, אז אין דמי משלוח.
+        </p>
+
+        <fieldset class="checkout-shipping" id="checkout-shipping">
+          <legend>משלוח *</legend>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="pickup" required>
+            <span>איסוף עצמי מרחובות — חינם</span>
+          </label>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="registered" required>
+            <span>דואר רשום — ₪25</span>
+          </label>
+          <label class="checkout-shipping__option">
+            <input type="radio" name="shipping" value="courier" required checked>
+            <span>שליח עד הבית — ₪40</span>
+          </label>
+        </fieldset>
+
+        <div id="checkout-address-fields">
+          <div class="form__group">
+            <label class="form__label" for="checkout-address">כתובת (רחוב, מספר בית ועיר) *</label>
+            <input
+              type="text"
+              id="checkout-address"
+              name="address"
+              class="form__input"
+              placeholder="לדוגמה: אייזנברג 39, רחובות"
+              autocomplete="street-address"
+              required
+            >
+          </div>
+
+          <div class="row">
+            <div class="col col-6 col-d-12">
+              <div class="form__group">
+                <label class="form__label" for="checkout-city">עיר *</label>
+                <input
+                  type="text"
+                  id="checkout-city"
+                  name="city"
+                  class="form__input"
+                  placeholder="עיר"
+                  autocomplete="address-level2"
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="col col-6 col-d-12">
+              <div class="form__group">
+                <label class="form__label" for="checkout-zip">מיקוד</label>
+                <input
+                  type="text"
+                  id="checkout-zip"
+                  name="zip"
+                  class="form__input"
+                  placeholder="מיקוד"
+                  autocomplete="postal-code"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="form__group">
+            <label class="form__label" for="checkout-country">מדינה *</label>
+            <select id="checkout-country" name="country" class="form__input" autocomplete="country" required>
+              <option value="IL" selected>ישראל</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form__group" id="checkout-variant-note-group" hidden>
+          <label class="form__label" for="checkout-variant-note">איזו דוגמא אהבת לסקראנצ'י?</label>
+          <textarea
+            id="checkout-variant-note"
+            name="variantNote"
+            class="form__input checkout-variant-note"
+            maxlength="200"
+            rows="2"
+            placeholder="למשל: פרחים ורודים, או תחרה זהובה (אופציונלי)"
+          ></textarea>
+          <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם הזמנת כמה, אפשר לרשום כאן איזו דוגמא לכל אחת.</p>
+        </div>
+
+        <div class="form__group" id="checkout-participants-group" hidden>
+          <label class="form__label" for="checkout-participants">שמות המשתתפות בסדנה</label>
+          <textarea
+            id="checkout-participants"
+            name="participantsNote"
+            class="form__input checkout-variant-note"
+            maxlength="200"
+            rows="2"
+            placeholder="למשל: נועה כהן, מיכל לוי"
+          ></textarea>
+          <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — אם נרשמת ליותר ממקום אחד, אפשר לרשום כאן מי מגיעה.</p>
+        </div>
+
+        <p class="checkout-grand-total">לתשלום: <strong id="checkout-grand-total">₪0</strong></p>
+
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label" for="checkout-pack-as-gift">
+            <input type="checkbox" id="checkout-pack-as-gift" name="packAsGift" value="1">
+            <span>האם לארוז כמתנה?</span>
+          </label>
+        </div>
+
+        <div class="form__group" id="checkout-gift-message-group" hidden>
+          <label class="form__label" for="checkout-gift-message">מילים בכרטיס ברכה</label>
+          <textarea
+            id="checkout-gift-message"
+            name="giftMessage"
+            class="form__input checkout-variant-note"
+            maxlength="200"
+            rows="2"
+            placeholder="למשל: מזל טוב! אוהבים אותך"
+          ></textarea>
+          <p class="checkout-form-section__note checkout-variant-note__hint">אופציונלי — יופיע על כרטיס הברכה באריזה.</p>
+        </div>
+
+        <div class="form__group">
+          <label class="form__label" for="checkout-order-note">הערות להזמנה</label>
+          <textarea
+            id="checkout-order-note"
+            name="orderNote"
+            class="form__input checkout-variant-note"
+            maxlength="500"
+            rows="3"
+            placeholder="אופציונלי"
+          ></textarea>
+        </div>
+
+        <div class="form__group form__group--checkbox" id="checkout-reuse-carton-group">
+          <label class="checkbox-label" for="checkout-reuse-carton">
+            <input type="checkbox" id="checkout-reuse-carton" name="reuseCarton" value="1">
+            <span>אני מעוניינת לקבל את ההזמנה בקרטון בשימוש חוזר.</span>
+          </label>
+        </div>
+
+        <div class="form__group form__group--checkbox">
+          <label class="checkbox-label" for="checkout-terms">
+            <input type="checkbox" id="checkout-terms" name="acceptTerms" required>
+            <span>
+              קראתי ואני מאשר/ת את
+              <a href="{{ '/regulations/' | relative_url }}" target="_blank" rel="noopener">תקנון האתר ותנאי השימוש</a>
+            </span>
+          </label>
+        </div>
+
+        <div class="form__group" id="checkout-installments-group" hidden>
+          <label class="form__label" for="checkout-installments">מספר תשלומים</label>
+          <select id="checkout-installments" name="installments" class="form__input"></select>
+        </div>
+
+        <p class="checkout-form-section__note" id="checkout-installments-note" hidden></p>
+
+        <button type="submit" class="button button--primary button--big checkout-form__submit" data-analytics="checkout_submit">
+          המשך לתשלום מאובטח
+        </button>
+
+        <div class="checkout-form__message" id="checkout-form-message" style="display: none;"></div>
+
+      </form>
+    </section>
+
+  </div>
+</div>

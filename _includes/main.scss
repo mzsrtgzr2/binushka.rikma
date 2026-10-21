@@ -71,8 +71,6 @@
 ======================= */
 /* >>>>>>>>>>>>>> :: 3.1-Header <<<<<<<<<<<<<<< */
 @import '3-modules/header';
-/* >>>>>>>>>>>>>> :: 3.1.1-Top Shipping Banner <<<<<<<<<<<<<<< */
-@import '3-modules/top-shipping-banner';
 /* >>>>>>>>>>>>>> :: 3.2-Pagination <<<<<<<<<<<<<<< */
 @import '3-modules/pagination';
 /* >>>>>>>>>>>>>> :: 3.3-Buttons <<<<<<<<<<<<<<< */
@@ -109,6 +107,7 @@
 @import '3-modules/video';
 /* >>>>>>>>>>>>>> :: 3.18-Terms Section <<<<<<<<<<<<<<< */
 @import '3-modules/terms-section';
+@import '3-modules/terms';
 /* >>>>>>>>>>>>>> :: 3.19-Content Section <<<<<<<<<<<<<<< */
 @import '3-modules/content-section';
 /* >>>>>>>>>>>>>> :: 3.20-Accordion <<<<<<<<<<<<<<< */
@@ -119,6 +118,11 @@
 @import '3-modules/retreat-banner';
 /* >>>>>>>>>>>>>> :: 3.23-Home Redesign <<<<<<<<<<<<<<< */
 @import '3-modules/home-redesign';
+/* >>>>>>>>>>>>>> :: 3.24-Checkout <<<<<<<<<<<<<<< */
+@import '3-modules/checkout';
+@import '3-modules/store-cart';
+/* >>>>>>>>>>>>>> :: 3.25-Newsletter <<<<<<<<<<<<<<< */
+@import '3-modules/newsletter';
 /* >>>>>>>>>>>>>> :: 3.11-Footer <<<<<<<<<<<<<<< */
 @import '3-modules/footer';
 
@@ -134,3 +138,6 @@
 @import '4-layouts/store';
 /* >>>>>>>>>>>>>> :: 4.4-Tags Page <<<<<<<<<<<<<<< */
 @import '4-layouts/tags-page';
+/* >>>>>>>>>>>>>> :: 4.5-Scrunchies <<<<<<<<<<<<<<< */
+@import '4-layouts/scrunchies';
+@import '4-layouts/admin';

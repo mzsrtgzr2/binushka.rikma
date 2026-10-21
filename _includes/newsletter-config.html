@@ -1,0 +1,40 @@
+{% assign newsletter = site.data.settings.newsletter %}
+{% if newsletter.enabled %}
+{% assign messages = newsletter.messages %}
+<script type="application/json" id="newsletter-config">
+{
+  "endpoints": {
+    "subscribe": "/api/newsletter/subscribe",
+    "unsubscribe": "/api/newsletter/unsubscribe"
+  },
+  "text": {
+    "sending": {{ messages.sending | jsonify }},
+    "success": {{ messages.success | jsonify }},
+    "unsubscribed": {{ messages.unsubscribed | jsonify }},
+    "invalidEmail": {{ messages.invalid_email | jsonify }},
+    "rateLimited": {{ messages.rate_limited | jsonify }},
+    "unavailable": {{ messages.unavailable | jsonify }},
+    "error": {{ messages.error | jsonify }}
+  },
+  "modal": {
+    "title": {{ newsletter.modal.title | jsonify }},
+    "description": {{ newsletter.modal.description | jsonify }},
+    "intents": {
+      "restock": {
+        "title": {{ newsletter.modal.restock.title | jsonify }},
+        "description": {{ newsletter.modal.restock.description | jsonify }}
+      },
+      "workshop": {
+        "title": {{ newsletter.modal.workshop.title | jsonify }},
+        "description": {{ newsletter.modal.workshop.description | jsonify }}
+      },
+      "opening": {
+        "title": {{ newsletter.modal.opening.title | jsonify }},
+        "description": {{ newsletter.modal.opening.description | jsonify }}
+      }
+    }
+  }
+}
+</script>
+<script src="{{ site.baseurl }}/js/newsletter.js" defer></script>
+{% endif %}

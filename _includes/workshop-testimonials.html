@@ -1,0 +1,72 @@
+{%- comment -%}
+  Social proof on workshop pages: short quotes and/or photos from previous
+  workshops, via _data/workshop-testimonials.yml.
+
+  Matching (in order):
+    1. page.testimonials_category (explicit override)
+    2. mothers pages that are not the embroidery course
+       (title lacks רקמה/רוקמות) → mothers-pamper
+       i.e. בוקר פינוק / הרצאת מנחת חוץ + בראנץ׳
+    3. page.category
+    4. all-levels fallback
+
+  Skip with front matter hide_testimonials: true.
+{%- endcomment -%}
+{%- unless page.hide_testimonials -%}
+{%- assign proof_key = page.testimonials_category | default: page.category -%}
+{%- if page.testimonials_category == nil and page.category == 'mothers' -%}
+  {%- assign _t = page.title | default: '' -%}
+  {%- unless _t contains 'רקמה' or _t contains 'רוקמות' -%}
+    {%- assign proof_key = 'mothers-pamper' -%}
+  {%- endunless -%}
+{%- endif -%}
+{%- assign proof = site.data.workshop-testimonials.categories[proof_key] -%}
+{%- unless proof -%}
+  {%- assign proof = site.data.workshop-testimonials.categories['all-levels'] -%}
+{%- endunless -%}
+{%- if proof -%}
+{%- assign proof_quotes = proof.quotes -%}
+{%- assign proof_photos = proof.photos -%}
+{%- assign has_quotes = false -%}
+{%- assign has_photos = false -%}
+{%- if proof_quotes and proof_quotes.size > 0 -%}{%- assign has_quotes = true -%}{%- endif -%}
+{%- if proof_photos and proof_photos.size > 0 -%}{%- assign has_photos = true -%}{%- endif -%}
+{%- if has_quotes or has_photos -%}
+{%- assign proof_title = proof.title | default: site.data.workshop-testimonials.title | default: 'מה אומרות משתתפות' -%}
+<section class="workshop-proof animate" aria-labelledby="workshop-proof-title">
+  <div class="workshop-proof__head">
+    <h2 class="workshop-proof__title" id="workshop-proof-title">{{ proof_title }}</h2>
+  </div>
+
+  {% if has_quotes %}
+  <ul class="workshop-proof__quotes">
+    {% for quote in proof_quotes %}
+    <li class="workshop-proof__quote">
+      <blockquote class="workshop-proof__text">
+        <p>{{ quote.text }}</p>
+      </blockquote>
+      {% if quote.name %}
+      <cite class="workshop-proof__name">{{ quote.name }}</cite>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if has_photos %}
+  <div class="workshop-proof__photos" role="group" aria-label="תמונות מסדנאות קודמות">
+    {% for photo in proof_photos %}
+    <figure class="workshop-proof__photo">
+      <img
+        class="lazy"
+        data-src="{{ site.baseurl }}{{ photo.src }}"
+        alt="{{ photo.alt | default: 'תמונה מסדנה קודמת' }}"
+      >
+    </figure>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{%- endif -%}
+{%- endif -%}
+{%- endunless -%}

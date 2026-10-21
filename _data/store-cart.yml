@@ -1,0 +1,17 @@
+# Cart products are `_store/*.md`. JSON under `_data/catalog.json` and
+# `api/catalog-data.json` is generated from those pages at build / admin save.
+# This YAML is only the cart toggle and shipping methods.
+
+enabled: true
+success_path: "/thanks/"
+
+shipping:
+  pickup:
+    label: איסוף עצמי מרחובות
+    price: 0
+  registered:
+    label: דואר רשום
+    price: 25
+  courier:
+    label: שליח עד הבית
+    price: 40

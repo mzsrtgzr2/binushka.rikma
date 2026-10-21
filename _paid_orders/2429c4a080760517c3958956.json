@@ -1,0 +1,12 @@
+{
+  "orderId": "2429c4a080760517c3958956",
+  "documentId": "0fd8d9c1-8d2b-40f8-ab8e-0f513e6d4919",
+  "amount": 500,
+  "purchases": [
+    {
+      "slug": "workshop-hosting-04-12",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-10-10T14:54:35.963Z"
+}

@@ -97,18 +97,13 @@
         <h2>הן כבר רקמו</h2>
       </div>
       <div class="home-redesign__testimonial-grid">
+        {% assign home_quotes = site.data['workshop-testimonials'].categories['all-levels'].quotes %}
+        {% for quote in home_quotes limit: 3 %}
         <article>
-          <p>הגעתי בלי ניסיון ויצאתי עם רקמה מהממת וביטחון להמשיך ליצור בבית. בינה סבלנית ומלאת לב.</p>
-          <span>מיכל, תל אביב</span>
+          <p>{{ quote.text }}</p>
+          <span>{{ quote.name }}</span>
         </article>
-        <article>
-          <p>שעתיים של שקט אמיתי. הקבוצה הקטנה והיחס האישי הופכים כל מפגש לחוויה שאני מחכה לה.</p>
-          <span>שרה, רחובות</span>
-        </article>
-        <article>
-          <p>הזמנתי סדנה פרטית כמתנה, וזאת היתה הבחירה הכי מוצלחת. הכל היה מוקפד ונעים.</p>
-          <span>דנה, נס ציונה</span>
-        </article>
+        {% endfor %}
       </div>
     </div>
   </section>

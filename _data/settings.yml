@@ -52,8 +52,8 @@ social:
 #-------------------------------
 # Hero Settings
 hero:
-  hero__title: שעתיים קסומות של שלווה וריקמה
-  hero__description: בואי לרקום איתי בקבוצה קטנה
+  hero__title: תני לעצמך רגע של שקט ויצירה
+  hero__description: בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
   hero__image: '/images/table-hero.png'
 
 
@@ -114,7 +114,7 @@ newsletter:
 # Projects Settings
 projects__settings:
   projects__title: חוגים וסדנאות
-  projects__description:
+  projects__description:  בואי לרקום איתי בקבוצות אינטימיות בפינוק מושלם
 
 recommendations__settings:
   recommendations__title: המלצות מוצרים
@@ -181,7 +181,7 @@ footer_menu__settings:
       url: '/projects/'
     - title: 'חנות'
       url: '/store/'
-    - title: 'צרי קשר'
+    - title: 'צרו קשר'
       url: '/contact/'
 
 footer_legal__settings:
@@ -203,7 +203,7 @@ instagram:
   enabled: true
   account: "bina.lir.cakes.embroidery"
   posts_count: 6
-  title: "עקבי אחריי באינסטגרם"
+  title: "עקבו אחריי באינסטגרם"
   description: "השראה, רקמות ועוד הרבה דברים יפים"
 
 #-------------------------------

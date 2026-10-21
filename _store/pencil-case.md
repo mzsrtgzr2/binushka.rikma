@@ -3,11 +3,11 @@ title: קלמר קנבס לרקמה
 date: 2026-09-23 15:58:00 +0000
 subtitle: בצבע טבעי
 image: /images/store/pencil-case/screenshot-2026-09-23-at-18-52-42-mueaerl1.jpg
-price: ₪20
+price: ₪25
 out_of_stock: false
 limited_stock: false
 hide: false
-cart_price: 20
+cart_price: 25
 order: 12
 preorder: false
 limited_edition: false

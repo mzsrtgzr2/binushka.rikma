@@ -39,7 +39,7 @@
       {% if project.registration_not_open %}
         <div class="registration-full">ההרשמה תיפתח בקרוב</div>
       {% elsif sold_out %}
-        <div class="registration-full">אין מקומות פנויים</div>
+        <div class="registration-full sold-out-badge">אין מקומות פנויים</div>
       {% elsif last_places %}
         <div class="last-places-badge">{% if spots == 1 %}מקום אחרון{% else %}מקומות אחרונים{% endif %}</div>
       {% endif %}

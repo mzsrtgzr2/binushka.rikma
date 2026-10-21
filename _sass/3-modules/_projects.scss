@@ -240,6 +240,14 @@
   z-index: 2;
 }
 
+/* Sold-out ("אין מקומות פנויים") — black on light gray (#e1e1e2, from the
+   reviewer's swatch). Same placement/size as .registration-full; only the
+   opening-soon badge keeps the red-on-translucent-white colours. */
+.registration-full.sold-out-badge {
+  background: #e1e1e2;
+  color: #000;
+}
+
 .registration-full-text {
   color: #ff0000;
   font-size: 24px;

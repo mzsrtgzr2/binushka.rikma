@@ -138,6 +138,7 @@
       option.textContent = i === 1 ? 'תשלום אחד' : i + ' תשלומים';
       installmentsSelect.appendChild(option);
     }
+    installmentsSelect.selectedIndex = 0;
     installmentsSelect.value = '1';
     installmentsGroup.hidden = false;
     if (installmentsNote) {

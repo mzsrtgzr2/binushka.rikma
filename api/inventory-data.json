@@ -341,7 +341,7 @@
       "name": "ערכות רקמה מיוחדות",
       "variants": {
         "tablecloth-autumn": {
-          "stock": 1,
+          "stock": 0,
           "preorder": true
         },
         "dmc-flowers": {

@@ -18,7 +18,7 @@ variants:
   tablecloth-autumn:
     name: מפה יפהיפיה – דוגמת סתיו שלכת
     price: 160
-    stock: 1
+    stock: 0
     preorder: true
     image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-56-mui93a0t.jpg
     gallery:

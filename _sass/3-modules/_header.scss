@@ -7,11 +7,11 @@
   background: rgba(252, 250, 247, 0.86);
   border-bottom: 1px solid var(--border-color);
   box-shadow: 0 1px 0 var(--border-color);
-  overflow: hidden;
+  overflow: visible;
 
   .container-big {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 28px;
+    padding-right: 28px;
   }
 
   .row {

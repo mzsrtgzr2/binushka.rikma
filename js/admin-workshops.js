@@ -1060,6 +1060,12 @@
   function cardHtml(workshop) {
     var image = workshop.image ? previewSrc(workshop.image) : '';
     var badge = badgeText(workshop);
+    // Mirrors project-card.html: last-places gets its own black badge in
+    // the top-right corner of the image, the other badges keep the old one.
+    var badgeClass =
+      !workshop.registration_not_open && !isSoldOut(workshop) && isLastPlaces(workshop)
+        ? 'last-places-badge'
+        : 'registration-full';
     var price = effectivePrice(workshop);
     var soldOut = isSoldOut(workshop);
 
@@ -1077,7 +1083,7 @@
       '<div class="project__content">' +
       '<span class="project__image">' +
       (image ? '<img src="' + escapeHtml(image) + '" alt="">' : '') +
-      (badge ? '<div class="registration-full">' + escapeHtml(badge) + '</div>' : '') +
+      (badge ? '<div class="' + badgeClass + '">' + escapeHtml(badge) + '</div>' : '') +
       '</span>' +
       '<div class="project__info">' +
       (categoryLabel(workshop) ? '<div class="project__category">' + escapeHtml(categoryLabel(workshop)) + '</div>' : '') +

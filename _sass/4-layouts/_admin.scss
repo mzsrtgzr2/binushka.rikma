@@ -1738,12 +1738,19 @@
 }
 
 .admin-preview .registration-full,
-.admin-preview .registration-full-text {
+.admin-preview .registration-full-text,
+.admin-preview .last-places-badge {
   font-size: 15px;
 }
 
 .admin-preview .registration-full {
   bottom: 10px;
+  right: 10px;
+  padding: 4px 10px;
+}
+
+.admin-preview .last-places-badge {
+  top: 10px;
   right: 10px;
   padding: 4px 10px;
 }

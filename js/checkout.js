@@ -8,6 +8,7 @@
     if (!form) return;
 
   var messageEl = document.getElementById('checkout-form-message');
+  var installmentsNote = document.getElementById('checkout-installments-note');
   var linesEl = document.getElementById('checkout-lines');
   var emptyEl = document.getElementById('checkout-empty');
   var subtotalRow = document.getElementById('checkout-subtotal-row');
@@ -119,6 +120,45 @@
     messageEl.className = 'checkout-form__message checkout-form__message--' + type;
     messageEl.style.display = text ? 'block' : 'none';
     if (text) messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /* Morning's payment form takes the actual number of installments, so the
+     shopper picks the count here and we send it with the order. */
+  var installmentsGroup = document.getElementById('checkout-installments-group');
+  var installmentsSelect = document.getElementById('checkout-installments');
+
+  function showInstallmentOptions(maxPayments) {
+    var count = Number(maxPayments);
+    if (!Number.isInteger(count) || count < 2) return;
+    if (!installmentsGroup || !installmentsSelect) return;
+    installmentsSelect.innerHTML = '';
+    for (var i = 1; i <= count; i++) {
+      var option = document.createElement('option');
+      option.value = String(i);
+      option.textContent = i === 1 ? 'תשלום אחד' : i + ' תשלומים';
+      installmentsSelect.appendChild(option);
+    }
+    installmentsSelect.selectedIndex = 0;
+    installmentsSelect.value = '1';
+    installmentsGroup.hidden = false;
+    if (installmentsNote) {
+      installmentsNote.textContent =
+        'אפשר לפרוס לעד ' + count + ' תשלומים, בכפוף לאישור חברת האשראי.';
+      installmentsNote.hidden = false;
+    }
+  }
+
+  function loadPaymentOptions() {
+    fetch('/api/checkout/', { headers: { Accept: 'application/json' } })
+      .then(function (res) {
+        return res.ok ? res.json() : null;
+      })
+      .then(function (body) {
+        if (body) showInstallmentOptions(body.maxPayments);
+      })
+      .catch(function () {
+        /* keep the picker hidden if checkout config is unavailable */
+      });
   }
 
   function showCouponMessage(text, type) {
@@ -591,6 +631,9 @@
       zip: needAddress ? data.zip || '' : '',
       country: needAddress ? data.country : data.country || 'IL',
     };
+    if (installmentsSelect && installmentsGroup && !installmentsGroup.hidden) {
+      payload.installments = Number(installmentsSelect.value) || 1;
+    }
     if (appliedCoupon && appliedCoupon.code) payload.couponCode = appliedCoupon.code;
     else if (data.couponCode) payload.couponCode = String(data.couponCode).trim();
     var hasScrunchie = items.some(function (item) {
@@ -691,6 +734,7 @@
     }
     if (initialItems.length) {
       track('beginCheckout', initialItems, window.StoreCart ? StoreCart.subtotal() : 0);
+      loadPaymentOptions();
     } else {
       track('track', 'checkout_error', { stage: 'arrival', reason: 'empty_cart' });
     }

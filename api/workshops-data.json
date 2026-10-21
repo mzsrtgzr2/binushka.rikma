@@ -83,7 +83,19 @@
     "name": "שיעור רקמה פרטי — בזמן שמתאים לשתינו",
     "price": 350,
     "kind": "workshop",
-    "shipping": false
+    "shipping": false,
+    "variants": {
+      "single": {
+        "name": "שיעור אחד",
+        "price": 350,
+        "places": 1
+      },
+      "three": {
+        "name": "חבילת 3 שיעורים",
+        "price": 800,
+        "places": 3
+      }
+    }
   },
   "workshop-private-workshop": {
     "name": "סדנת רקמה פרטית — בזמן שמתאים לכם",

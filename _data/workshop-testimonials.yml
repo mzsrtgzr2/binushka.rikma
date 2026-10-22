@@ -44,12 +44,12 @@ categories:
       - name: נועה
         text: מעגל קטן, בלי שיפוטיות, ואוכל מושקע. המנחה דיברה בגובה העיניים — ממליצה לכל אמא שצריכה אוויר.
     photos:
-      - src: /images/gallery/mothers-with-dina.png
-        alt: בוקר פינוק לאמהות עם מנחת חוץ
-      - src: /images/gallery/mothers-with-bar.png
-        alt: בראנץ׳ בבוקר פינוק לאמהות
-      - src: /images/gallery/mothers-with-shirley.jpg
-        alt: מעגל אמהות בבוקר פינוק
+      - src: /images/gallery/mothers-pamper-baby-01.jpg
+        alt: אמא עם תינוק בבוקר פינוק לאמהות
+      - src: /images/gallery/mothers-pamper-brunch-01.jpg
+        alt: שולחן בראנץ׳ מפנק בבוקר פינוק לאמהות
+      - src: /images/gallery/mothers-pamper-food-01.jpg
+        alt: מאפים טריים מהבראנץ׳ בבוקר פינוק
 
   # סדנת רקמה לכל הרמות — לא קשור לתינוקות ואמהות
   all-levels:

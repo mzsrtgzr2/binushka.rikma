@@ -1,9 +1,50 @@
 /* Projects */
 .projects-page {
-  margin-bottom: 68px;
+  margin-bottom: 40px;
 
   @media only screen and (max-width: $mobile) {
-    margin-bottom: 48px;
+    margin-bottom: 28px;
+  }
+
+  /* Workshops list (#230): tighten the white space inside each card and
+     between cards — the defaults stacked .project__footer's margin on top
+     of .project__add's, leaving an oversized gap above the CTA, and the
+     grid's 32px column padding left a wide gutter between cards. Spacing
+     is reduced further per review, not removed. Scoped here so the
+     homepage cards and the admin preview keep their existing rhythm. */
+  .store-toolbar {
+    margin-bottom: 16px;
+  }
+
+  #workshops-grid {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+
+  .project {
+    margin-bottom: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .project__info {
+    margin-top: 8px;
+
+    .project__category {
+      margin-bottom: 4px;
+    }
+
+    .project__title {
+      margin-bottom: 6px;
+    }
+
+    .project__footer {
+      margin-top: 4px;
+    }
+
+    .project__add {
+      margin-top: 4px;
+    }
   }
 }
 

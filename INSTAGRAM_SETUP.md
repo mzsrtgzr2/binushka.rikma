@@ -15,7 +15,7 @@ instagram:
   enabled: true                    # Enable/disable the Instagram section
   account: "bina.lir.cakes.embroidery"  # Instagram account username
   posts_count: 6                   # Number of posts to display
-  title: "עקבו אחריי באינסטגרם"    # Section title
+  title: "עקבי אחריי באינסטגרם"    # Section title
   description: "השראה, רקמות ועוד הרבה דברים יפים"  # Section description
 ```
 

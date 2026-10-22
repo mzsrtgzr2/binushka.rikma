@@ -170,7 +170,7 @@ terms:
   payment:
     title: "תנאי תשלום:"
     content:
-      - "יש אפשרות לשלם עד 4 תשלומים."
+      - "יש אפשרות לשלם עד 5 תשלומים."
 
 content_sections:
   title: ""

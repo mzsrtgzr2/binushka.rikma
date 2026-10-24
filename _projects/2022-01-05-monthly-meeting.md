@@ -4,7 +4,7 @@ date: 2025-10-21 11:00:00 +0300
 subtitle: שלישי בבוקר אחת לחודש
 location: "רח׳ אייזנברג, רחובות"
 category: advanced
-image: /images/gallery/10E9A3AC-D2F2-4A84-AC04-C15CEC6E869A_1_105_c.jpeg
+image: /images/workshops/2026-10/screenshot-2026-10-24-at-23-27-28-mvmuos0g.jpg
 permalink: /projects/monthly-meeting/
 form_url: "https://pages.greeninvoice.co.il/payments/links/59988810-26f7-4902-9e5d-0d9a5cb1d8ac"
 registration_full: false

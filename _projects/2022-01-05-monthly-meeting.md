@@ -31,6 +31,10 @@ variants:
     name: 5 שיעורים
     price: 500
     places: 1
+  pack-2:
+    name: הרשמה לשיעור אחד
+    price: 110
+    places: 1
 ---
 
 ## פרטי מפגשי רקמה למנוסות

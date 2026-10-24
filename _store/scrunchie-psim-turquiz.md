@@ -4,9 +4,9 @@ subtitle: פסים דקים בטורקיז על רקע לבן
 image: /images/scrunchies/gallery/scrunchie-psim-turquiz-1.png
 price: ₪45
 cart_price: 45
-stock: 1
+stock: 0
 limited_stock: true
-out_of_stock: false
+out_of_stock: true
 hide: true
 noindex: true
 sitemap: false

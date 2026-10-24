@@ -231,8 +231,8 @@
       }
     },
     "scrunchie-chuma-pirchonit-fableism": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י חומה פרחונית Fableism",
       "price": 45
@@ -252,8 +252,8 @@
       "price": 85
     },
     "scrunchie-mishbatzot-vrod-lavan-large": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י משבצות ורוד לבן",
       "price": 45
@@ -280,8 +280,8 @@
       "price": 30
     },
     "scrunchie-psim-turquiz": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י פסים טורקיז",
       "price": 45

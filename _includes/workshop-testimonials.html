@@ -14,10 +14,12 @@
 {%- endcomment -%}
 {%- unless page.hide_testimonials -%}
 {%- assign proof_key = page.testimonials_category | default: page.category -%}
-{%- if page.testimonials_category == nil and page.category == 'mothers' -%}
+{%- if page.testimonials_category == nil -%}
   {%- assign _t = page.title | default: '' -%}
   {%- unless _t contains 'רקמה' or _t contains 'רוקמות' -%}
-    {%- assign proof_key = 'mothers-pamper' -%}
+    {%- if page.category == 'mothers' or _t contains 'פינוק' or _t contains 'מפנק' -%}
+      {%- assign proof_key = 'mothers-pamper' -%}
+    {%- endif -%}
   {%- endunless -%}
 {%- endif -%}
 {%- assign proof = site.data.workshop-testimonials.categories[proof_key] -%}

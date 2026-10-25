@@ -22,10 +22,12 @@
   {%- if page.faq_category == nil and page.price_per == 'workshop' -%}
     {%- assign faq_key = 'private' -%}
   {%- endif -%}
-  {%- if page.faq_category == nil and page.category == 'mothers' -%}
+  {%- if page.faq_category == nil -%}
     {%- assign _t = page.title | default: '' -%}
     {%- unless _t contains 'רקמה' or _t contains 'רוקמות' -%}
-      {%- assign faq_key = 'mothers-pamper' -%}
+      {%- if page.category == 'mothers' or _t contains 'פינוק' or _t contains 'מפנק' -%}
+        {%- assign faq_key = 'mothers-pamper' -%}
+      {%- endif -%}
     {%- endunless -%}
   {%- endif -%}
   {%- assign accordion_items = site.data.workshop-faqs.categories[faq_key] -%}

@@ -1174,7 +1174,7 @@
       } else {
         priceLine =
           '<div class="project-price">' +
-          (packs.length ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
+          (packs.length > 1 ? 'מ־' : '') + '₪' + escapeHtml(shown) + ' ' + priceUnit(workshop) +
           '</div>';
       }
     }
@@ -1284,8 +1284,9 @@
 
     var price = effectivePrice(workshop);
     if (price > 0) {
-      var shown = (workshop.packs || []).length ? fromPrice(workshop) : price;
-      parts.push(((workshop.packs || []).length ? 'מ־' : '') + '₪' + shown + ' ' + priceUnit(workshop));
+      var cardPacks = packsForBooking(workshop);
+      var shown = cardPacks.length ? fromPrice(workshop) : price;
+      parts.push((cardPacks.length > 1 ? 'מ־' : '') + '₪' + shown + ' ' + priceUnit(workshop));
     } else parts.push('בלי הרשמה בסל');
 
     return parts.join(' · ');

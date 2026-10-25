@@ -73,7 +73,16 @@ layout: default
           {%- assign from_price = pack_each -%}
         {%- endif -%}
       {%- endfor -%}
+      {%- assign variant_count = workshop.variants | size -%}
+      {%- comment -%}
+        "מ־" only when there is more than one payment option. A single option
+        (one price, no package) is written plain.
+      {%- endcomment -%}
+      {% if variant_count > 1 %}
       <div class="project-price">מ־₪{{ from_price }} {{ price_unit }}</div>
+      {% else %}
+      <div class="project-price"><span data-product-price="{{ workshop_id }}">₪{{ from_price }}</span> {{ price_unit }}</div>
+      {% endif %}
       {% else %}
       {%- comment -%}
         Mothers embroidery is always 4 meetings: lead with sessions + ₪/meeting

@@ -340,6 +340,9 @@
       "limitedStock": true,
       "name": "ערכות רקמה מיוחדות",
       "variants": {
+        "type-1": {
+          "stock": 4
+        },
         "dmc-flowers": {
           "stock": 3
         },

@@ -593,6 +593,19 @@
   "special-embroidery-kits": {
     "name": "ערכות רקמה מיוחדות",
     "variants": {
+      "type-1": {
+        "name": "ערכת רקמה פרחונית על קלמר",
+        "price": 70,
+        "image": "/images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-45-30-mvo05xn3.jpg",
+        "description": "החלטתי לייצר עבורכן את ערכת הרקמה המזמינה, המרגיעה והמועילה הזו ברגע שהייתי צריכה קצת אוויר ושקט.\nבחרתי 4 גוונים יפים של חברת dmc הצרפתית. גזרתי, הפרדתי, חשבתי על איך יהיה לך הכי נוח לרקום איתם.\nהוספתי מחט איכותית, ציירתי ציור פרחוני ספונטני וחיברתי את הכל לערכת רקמה אחת.\nאני מציירת על כל קלמר ציור שונה. ולפעמים גם מבקשת עזרה מעפרי חברתי הטובה שתצייר איתי :)\n\nמה כיף להוסיף אקסטרא?\nמספריים איכותיות תמיד נחמד\nעוד מחטים אם תרצו",
+        "stock": 4,
+        "gallery": [
+          "/images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-20-mvo05xn3.jpg",
+          "/images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-04-mvo05xn4.jpg",
+          "/images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-13-mvo05xn4.jpg",
+          "/images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-46-mvo05xn4.jpg"
+        ]
+      },
       "dmc-flowers": {
         "name": "ערכת רקמה עם 2 דוגמאות",
         "price": 100,
@@ -672,6 +685,7 @@
       }
     },
     "variant_order": [
+      "type-1",
       "dmc-flowers",
       "trimits-elephants",
       "trimits-butterfly",

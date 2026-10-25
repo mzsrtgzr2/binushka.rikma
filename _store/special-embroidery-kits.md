@@ -3,7 +3,7 @@ title: ערכות רקמה מיוחדות
 date: 2026-10-08 05:00:00 +0000
 subtitle: מבית DMC ומבית VOG
 image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui9azth.jpg
-price: ₪100 – ₪210
+price: ₪70 – ₪210
 out_of_stock: false
 limited_stock: true
 hide: false
@@ -15,6 +15,17 @@ categories:
   - kits
   - beginners
 variants:
+  type-1:
+    name: ערכת רקמה פרחונית על קלמר
+    price: 70
+    stock: 4
+    image: /images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-45-30-mvo05xn3.jpg
+    gallery:
+      - /images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-20-mvo05xn3.jpg
+      - /images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-04-mvo05xn4.jpg
+      - /images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-13-mvo05xn4.jpg
+      - /images/store/special-embroidery-kits/screenshot-2026-10-25-at-17-47-46-mvo05xn4.jpg
+    description: "החלטתי לייצר עבורכן את ערכת הרקמה המזמינה, המרגיעה והמועילה הזו ברגע שהייתי צריכה קצת אוויר ושקט.\nבחרתי 4 גוונים יפים של חברת dmc הצרפתית. גזרתי, הפרדתי, חשבתי על איך יהיה לך הכי נוח לרקום איתם.\nהוספתי מחט איכותית, ציירתי ציור פרחוני ספונטני וחיברתי את הכל לערכת רקמה אחת.\nאני מציירת על כל קלמר ציור שונה. ולפעמים גם מבקשת עזרה מעפרי חברתי הטובה שתצייר איתי :)\n\nמה כיף להוסיף אקסטרא?\nמספריים איכותיות תמיד נחמד\nעוד מחטים אם תרצו"
   dmc-flowers:
     name: ערכת רקמה עם 2 דוגמאות
     price: 100

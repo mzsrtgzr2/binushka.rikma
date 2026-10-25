@@ -58,6 +58,20 @@
       }
     }
   },
+  "workshop-mothers-16-12": {
+    "name": "בוקר פינוק עם שירלי אבנון קרייזל — ביום רביעי ה-16.12 בלי ילדים🫣",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 12,
+    "variants": {
+      "one": {
+        "name": "משתתפת אחת",
+        "price": 330,
+        "places": 1
+      }
+    }
+  },
   "workshop-mothers-30-12": {
     "name": "בוקר פינוק לאמהות — ב30.12 עם הפסיכולוגית מיכל כץ-בלך",
     "price": 330,

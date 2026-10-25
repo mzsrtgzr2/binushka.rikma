@@ -23,11 +23,17 @@
 <div class="accordion-wrapper">
     <ul class="jekyllcodex_accordion">
         {% for item in accordion_list %}
+            {%- assign _item_content = item.content -%}
+            {%- if include.overrides -%}
+                {%- for ov in include.overrides -%}
+                    {%- if ov.title == item.title -%}{%- assign _item_content = ov.content -%}{%- endif -%}
+                {%- endfor -%}
+            {%- endif -%}
             <li><input id="accordion{{ forloop.index }}" type="checkbox"
                 data-faq-question="{{ item.title | escape }}"
                 data-faq-index="{{ forloop.index }}"
                 data-faq-total="{{ accordion_list.size }}"
-                data-faq-context="{{ include.context | default: page.category | default: page.title | escape }}" /><label for="accordion{{ forloop.index }}">{{ item.title }}</label><div>{{ item.content | markdownify }}</div></li>
+                data-faq-context="{{ include.context | default: page.category | default: page.title | escape }}" /><label for="accordion{{ forloop.index }}">{{ item.title }}</label><div>{{ _item_content | markdownify }}</div></li>
         {% endfor %}
     </ul>
 </div>

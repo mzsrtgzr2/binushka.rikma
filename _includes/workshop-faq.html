@@ -35,29 +35,12 @@
     {%- assign accordion_items = site.data.workshop-faqs.categories['all-levels'] -%}
   {%- endunless -%}
 {%- endif -%}
-{%- comment -%}
-    Per-event tweaks: page.faq_overrides is a list of {title, content} that
-    replaces the answer of a matching FAQ item without duplicating the whole list.
-  {%- endcomment -%}
-  {%- if page.faq_overrides and accordion_items -%}
-    {%- assign _items = '' | split: '' -%}
-    {%- for item in accordion_items -%}
-      {%- assign _new_item = item -%}
-      {%- for ov in page.faq_overrides -%}
-        {%- if ov.title == item.title -%}
-          {%- assign _new_item = item | merge: ov -%}
-        {%- endif -%}
-      {%- endfor -%}
-      {%- assign _items = _items | push: _new_item -%}
-    {%- endfor -%}
-    {%- assign accordion_items = _items -%}
-  {%- endif -%}
 {%- if accordion_items and accordion_items.size > 0 -%}
 <section class="project-faq animate">
   <div class="text-center">
     <h3 class="hero__title">שאלות נפוצות</h3>
   </div>
-  {% include section-accordion.html accordion_items=accordion_items context=faq_key %}
+  {% include section-accordion.html accordion_items=accordion_items context=faq_key overrides=page.faq_overrides %}
 </section>
 {%- endif -%}
 {%- endunless -%}

@@ -33,6 +33,7 @@
 {%- assign has_photos = false -%}
 {%- if proof_quotes and proof_quotes.size > 0 -%}{%- assign has_quotes = true -%}{%- endif -%}
 {%- if proof_photos and proof_photos.size > 0 -%}{%- assign has_photos = true -%}{%- endif -%}
+{%- if page.hide_testimonial_photos -%}{%- assign has_photos = false -%}{%- endif -%}
 {%- if has_quotes or has_photos -%}
 {%- assign proof_title = proof.title | default: site.data.workshop-testimonials.title | default: 'מה אומרות משתתפות' -%}
 <section class="workshop-proof animate" aria-labelledby="workshop-proof-title">

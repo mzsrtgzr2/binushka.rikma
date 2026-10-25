@@ -35,7 +35,7 @@
 <article class="project col col-4 col-d-6 col-t-12" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-analytics="workshop_card" data-category="{{ project.category }}" data-last-places="{% if last_places %}true{% else %}false{% endif %}"{% if filter_month_keys.size > 0 %} data-month="{{ filter_month_keys | join: ' ' }}"{% endif %}>
   <div class="project__content">
     <a href="{{ project.url }}" class="project__image" data-analytics="workshop_card_image">
-      <img class="lazy" data-src="{{ project.image }}" alt="{{ project.title }}">
+      <img class="lazy" data-src="{{ project.card_image | default: project.image }}" alt="{{ project.title }}">
       {% if project.registration_not_open %}
         <div class="registration-full">ההרשמה תיפתח בקרוב</div>
       {% elsif sold_out %}

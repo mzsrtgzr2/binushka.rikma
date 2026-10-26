@@ -187,6 +187,26 @@
       "name": "מחט לרקמה",
       "price": 2
     },
+    "pencil-case-kits": {
+      "stock": null,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "ערכות רקמה על קלמר",
+      "variants": {
+        "branch": {
+          "stock": 1
+        },
+        "bells": {
+          "stock": 1
+        },
+        "dandelion": {
+          "stock": 1
+        },
+        "meadow": {
+          "stock": 1
+        }
+      }
+    },
     "pencil-case": {
       "stock": 20,
       "outOfStock": false,
@@ -340,9 +360,6 @@
       "limitedStock": true,
       "name": "ערכות רקמה מיוחדות",
       "variants": {
-        "type-1": {
-          "stock": 4
-        },
         "dmc-flowers": {
           "stock": 3
         },

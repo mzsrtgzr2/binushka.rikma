@@ -1,6 +1,6 @@
 ---
 title: ערכות רקמה על קלמר
-date: 2026-10-26 14:30:00 +0000
+date: 2026-10-26 09:00:00 +0000
 subtitle: קלמר קנבס עם ציור ביד – 21×12.7 ס״מ
 image: /images/store/pencil-case-kits/designs.jpg
 gallery:

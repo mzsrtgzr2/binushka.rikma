@@ -255,8 +255,10 @@
   function shippingCost(method, subtotal) {
     var methods = shippingConfig.methods || {};
     var row = methods[method];
+    if (method === 'pickup') return 0;
+    var freeOver = Number(shippingConfig.freeOver) || 0;
+    if (freeOver && Number(subtotal) >= freeOver) return 0;
     if (!row) {
-      if (method === 'pickup') return 0;
       if (method === 'registered') return 25;
       if (method === 'courier') return 40;
       return 0;

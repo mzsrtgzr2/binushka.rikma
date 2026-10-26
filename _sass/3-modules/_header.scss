@@ -482,3 +482,13 @@
     display: none;
   }
 }
+/* Promo bar (site-wide announcement) */
+.promo-bar {
+  background: #1f1b18;
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 8px 14px;
+}
+.promo-bar a { color: #fff; text-decoration: underline; }

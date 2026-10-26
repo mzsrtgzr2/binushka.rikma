@@ -63,7 +63,7 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 12,
+    "stock": 10,
     "variants": {
       "one": {
         "name": "משתתפת אחת",

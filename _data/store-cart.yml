@@ -6,7 +6,7 @@ enabled: true
 success_path: "/thanks/"
 
 shipping:
-  free_over: 149
+  free_over: 250
   pickup:
     label: איסוף עצמי מרחובות
     price: 0

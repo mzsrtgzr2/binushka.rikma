@@ -914,8 +914,6 @@
     text: document.getElementById('store-cart-progress-text'),
     bar: document.getElementById('store-cart-progress-bar'),
     fill: document.getElementById('store-cart-progress-fill'),
-    suggestWrap: document.getElementById('store-cart-suggest'),
-    suggestList: document.getElementById('store-cart-suggest-list'),
   };
 
   function ils(n) {
@@ -936,42 +934,12 @@
     });
   }
 
-  function idsInCart(cart) {
-    var ids = {};
-    Object.keys(cart).forEach(function (key) {
-      if (cart[key] > 0) ids[parseCartKey(key).id] = true;
-    });
-    return ids;
-  }
-
-  /* Fillers are plain products: a variant or gift-card line needs a choice first. */
-  function fillerIdeas(cart, gap) {
-    var taken = idsInCart(cart);
-    var ideas = [];
-    Object.keys(byId).forEach(function (id) {
-      var p = byId[id];
-      if (!p || p.kind === 'workshop') return;
-      if (p.requiresShipping === false) return;
-      if (p.outOfStock || p.variants || p.variable) return;
-      if (taken[id]) return;
-      var price = Number(p.price) || 0;
-      if (price <= 0) return;
-      if (price > gap + 90) return;
-      ideas.push({ id: id, name: p.name, price: price, image: p.image || '', url: p.url || '' });
-    });
-    ideas.sort(function (a, b) {
-      return Math.abs(gap - a.price) - Math.abs(gap - b.price);
-    });
-    return ideas.slice(0, 3);
-  }
-
   function renderFreeShipping(cart) {
     if (!progress.wrap) return;
     var freeOver = Number(shippingConfig.freeOver) || 0;
     var hasItems = cartItems(cart).length > 0;
     if (!freeOver || !hasItems || !cartHasShippable(cart)) {
       progress.wrap.hidden = true;
-      if (progress.suggestWrap) progress.suggestWrap.hidden = true;
       return;
     }
     var subtotal = shippableSubtotal(cart);
@@ -991,36 +959,6 @@
         progress.text.innerHTML = '<strong>יש לך משלוח חינם 🎉</strong>';
       }
     }
-    if (!progress.suggestWrap || !progress.suggestList) return;
-    if (gap <= 0) {
-      progress.suggestWrap.hidden = true;
-      progress.suggestList.innerHTML = '';
-      return;
-    }
-    var ideas = fillerIdeas(cart, gap);
-    if (!ideas.length) {
-      progress.suggestWrap.hidden = true;
-      progress.suggestList.innerHTML = '';
-      return;
-    }
-    progress.suggestWrap.hidden = false;
-    progress.suggestList.innerHTML = '';
-    ideas.forEach(function (p) {
-      var li = document.createElement('li');
-      li.className = 'store-cart__suggest-item';
-      var thumb = p.image
-        ? '<img class="store-cart__suggest-thumb" src="' + escapeHtml(p.image) + '" alt="">'
-        : '';
-      li.innerHTML =
-        thumb +
-        '<span class="store-cart__suggest-info">' +
-        '<span class="store-cart__suggest-name">' + escapeHtml(p.name) + '</span>' +
-        '<span class="store-cart__suggest-price">' + ils(p.price) + '</span>' +
-        '</span>' +
-        '<button type="button" class="store-cart__suggest-add" data-cart-add="' +
-        escapeHtml(p.id) + '" data-analytics="cart_filler_add">הוספה</button>';
-      progress.suggestList.appendChild(li);
-    });
   }
 
   var headerHost = els.root && els.root.parentElement;
@@ -1182,28 +1120,6 @@
       StoreCart.add(btn.getAttribute('data-cart-add'), btn);
     }
   });
-
-  if (progress.suggestList) {
-    progress.suggestList.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-cart-add]');
-      if (!btn) return;
-      var id = btn.getAttribute('data-cart-add');
-      var p = byId[id];
-      if (!p) return;
-      var cart = loadCart();
-      var freeOver = Number(shippingConfig.freeOver) || 0;
-      if (window.Analytics && typeof Analytics.track === 'function') {
-        Analytics.track('cart_filler_add', {
-          item_id: id,
-          item_name: p.name,
-          item_price: Number(p.price) || 0,
-          gap_before: Math.max(0, freeOver - shippableSubtotal(cart)),
-          free_over: freeOver,
-          page_path: window.location.pathname,
-        });
-      }
-    });
-  }
 
   if (els.lines) {
     els.lines.addEventListener('click', function (e) {

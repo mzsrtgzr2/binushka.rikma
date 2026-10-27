@@ -26,7 +26,7 @@ variants:
   9-2:
     name: מספרי ציפור 9 ס״מ
     price: 70
-    stock: 3
+    stock: 2
     image: /images/store/scissors/screenshot-2026-09-23-at-21-58-39-mueib4k6.jpg
     description: "חביבות הקהל ללא ספק, זהובות יפות מדוייקות."
   type-3:

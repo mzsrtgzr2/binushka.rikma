@@ -462,9 +462,9 @@
     "workshop-mothers-7-12": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה7 בדצמבר",
       "price": 1090,
-      "stock": 4,
+      "stock": 3,
       "outOfStock": false,
-      "limitedStock": false
+      "limitedStock": true
     },
     "workshop-mothers-16-12": {
       "name": "בוקר פינוק עם שירלי אבנון קרייזל — ביום רביעי ה-16.12 בלי ילדים🫣",

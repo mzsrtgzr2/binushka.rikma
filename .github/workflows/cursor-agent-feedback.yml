@@ -306,12 +306,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Install Cursor CLI for conflict resolution
-        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
       - name: Merge base branch for conflict resolution
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
         id: conflict_merge
@@ -335,11 +329,10 @@ jobs:
             echo "has_conflicts=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Resolve merge conflicts with Cursor
+      - name: Build conflict resolution prompt
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true' && steps.conflict_merge.outputs.has_conflicts == 'true'
+        id: conflict_prompt
         env:
-          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'auto' }}
           PR_NUMBER: ${{ steps.context.outputs.pr_number }}
           PR_URL: ${{ steps.context.outputs.pr_url }}
           PR_TITLE: ${{ steps.context.outputs.title }}
@@ -348,16 +341,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          model="$CURSOR_MODEL"
-          if [ "$model" = "gpt-5" ]; then
-            echo "::warning::Cursor CLI does not offer model 'gpt-5' for this account; falling back to 'auto'."
-            model="auto"
-          fi
-
           conflicts="$(git diff --name-only --diff-filter=U || true)"
           prompt_file="$RUNNER_TEMP/cursor-conflict-prompt.md"
           {
-            echo "You are Cursor Agent working in repository ${REPOSITORY}."
+            echo "You are a coding agent working in repository ${REPOSITORY}."
             echo
             echo "Pull request: #${PR_NUMBER} - ${PR_TITLE}"
             echo "PR URL: ${PR_URL}"
@@ -374,11 +361,25 @@ jobs:
             echo "Do not create, merge, or update pull requests yourself; the GitHub Action will commit, push, and retry the merge after you finish."
           } > "$prompt_file"
 
-          agent -p "$(cat "$prompt_file")" \
-            --model "$model" \
-            --force \
-            --trust \
-            --output-format text
+          echo "file=${prompt_file}" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve merge conflicts with DeepSeek Flash
+        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true' && steps.conflict_merge.outputs.has_conflicts == 'true'
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek/deepseek-flash' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DEEPSEEK_API_KEY:-}" ]; then
+            echo "DEEPSEEK_API_KEY is not set. Add it as a GitHub Actions repository secret." >&2
+            exit 1
+          fi
+          if ! command -v opencode >/dev/null 2>&1; then
+            curl -fsSL https://opencode.ai/install | bash
+            export PATH="$HOME/.opencode/bin:$PATH"
+          fi
+          model="${DEEPSEEK_MODEL:-deepseek/deepseek-flash}"
+          opencode run --model "$model" --auto "$(cat "${{ steps.conflict_prompt.outputs.file }}")"
 
       - name: Commit and push conflict resolution
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'approve' && steps.merge.outputs.needs_resolution == 'true'
@@ -456,12 +457,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Install Cursor CLI
-        if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
-        run: |
-          curl https://cursor.com/install -fsS | bash
-          echo "$HOME/.cursor/bin" >> "$GITHUB_PATH"
-
       - name: Build feedback prompt
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         id: prompt
@@ -493,24 +488,23 @@ jobs:
 
           echo "file=${prompt_file}" >> "$GITHUB_OUTPUT"
 
-      - name: Run Cursor Agent on feedback
+      - name: Run DeepSeek Flash agent on feedback
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'
         env:
-          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          CURSOR_MODEL: ${{ vars.CURSOR_MODEL || 'auto' }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek/deepseek-flash' }}
         run: |
           set -euo pipefail
-          model="$CURSOR_MODEL"
-          if [ "$model" = "gpt-5" ]; then
-            echo "::warning::Cursor CLI does not offer model 'gpt-5' for this account; falling back to 'auto'."
-            model="auto"
+          if [ -z "${DEEPSEEK_API_KEY:-}" ]; then
+            echo "DEEPSEEK_API_KEY is not set. Add it as a GitHub Actions repository secret." >&2
+            exit 1
           fi
-
-          agent -p "$(cat "${{ steps.prompt.outputs.file }}")" \
-            --model "$model" \
-            --force \
-            --trust \
-            --output-format text
+          if ! command -v opencode >/dev/null 2>&1; then
+            curl -fsSL https://opencode.ai/install | bash
+            export PATH="$HOME/.opencode/bin:$PATH"
+          fi
+          model="${DEEPSEEK_MODEL:-deepseek/deepseek-flash}"
+          opencode run --model "$model" --auto "$(cat "${{ steps.prompt.outputs.file }}")"
 
       - name: Commit and push feedback changes
         if: steps.auth.outputs.authorized == 'true' && steps.context.outputs.skip != 'true' && steps.context.outputs.action == 'feedback'

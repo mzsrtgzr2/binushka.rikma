@@ -662,6 +662,13 @@ test('a slug cannot escape the newsletter folder', async () => {
   assert.equal(fs.existsSync(outside), true);
 });
 
+test('the subscribers list says so when the blob store is missing', async () => {
+  const res = await call({ body: { action: 'subscribers' } });
+
+  assert.equal(res.statusCode, 503);
+  assert.equal(res.body.code, 'not_configured');
+});
+
 test('front matter fields cannot inject extra keys through newlines', () => {
   const issue = issues.normalize({
     title: 'כותרת\nlayout: evil',

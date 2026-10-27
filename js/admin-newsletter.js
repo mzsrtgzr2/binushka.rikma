@@ -12,6 +12,11 @@
   var listView = document.getElementById('admin-list-view');
   var listEl = document.getElementById('admin-list');
   var statsEl = document.getElementById('admin-stats');
+  var subscribersSection = document.getElementById('admin-subscribers');
+  var subscribersSummaryEl = document.getElementById('admin-subscribers-summary');
+  var subscribersFilterEl = document.getElementById('admin-subscribers-filter');
+  var subscribersListEl = document.getElementById('admin-subscribers-list');
+  var subscribersCopyBtn = document.getElementById('admin-subscribers-copy');
   var newBtn = document.getElementById('admin-new');
   var logoutBtn = document.getElementById('admin-logout');
   var editor = document.getElementById('admin-editor');
@@ -57,6 +62,8 @@
   var omitted = {};
   var recipientFilter = '';
   var recipientsLoading = false;
+  var subscribers = [];
+  var subscriberFilter = '';
 
   /* Committed path -> the data URL the browser already has. An image is only
      served from /images/... after the next site build, so until then the
@@ -475,6 +482,97 @@
     statsEl.textContent = parts.join(' · ');
   }
 
+  /* ------------------------------------------------------------- subscribers
+
+     The list itself, not just how many are on it. It is read from the same
+     private blob store the send uses, so this is what an issue would reach. */
+  function subscriberRow(item) {
+    return (
+      '<li class="admin-subscribers__item">' +
+      '<span class="admin-subscribers__email">' + escapeHtml(item.email) + '</span>' +
+      (item.subscribedAt
+        ? '<span class="admin-subscribers__date">' + escapeHtml(formatDate(item.subscribedAt)) + '</span>'
+        : '') +
+      '</li>'
+    );
+  }
+
+  function renderSubscribers() {
+    if (!subscribersSection) return;
+
+    subscribersSection.hidden = false;
+    var query = subscriberFilter;
+    var visible = subscribers.filter(function (item) {
+      return !query || String(item.email).toLowerCase().indexOf(query) !== -1;
+    });
+
+    if (!subscribers.length) {
+      subscribersSummaryEl.textContent = 'אין עדיין כתובות ברשימה.';
+    } else if (visible.length === subscribers.length) {
+      subscribersSummaryEl.textContent =
+        subscribers.length + (subscribers.length === 1 ? ' כתובת ברשימה.' : ' כתובות ברשימה.');
+    } else {
+      subscribersSummaryEl.textContent = visible.length + ' מתוך ' + subscribers.length + ' כתובות.';
+    }
+
+    if (subscribersFilterEl) {
+      subscribersFilterEl.hidden = subscribers.length < 6;
+      if (!subscribers.length) subscribersFilterEl.value = '';
+    }
+    if (subscribersCopyBtn) {
+      subscribersCopyBtn.hidden = !subscribers.length;
+      subscribersCopyBtn.disabled = !subscribers.length;
+    }
+
+    if (!visible.length) {
+      subscribersListEl.innerHTML = subscribers.length
+        ? '<li class="admin-subscribers__item"><span class="admin-hint">אין כתובת שמתאימה לסינון.</span></li>'
+        : '';
+      return;
+    }
+
+    subscribersListEl.innerHTML = visible.map(subscriberRow).join('');
+  }
+
+  function loadSubscribers() {
+    if (!subscribersSection) return;
+
+    subscribersSection.hidden = false;
+    subscribersSummaryEl.textContent = 'טוענת את רשימת התפוצה...';
+    subscribersListEl.innerHTML = '';
+
+    api('POST', { action: 'subscribers' })
+      .then(function (data) {
+        subscribers = (Array.isArray(data.subscribers) ? data.subscribers : []).filter(function (item) {
+          return item && item.email;
+        });
+        renderSubscribers();
+      })
+      .catch(function (error) {
+        subscribers = [];
+        subscribersSection.hidden = false;
+        subscribersSummaryEl.textContent = (error && error.message) || 'לא הצלחנו לטעון את רשימת התפוצה.';
+        subscribersListEl.innerHTML = '';
+        if (subscribersFilterEl) subscribersFilterEl.hidden = true;
+        if (subscribersCopyBtn) subscribersCopyBtn.hidden = true;
+      });
+  }
+
+  function copySubscribers() {
+    var text = subscribers.map(function (item) { return item.email; }).join(', ');
+    if (!text) return;
+
+    function done() { show(boardMessage, 'כל הכתובות הועתקו.', 'ok'); }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () {
+        window.prompt('העתקת הכתובות:', text);
+      });
+    } else {
+      window.prompt('העתקת הכתובות:', text);
+    }
+  }
+
   function render() {
     listEl.innerHTML = issues.map(function (issue) {
       var sent = issue.status === 'sent';
@@ -713,6 +811,7 @@
       loginForm.hidden = true;
       logoutBtn.hidden = false;
       show(boardMessage, '');
+      loadSubscribers();
     });
   }
 
@@ -997,6 +1096,18 @@
       if (event.key === 'Enter') event.preventDefault();
     });
   }
+
+  if (subscribersFilterEl) {
+    subscribersFilterEl.addEventListener('input', function () {
+      subscriberFilter = subscribersFilterEl.value.trim().toLowerCase();
+      renderSubscribers();
+    });
+    subscribersFilterEl.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') event.preventDefault();
+    });
+  }
+
+  if (subscribersCopyBtn) subscribersCopyBtn.addEventListener('click', copySubscribers);
 
   sendBtn.addEventListener('click', function () {
     if (!current) return;

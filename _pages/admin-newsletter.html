@@ -28,6 +28,18 @@ noindex: true
       </div>
 
       <p class="admin-hint" id="admin-stats"></p>
+
+      <section class="admin-subscribers" id="admin-subscribers" hidden>
+        <div class="admin-subscribers__head">
+          <h2 class="admin-subscribers__title">רשימת התפוצה</h2>
+          <button type="button" class="button admin-upload-btn" id="admin-subscribers-copy" hidden>העתקת כל הכתובות</button>
+        </div>
+        <p class="admin-hint" id="admin-subscribers-summary"></p>
+        <input class="form__input admin-input--ltr" type="search" id="admin-subscribers-filter" dir="ltr"
+               placeholder="סינון כתובת" hidden>
+        <ul class="admin-subscribers__list" id="admin-subscribers-list"></ul>
+      </section>
+
       <ul class="admin-list" id="admin-list"></ul>
     </div>
 

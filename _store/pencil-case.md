@@ -8,7 +8,7 @@ out_of_stock: false
 limited_stock: false
 hide: false
 cart_price: 25
-order: 12
+order: 13
 preorder: false
 limited_edition: false
 stock: 20

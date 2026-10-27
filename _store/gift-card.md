@@ -11,7 +11,7 @@ variable: true
 min_price: 50
 max_price: 2000
 form_url: https://pay.grow.link/3a55f683853ac90ee5658a4d2a9a1cda-MzA5MDAwOA
-order: 23
+order: 24
 limited_edition: false
 preorder: false
 category: gift-card

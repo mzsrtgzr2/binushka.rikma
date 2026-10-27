@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 42
+order: 43
 scrunchie_type: כותנה
 scrunchie_color: תכלת
 fabric_country:

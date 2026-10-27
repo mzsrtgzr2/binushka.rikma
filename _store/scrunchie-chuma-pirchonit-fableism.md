@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 38
+order: 39
 scrunchie_type: כותנה
 scrunchie_color: חום
 fabric_country: לונדון

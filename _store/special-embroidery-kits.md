@@ -7,7 +7,7 @@ price: ₪100 – ₪210
 out_of_stock: false
 limited_stock: true
 hide: false
-order: 8
+order: 9
 preorder: false
 limited_edition: false
 category: kits

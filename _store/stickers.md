@@ -7,7 +7,7 @@ price: ₪25 – ₪80
 out_of_stock: false
 limited_stock: false
 hide: false
-order: 10
+order: 11
 preorder: false
 limited_edition: false
 gallery:

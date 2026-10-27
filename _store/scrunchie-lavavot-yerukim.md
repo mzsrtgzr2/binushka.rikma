@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 41
+order: 42
 scrunchie_type: כותנה
 scrunchie_color: לבן
 fabric_country: שווייץ

@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 39
+order: 40
 scrunchie_type: רקמה
 scrunchie_color: ירוק
 fabric_country:

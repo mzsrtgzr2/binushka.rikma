@@ -7,7 +7,7 @@ price: ₪195
 out_of_stock: false
 limited_stock: true
 hide: false
-order: 9
+order: 10
 preorder: false
 limited_edition: false
 category: books

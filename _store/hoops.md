@@ -5,13 +5,14 @@ subtitle: במגוון גדלים וצורות
 image: /images/store/hoops/vog-embroidery-hoops-and-pastel-threads-mupadaxt.jpg
 price: ₪35 – ₪45
 out_of_stock: false
-limited_stock: true
+limited_stock: false
 hide: false
-category: hoops
 order: 2
+preorder: false
 gallery:
   - /images/store/hoops/screenshot-2026-09-23-at-15-50-00-mue3pll0.jpg
-preorder: false
+category: hoops
+limited_edition: false
 variants:
   13:
     name: קוטר 13 ס״מ

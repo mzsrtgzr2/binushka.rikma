@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 31
+order: 32
 scrunchie_type: רקמה
 scrunchie_color: שחור
 fabric_country:

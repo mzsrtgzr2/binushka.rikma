@@ -9,7 +9,7 @@ limited_stock: false
 hide: false
 stock: 0
 cart_price: 330
-order: 11
+order: 12
 preorder: true
 limited_edition: false
 gallery:

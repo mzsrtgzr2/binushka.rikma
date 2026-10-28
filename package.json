@@ -4,7 +4,8 @@
   "description": "Serverless dependencies for the Vercel functions under api/.",
   "scripts": {
     "test": "node --test",
-    "build:catalog": "node scripts/build-catalog.js"
+    "build:catalog": "node scripts/build-catalog.js",
+    "test:e2e": "playwright test"
   },
   "engines": {
     "node": ">=18"
@@ -14,5 +15,8 @@
     "@vercel/blob": "^2.8.0",
     "marked": "^18.0.14",
     "nodemailer": "^10.0.10"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
   }
 }

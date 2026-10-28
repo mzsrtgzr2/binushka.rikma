@@ -109,6 +109,17 @@ variants:
       - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-06-mufplh6b.jpg
       - /images/store/embroidery-books/screenshot-2026-09-24-at-17-30-16-mufplh6c.png
     description: "ספר מתוק של סטף ארנולד, כנראה הנמכר ביותר אצלי.\nמאוד קליל, נגיש ומובן.\nכולל בסוף הספר תבנית לצייר על הבד את החלוקה ל12 חודשים :)"
+  plantladyembroidery300:
+    name: Plant Lady Embroidery – ספר רקמה בוטנית עם יותר מ־300 דוגמאות
+    price: 195
+    stock: 1
+    image: /images/store/embroidery-books/screenshot-2026-10-28-at-22-28-13-mvskou2b.jpg
+    gallery:
+      - /images/store/embroidery-books/screenshot-2026-10-28-at-22-27-26-mvskou2b.jpg
+      - /images/store/embroidery-books/screenshot-2026-10-28-at-22-21-44-mvskou2c.jpg
+      - /images/store/embroidery-books/screenshot-2026-10-28-at-22-26-25-mvskou2c.jpg
+      - /images/store/embroidery-books/screenshot-2026-10-28-at-22-22-24-mvskou2c.jpg
+    description: "ספר מעורר השראה לרוקמות שאוהבות את עולם הצומח ורוצות להוסיף עוד רעיונות לאוסף דוגמאות הרקמה שלהן.\nבספר תמצאי יותר מ־300 דוגמאות בוטניות לרקמה, ובהן פרחים, שרכים, סוקולנטים, עלים, דבורים, פטריות וסצנות מהגינה.\nלצד הדוגמאות תמצאי הסברים בסיסיים על תכי רקמה ועל העברת דוגמאות לבד, שיעזרו לך להפוך את האיורים לרקמה משלך."
 ---
 
 כל ספרי הרקמה מכילים בתוכם פירוט מלא ותמונות תקריב של כל הרקמות.

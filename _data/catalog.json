@@ -130,6 +130,19 @@
           "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-53-mui8gwqf.jpg",
           "/images/store/embroidery-books/screenshot-2026-09-26-at-13-11-34-mui8ne4o.jpg"
         ]
+      },
+      "plantladyembroidery300": {
+        "name": "Plant Lady Embroidery – ספר רקמה בוטנית עם יותר מ־300 דוגמאות",
+        "price": 195,
+        "image": "/images/store/embroidery-books/screenshot-2026-10-28-at-22-28-13-mvskou2b.jpg",
+        "description": "ספר מעורר השראה לרוקמות שאוהבות את עולם הצומח ורוצות להוסיף עוד רעיונות לאוסף דוגמאות הרקמה שלהן.\nבספר תמצאי יותר מ־300 דוגמאות בוטניות לרקמה, ובהן פרחים, שרכים, סוקולנטים, עלים, דבורים, פטריות וסצנות מהגינה.\nלצד הדוגמאות תמצאי הסברים בסיסיים על תכי רקמה ועל העברת דוגמאות לבד, שיעזרו לך להפוך את האיורים לרקמה משלך.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/embroidery-books/screenshot-2026-10-28-at-22-27-26-mvskou2b.jpg",
+          "/images/store/embroidery-books/screenshot-2026-10-28-at-22-21-44-mvskou2c.jpg",
+          "/images/store/embroidery-books/screenshot-2026-10-28-at-22-26-25-mvskou2c.jpg",
+          "/images/store/embroidery-books/screenshot-2026-10-28-at-22-22-24-mvskou2c.jpg"
+        ]
       }
     },
     "variant_order": [
@@ -141,7 +154,8 @@
       "type-7",
       "type-8",
       "type-9",
-      "365"
+      "365",
+      "plantladyembroidery300"
     ],
     "category": "books"
   },

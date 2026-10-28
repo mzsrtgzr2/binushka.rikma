@@ -6,7 +6,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = path.join(ROOT, '_site');
@@ -15,7 +15,18 @@ const PORT = Number(process.env.E2E_PORT || 8124);
 process.env.MORNING_ENV = process.env.MORNING_ENV || 'sandbox';
 process.env.SITE_URL = process.env.SITE_URL || 'http://127.0.0.1:' + PORT;
 
-const { default: dispatch } = await import('../lib/routes/dispatch.mjs');
+/* E2E_ROOT points at a copied function bundle, so a test can run the same
+ * artifact Vercel deploys instead of the whole repo. */
+const ROOT_OVERRIDE = process.env.E2E_ROOT ? path.resolve(process.env.E2E_ROOT) : ROOT;
+const DISPATCH_PATH = path.join(ROOT_OVERRIDE, 'lib', 'routes', 'dispatch.mjs');
+const loadError = [];
+let dispatch = null;
+try {
+  ({ default: dispatch } = await import(pathToFileURL(DISPATCH_PATH).href));
+} catch (error) {
+  loadError.push(error);
+  console.error('dispatch failed to load:', error && error.message);
+}
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -71,6 +82,11 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify(value));
       return res;
     };
+    if (!dispatch) {
+      res.writeHead(500, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: 'FUNCTION_INVOCATION_FAILED' }));
+      return;
+    }
     try {
       await dispatch(req, res);
     } catch (error) {

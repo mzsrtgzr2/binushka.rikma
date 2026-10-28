@@ -19,12 +19,12 @@ test('the prices api answers with a catalog', async ({ request }) => {
   expect(Array.isArray(body.products) || typeof body.products === 'object').toBeTruthy();
 });
 
-test('the catalog api answers', async ({ request }) => {
+/* An unknown route must answer 404 from our own dispatcher. A 500 here means
+ * the function never booted, which is exactly how the bundle bug looked. */
+test('an unknown api route answers 404, not a crash', async ({ request }) => {
   test.skip(!LIVE, REASON);
-  const res = await request.get('/api/catalog/');
-  expect(res.status(), 'catalog status').toBe(200);
-  const body = await res.json();
-  expect(body).toBeTruthy();
+  const res = await request.get('/api/definitely-not-a-route/');
+  expect(res.status(), 'unknown route status').toBe(404);
 });
 
 test('the checkout page loads its shipping law', async ({ page }) => {
@@ -36,7 +36,9 @@ test('the checkout page loads its shipping law', async ({ page }) => {
     }
   });
   await page.goto('/checkout/');
-  await expect(page.locator('#checkout-first-name')).toBeVisible();
+  /* The form is only shown once the cart has a line, so it has to be in the
+   * served HTML — visibility depends on localStorage, not on the deploy. */
+  await expect(page.locator('#checkout-first-name')).toBeAttached();
   const script = await page.request.get('/js/shipping.js');
   expect(script.status(), 'shipping.js status').toBe(200);
   expect(failures, 'no api call may fail on the checkout page').toEqual([]);

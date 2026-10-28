@@ -1,0 +1,50 @@
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/build-catalog.js
+      - run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+      # The bundle is what Vercel uploads: api/, lib/, node_modules. A require
+      # that reaches outside it boots fine locally and 500s in production.
+      - run: node scripts/bundle-copy.mjs /tmp/bundle
+      - name: browser tests against the real bundle
+        run: npx playwright test
+        env:
+          E2E_LIVE: '1'
+          E2E_ROOT: /tmp/bundle

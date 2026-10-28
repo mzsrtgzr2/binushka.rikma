@@ -262,11 +262,12 @@ test('private workshop is ₪2800 per session with no place inventory', () => {
   assert.equal(two.total, 5600);
 });
 
-test('mothers morning with Bar is in the cart catalog at ₪330', () => {
-  const workshop = PRODUCTS['workshop-bar-14-10'];
+test('mothers morning with Dana is in the cart catalog at ₪330', () => {
+  const workshop = PRODUCTS['workshop-mothers-11-11-2'];
   assert.equal(workshop.kind, 'workshop');
   assert.equal(workshop.price, 330);
   assert.match(workshop.name, /בוקר פינוק לאמהות/);
+  /* Bar's 14.10 morning is over and hidden; the open one at 330 is Dana's. */
   assert.equal(workshop.variants.one.price, 330);
   assert.equal(workshop.variants.one.places, 1);
   assert.equal(workshop.variants.pair.price, 600);
@@ -436,7 +437,8 @@ test('every visible workshop is in the cart at the page price', () => {
   });
   assert.ok(visible.length >= 9, 'expected the current open workshops to stay listed');
   assert.ok(hidden.length >= 1);
-  assert.ok(external.length >= 1, 'expected at least one external-registration workshop');
+  /* The shop currently has no external-registration workshop, so this group
+   * may be empty; when it is not, the loop below still checks its rules. */
   visible.forEach(({ page, raw }) => {
     const row = PRODUCTS[page.id];
     assert.ok(row, `${page.slug} should be in the cart catalog`);

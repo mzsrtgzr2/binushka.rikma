@@ -24,14 +24,6 @@ variants:
       - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg
       - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-32-mue2vvu6.jpg
     description: "ערכת רקמה כיפית מבית DMC שהבאתי מלונדון.\nכוללת בד, חישוק וחוטים תואמים, עם הסבר ל־2 דוגמאות שונות."
-  trimits-elephants:
-    name: ערכת רקמה מלונדון – דוגמת פילים
-    price: 100
-    stock: 1
-    image: /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-37-mutybzqm.jpg
-    gallery:
-      - /images/store/trimits-kit-elephant/screenshot-2026-10-04-at-15-13-59-mutybzqn.jpg
-    description: "ערכת רקמה נעימה ופשוטה של חברת Trimits הבריטית.\nכוללת חישוק במבוק 15 ס״מ, בד כותנה 25×25 עם דוגמה מודפסת, חוטים, מחט, לבד לסגירה, הוראות ו־QR להדרכות וידאו."
   trimits-butterfly:
     name: ערכת רקמה מלונדון – דוגמת פרפר
     price: 100

@@ -257,12 +257,14 @@
     var row = methods[method];
     if (method === 'pickup') return 0;
     var freeOver = Number(shippingConfig.freeOver) || 0;
-    if (freeOver && Number(subtotal) >= freeOver) return 0;
+    /* Free shipping is registered mail; courier above the threshold pays only the upgrade. */
+    var overFree = freeOver && Number(subtotal) >= freeOver;
     if (!row) {
-      if (method === 'registered') return 25;
-      if (method === 'courier') return 40;
+      if (method === 'registered') return overFree ? 0 : 25;
+      if (method === 'courier') return overFree ? 15 : 40;
       return 0;
     }
+    if (overFree) return Number(row.upgradeOverFree) || 0;
     return Number(row.price) || 0;
   }
 

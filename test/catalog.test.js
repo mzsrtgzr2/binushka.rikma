@@ -6,6 +6,7 @@ const { installFixtureWorkshops } = require('./fixtures/workshops');
 const store = require('../lib/store');
 const {
   buildOrder,
+  shippingPrice,
   fallbackPriceBook,
   applyVariantNote,
   applyWorkshopNote,
@@ -72,13 +73,37 @@ test('checkout charges the catalog price, not a client price', () => {
   assert.equal(order.subtotal, 440);
 });
 
-test('courier shipping stays ₪40 even on orders over ₪250', () => {
-  const order = buildOrder([{ id: 'fox', quantity: 2 }], 'courier');
-  assert.equal(order.subtotal, 440);
-  assert.equal(order.shipping, 40);
-  assert.equal(order.total, 480);
-  assert.equal(order.lines.at(-1).description, 'משלוח - שליח עד הבית');
-  assert.equal(order.lines.at(-1).price, 40);
+test('free shipping is registered mail; courier pays only the ₪15 upgrade', () => {
+  const courierFree = buildOrder([{ id: 'fox', quantity: 2 }], 'courier');
+  assert.equal(courierFree.subtotal, 440);
+  assert.equal(courierFree.shipping, 15);
+  assert.equal(courierFree.total, 455);
+  assert.equal(courierFree.lines.at(-1).description, 'משלוח - שליח עד הבית');
+  assert.equal(courierFree.lines.at(-1).price, 15);
+
+  const registeredFree = buildOrder([{ id: 'fox', quantity: 2 }], 'registered');
+  assert.equal(registeredFree.shipping, 0);
+  assert.equal(registeredFree.total, 440);
+
+  const registeredPaid = buildOrder([{ id: 'fox', quantity: 1 }], 'registered');
+  assert.equal(registeredPaid.subtotal, 220);
+  assert.equal(registeredPaid.shipping, 25);
+
+  const courierPaid = buildOrder([{ id: 'fox', quantity: 1 }], 'courier');
+  assert.equal(courierPaid.shipping, 40);
+});
+
+test('shipping prices match _data/store-cart.yml', () => {
+  const yaml = fs.readFileSync(path.join(__dirname, '..', '_data', 'store-cart.yml'), 'utf8');
+  const block = (name) => (yaml.match(new RegExp('\\n  ' + name + ':\\n((?:    [^\\n]*\\n)+)')) || [])[1] || '';
+  const price = (text) => Number((text.match(/price:\s*(\d+)/) || [])[1]);
+  assert.equal(Number((yaml.match(/^\s*free_over:\s*(\d+)/m) || [])[1]), 250);
+  assert.equal(price(block('registered')), 25);
+  assert.equal(price(block('courier')), 40);
+  assert.equal(Number((block('courier').match(/upgrade_over_free:\s*(\d+)/) || [])[1]), 15);
+  assert.equal(shippingPrice('courier', 300), 15);
+  assert.equal(shippingPrice('courier', 100), 40);
+  assert.equal(shippingPrice('registered', 300), 0);
 });
 
 test('gift card charges the chosen amount, not a catalog price', () => {
@@ -309,8 +334,8 @@ test('a mixed cart of a workshop and a shop product still needs shipping', () =>
     'courier'
   );
   assert.equal(order.needsShipping, true);
-  assert.equal(order.shipping, 40);
-  assert.equal(order.total, 330 + 220 + 40);
+  assert.equal(order.shipping, 15);
+  assert.equal(order.total, 330 + 220 + 15);
 });
 
 test('workshop places are stock: sold out and over-booking are rejected', () => {

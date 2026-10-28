@@ -96,7 +96,7 @@
     {%- for method in site.data.store-cart.shipping -%}
       {%- if method[0] != 'free_over' -%}
       {%- unless sfirst -%},{%- endunless -%}
-      {{ method[0] | jsonify }}: { "label": {{ method[1].label | jsonify }}, "price": {{ method[1].price }} }
+      {{ method[0] | jsonify }}: { "label": {{ method[1].label | jsonify }}, "price": {{ method[1].price }}, "upgradeOverFree": {{ method[1].upgrade_over_free | default: 0 }} }
       {%- assign sfirst = false -%}
       {%- endif -%}
     {%- endfor -%}

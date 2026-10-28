@@ -172,6 +172,6 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 2
+    "stock": 0
   }
 }

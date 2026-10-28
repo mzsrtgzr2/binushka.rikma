@@ -16,3 +16,5 @@ shipping:
   courier:
     label: שליח עד הבית
     price: 40
+    # Above free_over the shopper pays registered (free) + this upgrade.
+    upgrade_over_free: 15

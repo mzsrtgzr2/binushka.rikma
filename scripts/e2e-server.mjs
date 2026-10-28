@@ -12,6 +12,18 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = path.join(ROOT, '_site');
 const PORT = Number(process.env.E2E_PORT || 8124);
 
+/* Sandbox credentials for a real payment run live in .env.local, which is
+ * gitignored. Anything already exported wins over the file. */
+const ENV_FILE = path.join(ROOT, '.env.local');
+if (fs.existsSync(ENV_FILE)) {
+  for (const line of fs.readFileSync(ENV_FILE, 'utf8').split('\n')) {
+    const match = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (!match) continue;
+    if (process.env[match[1]] !== undefined) continue;
+    process.env[match[1]] = match[2].replace(/^["']|["']$/g, '');
+  }
+}
+
 process.env.MORNING_ENV = process.env.MORNING_ENV || 'sandbox';
 process.env.SITE_URL = process.env.SITE_URL || 'http://127.0.0.1:' + PORT;
 

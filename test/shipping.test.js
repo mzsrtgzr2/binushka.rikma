@@ -31,12 +31,29 @@ test('no freeOver means the flat price is always charged', () => {
   assert.equal(shipping.cost({ price: 25, freeOver: 0 }, 1000), 25);
 });
 
-test('the browser and the order builder both compute shipping through the shared rule', () => {
+test('the browser computes shipping through js/shipping.js', () => {
   const checkout = fs.readFileSync(path.join(REPO, 'js', 'checkout.js'), 'utf8');
-  const order = fs.readFileSync(path.join(REPO, 'lib', 'catalog', 'order.js'), 'utf8');
   assert.match(checkout, /BinushkaShipping\.cost\(/);
-  assert.match(order, /shippingRules\.cost\(/);
-  assert.match(order, /require\('\.\.\/\.\.\/js\/shipping'\)/);
+});
+
+test('the order builder and the browser agree on every method around the threshold', () => {
+  const { shippingPrice } = require('../lib/catalog');
+  const methods = ['pickup', 'registered', 'courier'];
+  const prices = { pickup: 0, registered: 25, courier: 40 };
+  const upgrades = { pickup: 0, registered: 0, courier: 15 };
+  for (const method of methods) {
+    for (const subtotal of [0, 249, 250, 251, 900]) {
+      const browser = shipping.cost(
+        { price: prices[method], upgradeOverFree: upgrades[method], freeOver: 250 },
+        subtotal
+      );
+      assert.equal(
+        shippingPrice(method, subtotal),
+        browser,
+        method + ' at ' + subtotal
+      );
+    }
+  }
 });
 
 test('the checkout layout loads js/shipping.js before js/checkout.js', () => {

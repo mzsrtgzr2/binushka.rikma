@@ -59,6 +59,8 @@ test('a real sandbox payment form opens', async ({ page }) => {
   await addFoxToCart(page);
   await fillCheckout(page);
   await page.click('.checkout-form__submit');
-  await page.waitForURL(/^https:\/\/sandbox\./, { timeout: 60000 });
+  /* Morning's sandbox page pulls slow external assets, so wait for the
+   * navigation to commit instead of for its load event. */
+  await page.waitForURL(/^https:\/\/sandbox\./, { timeout: 60000, waitUntil: 'commit' });
   await expect(page.locator('body')).toContainText(/₪/);
 });

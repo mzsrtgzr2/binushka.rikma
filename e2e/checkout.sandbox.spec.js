@@ -50,6 +50,12 @@ test('checkout posts the cart and follows the payment url', async ({ page }) => 
   await expect(page.locator('#sandbox-pay')).toHaveText('Sandbox payment');
 });
 
+/* Grow (formerly Meshulam) publishes these for the sandbox only:
+ * https://developers.grow.business/reference/testing-environment
+ * 4580458045804580 is the one valid for single (non-installment) payments. */
+const SANDBOX_CARD = '4580458045804580';
+const SANDBOX_ID = '000000000';
+
 test('a real sandbox payment form opens', async ({ page }) => {
   test.skip(
     process.env.E2E_SANDBOX !== '1',
@@ -63,4 +69,29 @@ test('a real sandbox payment form opens', async ({ page }) => {
    * navigation to commit instead of for its load event. */
   await page.waitForURL(/^https:\/\/sandbox\./, { timeout: 60000, waitUntil: 'commit' });
   await expect(page.locator('body')).toContainText(/₪/);
+});
+
+test('a sandbox card completes the purchase and lands on thanks', async ({ page }) => {
+  test.skip(
+    process.env.E2E_SANDBOX !== '1' || process.env.E2E_SANDBOX_PAY !== '1',
+    'set E2E_SANDBOX=1 and E2E_SANDBOX_PAY=1: Grow guards the submit with a reCAPTCHA image challenge that a bot cannot solve'
+  );
+
+  await addFoxToCart(page);
+  await fillCheckout(page);
+  await page.click('.checkout-form__submit');
+  await page.waitForURL(/^https:\/\/sandbox\./, { timeout: 60000, waitUntil: 'commit' });
+
+  /* The card fields live in CreditGuard's iframe, not in Grow's page. */
+  const card = page.frameLocator('iframe[src*="creditguard"]');
+  const number = card.locator('#card-number');
+  await number.waitFor({ state: 'visible', timeout: 60000 });
+  await number.fill(SANDBOX_CARD);
+  await card.locator('#expMonth').selectOption('12');
+  await card.locator('#expYear').selectOption('2030');
+  await card.locator('#personal-id').fill(SANDBOX_ID);
+  await card.getByRole('button', { name: 'לתשלום' }).click();
+
+  await page.waitForURL(/\/thanks\//, { timeout: 90000 });
+  await expect(page.locator('body')).toContainText(/תודה/);
 });

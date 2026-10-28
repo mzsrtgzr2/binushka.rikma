@@ -209,21 +209,9 @@
         "price": 100,
         "image": "/images/store/floss-25-set/screenshot-2026-09-24-at-15-20-02-mufi6jdb.jpg",
         "description": "הצבעים שאני משתמשת בהם הכי הרבה בסט מעולה למתחילות, מתקדמות.\nכולל שחור, לבן, ecru, ירוקים, כחולים, צהובים, אדומים. ועוד :)",
-        "units": 25,
         "stock": 18,
         "gallery": [
           "/images/store/floss-25-set/screenshot-2026-09-24-at-15-24-12-mufi7wmn.jpg"
-        ]
-      },
-      "original-27": {
-        "name": "מארז מקורי — 27 גוונים",
-        "price": 120,
-        "image": "/images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-19-mue250c8.jpg",
-        "description": "חוטים של חברת dmc הצרפתית עשויים מ100% כותנה.\nיכולים לשמש לרקמה על בגדים, תיקים, נעליים וכו.\nתהנו :)",
-        "units": 27,
-        "stock": 1,
-        "gallery": [
-          "/images/store/dmc-floss-set/screenshot-2026-09-23-at-15-04-12-mue250c9.png"
         ]
       },
       "set-30": {
@@ -231,7 +219,6 @@
         "price": 130,
         "image": "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg",
         "description": "חוטי כותנה 100% של חברת dmc הצרפתית, סט גוונים שימושי ויפה לרקמת צמחים, טבע, יום יום ובגדול הכל :)",
-        "units": 30,
         "stock": 1,
         "gallery": [
           "/images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg"
@@ -241,7 +228,6 @@
     "variant_order": [
       "dmc",
       "custom-25",
-      "original-27",
       "set-30"
     ],
     "category": "threads"

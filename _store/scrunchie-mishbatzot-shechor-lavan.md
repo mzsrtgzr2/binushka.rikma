@@ -4,9 +4,9 @@ subtitle: משבצות שחור־לבן עם תחרה לבנה
 image: /images/scrunchies/gallery/scrunchie-mishbatzot-shechor-lavan-1.png
 price: ₪85
 cart_price: 85
-stock: 1
-limited_stock: true
-out_of_stock: false
+stock: 0
+limited_stock: false
+out_of_stock: true
 hide: true
 noindex: true
 sitemap: false

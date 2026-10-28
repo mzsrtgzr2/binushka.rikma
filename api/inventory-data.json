@@ -265,9 +265,9 @@
       "price": 30
     },
     "scrunchie-mishbatzot-shechor-lavan": {
-      "stock": 1,
-      "outOfStock": false,
-      "limitedStock": true,
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false,
       "name": "סקראנצ'י משבצות שחור לבן",
       "price": 85
     },

@@ -18,7 +18,7 @@ variants:
   dmc-flowers:
     name: ערכת רקמה עם 2 דוגמאות
     price: 100
-    stock: 3
+    stock: 2
     image: /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-40-mue2vvu5.jpg
     gallery:
       - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg

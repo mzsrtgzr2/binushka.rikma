@@ -1,0 +1,33 @@
+{
+  "orderId": "a4f45cf3b8772e57226ba76f",
+  "documentId": "1212b3c8-6591-4b01-bfbe-a0c7c2a95ecc",
+  "amount": 440,
+  "purchases": [
+    {
+      "slug": "floss-25-set",
+      "quantity": 1,
+      "variant": "set-30"
+    },
+    {
+      "slug": "prym-marker-purple",
+      "quantity": 1,
+      "variant": "water"
+    },
+    {
+      "slug": "fabrics",
+      "quantity": 2,
+      "variant": "type-2"
+    },
+    {
+      "slug": "stickers",
+      "quantity": 1,
+      "variant": "type-1"
+    },
+    {
+      "slug": "embroidery-books",
+      "quantity": 1,
+      "variant": "type-9"
+    }
+  ],
+  "paidAt": "2026-10-29T14:58:49.815Z"
+}

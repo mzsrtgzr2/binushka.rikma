@@ -30,7 +30,7 @@ variants:
   set-30:
     name: סט 30 גוונים
     price: 130
-    stock: 1
+    stock: 0
     image: /images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-07-31-mue29jiz.jpg
     gallery:
       - /images/store/dmc-floss-set-30/screenshot-2026-09-23-at-15-09-18-mue29jj7.jpg

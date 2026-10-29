@@ -2,7 +2,7 @@
 title: ערכות רקמה מיוחדות
 date: 2026-10-08 05:00:00 +0000
 subtitle: מבית DMC ומבית VOG
-image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui9azth.jpg
+image: /images/store/special-embroidery-kits/screenshot-2026-09-23-at-15-24-40-mvtkze7p.jpg
 price: ₪100 – ₪210
 out_of_stock: false
 limited_stock: true
@@ -10,6 +10,8 @@ hide: false
 order: 9
 preorder: false
 limited_edition: false
+gallery:
+  - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-02-mui9azth.jpg
 category: kits
 categories:
   - kits
@@ -18,7 +20,7 @@ variants:
   dmc-flowers:
     name: ערכת רקמה עם 2 דוגמאות
     price: 100
-    stock: 2
+    stock: 3
     image: /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-40-mue2vvu5.jpg
     gallery:
       - /images/store/dmc-kit-flowers/screenshot-2026-09-23-at-15-24-27-mue2vvu5.jpg

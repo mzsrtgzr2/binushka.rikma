@@ -1,0 +1,12 @@
+{
+  "orderId": "8ad1155605280ce9bf393516",
+  "documentId": "f3ccd0d0-ec99-4111-931a-d148a17cb508",
+  "amount": 350,
+  "purchases": [
+    {
+      "slug": "workshop-private-lesson",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-10-29T15:08:18.791Z"
+}

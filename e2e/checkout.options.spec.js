@@ -168,7 +168,12 @@ test.describe('form options', () => {
     await page.fill('#checkout-city', 'רחובות');
 
     await page.click('.checkout-form__submit');
-    await expect(page.locator('#checkout-form-message')).toBeVisible();
+    /* The checkout form is novalidate and lets the browser report a missing
+     * required field (form.reportValidity), so there is no custom message to
+     * assert here — the gate is the checkbox's validity state. */
+    expect(
+      await page.locator('#checkout-terms').evaluate((el) => el.validity.valueMissing)
+    ).toBe(true);
     await expect(page).toHaveURL(/\/checkout\/?$/);
     expect(posts).toBe(0);
 

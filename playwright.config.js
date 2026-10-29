@@ -1,4 +1,8 @@
+const fs = require('node:fs');
 const { defineConfig } = require('@playwright/test');
+
+/* A system chromium where one exists, playwright's own download otherwise. */
+const CHROMIUM = process.env.CHROMIUM_PATH || (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined);
 
 /* The payment-callback run uses its own port so it can never reuse a server
  * started without the stub (reuseExistingServer would mask the missing env). */
@@ -19,7 +23,7 @@ module.exports = defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     launchOptions: {
-      executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium',
+      ...(CHROMIUM ? { executablePath: CHROMIUM } : {}),
       args: ['--no-sandbox', '--disable-dev-shm-usage'],
     },
   },

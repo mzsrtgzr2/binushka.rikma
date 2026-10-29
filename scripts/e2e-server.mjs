@@ -27,6 +27,84 @@ if (fs.existsSync(ENV_FILE)) {
 process.env.MORNING_ENV = process.env.MORNING_ENV || 'sandbox';
 process.env.SITE_URL = process.env.SITE_URL || 'http://127.0.0.1:' + PORT;
 
+/* E2E_NOTIFY_STUB=1 makes the payment callback testable without Grow, without
+ * a card and without a real mailbox: the real /api/payment-notify handler runs
+ * against a throwaway copy of _store, a fake Morning document lookup, and a
+ * fake SMTP transport that keeps the message in memory. Nothing here is
+ * deployed — this file only ever runs the local test server. */
+const NOTIFY_STUB = process.env.E2E_NOTIFY_STUB === '1';
+let notifyStub = null;
+if (NOTIFY_STUB) {
+  const { createRequire } = await import('node:module');
+  const os = await import('node:os');
+  const require = createRequire(import.meta.url);
+  const notify = require('../lib/routes/payment-notify.js');
+  const admin = require('../lib/routes/admin.js');
+  const { signOrder, newOrderId } = require('../lib/order-token.js');
+
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'binushka-e2e-'));
+  fs.cpSync(path.join(ROOT, '_store'), path.join(root, '_store'), { recursive: true });
+  process.env.ADMIN_LOCAL_ROOT = root;
+
+  /* Dummy mailbox config so the mailer runs its real path; the transport below
+   * never opens a socket, so no mail leaves this machine. */
+  process.env.GMAIL_USER = process.env.GMAIL_USER || 'shop@binushka.test';
+  process.env.GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || 'e2e-not-a-real-password';
+  process.env.ORDER_NOTIFY_EMAIL = process.env.ORDER_NOTIFY_EMAIL || 'orders@binushka.test';
+
+  const mails = [];
+  const orders = new Map();
+
+  /* Document ids are the fixture: e2e-<amount>-<anything>. The amount comes
+   * from the id so a test can prove a mismatched document is refused. */
+  notify.morning.fetchDocument = async (id) => {
+    const match = /^e2e-(\d+)-[A-Za-z0-9]+$/.exec(String(id));
+    if (!match) return null;
+    return { id, amount: Number(match[1]), creationDate: Math.floor(Date.now() / 1000) };
+  };
+  /* The snapshot checkout would have written to Blob; rebuilt from the signed
+   * order so the mail carries the amount the shopper paid. */
+  notify.pendingOrders.read = async (_env, orderId) => {
+    const order = orders.get(orderId);
+    if (!order) return null;
+    return {
+      orderId,
+      createdAt: new Date().toISOString(),
+      customer: {
+        name: 'נועה כהן',
+        email: 'noa@example.com',
+        phone: '0501234567',
+        address: 'אייזנברג 39',
+        city: 'רחובות',
+        zip: '7620000',
+        country: 'IL',
+      },
+      shippingMethod: 'courier',
+      shippingLabel: 'משלוח - שליח עד הבית',
+      lines: order.purchases.map((row) => ({
+        description: row.slug,
+        quantity: row.quantity,
+        price: order.amount / order.purchases.reduce((sum, p) => sum + p.quantity, 0),
+      })),
+      subtotal: order.amount,
+      shipping: 0,
+      discount: 0,
+      total: order.amount,
+      notes: {},
+    };
+  };
+  notify.pendingOrders.remove = async () => ({ ok: true });
+  notify.mailTransport = async () => ({
+    sendMail(message) {
+      mails.push(message);
+    },
+    close() {},
+  });
+
+  notifyStub = { root, admin, signOrder, newOrderId, mails, orders };
+  console.log('payment notify stub on (store copy: ' + root + ')');
+}
+
 /* E2E_ROOT points at a copied function bundle, so a test can run the same
  * artifact Vercel deploys instead of the whole repo. */
 const ROOT_OVERRIDE = process.env.E2E_ROOT ? path.resolve(process.env.E2E_ROOT) : ROOT;
@@ -80,6 +158,50 @@ function readBody(req) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://127.0.0.1:' + PORT);
+  const json = (value, code = 200) => {
+    res.writeHead(code, { 'content-type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify(value));
+  };
+
+  /* Test-only helpers for the payment callback spec: sign an order the way
+   * checkout does, read stock from the throwaway copy, and inspect the mail the
+   * callback produced. They exist only while E2E_NOTIFY_STUB=1. */
+  if (notifyStub && url.pathname === '/__e2e/order') {
+    if (req.method !== 'POST') return json({ error: 'use POST' }, 405);
+    const body = await readBody(req);
+    const purchases = body.purchases || [{ slug: 'fox', quantity: 1 }];
+    const amount = Number(body.amount || 220);
+    try {
+      const orderId = notifyStub.newOrderId();
+      const signedOrder = notifyStub.signOrder(process.env, { orderId, purchases, amount });
+      notifyStub.orders.set(orderId, { purchases, amount });
+      return json({
+        orderId,
+        token: signedOrder,
+        notifyUrl: '/api/payment-notify/?order=' + encodeURIComponent(signedOrder),
+        root: notifyStub.root,
+      });
+    } catch (error) {
+      return json({ error: error.message }, 500);
+    }
+  }
+  if (notifyStub && url.pathname === '/__e2e/stock') {
+    const slug = String(url.searchParams.get('slug') || 'fox');
+    if (!/^[a-z0-9-]+$/.test(slug)) return json({ error: 'bad slug' }, 400);
+    try {
+      const raw = fs.readFileSync(path.join(notifyStub.root, '_store', slug + '.md'), 'utf8');
+      return json({ slug, stock: notifyStub.admin.parseProduct(slug, raw).stock });
+    } catch (error) {
+      return json({ error: error.message }, 404);
+    }
+  }
+  if (notifyStub && url.pathname === '/__e2e/mail') {
+    const last = notifyStub.mails[notifyStub.mails.length - 1] || null;
+    return json({
+      count: notifyStub.mails.length,
+      last: last ? { to: last.to, from: last.from, subject: last.subject, html: last.html, text: last.text } : null,
+    });
+  }
 
   if (url.pathname.startsWith('/api/')) {
     const segments = url.pathname.replace(/^\/api\//, '').replace(/\/+$/, '').split('/').filter(Boolean);

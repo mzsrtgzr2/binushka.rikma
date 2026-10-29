@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node --test",
     "build:catalog": "node scripts/build-catalog.js",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:notify": "E2E_NOTIFY_STUB=1 playwright test e2e/payment-notify.spec.js"
   },
   "engines": {
     "node": ">=18"

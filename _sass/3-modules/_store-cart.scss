@@ -202,6 +202,37 @@
   border-top: 1px solid var(--border-color);
 }
 
+.store-cart__shipping {
+  padding: 12px 18px 6px;
+  border-top: 1px solid var(--border-color);
+}
+
+.store-cart__shipping-text {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.store-cart__shipping-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .09);
+  overflow: hidden;
+}
+
+.store-cart__shipping-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--brand-color);
+  transition: width .3s ease;
+}
+
+.store-cart__shipping.is-qualified .store-cart__shipping-text {
+  color: var(--brand-color);
+}
+
 .store-cart__total {
   margin: 0 0 12px;
   font-size: 18px;

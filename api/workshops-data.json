@@ -11,7 +11,7 @@
     "price": 500,
     "kind": "workshop",
     "shipping": false,
-    "stock": 4
+    "stock": 3
   },
   "workshop-monthly-meeting": {
     "name": "מפגש רקמה ברחובות — שלישי בבוקר אחת לחודש",

@@ -26,10 +26,13 @@
           "preorder": true
         },
         "380": {
-          "stock": 1
+          "stock": 0
         },
         "type-6": {
           "stock": 3
+        },
+        "plantladyembroidery300": {
+          "stock": 1
         },
         "paintwiththread": {
           "stock": 1
@@ -47,9 +50,6 @@
           "stock": 1
         },
         "type-9": {
-          "stock": 1
-        },
-        "plantladyembroidery300": {
           "stock": 1
         }
       }

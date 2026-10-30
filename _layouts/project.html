@@ -19,6 +19,13 @@ layout: default
 {%- if page.category == 'mothers' and spots != nil and spots > 4 -%}
   {%- assign hide_remaining_spots = true -%}
 {%- endif -%}
+{%- comment -%}
+  Owner rule (2026-10-30): whenever fewer than 4 places are left, every
+  workshop page shows how many remain — this overrides a page/admin hide flag.
+{%- endcomment -%}
+{%- if spots != nil and spots > 0 and spots < 4 -%}
+  {%- assign hide_remaining_spots = false -%}
+{%- endif -%}
 {%- unless page.price_per == 'workshop' or hide_remaining_spots or page.category == 'mothers' -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
 {%- endunless -%}

@@ -4,9 +4,9 @@ subtitle: "נמרים וטיגריסים על מג'נטה עם תחרה ורוד
 image: /images/scrunchies/gallery/scrunchie-nimrim-adilit-1.png
 price: ₪85
 cart_price: 85
-stock: 1
+stock: 0
 limited_stock: true
-out_of_stock: false
+out_of_stock: true
 hide: true
 noindex: true
 sitemap: false

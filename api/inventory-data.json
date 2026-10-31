@@ -286,8 +286,8 @@
       "price": 30
     },
     "scrunchie-nimrim-adilit": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י נמרים אצילית",
       "price": 85

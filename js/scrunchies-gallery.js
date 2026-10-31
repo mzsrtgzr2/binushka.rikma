@@ -100,6 +100,9 @@
       var pb = Number(b.getAttribute('data-price')) || 0;
       if (mode === 'price-asc' && pa !== pb) return pa - pb;
       if (mode === 'price-desc' && pa !== pb) return pb - pa;
+      var aa = Number(a.getAttribute('data-available'));
+      var ab = Number(b.getAttribute('data-available'));
+      if (aa !== ab) return ab - aa;
       var sa = Number(a.getAttribute('data-size-rank')) || 9;
       var sb = Number(b.getAttribute('data-size-rank')) || 9;
       if (sa !== sb) return sa - sb;

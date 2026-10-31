@@ -58,6 +58,12 @@ layout: default
   {% endif %}
 {% endfor %}
 {% assign gallery_items = g_regular | concat: g_large | concat: g_fancy | concat: g_other %}
+{% assign g_available = '' | split: '' %}
+{% assign g_soldout = '' | split: '' %}
+{% for item in gallery_items %}
+  {% if item.out_of_stock or item.stock == 0 %}{% assign g_soldout = g_soldout | push: item %}{% else %}{% assign g_available = g_available | push: item %}{% endif %}
+{% endfor %}
+{% assign gallery_items = g_available | concat: g_soldout %}
 {% if site.data.store-cart.enabled and gallery_items.size > 0 %}
 <div class="container scrunchies-variants-section animate" id="scrunchies-shop">
   <p class="scrunchies-variants-section__eyebrow">לקנות דרך האתר</p>
@@ -148,6 +154,7 @@ layout: default
           data-gallery-color="{{ item.scrunchie_color }}"
           data-gallery-country="{{ item.fabric_country }}"
           data-price="{{ item_price }}"
+          data-available="{% if item.out_of_stock or item.stock == 0 %}0{% else %}1{% endif %}"
           data-order="{{ forloop.index }}">
           {% assign item_images = '' | split: '' %}
           {% if item.image %}{% assign item_images = item_images | push: item.image %}{% endif %}

@@ -292,6 +292,13 @@
       "name": "סקראנצ'י נמרים אצילית",
       "price": 85
     },
+    "scrunchie-prachim-adumim": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פרחים אדום",
+      "price": 45
+    },
     "scrunchie-prachim-yapaniyim": {
       "stock": 2,
       "outOfStock": false,

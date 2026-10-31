@@ -4,9 +4,9 @@ subtitle: "פסים באלכסון בגווני ורוד, חום ושמנת"
 image: /images/scrunchies/gallery/scrunchie-psim-vrod-chum-1.png
 price: ₪30
 cart_price: 30
-stock: 1
+stock: 0
 limited_stock: true
-out_of_stock: false
+out_of_stock: true
 hide: true
 noindex: true
 sitemap: false

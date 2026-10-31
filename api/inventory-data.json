@@ -307,8 +307,8 @@
       "price": 45
     },
     "scrunchie-psim-vrod-chum": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י פסים ורוד חום",
       "price": 30
@@ -335,8 +335,8 @@
       "price": 30
     },
     "scrunchie-yarok-amok-large": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י ירוק עמוק",
       "price": 45

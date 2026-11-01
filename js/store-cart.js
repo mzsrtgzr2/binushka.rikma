@@ -899,6 +899,68 @@
     checkout: document.getElementById('store-cart-checkout'),
   };
 
+  var shippingEl = document.getElementById('store-cart-shipping');
+  var shippingConfig = {};
+  if (shippingEl) {
+    try {
+      shippingConfig = JSON.parse(shippingEl.textContent) || {};
+    } catch (e) {
+      shippingConfig = {};
+    }
+  }
+
+  var progress = {
+    wrap: document.getElementById('store-cart-progress'),
+    text: document.getElementById('store-cart-progress-text'),
+    bar: document.getElementById('store-cart-progress-bar'),
+    fill: document.getElementById('store-cart-progress-fill'),
+  };
+
+  function ils(n) {
+    return '₪' + Math.round(Number(n) || 0);
+  }
+
+  /* Workshops are not shipped, so only physical lines count toward free shipping. */
+  function shippableSubtotal(cart) {
+    return cartItems(cart).reduce(function (sum, item) {
+      if (item.requiresShipping === false) return sum;
+      return sum + item.price * item.quantity;
+    }, 0);
+  }
+
+  function cartHasShippable(cart) {
+    return cartItems(cart).some(function (item) {
+      return item.requiresShipping !== false;
+    });
+  }
+
+  function renderFreeShipping(cart) {
+    if (!progress.wrap) return;
+    var freeOver = Number(shippingConfig.freeOver) || 0;
+    var hasItems = cartItems(cart).length > 0;
+    if (!freeOver || !hasItems || !cartHasShippable(cart)) {
+      progress.wrap.hidden = true;
+      return;
+    }
+    var subtotal = shippableSubtotal(cart);
+    var gap = Math.max(0, freeOver - subtotal);
+    var pct = Math.max(0, Math.min(100, Math.round((subtotal / freeOver) * 100)));
+
+    progress.wrap.hidden = false;
+    progress.wrap.classList.toggle('is-qualified', gap === 0);
+    if (progress.fill) progress.fill.style.width = pct + '%';
+    if (progress.bar) progress.bar.setAttribute('aria-valuenow', String(pct));
+    if (progress.text) {
+      if (gap > 0) {
+        progress.text.innerHTML =
+          '<strong>' + ils(subtotal) + '</strong> מתוך ' + ils(freeOver) +
+          ' למשלוח חינם — עוד <strong>' + ils(gap) + '</strong>';
+      } else {
+        progress.text.innerHTML = '<strong>יש לך משלוח חינם 🎉</strong>';
+      }
+    }
+  }
+
   var headerHost = els.root && els.root.parentElement;
   var headerNextSibling = els.root && els.root.nextSibling;
 
@@ -960,6 +1022,7 @@
       els.checkout.removeAttribute('aria-disabled');
     }
     els.lines.innerHTML = '';
+    renderFreeShipping(cart);
 
     cartItems(cart).forEach(function (item) {
       var li = document.createElement('li');

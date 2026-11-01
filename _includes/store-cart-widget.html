@@ -20,6 +20,21 @@
     </div>
     <ul class="store-cart__lines" id="store-cart-lines"></ul>
     <p class="store-cart__empty" id="store-cart-empty">הסל ריק</p>
+
+    <div class="store-cart__shipping" id="store-cart-progress" hidden>
+      <p class="store-cart__shipping-text" id="store-cart-progress-text"></p>
+      <div
+        class="store-cart__shipping-bar"
+        id="store-cart-progress-bar"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+        aria-label="התקדמות למשלוח חינם"
+      >
+        <span class="store-cart__shipping-fill" id="store-cart-progress-fill"></span>
+      </div>
+    </div>
     <div class="store-cart__footer">
       <p class="store-cart__total"><span>סה״כ:</span> <strong id="store-cart-total">₪0</strong></p>
       <a class="button button--primary store-cart__checkout" id="store-cart-checkout" href="{{ '/checkout/' | relative_url }}" data-analytics="cart_checkout">

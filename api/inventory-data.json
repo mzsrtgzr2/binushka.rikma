@@ -451,9 +451,9 @@
     "workshop-mothers-11-11-2": {
       "name": "בוקר פינוק לאמהות — ב11.11 עם דינה אלטשולר ויסוצקי",
       "price": 330,
-      "stock": 4,
+      "stock": 3,
       "outOfStock": false,
-      "limitedStock": false
+      "limitedStock": true
     },
     "workshop-mothers-7-12": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה7 בדצמבר",

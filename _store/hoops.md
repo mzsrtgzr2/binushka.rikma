@@ -58,6 +58,19 @@ variants:
       - /images/store/hoops/screenshot-2026-09-24-at-23-01-08-mufyyrij.jpg
       - /images/store/hoops/screenshot-2026-09-24-at-23-01-17-mufyyrij.jpg
     description: "גדול ויפה, נהניתי מאוד לרקום בו ולתת במתנה כשהתארחנו בפסח.\nאת הרקמה ראיתי באתר של dmc, כוס לא סימטרית עם פרחים מיוחדים, התאימה בול לחישוק המתומן.\nרוחב 18 ס״מ\nאורך 26 ס״מ"
+  house-flex:
+    name: חישוק בצורת בית — גמיש דמוי עץ
+    price: 40
+    stock: 2
+    image: /images/store/hoops/house-flex-front.jpg
+    gallery:
+      - /images/store/hoops/house-flex-embroidered.jpg
+      - /images/store/hoops/house-flex-side.jpg
+      - /images/store/hoops/house-flex-detail.jpg
+      - /images/store/hoops/house-flex-clasp.jpg
+      - /images/store/hoops/house-flex-hinge.jpg
+      - /images/store/hoops/house-flex-fabric.jpg
+    description: "חישוק בצורת בית, גמיש עם מראה של עץ — קל ונוח למותח עליו בד ולעבוד איתו ביד.\nגודל 18.5X14.5 ס״מ.\nבגלל הגמישות שלו הוא גם נוח לתלייה על הקיר אחרי שסיימת.\nיש 2 יחידות במלאי."
 ---
 
 חישוקי רקמה מעץ אשוח של VOG, בשבעה גדלים וצורות.
@@ -66,4 +79,5 @@ variants:
 קוטר 19 ס״מ וקוטר 22 ס״מ — לפרויקטים רחבי ידיים.
 אובאלי 16×10 ס״מ ואובאלי 21×13 ס״מ — לפרויקטים מלבניים.
 חישוק מתומן — לצורה פחות שגרתית.
+חישוק בצורת בית — גמיש דמוי עץ, 18.5×14.5 ס״מ.
 כל החישוקים במחיר ₪35–₪45 לפי הגודל.

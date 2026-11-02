@@ -55,10 +55,10 @@ variants:
   prym-pinking:
     name: מספרי זיג זג Prym 22 ס״מ
     price: 140
-    image: /images/store/scissors/prym-pinking-22cm.jpg
+    image: /images/store/scissors/prym-pinking-cut.jpg
     gallery:
+      - /images/store/scissors/prym-pinking-22cm.jpg
       - /images/store/scissors/prym-pinking-open.jpg
-      - /images/store/scissors/prym-pinking-cut.jpg
       - /images/store/scissors/prym-pinking-pack.jpg
     description: "מספרי זיג זג כלליות של Prym, באורך 22 ס״מ.\nהלהבים המשוננים חותכים בד בגימור דקורטיבי ומונעים התפרמות של קצוות הבד — מושלמות לגימור בדים, לבד, נייר ועור דק.\nלהבי Stainless Steel וידיות אפורות נוחות לאחיזה."
 ---

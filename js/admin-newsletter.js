@@ -17,6 +17,9 @@
   var subscribersFilterEl = document.getElementById('admin-subscribers-filter');
   var subscribersListEl = document.getElementById('admin-subscribers-list');
   var subscribersCopyBtn = document.getElementById('admin-subscribers-copy');
+  var waitlistsSection = document.getElementById('admin-waitlists');
+  var waitlistsSummaryEl = document.getElementById('admin-waitlists-summary');
+  var waitlistsGroupsEl = document.getElementById('admin-waitlists-groups');
   var newBtn = document.getElementById('admin-new');
   var logoutBtn = document.getElementById('admin-logout');
   var editor = document.getElementById('admin-editor');
@@ -486,10 +489,93 @@
 
      The list itself, not just how many are on it. It is read from the same
      private blob store the send uses, so this is what an issue would reach. */
+  var WAITLIST_KIND_LABELS = {
+    workshop: 'רשימת המתנה לסדנה',
+    restock: 'רשימת המתנה לחזרה למלאי',
+    general: 'רשימת המתנה'
+  };
+
+  function waitlistKindLabel(kind) {
+    return WAITLIST_KIND_LABELS[kind] || WAITLIST_KIND_LABELS.general;
+  }
+
+  function waitlistName(item) {
+    var waitlist = item.waitlist || {};
+    return waitlist.title || waitlist.slug || '';
+  }
+
+  /* Grouped by the workshop/product the visitor was waiting for. A flat
+     newsletter list hides that; this is the answer to "who is waiting for
+     which workshop". */
+  function renderWaitlists() {
+    if (!waitlistsSection) return;
+
+    var groups = [];
+    var byKey = {};
+
+    subscribers.forEach(function (item) {
+      var waitlist = item.waitlist;
+      if (!waitlist) return;
+      var key = (waitlist.kind || 'general') + '::' + (waitlist.slug || waitlist.title || '');
+      if (!byKey[key]) {
+        byKey[key] = {
+          key: key,
+          kind: waitlist.kind || 'general',
+          name: waitlistName(item),
+          items: []
+        };
+        groups.push(byKey[key]);
+      }
+      byKey[key].items.push(item);
+    });
+
+    if (!groups.length) {
+      waitlistsSection.hidden = true;
+      waitlistsGroupsEl.innerHTML = '';
+      return;
+    }
+
+    groups.sort(function (a, b) {
+      return b.items.length - a.items.length || String(a.name).localeCompare(String(b.name), 'he');
+    });
+
+    waitlistsSection.hidden = false;
+    waitlistsSummaryEl.textContent =
+      groups.length === 1 ? 'רשימת המתנה אחת עם נרשמות.' : groups.length + ' רשימות המתנה.';
+
+    waitlistsGroupsEl.innerHTML = groups.map(function (group) {
+      var rows = group.items.map(function (item) {
+        return (
+          '<li class="admin-waitlist__item">' +
+          '<span class="admin-subscribers__email">' + escapeHtml(item.email) + '</span>' +
+          (item.subscribedAt
+            ? '<span class="admin-subscribers__date">' + escapeHtml(formatDate(item.subscribedAt)) + '</span>'
+            : '') +
+          '</li>'
+        );
+      }).join('');
+
+      return (
+        '<div class="admin-waitlist">' +
+        '<div class="admin-waitlist__head">' +
+        '<span class="admin-waitlist__title">' + escapeHtml(group.name || 'ללא שם') + '</span>' +
+        '<span class="admin-waitlist__count">' + group.items.length + '</span>' +
+        '</div>' +
+        '<p class="admin-waitlist__meta">' + escapeHtml(waitlistKindLabel(group.kind)) + '</p>' +
+        '<ul class="admin-waitlist__list">' + rows + '</ul>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
   function subscriberRow(item) {
+    var waitlist = item.waitlist;
     return (
       '<li class="admin-subscribers__item">' +
       '<span class="admin-subscribers__email">' + escapeHtml(item.email) + '</span>' +
+      (waitlist
+        ? '<span class="admin-subscribers__tag">' + escapeHtml(waitlistName(item) || waitlistKindLabel(waitlist.kind)) + '</span>'
+        : '') +
       (item.subscribedAt
         ? '<span class="admin-subscribers__date">' + escapeHtml(formatDate(item.subscribedAt)) + '</span>'
         : '') +
@@ -500,6 +586,7 @@
   function renderSubscribers() {
     if (!subscribersSection) return;
 
+    renderWaitlists();
     subscribersSection.hidden = false;
     var query = subscriberFilter;
     var visible = subscribers.filter(function (item) {

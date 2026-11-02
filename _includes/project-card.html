@@ -55,12 +55,12 @@
       {% if project.registration_not_open %}
         {% if site.data.settings.newsletter.enabled %}
         <div class="project__footer">
-          {% include newsletter-notify-button.html intent="opening" source="workshop_opening" class="project__add" analytics="newsletter_workshop_opening" %}
+          {% include newsletter-notify-button.html intent="opening" source="workshop_opening" class="project__add" analytics="newsletter_workshop_opening" waitlist_kind="workshop" waitlist_slug=project.slug waitlist_title=project.title %}
         </div>
         {% endif %}
       {% elsif sold_out %}
         <div class="project__footer">
-          {% include workshop-waitlist-button.html title=project.title class="project__add" source="workshop_card" %}
+          {% include workshop-waitlist-button.html title=project.title slug=project.slug class="project__add" source="workshop_card" %}
         </div>
       {% elsif booking_in_cart or project.form_url %}
         <div class="project__footer">

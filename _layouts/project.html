@@ -131,7 +131,7 @@ layout: default
       <p>פרטי הסדנה יפורסמו בקרוב.</p>
       {% if site.data.settings.newsletter.enabled %}
       <div class="workshop-booking workshop-booking--waitlist">
-        {% include newsletter-notify-button.html intent="opening" source="workshop_opening" class="section-button" analytics="newsletter_workshop_opening" %}
+        {% include newsletter-notify-button.html intent="opening" source="workshop_opening" class="section-button" analytics="newsletter_workshop_opening" waitlist_kind="workshop" waitlist_slug=page.slug waitlist_title=page.title %}
         <p class="workshop-booking__note">
           כשההרשמה תיפתח אכתוב על זה בניוזלטר, יחד עם סדנאות ומוצרים נוספים. מייל אחד מדי פעם, בלי להציף.
         </p>

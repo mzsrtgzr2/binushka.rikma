@@ -566,6 +566,78 @@
   white-space: nowrap;
 }
 
+.admin-subscribers__tag {
+  flex: 0 1 auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--background-alt-color, #f4f1ea);
+  color: var(--text-color, #1f1f1f);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.admin-waitlists__groups {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.admin-waitlist {
+  border: 1px solid var(--border-color, #ececf0);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.admin-waitlist__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-waitlist__title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.admin-waitlist__count {
+  min-width: 24px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--primary-color, #e8c97a);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.admin-waitlist__meta {
+  margin: 2px 0 6px;
+  color: var(--text-alt-color, #667085);
+  font-size: 13px;
+}
+
+.admin-waitlist__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.admin-waitlist__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-color, #ececf0);
+  font-size: 14px;
+}
+
+.admin-waitlist__item:last-child {
+  border-bottom: 0;
+}
+
 .admin-field-error {
   margin: 6px 0 0;
   font-size: 13px;

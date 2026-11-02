@@ -6,6 +6,9 @@
   include.class   — extra button classes
   include.analytics — data-analytics label
   include.hide    — "1" hides the button until live stock sells out
+  include.waitlist_kind  — workshop | restock (recorded with the signup)
+  include.waitlist_slug  — which workshop / product the waitlist is for
+  include.waitlist_title — human-readable name shown in the backoffice
 {%- endcomment -%}
 {% assign newsletter = site.data.settings.newsletter %}
 {% if newsletter.enabled %}
@@ -18,6 +21,9 @@
         data-newsletter-open
         data-newsletter-intent="{{ intent }}"
         data-newsletter-source="{{ include.source | default: intent }}"
+        {% if include.waitlist_kind %}data-newsletter-waitlist-kind="{{ include.waitlist_kind }}"{% endif %}
+        {% if include.waitlist_slug %}data-newsletter-waitlist-slug="{{ include.waitlist_slug }}"{% endif %}
+        {% if include.waitlist_title %}data-newsletter-waitlist-title="{{ include.waitlist_title | escape }}"{% endif %}
         data-analytics="{{ include.analytics | default: 'newsletter_notify' }}"
         {% if include.hide == '1' %}hidden{% endif %}>
   {{ pack.button | default: newsletter.button }}

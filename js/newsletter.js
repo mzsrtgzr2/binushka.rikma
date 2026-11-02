@@ -61,12 +61,23 @@
       return form.getAttribute('data-newsletter-source') || options.source || 'website';
     }
 
+    // Set when the panel was opened from a waitlist button, so the signup is
+    // still a newsletter subscriber but the backoffice knows which list.
+    function currentWaitlist() {
+      var kind = form.getAttribute('data-newsletter-waitlist-kind') || '';
+      var slug = form.getAttribute('data-newsletter-waitlist-slug') || '';
+      var title = form.getAttribute('data-newsletter-waitlist-title') || '';
+      if (!kind && !slug && !title) return null;
+      return { kind: kind || 'general', slug: slug || '', title: title || '' };
+    }
+
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       if (busy || !emailInput) return;
 
       var email = emailInput.value.trim();
       var source = currentSource();
+      var waitlist = currentWaitlist();
       if (!email) {
         setStatus(status, text.invalidEmail, 'error');
         if (options.trackName) {
@@ -89,6 +100,7 @@
       var payload = { email: email };
       if (honeypot) payload.website = honeypot.value;
       if (source) payload.source = source;
+      if (waitlist) payload.waitlist = waitlist;
 
       submitEmail(options.url, payload)
         .then(function (result) {
@@ -193,11 +205,18 @@
     var form = modal.querySelector('[data-newsletter-form]');
     var lastTrigger = null;
 
-    function applyIntent(intent, source) {
+    function applyIntent(intent, source, trigger) {
       var pack = intents[intent] || {};
       if (titleEl) titleEl.textContent = pack.title || copy.title || '';
       if (descEl) descEl.textContent = pack.description || copy.description || '';
-      if (form) form.setAttribute('data-newsletter-source', source || intent || 'modal');
+      if (form) {
+        form.setAttribute('data-newsletter-source', source || intent || 'modal');
+        ['kind', 'slug', 'title'].forEach(function (name) {
+          var value = trigger && trigger.getAttribute('data-newsletter-waitlist-' + name);
+          if (value) form.setAttribute('data-newsletter-waitlist-' + name, value);
+          else form.removeAttribute('data-newsletter-waitlist-' + name);
+        });
+      }
       var status = form && form.querySelector('[data-newsletter-status]');
       setStatus(status, '', null);
     }
@@ -206,7 +225,7 @@
       lastTrigger = trigger || null;
       var intent = (trigger && trigger.getAttribute('data-newsletter-intent')) || '';
       var source = (trigger && trigger.getAttribute('data-newsletter-source')) || 'modal';
-      applyIntent(intent, source);
+      applyIntent(intent, source, trigger);
       modal.hidden = false;
       document.body.classList.add('newsletter-modal-open');
       var email = form && form.querySelector('input[type="email"]');

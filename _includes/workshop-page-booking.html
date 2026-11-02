@@ -20,7 +20,7 @@
     <div class="col-12">
       {% if sold_out %}
       <div class="workshop-booking workshop-booking--waitlist">
-        {% include workshop-waitlist-button.html title=page.title class="section-button" source="workshop_page" %}
+        {% include workshop-waitlist-button.html title=page.title slug=page.slug class="section-button" source="workshop_page" %}
         <p class="workshop-booking__note">
           {% if site.data.settings.newsletter.enabled %}
           הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.
@@ -32,7 +32,7 @@
       {% elsif booking_in_cart %}
       {% if site.data.settings.newsletter.enabled %}
       <div class="workshop-booking workshop-booking--waitlist" data-newsletter-notify-slot="workshop" hidden>
-        {% include workshop-waitlist-button.html title=page.title class="section-button" source="workshop_page" %}
+        {% include workshop-waitlist-button.html title=page.title slug=page.slug class="section-button" source="workshop_page" %}
         <p class="workshop-booking__note">
           הסדנה מלאה כרגע. אפשר להירשם לניוזלטר ואעדכן כשנפתח מקום — בלי ספאם, רק כשיש מה לספר.
         </p>

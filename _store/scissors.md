@@ -3,7 +3,7 @@ title: מספרי רקמה איכותיות
 date: 2026-09-23 19:39:00 +0000
 subtitle: "של dmc, singer ועוד"
 image: /images/store/scissors/screenshot-2026-10-04-at-15-03-06-mutrvlbo.jpg
-price: ₪70 – ₪110
+price: ₪70 – ₪140
 out_of_stock: false
 limited_stock: true
 hide: false
@@ -52,7 +52,16 @@ variants:
     stock: 0
     image: /images/store/scissors/screenshot-2026-09-24-at-15-32-45-mufij4sz.jpg
     description: "איך אפשר שלא להתאהב בך\nגודל 10.1 cm"
+  prym-pinking:
+    name: מספרי זיג זג Prym 22 ס״מ
+    price: 140
+    image: /images/store/scissors/prym-pinking-22cm.jpg
+    gallery:
+      - /images/store/scissors/prym-pinking-open.jpg
+      - /images/store/scissors/prym-pinking-cut.jpg
+      - /images/store/scissors/prym-pinking-pack.jpg
+    description: "מספרי זיג זג כלליות של Prym, באורך 22 ס״מ.\nהלהבים המשוננים חותכים בד בגימור דקורטיבי ומונעים התפרמות של קצוות הבד — מושלמות לגימור בדים, לבד, נייר ועור דק.\nלהבי Stainless Steel וידיות אפורות נוחות לאחיזה."
 ---
 
-מספרי רקמה של DMC, Singer ו-Victorinox — עגולות 9 ס״מ, מספרי ציפור, והזוג המלכותי.
+מספרי רקמה של DMC, Singer, Victorinox ו-Prym — עגולות 9 ס״מ, מספרי ציפור, הזוג המלכותי ומספרי זיג זג 22 ס״מ.
 גודל נוח לעבודה עדינה, עם חוד שמגיע עד החוט בלי לתפוס את הבד.

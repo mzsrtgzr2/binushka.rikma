@@ -160,16 +160,24 @@ layout: default
 
   {% include workshop-page-booking.html %}
 
-  {% if page.gallery %}
+  {%- comment -%}
+    Mothers courses share one photo gallery. A new mothers workshop gets it
+    automatically, so no page ships without a gallery.
+  {%- endcomment -%}
+  {%- assign project_gallery = page.gallery -%}
+  {%- if project_gallery == nil and page.category == 'mothers' -%}
+    {%- assign project_gallery = site.data.workshop_defaults.mothers.gallery -%}
+  {%- endif -%}
+  {% if project_gallery %}
   <div class="project-gallery animate">
     {% if page.image %}
-      {% unless page.gallery contains page.image %}
+      {% unless project_gallery contains page.image %}
       <div class="project-gallery__item">
         <img class="lazy" data-src="{{site.baseurl}}{{page.image}}" alt="{{page.title}}">
       </div>
       {% endunless %}
     {% endif %}
-    {% for gimg in page.gallery %}
+    {% for gimg in project_gallery %}
     <div class="project-gallery__item">
       <img class="lazy" data-src="{{site.baseurl}}{{gimg}}" alt="{{page.title}}">
     </div>

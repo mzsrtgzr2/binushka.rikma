@@ -503,6 +503,13 @@
       "stock": 3,
       "outOfStock": false,
       "limitedStock": true
+    },
+    "workshop-mothers-feb-26": {
+      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה1 בפברואר",
+      "price": 1090,
+      "stock": 8,
+      "outOfStock": false,
+      "limitedStock": false
     }
   }
 }

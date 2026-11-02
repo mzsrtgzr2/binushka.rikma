@@ -44,7 +44,7 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 4,
+    "stock": 3,
     "variants": {
       "one": {
         "name": "משתתפת אחת",
@@ -109,6 +109,13 @@
     "kind": "workshop",
     "shipping": false,
     "stock": 0
+  },
+  "workshop-mothers-feb-26": {
+    "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה1 בפברואר",
+    "price": 1090,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 8
   },
   "workshop-private-lesson": {
     "name": "שיעור רקמה פרטי — בזמן שמתאים לשתינו",

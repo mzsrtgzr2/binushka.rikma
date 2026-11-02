@@ -77,6 +77,19 @@ test('obvious non-addresses are rejected', () => {
   });
 });
 
+test('waitlist metadata is trimmed and labelled', () => {
+  assert.deepEqual(
+    store.normalizeWaitlist({ kind: ' workshop ', slug: ' mothers-1-6 ', title: ' רקמה ' }),
+    { kind: 'workshop', slug: 'mothers-1-6', title: 'רקמה' }
+  );
+  assert.deepEqual(
+    store.normalizeWaitlist({ title: 'רק כותרת' }),
+    { kind: 'general', slug: null, title: 'רק כותרת' }
+  );
+  assert.equal(store.normalizeWaitlist(null), null);
+  assert.equal(store.normalizeWaitlist({}), null);
+});
+
 test('the storage path is derived from the address and hides it', () => {
   const path = store.pathFor('someone@example.com');
 

@@ -499,9 +499,14 @@
     return WAITLIST_KIND_LABELS[kind] || WAITLIST_KIND_LABELS.general;
   }
 
-  function waitlistName(item) {
-    var waitlist = item.waitlist || {};
+  function waitlistName(waitlist) {
+    waitlist = waitlist || {};
     return waitlist.title || waitlist.slug || '';
+  }
+
+  function itemWaitlists(item) {
+    if (Array.isArray(item.waitlists)) return item.waitlists;
+    return item.waitlist ? [item.waitlist] : [];
   }
 
   /* Grouped by the workshop/product the visitor was waiting for. A flat
@@ -514,19 +519,20 @@
     var byKey = {};
 
     subscribers.forEach(function (item) {
-      var waitlist = item.waitlist;
-      if (!waitlist) return;
-      var key = (waitlist.kind || 'general') + '::' + (waitlist.slug || waitlist.title || '');
-      if (!byKey[key]) {
-        byKey[key] = {
-          key: key,
-          kind: waitlist.kind || 'general',
-          name: waitlistName(item),
-          items: []
-        };
-        groups.push(byKey[key]);
-      }
-      byKey[key].items.push(item);
+      itemWaitlists(item).forEach(function (waitlist) {
+        if (!waitlist) return;
+        var key = (waitlist.kind || 'general') + '::' + (waitlist.slug || waitlist.title || '');
+        if (!byKey[key]) {
+          byKey[key] = {
+            key: key,
+            kind: waitlist.kind || 'general',
+            name: waitlistName(waitlist),
+            items: []
+          };
+          groups.push(byKey[key]);
+        }
+        byKey[key].items.push(item);
+      });
     });
 
     if (!groups.length) {
@@ -569,12 +575,14 @@
   }
 
   function subscriberRow(item) {
-    var waitlist = item.waitlist;
+    var lists = itemWaitlists(item);
+    var waitlist = lists[0];
+    var extra = lists.length > 1 ? ' +' + (lists.length - 1) : '';
     return (
       '<li class="admin-subscribers__item">' +
       '<span class="admin-subscribers__email">' + escapeHtml(item.email) + '</span>' +
       (waitlist
-        ? '<span class="admin-subscribers__tag">' + escapeHtml(waitlistName(item) || waitlistKindLabel(waitlist.kind)) + '</span>'
+        ? '<span class="admin-subscribers__tag">' + escapeHtml((waitlistName(waitlist) || waitlistKindLabel(waitlist.kind)) + extra) + '</span>'
         : '') +
       (item.subscribedAt
         ? '<span class="admin-subscribers__date">' + escapeHtml(formatDate(item.subscribedAt)) + '</span>'

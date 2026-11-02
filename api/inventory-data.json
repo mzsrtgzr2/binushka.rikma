@@ -490,6 +490,13 @@
       "outOfStock": false,
       "limitedStock": false
     },
+    "workshop-mothers-feb-26": {
+      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה1 בפברואר",
+      "price": 1090,
+      "stock": 8,
+      "outOfStock": false,
+      "limitedStock": false
+    },
     "workshop-private-lesson": {
       "name": "שיעור רקמה פרטי — בזמן שמתאים לשתינו",
       "price": 350,
@@ -503,13 +510,6 @@
       "stock": 3,
       "outOfStock": false,
       "limitedStock": true
-    },
-    "workshop-mothers-feb-26": {
-      "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה1 בפברואר",
-      "price": 1090,
-      "stock": 8,
-      "outOfStock": false,
-      "limitedStock": false
     }
   }
 }

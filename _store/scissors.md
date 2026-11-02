@@ -55,6 +55,8 @@ variants:
   prym-pinking:
     name: מספרי זיג זג Prym 22 ס״מ
     price: 140
+    stock: 1
+    preorder: true
     image: /images/store/scissors/prym-pinking-cut.jpg
     gallery:
       - /images/store/scissors/prym-pinking-22cm.jpg

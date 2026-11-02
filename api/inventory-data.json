@@ -252,7 +252,8 @@
           "stock": 0
         },
         "prym-pinking": {
-          "stock": null
+          "stock": 1,
+          "preorder": true
         }
       }
     },

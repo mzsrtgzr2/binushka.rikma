@@ -546,6 +546,8 @@
         "price": 140,
         "image": "/images/store/scissors/prym-pinking-cut.jpg",
         "description": "מספרי זיג זג כלליות של Prym, באורך 22 ס״מ.\nהלהבים המשוננים חותכים בד בגימור דקורטיבי ומונעים התפרמות של קצוות הבד — מושלמות לגימור בדים, לבד, נייר ועור דק.\nלהבי Stainless Steel וידיות אפורות נוחות לאחיזה.",
+        "stock": 1,
+        "preorder": true,
         "gallery": [
           "/images/store/scissors/prym-pinking-22cm.jpg",
           "/images/store/scissors/prym-pinking-open.jpg",

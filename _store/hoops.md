@@ -62,14 +62,14 @@ variants:
     name: חישוק בצורת בית — גמיש דמוי עץ
     price: 40
     stock: 2
-    image: /images/store/hoops/house-flex-front.jpg
+    image: /images/store/hoops/house-flex-fabric.jpg
     gallery:
+      - /images/store/hoops/house-flex-front.jpg
       - /images/store/hoops/house-flex-embroidered.jpg
       - /images/store/hoops/house-flex-side.jpg
       - /images/store/hoops/house-flex-detail.jpg
       - /images/store/hoops/house-flex-clasp.jpg
       - /images/store/hoops/house-flex-hinge.jpg
-      - /images/store/hoops/house-flex-fabric.jpg
     description: "חישוק בצורת בית, גמיש עם מראה של עץ — קל ונוח למותח עליו בד ולעבוד איתו ביד.\nגודל 18.5X14.5 ס״מ.\nבגלל הגמישות שלו הוא גם נוח לתלייה על הקיר אחרי שסיימת.\nיש 2 יחידות במלאי."
 ---
 

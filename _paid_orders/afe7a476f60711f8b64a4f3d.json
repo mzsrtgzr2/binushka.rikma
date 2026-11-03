@@ -1,0 +1,16 @@
+{
+  "orderId": "afe7a476f60711f8b64a4f3d",
+  "documentId": "e50c7cfc-762c-4f74-a1bb-3dad38d71f90",
+  "amount": 530,
+  "purchases": [
+    {
+      "slug": "workshop-hosting-04-12",
+      "quantity": 1
+    },
+    {
+      "slug": "scrunchie-tarnegolim",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-03T16:19:38.108Z"
+}

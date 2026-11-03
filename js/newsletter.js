@@ -85,11 +85,24 @@
       if (phoneInput) phoneInput.required = active;
     }
 
+    /* Mirrors normalizePhone in lib/newsletter/subscribers.mjs: Israeli
+       mobile (05…) or landline (02/03/04/08/09…), in local form. */
     function validPhone(value) {
-      var digits = String(value || '').replace(/[^\d]/g, '');
-      if (digits.indexOf('972') === 0) digits = digits.slice(3);
-      else if (digits.charAt(0) === '0') digits = digits.slice(1);
-      return digits.length >= 8 && digits.length <= 11;
+      var digits = String(value || '').replace(/[^0-9]/g, '');
+      if (digits.indexOf('972') === 0) digits = '0' + digits.slice(3);
+      if (digits.charAt(0) !== '0') digits = '0' + digits;
+      return /^0[2-489][0-9]{7}$/.test(digits) || /^05[0-9]{8}$/.test(digits);
+    }
+
+    /* A waitlist name must be callable: first name and family name. */
+    function validName(value) {
+      var words = String(value || '')
+        .trim()
+        .split(/\s+/)
+        .filter(function (word) {
+          return word.replace(/[^A-Za-z֐-׿]/g, '').length >= 2;
+        });
+      return words.length >= 2;
     }
 
     syncWaitlistFields();
@@ -106,7 +119,7 @@
       var phone = phoneInput ? phoneInput.value.trim() : '';
 
       if (waitlist) {
-        if (personName.length < 2) {
+        if (!validName(personName)) {
           setStatus(status, text.invalidName || text.invalidEmail, 'error');
           if (nameInput) { try { nameInput.focus(); } catch (e) { /* ignore */ } }
           return;

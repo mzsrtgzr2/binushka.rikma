@@ -90,6 +90,27 @@ test('waitlist metadata is trimmed and labelled', () => {
   assert.equal(store.normalizeWaitlist({}), null);
 });
 
+test('a waitlist name needs a first name and a family name', () => {
+  assert.equal(store.isWaitlistName('דנה לוי'), true);
+  assert.equal(store.isWaitlistName('Dana Levi'), true);
+  assert.equal(store.isWaitlistName('דנה'), false);
+  assert.equal(store.isWaitlistName(' א '), false);
+  assert.equal(store.isWaitlistName('   '), false);
+  assert.equal(store.isWaitlistName(null), false);
+});
+
+test('a waitlist phone must be a dialable Israeli number', () => {
+  assert.equal(store.normalizePhone('050-123-4567'), '0501234567');
+  assert.equal(store.normalizePhone('0501234567'), '0501234567');
+  assert.equal(store.normalizePhone('+972 50-123-4567'), '0501234567');
+  assert.equal(store.normalizePhone('972501234567'), '0501234567');
+  assert.equal(store.normalizePhone('03-1234567'), '031234567');
+
+  ['12345', '050-123', '+1 555 0100', 'abcdefghij', '', null, undefined].forEach((value) => {
+    assert.equal(store.normalizePhone(value), '', `expected ${JSON.stringify(value)} to be rejected`);
+  });
+});
+
 test('the storage path is derived from the address and hides it', () => {
   const path = store.pathFor('someone@example.com');
 

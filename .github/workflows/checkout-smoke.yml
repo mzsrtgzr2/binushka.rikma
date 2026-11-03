@@ -56,3 +56,24 @@ jobs:
               sys.exit(1)
           print('settings ok, env =', d.get('env'))
           PY
+
+      - name: alert discord when the check failed
+        if: failure()
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WEBHOOK:-}" ]; then
+            echo 'no DISCORD_WEBHOOK_URL secret; skipping alert'
+            exit 0
+          fi
+          text="🚨 בדיקת התשלום נכשלה — החנות לא הצליחה לפתוח טופס תשלום.
+          ריצה: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          python3 - "$WEBHOOK" "$text" <<'PY'
+          import json, sys, urllib.request
+          hook, text = sys.argv[1], sys.argv[2]
+          body = json.dumps({'content': text[:1900]}).encode()
+          req = urllib.request.Request(hook, data=body, headers={'Content-Type': 'application/json'})
+          with urllib.request.urlopen(req, timeout=20) as res:
+              print('discord', res.status)
+          PY

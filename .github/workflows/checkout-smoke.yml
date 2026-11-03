@@ -8,6 +8,10 @@ on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
+  # Self-test whenever this file changes, so a broken monitor cannot go quiet.
+  push:
+    paths:
+      - .github/workflows/checkout-smoke.yml
 
 concurrency:
   group: checkout-smoke

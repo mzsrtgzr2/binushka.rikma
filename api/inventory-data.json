@@ -251,6 +251,9 @@
         "singer": {
           "stock": 0
         },
+        "singer-pro-95": {
+          "stock": 1
+        },
         "prym-pinking": {
           "stock": 1,
           "preorder": true

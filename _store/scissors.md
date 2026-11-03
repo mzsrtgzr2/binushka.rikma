@@ -52,6 +52,15 @@ variants:
     stock: 0
     image: /images/store/scissors/screenshot-2026-09-24-at-15-32-45-mufij4sz.jpg
     description: "איך אפשר שלא להתאהב בך\nגודל 10.1 cm"
+  singer-pro-95:
+    name: מספרי תפירה מקצועיים SINGER עם קפיץ וידית אחיזה נוחה
+    price: 140
+    stock: 1
+    image: /images/store/scissors/singer-pro-95-main.png
+    gallery:
+      - /images/store/scissors/singer-pro-95-open.png
+      - /images/store/scissors/singer-pro-95-spring.png
+    description: "מספרי תפירה מקצועיים של SINGER באורך 9.5 אינץ׳ (כ־24 ס״מ), עם מנגנון קפיץ שמקל על פעולת החיתוך ומפחית את המאמץ ביד. בעלי ידית אחיזה ארגונומית ונוחה, ומתאימים לחיתוך בדים ולעבודות תפירה ויצירה.\nבצבע טורקיז."
   prym-pinking:
     name: מספרי זיג זג Prym 22 ס״מ
     price: 140

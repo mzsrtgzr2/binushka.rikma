@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י תות"
 subtitle: תותים על לבן
-image: /images/scrunchies/gallery/scrunchie-tut-large-1.png
+image: /images/scrunchies/gallery/scrunchie-tut-large-1.jpg
 price: ₪45
 cart_price: 45
 stock: 1
@@ -17,7 +17,7 @@ fabric_country:
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-tut-large-2.png
+  - /images/scrunchies/gallery/scrunchie-tut-large-2.jpg
 category: scrunchies-gallery
 ---
 

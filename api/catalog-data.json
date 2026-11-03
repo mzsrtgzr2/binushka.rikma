@@ -541,6 +541,17 @@
         "description": "איך אפשר שלא להתאהב בך\nגודל 10.1 cm",
         "stock": 0
       },
+      "singer-pro-95": {
+        "name": "מספרי תפירה מקצועיים SINGER עם קפיץ וידית אחיזה נוחה",
+        "price": 140,
+        "image": "/images/store/scissors/singer-pro-95-main.png",
+        "description": "מספרי תפירה מקצועיים של SINGER באורך 9.5 אינץ׳ (כ־24 ס״מ), עם מנגנון קפיץ שמקל על פעולת החיתוך ומפחית את המאמץ ביד. בעלי ידית אחיזה ארגונומית ונוחה, ומתאימים לחיתוך בדים ולעבודות תפירה ויצירה.\nבצבע טורקיז.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/scissors/singer-pro-95-open.png",
+          "/images/store/scissors/singer-pro-95-spring.png"
+        ]
+      },
       "prym-pinking": {
         "name": "מספרי זיג זג Prym 22 ס״מ",
         "price": 140,
@@ -560,6 +571,7 @@
       "9-2",
       "type-3",
       "victorinox",
+      "singer-pro-95",
       "prym-pinking",
       "singer"
     ],

@@ -23,6 +23,35 @@
       </button>
     </div>
 
+    {%- comment -%}
+      Waitlist signups need a name and a phone, not just an address: the whole
+      point is that Bina can call back when a place opens. These two are hidden
+      for a plain newsletter signup and revealed by js/newsletter.js when the
+      form carries a waitlist (kind/slug/title).
+    {%- endcomment -%}
+    <div class="newsletter-signup__waitlist" data-newsletter-waitlist-fields hidden>
+      <div class="newsletter-signup__field">
+        <input type="text"
+               name="name"
+               class="form__input newsletter-signup__input"
+               placeholder="שם מלא"
+               aria-label="שם מלא"
+               autocomplete="name"
+               data-newsletter-name>
+      </div>
+      <div class="newsletter-signup__field">
+        <input type="tel"
+               name="phone"
+               class="form__input newsletter-signup__input"
+               placeholder="מספר טלפון"
+               aria-label="מספר טלפון"
+               autocomplete="tel"
+               inputmode="tel"
+               dir="ltr"
+               data-newsletter-phone>
+      </div>
+    </div>
+
     <div class="newsletter-signup__honeypot" aria-hidden="true">
       <label>
         Website

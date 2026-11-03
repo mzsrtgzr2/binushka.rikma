@@ -55,6 +55,26 @@
   background-color: var(--background-color);
 }
 
+/* Name and phone, only while the panel is a waitlist signup. Stacked under
+   the email row so the primary action stays visually the same. */
+.newsletter-signup__waitlist {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.newsletter-signup__waitlist .newsletter-signup__field {
+  display: block;
+}
+
+.newsletter-signup__waitlist .newsletter-signup__input {
+  width: 100%;
+}
+
 .newsletter-signup__button {
   flex: 0 0 auto;
   white-space: nowrap;

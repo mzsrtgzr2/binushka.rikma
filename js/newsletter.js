@@ -27,6 +27,8 @@
 
   function messageForFailure(status, code) {
     if (code === 'invalid_email') return text.invalidEmail;
+    if (code === 'invalid_name') return text.invalidName || text.invalidEmail;
+    if (code === 'invalid_phone') return text.invalidPhone || text.invalidEmail;
     if (code === 'rate_limited') return text.rateLimited;
     if (code === 'not_configured' || status === 503) return text.unavailable;
 
@@ -54,6 +56,9 @@
     var status = form.querySelector('[data-newsletter-status]');
     var button = form.querySelector('button[type="submit"]');
     var emailInput = form.querySelector('input[type="email"]');
+    var nameInput = form.querySelector('[data-newsletter-name]');
+    var phoneInput = form.querySelector('[data-newsletter-phone]');
+    var waitlistFields = form.querySelector('[data-newsletter-waitlist-fields]');
     var honeypot = form.querySelector('[data-newsletter-honeypot]');
     var busy = false;
 
@@ -71,6 +76,25 @@
       return { kind: kind || 'general', slug: slug || '', title: title || '' };
     }
 
+    /* A waitlist signup has to leave Bina a way to reach the person: name and
+       phone are shown and required only while the form carries a waitlist. */
+    function syncWaitlistFields() {
+      var active = Boolean(currentWaitlist());
+      if (waitlistFields) waitlistFields.hidden = !active;
+      if (nameInput) nameInput.required = active;
+      if (phoneInput) phoneInput.required = active;
+    }
+
+    function validPhone(value) {
+      var digits = String(value || '').replace(/[^\d]/g, '');
+      if (digits.indexOf('972') === 0) digits = digits.slice(3);
+      else if (digits.charAt(0) === '0') digits = digits.slice(1);
+      return digits.length >= 8 && digits.length <= 11;
+    }
+
+    syncWaitlistFields();
+    form.addEventListener('newsletter-waitlist-change', syncWaitlistFields);
+
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       if (busy || !emailInput) return;
@@ -78,6 +102,22 @@
       var email = emailInput.value.trim();
       var source = currentSource();
       var waitlist = currentWaitlist();
+      var personName = nameInput ? nameInput.value.trim() : '';
+      var phone = phoneInput ? phoneInput.value.trim() : '';
+
+      if (waitlist) {
+        if (personName.length < 2) {
+          setStatus(status, text.invalidName || text.invalidEmail, 'error');
+          if (nameInput) { try { nameInput.focus(); } catch (e) { /* ignore */ } }
+          return;
+        }
+        if (!validPhone(phone)) {
+          setStatus(status, text.invalidPhone || text.invalidEmail, 'error');
+          if (phoneInput) { try { phoneInput.focus(); } catch (e) { /* ignore */ } }
+          return;
+        }
+      }
+
       if (!email) {
         setStatus(status, text.invalidEmail, 'error');
         if (options.trackName) {
@@ -101,6 +141,8 @@
       if (honeypot) payload.website = honeypot.value;
       if (source) payload.source = source;
       if (waitlist) payload.waitlist = waitlist;
+      if (waitlist && personName) payload.name = personName;
+      if (waitlist && phone) payload.phone = phone;
 
       submitEmail(options.url, payload)
         .then(function (result) {
@@ -217,6 +259,7 @@
           else form.removeAttribute('data-newsletter-waitlist-' + name);
         });
       }
+      if (form) form.dispatchEvent(new CustomEvent('newsletter-waitlist-change'));
       var status = form && form.querySelector('[data-newsletter-status]');
       setStatus(status, '', null);
     }

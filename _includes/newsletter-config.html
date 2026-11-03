@@ -12,6 +12,8 @@
     "success": {{ messages.success | jsonify }},
     "unsubscribed": {{ messages.unsubscribed | jsonify }},
     "invalidEmail": {{ messages.invalid_email | jsonify }},
+    "invalidName": {{ messages.invalid_name | jsonify }},
+    "invalidPhone": {{ messages.invalid_phone | jsonify }},
     "rateLimited": {{ messages.rate_limited | jsonify }},
     "unavailable": {{ messages.unavailable | jsonify }},
     "error": {{ messages.error | jsonify }}
@@ -36,5 +38,5 @@
   }
 }
 </script>
-<script src="{{ site.baseurl }}/js/newsletter.js?v=waitlist" defer></script>
+<script src="{{ site.baseurl }}/js/newsletter.js?v=waitlist2" defer></script>
 {% endif %}

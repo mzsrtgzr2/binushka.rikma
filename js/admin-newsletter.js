@@ -509,9 +509,36 @@
     return item.waitlist ? [item.waitlist] : [];
   }
 
-  /* Grouped by the workshop/product the visitor was waiting for. A flat
-     newsletter list hides that; this is the answer to "who is waiting for
-     which workshop". */
+  /* When this address joined that particular list. Records written before
+     joinedAt existed fall back to the subscriber timestamp. */
+  function waitlistJoinedAt(waitlist, item) {
+    var value = (waitlist && waitlist.joinedAt) || (item && item.subscribedAt) || '';
+    var time = Date.parse(value);
+    return Number.isNaN(time) ? 0 : time;
+  }
+
+  function waitlistRow(entry) {
+    var item = entry.item;
+    return (
+      '<li class="admin-waitlist__item">' +
+      '<span class="admin-waitlist__num">' + entry.position + '</span>' +
+      '<span class="admin-waitlist__person">' +
+      '<span class="admin-waitlist__name">' + escapeHtml(item.name || 'ללא שם') + '</span>' +
+      (item.phone
+        ? '<a class="admin-waitlist__phone" dir="ltr" href="tel:' + escapeHtml(item.phone) + '">' + escapeHtml(item.phone) + '</a>'
+        : '') +
+      '<span class="admin-subscribers__email" dir="ltr">' + escapeHtml(item.email) + '</span>' +
+      '</span>' +
+      (entry.date
+        ? '<span class="admin-subscribers__date">' + escapeHtml(formatDate(entry.date)) + '</span>'
+        : '') +
+      '</li>'
+    );
+  }
+
+  /* Grouped by the workshop/product the visitor was waiting for, and inside
+     each group ordered by when they joined that list — the queue as it formed,
+     not by when their record was last touched. */
   function renderWaitlists() {
     if (!waitlistsSection) return;
 
@@ -527,11 +554,15 @@
             key: key,
             kind: waitlist.kind || 'general',
             name: waitlistName(waitlist),
-            items: []
+            entries: []
           };
           groups.push(byKey[key]);
         }
-        byKey[key].items.push(item);
+        byKey[key].entries.push({
+          item: item,
+          joinedAt: waitlistJoinedAt(waitlist, item),
+          date: (waitlist && waitlist.joinedAt) || item.subscribedAt || null
+        });
       });
     });
 
@@ -541,36 +572,38 @@
       return;
     }
 
-    groups.sort(function (a, b) {
-      return b.items.length - a.items.length || String(a.name).localeCompare(String(b.name), 'he');
+    groups.forEach(function (group) {
+      group.entries.sort(function (a, b) { return a.joinedAt - b.joinedAt; });
+      group.entries.forEach(function (entry, index) {
+        entry.position = index + 1;
+      });
     });
+
+    // Waiting lists in the order they started, so the oldest queue is first.
+    groups.sort(function (a, b) {
+      return a.entries[0].joinedAt - b.entries[0].joinedAt || String(a.name).localeCompare(String(b.name), 'he');
+    });
+
+    var total = groups.reduce(function (sum, group) { return sum + group.entries.length; }, 0);
 
     waitlistsSection.hidden = false;
     waitlistsSummaryEl.textContent =
-      groups.length === 1 ? 'רשימת המתנה אחת עם נרשמות.' : groups.length + ' רשימות המתנה.';
+      groups.length + (groups.length === 1 ? ' רשימת המתנה' : ' רשימות המתנה') +
+      ' · ' + total + (total === 1 ? ' נרשמת' : ' נרשמות') +
+      ' — כל רשימה לפי סדר ההרשמה.';
 
     waitlistsGroupsEl.innerHTML = groups.map(function (group) {
-      var rows = group.items.map(function (item) {
-        return (
-          '<li class="admin-waitlist__item">' +
-          '<span class="admin-subscribers__email">' + escapeHtml(item.email) + '</span>' +
-          (item.subscribedAt
-            ? '<span class="admin-subscribers__date">' + escapeHtml(formatDate(item.subscribedAt)) + '</span>'
-            : '') +
-          '</li>'
-        );
-      }).join('');
-
-      return (
-        '<div class="admin-waitlist">' +
+      var head =
         '<div class="admin-waitlist__head">' +
         '<span class="admin-waitlist__title">' + escapeHtml(group.name || 'ללא שם') + '</span>' +
-        '<span class="admin-waitlist__count">' + group.items.length + '</span>' +
+        '<span class="admin-waitlist__count">' + group.entries.length + '</span>' +
         '</div>' +
-        '<p class="admin-waitlist__meta">' + escapeHtml(waitlistKindLabel(group.kind)) + '</p>' +
-        '<ul class="admin-waitlist__list">' + rows + '</ul>' +
-        '</div>'
-      );
+        '<p class="admin-waitlist__meta">' + escapeHtml(waitlistKindLabel(group.kind)) +
+        (group.name && group.kind === 'workshop' ? ' · סדנה: ' + escapeHtml(group.name) : '') +
+        '</p>';
+
+      var rows = group.entries.map(waitlistRow).join('');
+      return '<div class="admin-waitlist">' + head + '<ul class="admin-waitlist__list">' + rows + '</ul></div>';
     }).join('');
   }
 

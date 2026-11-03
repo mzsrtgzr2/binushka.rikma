@@ -348,6 +348,13 @@
       "name": "סקראנצ'י תרנגולים",
       "price": 30
     },
+    "scrunchie-tut-large": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י תות",
+      "price": 45
+    },
     "scrunchie-yarok-amok-large": {
       "stock": 0,
       "outOfStock": true,

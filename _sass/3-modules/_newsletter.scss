@@ -55,6 +55,22 @@
   background-color: var(--background-color);
 }
 
+/* In the modal the form sits on a white panel, so a transparent border and a
+   white fill make an empty field look like floating text until it is focused.
+   Waitlist fields (name, phone) always get a quiet frame; the email field in
+   the modal gets one too. Focus still flips it to the brand colour. */
+.newsletter-modal .newsletter-signup__input,
+.newsletter-signup__waitlist .newsletter-signup__input {
+  border-color: #d8d7e2;
+  background-color: var(--background-alt-color);
+}
+
+.newsletter-modal .newsletter-signup__input:focus,
+.newsletter-signup__waitlist .newsletter-signup__input:focus {
+  border-color: var(--brand-color);
+  background-color: var(--background-color);
+}
+
 /* Name and phone, only while the panel is a waitlist signup. Stacked under
    the email row so the primary action stays visually the same. */
 .newsletter-signup__waitlist {

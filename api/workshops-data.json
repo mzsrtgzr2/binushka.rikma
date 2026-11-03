@@ -18,7 +18,7 @@
     "price": 110,
     "kind": "workshop",
     "shipping": false,
-    "stock": 6,
+    "stock": 5,
     "variants": {
       "5": {
         "name": "5 שיעורים",
@@ -37,7 +37,7 @@
     "price": 330,
     "kind": "workshop",
     "shipping": false,
-    "stock": 1,
+    "stock": 0,
     "variants": {
       "one": {
         "name": "משתתפת אחת",
@@ -94,7 +94,7 @@
     "price": 1090,
     "kind": "workshop",
     "shipping": false,
-    "stock": 7
+    "stock": 6
   },
   "workshop-mothers-7-12": {
     "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה7 בדצמבר",

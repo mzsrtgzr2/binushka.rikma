@@ -1,0 +1,12 @@
+{
+  "orderId": "41e20e634b2937b99652edc0",
+  "documentId": "aabfb442-c3bf-4674-91f5-f14e29250835",
+  "amount": 110,
+  "purchases": [
+    {
+      "slug": "workshop-monthly-meeting",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-03T13:08:27.437Z"
+}

@@ -434,9 +434,9 @@
     "workshop-rehovot-04-12": {
       "name": "סדנת רקמה של שישי בבוקר — ב18.12 ברחובות",
       "price": 330,
-      "stock": 4,
+      "stock": 1,
       "outOfStock": false,
-      "limitedStock": false
+      "limitedStock": true
     },
     "workshop-rehovot-09-10": {
       "name": "בוקר קרושה ומאפה — 8.1 שישי בבוקר",

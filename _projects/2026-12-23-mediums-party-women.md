@@ -7,6 +7,17 @@ category: all-levels
 faq_category: all-levels
 testimonials_category: all-levels
 image: /images/gallery/without-kids.png
+gallery:
+  - /images/workshops/2026-12/mediums-party-01.jpg
+  - /images/workshops/2026-12/mediums-party-02.jpg
+  - /images/workshops/2026-12/mediums-party-03.jpg
+  - /images/workshops/2026-12/mediums-party-04.jpg
+  - /images/workshops/2026-12/mediums-party-05.jpg
+  - /images/workshops/2026-12/mediums-party-06.jpg
+  - /images/workshops/2026-12/mediums-party-07.jpg
+  - /images/workshops/2026-12/mediums-party-08.jpg
+  - /images/workshops/2026-12/mediums-party-09.jpg
+  - /images/workshops/2026-12/mediums-party-10.jpg
 permalink: /projects/mediums-party-women/
 registration_full: false
 hide: false

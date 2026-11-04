@@ -1,7 +1,7 @@
 ---
 title: מסיבת מדיומים לנשים
-date: 2026-11-04 08:01:00 +0300
-subtitle: ב23.12, 10:00-13:00
+date: 2025-12-23 10:00:00 +0300
+subtitle: ב23.12 בלי ילדים🫣
 location: "אייזנברג, רחובות"
 category: all-levels
 faq_category: all-levels

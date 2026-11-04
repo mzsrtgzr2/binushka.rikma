@@ -35,7 +35,7 @@ variants:
   plantladyembroidery300:
     name: Plant Lady Embroidery – ספר רקמה בוטנית עם יותר מ־300 דוגמאות
     price: 195
-    stock: 1
+    stock: 4
     image: /images/store/embroidery-books/screenshot-2026-10-28-at-22-28-13-mvskou2b.jpg
     gallery:
       - /images/store/embroidery-books/screenshot-2026-10-28-at-22-27-26-mvskou2b.jpg

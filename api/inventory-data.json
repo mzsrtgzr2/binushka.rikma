@@ -445,13 +445,6 @@
       "outOfStock": false,
       "limitedStock": false
     },
-    "workshop-2022-11-04": {
-      "name": "מסיבת מדיומים לאמהות — ב4.11 בלי ילדים🫣",
-      "price": 330,
-      "stock": 0,
-      "outOfStock": true,
-      "limitedStock": false
-    },
     "workshop-mothers-11-11-2": {
       "name": "בוקר פינוק לאמהות — ב11.11 עם דינה אלטשולר ויסוצקי",
       "price": 330,
@@ -521,6 +514,13 @@
       "stock": 2,
       "outOfStock": false,
       "limitedStock": true
+    },
+    "workshop-mediums-party-women": {
+      "name": "מסיבת מדיומים לנשים — ב23.12, 10:00-13:00",
+      "price": 360,
+      "stock": 8,
+      "outOfStock": false,
+      "limitedStock": false
     }
   }
 }

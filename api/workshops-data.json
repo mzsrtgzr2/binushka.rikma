@@ -1,17 +1,17 @@
 {
-  "workshop-2022-11-04": {
-    "name": "מסיבת מדיומים לאמהות — ב4.11 בלי ילדים🫣",
-    "price": 330,
-    "kind": "workshop",
-    "shipping": false,
-    "stock": 0
-  },
   "workshop-hosting-04-12": {
     "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב4.12 שישי בבוקר",
     "price": 500,
     "kind": "workshop",
     "shipping": false,
     "stock": 2
+  },
+  "workshop-mediums-party-women": {
+    "name": "מסיבת מדיומים לנשים — ב23.12, 10:00-13:00",
+    "price": 360,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 8
   },
   "workshop-monthly-meeting": {
     "name": "מפגש רקמה ברחובות — שלישי בבוקר אחת לחודש",

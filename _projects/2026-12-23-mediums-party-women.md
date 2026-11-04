@@ -6,7 +6,7 @@ location: "אייזנברג, רחובות"
 category: all-levels
 faq_category: all-levels
 testimonials_category: all-levels
-image: /images/workshops/2026-12/mothers-course-01.jpg
+image: /images/gallery/without-kids.png
 permalink: /projects/mediums-party-women/
 registration_full: false
 hide: false

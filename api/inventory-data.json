@@ -309,6 +309,13 @@
       "name": "סקראנצ'י נמרים אצילית",
       "price": 85
     },
+    "scrunchie-poodle-tzarfati-large": {
+      "stock": 2,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פודל צרפתי",
+      "price": 45
+    },
     "scrunchie-prachim-adumim": {
       "stock": 2,
       "outOfStock": false,
@@ -328,6 +335,13 @@
       "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י פירות על משבצות תכלת",
+      "price": 45
+    },
+    "scrunchie-psim-bezh-large": {
+      "stock": 3,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פסים בז'",
       "price": 45
     },
     "scrunchie-psim-turquiz": {

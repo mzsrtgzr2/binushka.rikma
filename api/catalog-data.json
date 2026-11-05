@@ -612,6 +612,11 @@
     "price": 85,
     "category": "scrunchies-gallery"
   },
+  "scrunchie-poodle-tzarfati-large": {
+    "name": "סקראנצ'י פודל צרפתי",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
   "scrunchie-prachim-adumim": {
     "name": "סקראנצ'י פרחים אדום",
     "price": 45,
@@ -624,6 +629,11 @@
   },
   "scrunchie-prirot-mishbatzot-tchelet-large": {
     "name": "סקראנצ'י פירות על משבצות תכלת",
+    "price": 45,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-psim-bezh-large": {
+    "name": "סקראנצ'י פסים בז'",
     "price": 45,
     "category": "scrunchies-gallery"
   },

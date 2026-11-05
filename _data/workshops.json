@@ -4,7 +4,14 @@
     "price": 500,
     "kind": "workshop",
     "shipping": false,
-    "stock": 2
+    "stock": 0
+  },
+  "workshop-hosting-15-1": {
+    "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב15.1 שישי בבוקר",
+    "price": 500,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 10
   },
   "workshop-mediums-party-women": {
     "name": "מסיבת מדיומים לנשים — ב23.12 בלי ילדים🫣",
@@ -154,13 +161,6 @@
         "places": 1
       }
     }
-  },
-  "workshop-rehovot-15-1": {
-    "name": "סדנת רקמה של שישי בבוקר — ב15.1 בהוד השרון",
-    "price": 360,
-    "kind": "workshop",
-    "shipping": false,
-    "stock": 10
   },
   "workshop-rehovot-22-1": {
     "name": "סדנת רקמה של שישי בבוקר — ב22.1 ברחובות",

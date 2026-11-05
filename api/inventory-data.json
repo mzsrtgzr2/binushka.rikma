@@ -480,9 +480,9 @@
       "outOfStock": false,
       "limitedStock": false
     },
-    "workshop-rehovot-15-1": {
-      "name": "סדנת רקמה של שישי בבוקר — ב15.1 בהוד השרון",
-      "price": 360,
+    "workshop-hosting-15-1": {
+      "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב15.1 שישי בבוקר",
+      "price": 500,
       "stock": 10,
       "outOfStock": false,
       "limitedStock": false

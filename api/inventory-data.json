@@ -373,8 +373,8 @@
       "price": 45
     },
     "scrunchie-yarok-amok": {
-      "stock": 1,
-      "outOfStock": false,
+      "stock": 0,
+      "outOfStock": true,
       "limitedStock": true,
       "name": "סקראנצ'י ירוק עמוק",
       "price": 30

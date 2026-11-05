@@ -4,9 +4,9 @@ subtitle: ירוק עמוק עם רקמת איקס עדינה
 image: /images/scrunchies/gallery/scrunchie-yarok-amok-1.png
 price: ₪30
 cart_price: 30
-stock: 1
+stock: 0
 limited_stock: true
-out_of_stock: false
+out_of_stock: true
 hide: false
 noindex: true
 sitemap: false

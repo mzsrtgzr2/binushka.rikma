@@ -1107,7 +1107,9 @@
 
     var packs = packsForBooking(workshop);
     var spots = spotsOf(workshop);
-    var showSpots = spots != null && workshop.price_per !== 'workshop' && !hideRemainingSpots(workshop);
+    // Keep the count private while more than 4 places are open.
+    var showSpots =
+      spots != null && spots <= 4 && workshop.price_per !== 'workshop' && !hideRemainingSpots(workshop);
 
     var body = '';
     // Mothers embroidery: price is only in the page head; CTA is the button.

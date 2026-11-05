@@ -2,8 +2,8 @@
 title: "סקראנצ'י רקמת פרחים שחורה"
 subtitle: רקמת פרחים על שחור
 image: /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-1.png
-price: ₪30
-cart_price: 30
+price: ₪45
+cart_price: 45
 stock: 1
 limited_stock: true
 out_of_stock: false
@@ -11,7 +11,7 @@ hide: false
 noindex: true
 sitemap: false
 scrunchie_gallery: true
-scrunchie_size: regular
+scrunchie_size: large
 order: 32
 scrunchie_type: רקמה
 scrunchie_color: שחור
@@ -25,4 +25,4 @@ gallery:
 category: scrunchies-gallery
 ---
 
-סקראנצ'י מבד שחור עם רקמת פרחים עדינה. גודל רגיל. תפורה בעבודת יד.
+סקראנצ'י מבד שחור עם רקמת פרחים עדינה. גודל גדול. תפורה בעבודת יד.

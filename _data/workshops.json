@@ -4,14 +4,14 @@
     "price": 500,
     "kind": "workshop",
     "shipping": false,
-    "stock": 0
+    "stock": 1
   },
   "workshop-hosting-15-1": {
     "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב15.1 שישי בבוקר",
     "price": 500,
     "kind": "workshop",
     "shipping": false,
-    "stock": 10
+    "stock": 9
   },
   "workshop-mediums-party-women": {
     "name": "מסיבת מדיומים לנשים — ב23.12 בלי ילדים🫣",

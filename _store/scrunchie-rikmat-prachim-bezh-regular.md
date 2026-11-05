@@ -7,7 +7,7 @@ cart_price: 30
 stock: 2
 limited_stock: true
 out_of_stock: false
-hide: true
+hide: false
 noindex: true
 sitemap: false
 scrunchie_gallery: true

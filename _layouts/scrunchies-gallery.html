@@ -51,7 +51,7 @@ layout: default
   {% if item.category == 'scrunchies-gallery' %}{% assign is_gallery_item = true %}{% endif %}
   {% if item.categories %}{% if item.categories contains 'scrunchies-gallery' %}{% assign is_gallery_item = true %}{% endif %}{% endif %}
   {% comment %} Only scrunchies that are in stock and not hidden belong in the shop grid. {% endcomment %}
-  {% if is_gallery_item and item.hide != true and item.out_of_stock != true and item.stock != 0 %}
+  {% if is_gallery_item and item.out_of_stock != true and item.stock != 0 %}
     {% if item.scrunchie_size == 'regular' %}{% assign g_regular = g_regular | push: item %}
     {% elsif item.scrunchie_size == 'large' %}{% assign g_large = g_large | push: item %}
     {% elsif item.scrunchie_size == 'fancy' %}{% assign g_fancy = g_fancy | push: item %}

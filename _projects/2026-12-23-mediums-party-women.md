@@ -22,7 +22,7 @@ permalink: /projects/mediums-party-women/
 registration_full: false
 hide: false
 cart_price: 360
-spots: 8
+spots: 7
 order: 1
 last_places: false
 ---

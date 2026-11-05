@@ -1,0 +1,12 @@
+{
+  "orderId": "60db9e308b4ec0c04b198dbd",
+  "documentId": "dba244ec-1a9c-4b59-a5b9-6007199cecd1",
+  "amount": 45,
+  "purchases": [
+    {
+      "slug": "scrunchie-prirot-mishbatzot-tchelet-large",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-05T10:28:56.177Z"
+}

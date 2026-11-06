@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: fancy
-order: 36
+order: 44
 scrunchie_type: תחרה
 scrunchie_color: שחור
 fabric_country: שווייץ

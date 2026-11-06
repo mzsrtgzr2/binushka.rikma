@@ -51,7 +51,7 @@ stockists:
         logo: /images/stockists/revibe.jpg
         logo_fill: true
         url: https://www.instagram.com/revibe_2ndhand/
-order: 44
+order: 49
 out_of_stock: false
 limited_stock: false
 limited_edition: false

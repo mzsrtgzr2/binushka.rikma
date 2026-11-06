@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: fancy
-order: 37
+order: 45
 scrunchie_type: תחרה
 scrunchie_color: ורוד
 fabric_country:

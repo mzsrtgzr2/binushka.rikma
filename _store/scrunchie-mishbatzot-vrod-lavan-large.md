@@ -12,7 +12,7 @@ noindex: true
 sitemap: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 34
+order: 42
 scrunchie_type: כותנה
 scrunchie_color: ורוד
 fabric_country:

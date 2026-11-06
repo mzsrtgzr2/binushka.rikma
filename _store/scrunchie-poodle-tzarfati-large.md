@@ -10,7 +10,7 @@ out_of_stock: false
 hide: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 47
+order: 35
 scrunchie_type: כותנה
 scrunchie_color: שמנת
 fabric_country:

@@ -1,6 +1,6 @@
 ---
 title: "סקראנצ'י פסים בז'"
-subtitle: פסים דקים בבז' על רקע לבן
+subtitle: "פסים דקים בבז' על רקע לבן"
 image: /images/scrunchies/gallery/scrunchie-psim-bezh-large-1.jpg
 price: ₪45
 cart_price: 45
@@ -10,7 +10,7 @@ out_of_stock: false
 hide: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 48
+order: 36
 scrunchie_type: כותנה
 scrunchie_color: בז'
 fabric_country:

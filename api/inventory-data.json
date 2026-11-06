@@ -331,8 +331,8 @@
       "price": 30
     },
     "scrunchie-prirot-mishbatzot-tchelet-large": {
-      "stock": 0,
-      "outOfStock": true,
+      "stock": 1,
+      "outOfStock": false,
       "limitedStock": true,
       "name": "סקראנצ'י פירות על משבצות תכלת",
       "price": 45

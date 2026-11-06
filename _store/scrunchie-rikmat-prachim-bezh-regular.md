@@ -8,11 +8,9 @@ stock: 2
 limited_stock: true
 out_of_stock: false
 hide: false
-noindex: true
-sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 30
+order: 27
 scrunchie_type: רקמה
 scrunchie_color: בז'
 fabric_country:

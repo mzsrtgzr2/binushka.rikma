@@ -10,7 +10,7 @@ hide: true
 in_cart: false
 noindex: true
 sitemap: false
-order: 26
+order: 37
 preorder: false
 limited_edition: false
 gallery:

@@ -10,7 +10,7 @@ out_of_stock: false
 hide: false
 scrunchie_gallery: true
 scrunchie_size: large
-order: 45
+order: 33
 scrunchie_type: כותנה
 scrunchie_color: כחול
 fabric_country:

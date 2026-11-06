@@ -8,11 +8,9 @@ stock: 0
 limited_stock: true
 out_of_stock: true
 hide: false
-noindex: true
-sitemap: false
 scrunchie_gallery: true
 scrunchie_size: regular
-order: 38
+order: 29
 scrunchie_type: רקמה
 scrunchie_color: ירוק
 fabric_country:

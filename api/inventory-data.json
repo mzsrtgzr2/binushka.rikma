@@ -337,6 +337,13 @@
       "name": "סקראנצ'י פירות על משבצות תכלת",
       "price": 45
     },
+    "scrunchie-prirot-mishbatzot-tchelet-regular": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פירות על משבצות תכלת",
+      "price": 30
+    },
     "scrunchie-psim-bezh-large": {
       "stock": 3,
       "outOfStock": false,

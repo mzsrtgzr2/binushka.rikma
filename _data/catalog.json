@@ -587,6 +587,11 @@
     "price": 30,
     "category": "scrunchies-gallery"
   },
+  "scrunchie-mishbatzot-kachol-lavan-fancy": {
+    "name": "סקראנצ'י משבצות כחול לבן עם תחרה",
+    "price": 85,
+    "category": "scrunchies-gallery"
+  },
   "scrunchie-mishbatzot-kachol-lavan-large": {
     "name": "סקראנצ'י משבצות כחול לבן",
     "price": 45,
@@ -630,6 +635,11 @@
   "scrunchie-prachim-yapaniyim": {
     "name": "סקראנצ'י פרחים יפניים",
     "price": 30,
+    "category": "scrunchies-gallery"
+  },
+  "scrunchie-prirot-mishbatzot-tchelet-fancy": {
+    "name": "סקראנצ'י פירות על משבצות תכלת עם תחרה",
+    "price": 85,
     "category": "scrunchies-gallery"
   },
   "scrunchie-prirot-mishbatzot-tchelet-large": {

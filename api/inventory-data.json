@@ -274,6 +274,13 @@
       "name": "סקראנצ'י לבבות ירוקים",
       "price": 30
     },
+    "scrunchie-mishbatzot-kachol-lavan-fancy": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י משבצות כחול לבן עם תחרה",
+      "price": 85
+    },
     "scrunchie-mishbatzot-kachol-lavan-large": {
       "stock": 1,
       "outOfStock": false,
@@ -336,6 +343,13 @@
       "limitedStock": true,
       "name": "סקראנצ'י פרחים יפניים",
       "price": 30
+    },
+    "scrunchie-prirot-mishbatzot-tchelet-fancy": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פירות על משבצות תכלת עם תחרה",
+      "price": 85
     },
     "scrunchie-prirot-mishbatzot-tchelet-large": {
       "stock": 1,

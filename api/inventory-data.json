@@ -309,6 +309,13 @@
       "name": "סקראנצ'י נמרים אצילית",
       "price": 85
     },
+    "scrunchie-poodle-tzarfati-fancy": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פודל צרפתי עם תחרה",
+      "price": 85
+    },
     "scrunchie-poodle-tzarfati-large": {
       "stock": 2,
       "outOfStock": false,

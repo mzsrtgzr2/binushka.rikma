@@ -9,23 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: diagnose and post
+      - name: post with curl UA
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          python3 - <<'PY'
-          import os, json, hashlib, urllib.request, urllib.error
-          w = os.environ.get('WEBHOOK', '')
-          print('len=', len(w))
-          print('start_ok=', w.startswith('https://discord.com/api/webhooks/'))
-          print('parts=', len(w.split('/')))
-          print('sha12=', hashlib.sha256(w.encode()).hexdigest()[:12])
-          try:
-              body = json.dumps({'content': '✅ בדיקת webhook מהתהליך — החיבור עובד.'}).encode()
-              req = urllib.request.Request(w.strip(), data=body, headers={'Content-Type': 'application/json'})
-              with urllib.request.urlopen(req, timeout=20) as res:
-                  print('discord status', res.status)
-          except urllib.error.HTTPError as e:
-              print('discord error', e.code)
-              print('body', e.read()[:200])
-          PY
+          set -euo pipefail
+          [ -n "${WEBHOOK:-}" ] || { echo 'MISSING SECRET'; exit 2; }
+          code=$(curl -sS -o /tmp/wh.out -w '%{http_code}' -X POST "$WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -H 'User-Agent: rikma-checkout-smoke/1.0' \
+            -d '{"content":"✅ בדיקת webhook מהתהליך — החיבור עובד."}')
+          echo "discord status $code"
+          head -c 200 /tmp/wh.out || true
+          [ "$code" = "204" ] || [ "$code" = "200" ]

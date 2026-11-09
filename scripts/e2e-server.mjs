@@ -51,6 +51,9 @@ if (NOTIFY_STUB) {
   process.env.GMAIL_USER = process.env.GMAIL_USER || 'shop@binushka.test';
   process.env.GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD || 'e2e-not-a-real-password';
   process.env.ORDER_NOTIFY_EMAIL = process.env.ORDER_NOTIFY_EMAIL || 'orders@binushka.test';
+  /* CI has no .env.local: signOrder needs a key, and production keys must
+   * never be used by a test. Any value works here — both sides read it. */
+  process.env.ORDER_SIGNING_SECRET = process.env.ORDER_SIGNING_SECRET || 'e2e-order-signing-secret';
 
   const mails = [];
   const orders = new Map();

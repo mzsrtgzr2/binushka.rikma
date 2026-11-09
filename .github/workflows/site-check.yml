@@ -1,0 +1,54 @@
+name: site links
+
+# Daily sweep of the deployed site: every product page, workshop page and hero
+# photo must answer 200. Catches the silent failures — a page dated in the
+# future that 404s after a green deploy, a renamed slug, a missing image —
+# before a shopper finds them. Read-only GET traffic; nothing is ordered.
+
+on:
+  schedule:
+    - cron: '0 5 * * *' # 05:00 UTC = 07:00/08:00 Israel
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/site-check.yml
+      - scripts/check-live-links.mjs
+
+concurrency:
+  group: site-links
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: every page and hero image opens
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: sweep the live site
+        run: node scripts/check-live-links.mjs
+
+      - name: alert discord when the sweep failed
+        if: failure()
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DRILL: ${{ inputs.simulate_failure }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WEBHOOK:-}" ]; then
+            echo 'no DISCORD_WEBHOOK_URL secret; skipping alert'
+            exit 0
+          fi
+          text="🚨 סוויפ הקישורים נכשל — יש דף או תמונה שלא נפתחים באתר. ריצה: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          payload=$(python3 -c 'import json,sys; print(json.dumps({"content": sys.argv[1][:1900]}))' "$text")
+          code=$(curl -sS -o /tmp/discord.out -w '%{http_code}' -X POST "$WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -H 'User-Agent: rikma-site-check/1.0' \
+            --data "$payload")
+          echo "discord status $code"
+          cat /tmp/discord.out || true
+          [ "$code" = "204" ] || [ "$code" = "200" ]

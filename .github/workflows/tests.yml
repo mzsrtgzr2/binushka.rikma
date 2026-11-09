@@ -20,6 +20,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: node scripts/check-catalog.js
       - run: npm test
 
   e2e:
@@ -49,3 +50,34 @@ jobs:
         env:
           E2E_LIVE: '1'
           E2E_ROOT: /tmp/bundle
+
+      # The paid-order callback: real /api/payment-notify handler, fake Morning
+      # document, in-memory mail transport. Stock decrement + owner summary mail
+      # without Grow, a card, or a real mailbox.
+      - name: payment callback (notify) tests
+        run: npm run test:e2e:notify
+
+  alert:
+    name: alert discord
+    needs: [unit, e2e]
+    if: ${{ always() && (needs.unit.result == 'failure' || needs.e2e.result == 'failure') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: post the failure to discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${WEBHOOK:-}" ]; then
+            echo 'no DISCORD_WEBHOOK_URL secret; skipping alert'
+            exit 0
+          fi
+          text="🚨 בדיקות נכשלו (unit/e2e) — לא למזג/לשחרר עד שזה ירוק. ריצה: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          payload=$(python3 -c 'import json,sys; print(json.dumps({"content": sys.argv[1][:1900]}))' "$text")
+          code=$(curl -sS -o /tmp/discord.out -w '%{http_code}' -X POST "$WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -H 'User-Agent: rikma-tests/1.0' \
+            --data "$payload")
+          echo "discord status $code"
+          cat /tmp/discord.out || true
+          [ "$code" = "204" ] || [ "$code" = "200" ]

@@ -47,6 +47,55 @@ jobs:
             exit 1
           fi
 
+      # The link is the thing a shopper clicks. A 200 from our API with a dead
+      # payment URL is still a broken checkout, so open the link too.
+      - name: the payment page actually opens
+        run: |
+          set -euo pipefail
+          url=$(python3 -c 'import json; print(json.load(open("/tmp/checkout.json"))["url"])')
+          echo "payment host: $(python3 -c 'import sys,urllib.parse; print(urllib.parse.urlparse(sys.argv[1]).hostname)' "$url")"
+          python3 - "$url" <<'PY'
+          import sys, urllib.parse
+          u = urllib.parse.urlparse(sys.argv[1])
+          if u.scheme != 'https':
+              print(f'::error::payment url is not https: {u.scheme}')
+              sys.exit(1)
+          host = u.hostname or ''
+          allowed = {'secure.meshulam.co.il'}
+          if host not in allowed:
+              print(f'::error::unexpected payment host: {host}')
+              sys.exit(1)
+          PY
+          code=$(curl -sS --max-time 45 -o /tmp/payment.html -w '%{http_code}' \
+            -A 'rikma-checkout-smoke/1.0' "$url")
+          type=$(curl -sS --max-time 45 -o /dev/null -w '%{content_type}' \
+            -A 'rikma-checkout-smoke/1.0' "$url")
+          echo "payment page status=$code type=$type"
+          if [ "$code" != "200" ]; then
+            echo "::error::payment page did not load (HTTP $code)"
+            exit 1
+          fi
+
+      - name: the cart catalog serves the smoke product
+        run: |
+          set -euo pipefail
+          code=$(curl -sS --max-time 30 -o /tmp/prices.json -w '%{http_code}' 'https://rikma.binushka.com/api/prices/')
+          echo "prices status=$code"
+          [ "$code" = "200" ] || { echo "::error::/api/prices/ returned $code"; exit 1; }
+          python3 - <<'PY'
+          import json, sys
+          d = json.load(open('/tmp/prices.json'))
+          products = d.get('products') or {}
+          if 'birth-hoop' not in products:
+              print('::error::smoke product missing from /api/prices/')
+              sys.exit(1)
+          price = products['birth-hoop'].get('price')
+          if not isinstance(price, (int, float)) or price <= 0:
+              print(f'::error::smoke product has no price: {price}')
+              sys.exit(1)
+          print('catalog ok, birth-hoop =', price)
+          PY
+
       - name: payment settings are present
         run: |
           set -euo pipefail
@@ -58,6 +107,12 @@ jobs:
           missing = [k for k in ('hasKeyId', 'hasSecret', 'hasPluginId') if not d.get(k)]
           if missing:
               print(f"::error::missing payment settings: {missing}")
+              sys.exit(1)
+          if d.get('env') != 'production':
+              print(f"::error::checkout env is {d.get('env')!r}, expected 'production'")
+              sys.exit(1)
+          if not isinstance(d.get('maxPayments'), int) or d['maxPayments'] < 1:
+              print(f"::error::maxPayments is {d.get('maxPayments')!r}")
               sys.exit(1)
           print('settings ok, env =', d.get('env'))
           PY

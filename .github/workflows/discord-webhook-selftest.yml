@@ -9,16 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: post a test message
+      - name: diagnose and post
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          set -euo pipefail
-          if [ -z "${WEBHOOK:-}" ]; then echo 'MISSING SECRET'; exit 2; fi
-          python3 - "$WEBHOOK" <<'PY'
-          import json, sys, urllib.request
-          body = json.dumps({'content': '✅ בדיקת webhook מהתהליך — החיבור עובד.'}).encode()
-          req = urllib.request.Request(sys.argv[1], data=body, headers={'Content-Type': 'application/json'})
-          with urllib.request.urlopen(req, timeout=20) as res:
-              print('discord status', res.status)
+          python3 - <<'PY'
+          import os, json, hashlib, urllib.request, urllib.error
+          w = os.environ.get('WEBHOOK', '')
+          print('len=', len(w))
+          print('start_ok=', w.startswith('https://discord.com/api/webhooks/'))
+          print('parts=', len(w.split('/')))
+          print('sha12=', hashlib.sha256(w.encode()).hexdigest()[:12])
+          try:
+              body = json.dumps({'content': '✅ בדיקת webhook מהתהליך — החיבור עובד.'}).encode()
+              req = urllib.request.Request(w.strip(), data=body, headers={'Content-Type': 'application/json'})
+              with urllib.request.urlopen(req, timeout=20) as res:
+                  print('discord status', res.status)
+          except urllib.error.HTTPError as e:
+              print('discord error', e.code)
+              print('body', e.read()[:200])
           PY

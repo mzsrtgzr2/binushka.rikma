@@ -67,13 +67,15 @@ jobs:
             echo 'no DISCORD_WEBHOOK_URL secret; skipping alert'
             exit 0
           fi
-          text="🚨 בדיקת התשלום נכשלה — החנות לא הצליחה לפתוח טופס תשלום.
-          ריצה: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          python3 - "$WEBHOOK" "$text" <<'PY'
-          import json, sys, urllib.request
-          hook, text = sys.argv[1], sys.argv[2]
-          body = json.dumps({'content': text[:1900]}).encode()
-          req = urllib.request.Request(hook, data=body, headers={'Content-Type': 'application/json'})
-          with urllib.request.urlopen(req, timeout=20) as res:
-              print('discord', res.status)
-          PY
+          text="🚨 בדיקת התשלום נכשלה — החנות לא הצליחה לפתוח טופס תשלום. ריצה: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          payload=$(python3 -c 'import json,sys; print(json.dumps({"content": sys.argv[1][:1900]}))' "$text")
+          # Discord sits behind Cloudflare: a plain python urllib POST is
+          # rejected with 403 / error code 1010 from GitHub runners, so send
+          # with curl and an explicit User-Agent.
+          code=$(curl -sS -o /tmp/discord.out -w '%{http_code}' -X POST "$WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -H 'User-Agent: rikma-checkout-smoke/1.0' \
+            --data "$payload")
+          echo "discord status $code"
+          cat /tmp/discord.out || true
+          [ "$code" = "204" ] || [ "$code" = "200" ]

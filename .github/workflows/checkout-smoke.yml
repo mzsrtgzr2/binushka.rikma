@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: 'Drill: fail on purpose to test the Discord alert (no site traffic, no charge)'
+        type: boolean
+        default: false
   # Self-test whenever this file changes, so a broken monitor cannot go quiet.
   push:
     paths:
@@ -57,17 +62,26 @@ jobs:
           print('settings ok, env =', d.get('env'))
           PY
 
+      - name: drill — simulate a checkout failure
+        if: ${{ inputs.simulate_failure }}
+        run: |
+          echo '::error::DRILL: intentional failure to test the Discord alert'
+          exit 1
+
       - name: alert discord when the check failed
         if: failure()
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DRILL: ${{ inputs.simulate_failure }}
         run: |
           set -euo pipefail
           if [ -z "${WEBHOOK:-}" ]; then
             echo 'no DISCORD_WEBHOOK_URL secret; skipping alert'
             exit 0
           fi
-          text="🚨 בדיקת התשלום נכשלה — החנות לא הצליחה לפתוח טופס תשלום. ריצה: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          prefix=""
+          if [ "${DRILL:-}" = "true" ]; then prefix="🧪 סימולציה — "; fi
+          text="${prefix}🚨 בדיקת התשלום נכשלה — החנות לא הצליחה לפתוח טופס תשלום. ריצה: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           payload=$(python3 -c 'import json,sys; print(json.dumps({"content": sys.argv[1][:1900]}))' "$text")
           # Discord sits behind Cloudflare: a plain python urllib POST is
           # rejected with 403 / error code 1010 from GitHub runners, so send

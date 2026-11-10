@@ -11,7 +11,7 @@
     "price": 110,
     "kind": "workshop",
     "shipping": false,
-    "stock": 5,
+    "stock": 4,
     "variants": {
       "5": {
         "name": "5 שיעורים",

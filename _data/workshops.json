@@ -6,13 +6,6 @@
     "shipping": false,
     "stock": 0
   },
-  "workshop-mediums-party-women": {
-    "name": "מסיבת מדיומים לנשים — ב23.12 בלי ילדים🫣",
-    "price": 360,
-    "kind": "workshop",
-    "shipping": false,
-    "stock": 7
-  },
   "workshop-monthly-meeting": {
     "name": "מפגש רקמה ברחובות — שלישי בבוקר אחת לחודש",
     "price": 110,

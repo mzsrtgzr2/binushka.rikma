@@ -577,13 +577,6 @@
       "stock": 0,
       "outOfStock": true,
       "limitedStock": false
-    },
-    "workshop-mediums-party-women": {
-      "name": "מסיבת מדיומים לנשים — ב23.12 בלי ילדים🫣",
-      "price": 360,
-      "stock": 7,
-      "outOfStock": false,
-      "limitedStock": false
     }
   }
 }

@@ -20,7 +20,7 @@ gallery:
   - /images/workshops/2026-12/mediums-party-10.jpg
 permalink: /projects/mediums-party-women/
 registration_full: false
-hide: false
+hide: true
 cart_price: 360
 spots: 7
 order: 1

@@ -1561,3 +1561,40 @@ body
     admin.clearPublicInventoryCache();
   }
 });
+
+test('paid-order stock commit also refreshes the workshop catalog', async () => {
+  const io = require('../lib/admin/store-io');
+  const originalFetch = global.fetch;
+  global.fetch = async (url) => {
+    const href = String(url);
+    if (href.includes('/contents/api/inventory-data.json')) {
+      return githubFile(JSON.stringify({ products: { fox: { name: 'fox', price: 220, stock: 2 } } }));
+    }
+    throw new Error('unexpected GitHub URL ' + href);
+  };
+  const env = { GITHUB_TOKEN: 'token', GITHUB_REPO: 'owner/repo', GITHUB_BRANCH: 'master' };
+  const raw = `---
+title: סדנת רקמה
+subtitle: שישי בבוקר
+cart_price: 330
+spots: 1
+registration_full: false
+---
+
+body
+`;
+  try {
+    const files = await io.inventoryFilesForGithubCommit(
+      env,
+      { storeUpdates: {}, projectUpdates: { 'rehovot-04-12': raw } },
+      { projectsRaw: { 'rehovot-04-12': raw } }
+    );
+    const paths = files.map((file) => file.path);
+    assert.ok(paths.includes('api/workshops-data.json'));
+    assert.ok(paths.includes('_data/workshops.json'));
+    const workshops = JSON.parse(files.find((file) => file.path === 'api/workshops-data.json').content);
+    assert.equal(workshops['workshop-rehovot-04-12'].stock, 1);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});

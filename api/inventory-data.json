@@ -490,7 +490,7 @@
     "workshop-monthly-meeting": {
       "name": "מפגש רקמה ברחובות — שלישי בבוקר אחת לחודש",
       "price": 110,
-      "stock": 5,
+      "stock": 4,
       "outOfStock": false,
       "limitedStock": false
     },

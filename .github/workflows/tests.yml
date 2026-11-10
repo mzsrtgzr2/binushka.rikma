@@ -60,7 +60,8 @@ jobs:
   alert:
     name: alert discord
     needs: [unit, e2e]
-    if: ${{ always() && (needs.unit.result == 'failure' || needs.e2e.result == 'failure') }}
+    # PR/branch failures stay on the PR (red check); only production runs ping Discord.
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/master' && (needs.unit.result == 'failure' || needs.e2e.result == 'failure') }}
     runs-on: ubuntu-latest
     steps:
       - name: post the failure to discord

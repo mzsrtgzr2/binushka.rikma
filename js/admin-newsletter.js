@@ -607,8 +607,10 @@
     /* The subtitles start with the same date ("ב29.1 עם…"), so drop that
        prefix instead of printing the date twice. */
     var subtitle = info && info.subtitle ? String(info.subtitle).trim() : '';
-    if (subtitle.indexOf(when) === 0) subtitle = subtitle.slice(when.length);
-    subtitle = subtitle.replace(/^ב?\s*/, '').trim();
+    /* "ב29.1 עם …" → drop the leading ב and the date it repeats. */
+    var rest = subtitle.replace(/^ב/, '');
+    if (rest.indexOf(when) === 0) rest = rest.slice(when.length);
+    subtitle = rest.replace(/^[\s,\-–]+/, '').trim();
     return (
       '<p class="admin-waitlist__when">' + escapeHtml(when) +
       (subtitle ? ' · ' + escapeHtml(subtitle) : '') +

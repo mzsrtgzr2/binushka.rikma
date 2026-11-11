@@ -544,14 +544,22 @@
     if (!info || !info.date) return '';
     var date = new Date(info.date);
     if (isNaN(date.getTime())) return '';
+    /* Day.month, the same way the workshop subtitles name their date
+       ("ב29.1", "ב11.11"). A full Gregorian date would print the catalog's
+       placeholder year, which is not the year on the poster. */
     try {
-      return new Intl.DateTimeFormat('he-IL', {
-        weekday: 'long',
+      var parts = new Intl.DateTimeFormat('he-IL', {
         day: 'numeric',
-        month: 'long',
-        year: 'numeric',
+        month: 'numeric',
         timeZone: 'Asia/Jerusalem'
-      }).format(date);
+      }).formatToParts(date);
+      var day = '';
+      var month = '';
+      parts.forEach(function (part) {
+        if (part.type === 'day') day = part.value;
+        if (part.type === 'month') month = part.value;
+      });
+      return day && month ? day + '.' + month : '';
     } catch (e) {
       return '';
     }
@@ -596,7 +604,11 @@
     var info = workshopInfo(group.slug) || workshopInfoByTitle(group.name);
     var when = formatWorkshopWhen(info);
     if (!when) return '';
-    var subtitle = info && info.subtitle ? String(info.subtitle) : '';
+    /* The subtitles start with the same date ("ב29.1 עם…"), so drop that
+       prefix instead of printing the date twice. */
+    var subtitle = info && info.subtitle ? String(info.subtitle).trim() : '';
+    if (subtitle.indexOf(when) === 0) subtitle = subtitle.slice(when.length);
+    subtitle = subtitle.replace(/^ב?\s*/, '').trim();
     return (
       '<p class="admin-waitlist__when">' + escapeHtml(when) +
       (subtitle ? ' · ' + escapeHtml(subtitle) : '') +

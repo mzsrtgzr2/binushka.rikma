@@ -616,6 +616,13 @@
   font-size: 13px;
 }
 
+.admin-waitlist__when {
+  margin: 0 0 8px;
+  color: var(--text-color, #1d2939);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .admin-waitlist__list {
   list-style: none;
   margin: 0;

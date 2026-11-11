@@ -162,3 +162,12 @@ noindex: true
       </div>
     </form>
   </div>
+
+  <script type="application/json" id="admin-workshop-dates">
+  {
+  {%- for project in site.projects %}
+    "{{ project.slug }}": {"title": {{ project.title | jsonify }}, "subtitle": {{ project.subtitle | default: '' | jsonify }}, "date": {{ project.date | date_to_xmlschema | jsonify }}}{% unless forloop.last %},{% endunless %}
+  {%- endfor %}
+  }
+  </script>
+

@@ -504,6 +504,59 @@
     return waitlist.title || waitlist.slug || '';
   }
 
+  /* Workshop pages carry their own date; the waitlist record only keeps the
+     title, which is identical for every morning of the same series. Read the
+     dates the admin page renders so "בוקר פינוק לאמהות" is never ambiguous. */
+  function workshopDates() {
+    if (workshopDates.cache) return workshopDates.cache;
+    var el = document.getElementById('admin-workshop-dates');
+    var map = {};
+    if (el && el.textContent) {
+      try {
+        map = JSON.parse(el.textContent) || {};
+      } catch (e) {
+        map = {};
+      }
+    }
+    workshopDates.cache = map;
+    return map;
+  }
+
+  function workshopInfo(slug) {
+    var map = workshopDates();
+    if (slug && map[slug]) return map[slug];
+    return null;
+  }
+
+  /* Older records were saved before the workshop slug travelled with the
+     signup, so they carry only a title. Use it only when exactly one workshop
+     has that title — with two mothers mornings the date stays unknown. */
+  function workshopInfoByTitle(title) {
+    if (!title) return null;
+    var map = workshopDates();
+    var hits = Object.keys(map).filter(function (slug) {
+      return map[slug] && map[slug].title === title;
+    });
+    return hits.length === 1 ? map[hits[0]] : null;
+  }
+
+  function formatWorkshopWhen(info) {
+    if (!info || !info.date) return '';
+    var date = new Date(info.date);
+    if (isNaN(date.getTime())) return '';
+    try {
+      return new Intl.DateTimeFormat('he-IL', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'Asia/Jerusalem'
+      }).format(date);
+    } catch (e) {
+      return '';
+    }
+  }
+
   function itemWaitlists(item) {
     if (Array.isArray(item.waitlists)) return item.waitlists;
     return item.waitlist ? [item.waitlist] : [];
@@ -530,9 +583,24 @@
       '<span class="admin-subscribers__email" dir="ltr">' + escapeHtml(item.email) + '</span>' +
       '</span>' +
       (entry.date
-        ? '<span class="admin-subscribers__date">' + escapeHtml(formatDate(entry.date)) + '</span>'
+        ? '<span class="admin-subscribers__date">נרשמה ב־' + escapeHtml(formatDate(entry.date)) + '</span>'
         : '') +
       '</li>'
+    );
+  }
+
+  /* The date line under a waitlist heading: which morning, at what time.
+     Without it every "בוקר פינוק לאמהות" row looks the same. */
+  function waitlistWhen(group) {
+    if (group.kind !== 'workshop') return '';
+    var info = workshopInfo(group.slug) || workshopInfoByTitle(group.name);
+    var when = formatWorkshopWhen(info);
+    if (!when) return '';
+    var subtitle = info && info.subtitle ? String(info.subtitle) : '';
+    return (
+      '<p class="admin-waitlist__when">' + escapeHtml(when) +
+      (subtitle ? ' · ' + escapeHtml(subtitle) : '') +
+      '</p>'
     );
   }
 
@@ -554,6 +622,7 @@
             key: key,
             kind: waitlist.kind || 'general',
             name: waitlistName(waitlist),
+            slug: waitlist.slug || '',
             entries: []
           };
           groups.push(byKey[key]);
@@ -599,8 +668,9 @@
         '<span class="admin-waitlist__count">' + group.entries.length + '</span>' +
         '</div>' +
         '<p class="admin-waitlist__meta">' + escapeHtml(waitlistKindLabel(group.kind)) +
-        (group.name && group.kind === 'workshop' ? ' · סדנה: ' + escapeHtml(group.name) : '') +
-        '</p>';
+        (group.name && group.kind !== 'workshop' ? ' · ' + escapeHtml(group.name) : '') +
+        '</p>' +
+        waitlistWhen(group);
 
       var rows = group.entries.map(waitlistRow).join('');
       return '<div class="admin-waitlist">' + head + '<ul class="admin-waitlist__list">' + rows + '</ul></div>';

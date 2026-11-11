@@ -262,16 +262,18 @@ test('private workshop is ₪2800 per session with no place inventory', () => {
   assert.equal(two.total, 5600);
 });
 
-test('mothers morning with Dana is in the cart catalog at ₪330', () => {
-  const workshop = PRODUCTS['workshop-mothers-11-11-2'];
+test('the open mothers morning is in the cart catalog at ₪330', () => {
+  const workshop = PRODUCTS['workshop-mothers-29-01-27'];
   assert.equal(workshop.kind, 'workshop');
   assert.equal(workshop.price, 330);
   assert.match(workshop.name, /בוקר פינוק לאמהות/);
-  /* Bar's 14.10 morning is over and hidden; the open one at 330 is Dana's. */
-  assert.equal(workshop.variants.one.price, 330);
-  assert.equal(workshop.variants.one.places, 1);
-  assert.equal(workshop.variants.pair.price, 600);
-  assert.equal(workshop.variants.pair.places, 2);
+  /* Friday morning: one price for one participant, no pair discount. */
+  assert.equal(workshop.variants, undefined);
+});
+
+test('a finished morning that is hidden leaves the cart catalog', () => {
+  /* Dana's 11.11 morning ran; the page is hidden and must not be sellable. */
+  assert.equal(PRODUCTS['workshop-mothers-11-11-2'], undefined);
 });
 
 test('a pair pack is ₪600 and uses two workshop places', () => {

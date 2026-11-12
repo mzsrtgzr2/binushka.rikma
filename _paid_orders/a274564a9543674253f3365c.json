@@ -1,0 +1,13 @@
+{
+  "orderId": "a274564a9543674253f3365c",
+  "documentId": "c1cfe20b-ffb0-4f9b-bfb5-5bf456d6b406",
+  "amount": 313.5,
+  "purchases": [
+    {
+      "slug": "workshop-rehovot-09-10",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-12T08:01:50.145Z",
+  "coupon": "SHASHI"
+}

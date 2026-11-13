@@ -1,0 +1,12 @@
+{
+  "orderId": "a705b706c58ef3cd6b346d07",
+  "documentId": "def8aef9-f33f-494a-9482-f29ac2416ba9",
+  "amount": 330,
+  "purchases": [
+    {
+      "slug": "workshop-mothers-16-12",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-13T19:28:12.001Z"
+}

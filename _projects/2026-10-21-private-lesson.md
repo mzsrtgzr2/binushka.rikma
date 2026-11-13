@@ -23,7 +23,7 @@ variants:
     name: חבילת 3 שיעורים
     price: 800
     places: 3
-order: 11
+order: 8
 ---
 
 ## שיעור אחד על אחת

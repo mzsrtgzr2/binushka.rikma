@@ -11,7 +11,7 @@ registration_full: false
 hide: false
 cart_price: 110
 spots: 4
-order: 8
+order: 5
 last_places: false
 filter_months:
   - "01"

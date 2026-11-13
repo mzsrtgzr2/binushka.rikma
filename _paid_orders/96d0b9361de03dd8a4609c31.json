@@ -1,0 +1,13 @@
+{
+  "orderId": "96d0b9361de03dd8a4609c31",
+  "documentId": "de81f8c0-61fc-45be-9b17-aa421222e2ea",
+  "amount": 313.5,
+  "purchases": [
+    {
+      "slug": "workshop-mothers-16-12",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-13T20:51:56.971Z",
+  "coupon": "MOMISBACK"
+}

@@ -321,8 +321,8 @@
       "price": 85
     },
     "scrunchie-poodle-tzarfati-large": {
-      "stock": 0,
-      "outOfStock": true,
+      "stock": 1,
+      "outOfStock": false,
       "limitedStock": true,
       "name": "סקראנצ'י פודל צרפתי",
       "price": 45

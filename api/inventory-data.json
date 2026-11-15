@@ -334,6 +334,13 @@
       "name": "סקראנצ'י פרחים אדום",
       "price": 45
     },
+    "scrunchie-prachim-sgulim": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פרחים סגולים",
+      "price": 30
+    },
     "scrunchie-prachim-yapaniyim": {
       "stock": 0,
       "outOfStock": true,

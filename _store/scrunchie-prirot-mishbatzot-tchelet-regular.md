@@ -4,10 +4,10 @@ subtitle: פירות על רקע שמנת עם משבצות תכלת
 image: /images/scrunchies/gallery/scrunchie-prirot-mishbatzot-tchelet-regular-1.jpg
 price: ₪30
 cart_price: 30
-stock: 1
+stock: 0
 limited_stock: true
-out_of_stock: false
-hide: false
+out_of_stock: true
+hide: true
 scrunchie_gallery: true
 scrunchie_size: regular
 order: 49

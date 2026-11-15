@@ -4,10 +4,10 @@ subtitle: הדפס פודל צרפתי על רקע שמנת
 image: /images/scrunchies/gallery/scrunchie-poodle-tzarfati-large-1.jpg
 price: ₪45
 cart_price: 45
-stock: 2
+stock: 0
 limited_stock: true
-out_of_stock: false
-hide: false
+out_of_stock: true
+hide: true
 scrunchie_gallery: true
 scrunchie_size: large
 order: 35

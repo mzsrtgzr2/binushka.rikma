@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י רקמת פרחים שחורה"
 subtitle: רקמת פרחים על שחור
-image: /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-1.png
+image: /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-2.png
 price: ₪45
 cart_price: 45
 stock: 1
@@ -17,7 +17,7 @@ fabric_country:
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-2.png
+  - /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-1.png
   - /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-3.png
   - /images/scrunchies/gallery/scrunchie-rikmat-prachim-shechora-4.png
 category: scrunchies-gallery

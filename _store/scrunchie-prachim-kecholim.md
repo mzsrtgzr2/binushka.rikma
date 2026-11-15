@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י פרחים כחולים"
 subtitle: פרחים כחולים על רקע שמנת — בד כותנה
-image: /images/scrunchies/gallery/scrunchie-prachim-kecholim-1.jpg
+image: /images/scrunchies/gallery/scrunchie-prachim-kecholim-2.jpg
 price: ₪45
 cart_price: 45
 stock: 1
@@ -17,7 +17,7 @@ fabric_country:
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-prachim-kecholim-2.jpg
+  - /images/scrunchies/gallery/scrunchie-prachim-kecholim-1.jpg
   - /images/scrunchies/gallery/scrunchie-prachim-kecholim-3.jpg
 category: scrunchies-gallery
 ---

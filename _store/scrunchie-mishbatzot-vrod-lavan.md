@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י משבצות ורוד לבן"
 subtitle: משבצות ורוד ולבן
-image: /images/scrunchies/gallery/scrunchie-mishbatzot-vrod-lavan-1.png
+image: /images/scrunchies/gallery/scrunchie-mishbatzot-vrod-lavan-2.png
 price: ₪30
 cart_price: 30
 stock: 0
@@ -17,7 +17,7 @@ fabric_country:
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-mishbatzot-vrod-lavan-2.png
+  - /images/scrunchies/gallery/scrunchie-mishbatzot-vrod-lavan-1.png
 category: scrunchies-gallery
 ---
 

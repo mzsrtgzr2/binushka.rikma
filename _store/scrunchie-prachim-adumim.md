@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י פרחים אדום"
 subtitle: פרחים צהובים וירוקים על רקע אדום
-image: /images/scrunchies/gallery/scrunchie-prachim-adumim-2.png
+image: /images/scrunchies/gallery/scrunchie-prachim-adumim-1.png
 price: ₪45
 cart_price: 45
 stock: 2
@@ -17,7 +17,7 @@ fabric_country:
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-prachim-adumim-1.png
+  - /images/scrunchies/gallery/scrunchie-prachim-adumim-2.png
 category: scrunchies-gallery
 ---
 

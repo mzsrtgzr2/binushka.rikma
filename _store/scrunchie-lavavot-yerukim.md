@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י לבבות ירוקים"
 subtitle: לבבות ירוקים על רקע לבן — בד משווייץ
-image: /images/scrunchies/gallery/scrunchie-lavavot-yerukim-1.png
+image: /images/scrunchies/gallery/scrunchie-lavavot-yerukim-2.png
 price: ₪30
 cart_price: 30
 stock: 0
@@ -17,7 +17,7 @@ fabric_country: שווייץ
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-lavavot-yerukim-2.png
+  - /images/scrunchies/gallery/scrunchie-lavavot-yerukim-1.png
 category: scrunchies-gallery
 ---
 

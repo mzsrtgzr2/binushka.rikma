@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י נמרים אצילית"
 subtitle: "נמרים וטיגריסים על מג'נטה עם תחרה ורודה"
-image: /images/scrunchies/gallery/scrunchie-nimrim-adilit-1.png
+image: /images/scrunchies/gallery/scrunchie-nimrim-adilit-2.png
 price: ₪85
 cart_price: 85
 stock: 0
@@ -19,7 +19,7 @@ fabric_country:
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-nimrim-adilit-2.png
+  - /images/scrunchies/gallery/scrunchie-nimrim-adilit-1.png
   - /images/scrunchies/gallery/scrunchie-nimrim-adilit-3.png
 category: scrunchies-gallery
 ---

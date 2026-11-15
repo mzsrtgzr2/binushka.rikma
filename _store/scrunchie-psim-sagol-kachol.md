@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י פסים סגול כחול"
 subtitle: פסים אלכסוניים בסגול וכחול
-image: /images/scrunchies/gallery/scrunchie-psim-sagol-kachol-1.jpg
+image: /images/scrunchies/gallery/scrunchie-psim-sagol-kachol-2.jpg
 price: ₪30
 cart_price: 30
 stock: 1
@@ -17,7 +17,7 @@ fabric_country:
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-psim-sagol-kachol-2.jpg
+  - /images/scrunchies/gallery/scrunchie-psim-sagol-kachol-1.jpg
 category: scrunchies-gallery
 ---
 

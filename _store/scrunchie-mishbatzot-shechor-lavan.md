@@ -1,7 +1,7 @@
 ---
 title: "סקראנצ'י משבצות שחור לבן"
 subtitle: משבצות שחור־לבן עם תחרה לבנה
-image: /images/scrunchies/gallery/scrunchie-mishbatzot-shechor-lavan-1.png
+image: /images/scrunchies/gallery/scrunchie-mishbatzot-shechor-lavan-2.png
 price: ₪85
 cart_price: 85
 stock: 0
@@ -19,7 +19,7 @@ fabric_country: שווייץ
 limited_edition: false
 preorder: false
 gallery:
-  - /images/scrunchies/gallery/scrunchie-mishbatzot-shechor-lavan-2.png
+  - /images/scrunchies/gallery/scrunchie-mishbatzot-shechor-lavan-1.png
 category: scrunchies-gallery
 ---
 

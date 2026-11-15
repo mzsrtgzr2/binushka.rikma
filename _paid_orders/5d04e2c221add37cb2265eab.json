@@ -1,0 +1,12 @@
+{
+  "orderId": "5d04e2c221add37cb2265eab",
+  "documentId": "25caee57-61e3-47a4-af9e-c5c73158a7a4",
+  "amount": 30,
+  "purchases": [
+    {
+      "slug": "scrunchie-psim-bezh-regular",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-15T16:18:51.442Z"
+}

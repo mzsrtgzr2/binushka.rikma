@@ -1,10 +1,10 @@
 ---
 title: "סקראנצ'י פסים בז'"
-subtitle: פסים רחבים בבז' על רקע שמנת
+subtitle: "פסים רחבים בבז' על רקע שמנת"
 image: /images/scrunchies/gallery/scrunchie-psim-bezh-regular-1.jpg
 price: ₪30
 cart_price: 30
-stock: 2
+stock: 1
 limited_stock: true
 out_of_stock: false
 hide: false

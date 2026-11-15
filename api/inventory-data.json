@@ -390,6 +390,13 @@
       "name": "סקראנצ'י פסים בז'",
       "price": 30
     },
+    "scrunchie-psim-sagol-kachol": {
+      "stock": 1,
+      "outOfStock": false,
+      "limitedStock": true,
+      "name": "סקראנצ'י פסים סגול כחול",
+      "price": 30
+    },
     "scrunchie-psim-turquiz-regular": {
       "stock": 1,
       "outOfStock": false,

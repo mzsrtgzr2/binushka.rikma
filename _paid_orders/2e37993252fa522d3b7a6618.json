@@ -1,0 +1,12 @@
+{
+  "orderId": "2e37993252fa522d3b7a6618",
+  "documentId": "ce94aad4-069a-4af9-8b43-869b4415330f",
+  "amount": 330,
+  "purchases": [
+    {
+      "slug": "workshop-rehovot-04-12",
+      "quantity": 1
+    }
+  ],
+  "paidAt": "2026-11-16T21:21:56.497Z"
+}

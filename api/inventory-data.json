@@ -557,9 +557,9 @@
     "workshop-mothers-4-1": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה4 בינואר",
       "price": 1090,
-      "stock": 4,
+      "stock": 3,
       "outOfStock": false,
-      "limitedStock": false
+      "limitedStock": true
     },
     "workshop-rehovot-22-1": {
       "name": "סדנת רקמה של שישי בבוקר — ב22.1 ברחובות",

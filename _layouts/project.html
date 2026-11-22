@@ -161,11 +161,13 @@ layout: default
   {% include workshop-page-booking.html %}
 
   {%- comment -%}
-    Mothers courses share one photo gallery. A new mothers workshop gets it
-    automatically, so no page ships without a gallery.
+    Only mothers embroidery courses (אמהות רוקמות) share the embroidery
+    photo gallery. Pamper mornings (בוקר פינוק לאמהות) must never show
+    threads, fabric or hoops (owner rule, 2026-11-22), so they do not
+    inherit the fallback gallery.
   {%- endcomment -%}
   {%- assign project_gallery = page.gallery -%}
-  {%- if project_gallery == nil and page.category == 'mothers' -%}
+  {%- if project_gallery == nil and page.category == 'mothers' and mothers_embroidery -%}
     {%- assign project_gallery = site.data.workshop_defaults.mothers.gallery -%}
   {%- endif -%}
   {% if project_gallery %}
@@ -235,11 +237,22 @@ layout: default
             
             {% assign prev_project = visible_projects[prev_index] %}
             {% assign next_project = visible_projects[next_index] %}
+            {%- comment -%}
+              Pamper mornings must not show embroidery photos anywhere on the
+              page, including the neighbouring workshop thumbnails (owner
+              rule, 2026-11-22). Keep the text links, drop the images.
+            {%- endcomment -%}
+            {%- assign hide_nav_thumbnails = false -%}
+            {%- if page.category == 'mothers' and mothers_embroidery != true -%}
+              {%- assign hide_nav_thumbnails = true -%}
+            {%- endif -%}
             
             <a href="{{ prev_project.permalink }}" class="project-navigation__button project-navigation__button--prev" data-analytics="workshop_nav_prev">
+              {% unless hide_nav_thumbnails %}
               <div class="project-navigation__thumbnail">
                 <img src="{{ prev_project.image }}" alt="{{ prev_project.title }}">
               </div>
+              {% endunless %}
               <span class="project-navigation__arrow">→</span>
               <span class="project-navigation__text">{{ prev_project.title }}</span>
             </a>
@@ -247,9 +260,11 @@ layout: default
             <a href="{{ next_project.permalink }}" class="project-navigation__button project-navigation__button--next" data-analytics="workshop_nav_next">
               <span class="project-navigation__text">{{ next_project.title }}</span>
               <span class="project-navigation__arrow">←</span>
+              {% unless hide_nav_thumbnails %}
               <div class="project-navigation__thumbnail">
                 <img src="{{ next_project.image }}" alt="{{ next_project.title }}">
               </div>
+              {% endunless %}
             </a>
           </div>
         </div>

@@ -1,4 +1,18 @@
 {
+  "workshop-dafna-13-1": {
+    "name": "בוקר פינוק לאמהות — ב13.1  עם דפנה קיפר מנשקו",
+    "price": 330,
+    "kind": "workshop",
+    "shipping": false,
+    "stock": 10,
+    "variants": {
+      "one": {
+        "name": "משתתפת אחת",
+        "price": 330,
+        "places": 1
+      }
+    }
+  },
   "workshop-hosting-04-12": {
     "name": "סדנה מעשית לאירוח, אפייה והכנות מראש — ב4.12 שישי בבוקר",
     "price": 500,

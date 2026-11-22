@@ -561,6 +561,13 @@
       "outOfStock": false,
       "limitedStock": true
     },
+    "workshop-dafna-13-1": {
+      "name": "בוקר פינוק לאמהות — ב13.1  עם דפנה קיפר מנשקו",
+      "price": 330,
+      "stock": 10,
+      "outOfStock": false,
+      "limitedStock": false
+    },
     "workshop-rehovot-22-1": {
       "name": "סדנת רקמה של שישי בבוקר — ב22.1 ברחובות",
       "price": 360,

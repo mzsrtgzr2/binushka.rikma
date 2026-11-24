@@ -557,9 +557,9 @@
     "workshop-mothers-4-1": {
       "name": "רקמה לאימהות בחופשת לידה — ימי שני החל מה4 בינואר",
       "price": 1090,
-      "stock": 1,
-      "outOfStock": false,
-      "limitedStock": true
+      "stock": 0,
+      "outOfStock": true,
+      "limitedStock": false
     },
     "workshop-dafna-13-1": {
       "name": "בוקר פינוק לאמהות — ב13.1  עם דפנה קיפר מנשקו",

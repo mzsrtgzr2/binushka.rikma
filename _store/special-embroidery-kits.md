@@ -74,7 +74,7 @@ variants:
       - /images/store/bookmark-kits/eiffel-angle.jpg
       - /images/store/bookmark-kits/eiffel-threads.jpg
       - /images/store/bookmark-kits/eiffel-label.jpg
-    description: "ערכת רקמת סימניה צרפתית – מגדל אייפל, קרואסון וספל קפה, מבית Le Bonheur des Dames, הבאתי מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס"מ."
+    description: "ערכת רקמת סימניה צרפתית – מגדל אייפל, קרואסון וספל קפה, מבית Le Bonheur des Dames, מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס\"מ."
   bookmark-chickens:
     name: ערכת רקמת סימניה – תרנגולות
     price: 170
@@ -84,7 +84,7 @@ variants:
       - /images/store/bookmark-kits/chickens-detail.jpg
       - /images/store/bookmark-kits/chickens-dmc.jpg
       - /images/store/bookmark-kits/chickens-dmc-close.jpg
-    description: "ערכת רקמת סימניה צרפתית עם שלוש תרנגולות מצחיקות – מבית Le Bonheur des Dames, הבאתי מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס"מ."
+    description: "ערכת רקמת סימניה צרפתית עם שלוש תרנגולות מצחיקות – מבית Le Bonheur des Dames, מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס\"מ."
   canevas-fatal-outdoor-chilling:
     name: ערכת גובלן – Outdoor Chilling מבית Canevas Fatal
     price: 330
@@ -94,7 +94,7 @@ variants:
       - /images/store/canevas-fatal/outdoor-chilling-back.jpg
       - /images/store/canevas-fatal/outdoor-chilling-contents.jpg
       - /images/store/canevas-fatal/outdoor-chilling-detail.jpg
-    description: "ערכת רקמת גובלן צרפתית – איור של Mameko Maeda, מבית Canevas Fatal.\nכל החומרים בפנים: בד קנבס כותנה, 6 גווני חוט DMC מותאמים, מחט גובלן של Bohin וחוברת הוראות מאוירת.\nהתוצר הסופי בגודל 15×20 ס"מ."
+    description: "ערכת רקמת גובלן צרפתית – איור של Mameko Maeda, מבית Canevas Fatal.\nכל החומרים בפנים: בד קנבס כותנה, 6 גווני חוט DMC מותאמים, מחט גובלן של Bohin וחוברת הוראות מאוירת.\nהתוצר הסופי בגודל 15×20 ס\"מ.\nמה שמיוחד במותג: אפס שימוש ב-AI – כל היצירות של יוצרים מקומיים צרפתיים, כולל הרקמת שמלמדת איך לרקום."
 ---
 
 ערכות רקמה מוכנות ומפנקות מבית DMC, VOG, Djeco ו-Canevas Fatal – כל אחת עם אופי משלה.

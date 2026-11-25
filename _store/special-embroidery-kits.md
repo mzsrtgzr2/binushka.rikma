@@ -52,26 +52,6 @@ variants:
       - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-07-mui93a0u.jpg
       - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg
     description: "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת."
-  dmc-pearl:
-    name: רקמת סתיו מבית DMC
-    price: 120
-    stock: 0
-    image: /images/store/dmc-kit-pearl/screenshot-2026-09-23-at-15-15-02-mue2n4gg.png
-    gallery:
-      - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-34-mui9lg06.jpg
-      - /images/store/dmc-kit-pearl/screenshot-2026-09-23-at-22-31-14-muei2kk4.jpg
-      - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-45-25-mui9lg05.jpg
-      - /images/store/dmc-kit-pearl/screenshot-2026-09-26-at-13-48-03-mui9nxtz.jpg
-    description: "ערכת רקמה יפהיפיה מבית DMC שהבאתי מהטיול האחרון בלונדון.\nהתוצאה משמחת והתהליך כיפי."
-  tablecloth-mono:
-    name: מפה יפהיפיה – דוגמא פרחונית מונוכרמטית כחולה
-    price: 160
-    stock: 0
-    image: /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-12-mui9079h.jpg
-    gallery:
-      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-28-53-mui9079g.jpg
-      - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-29-02-mui9079h.jpg
-    description: "ערכת רקמה פרחונית בצבע אחד – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת."
 ---
 
 ערכות רקמה מוכנות ומפנקות מבית DMC ומבית VOG – כל אחת עם אופי משלה.

@@ -29,6 +29,11 @@ layout: default
 {%- unless page.price_per == 'workshop' or hide_remaining_spots or page.category == 'mothers' -%}
 {%- if spots != nil and spots > 0 and spots <= 3 %}{% assign last_places = true %}{% endif -%}
 {%- endunless -%}
+{%- comment -%}
+  Per-page opt-out (`hide_last_places: true`): never badge this event as
+  "מקומות אחרונים", even when stock is low.
+{%- endcomment -%}
+{%- if page.hide_last_places %}{% assign last_places = false %}{% endif -%}
 {%- assign booking_in_cart = false -%}
 {%- if site.data.store-cart.enabled and workshop and workshop.enabled != false %}{% assign booking_in_cart = true %}{% endif -%}
 {%- assign price_unit = 'למשתתפת' -%}
@@ -49,7 +54,7 @@ layout: default
 
 {% include workshop-event-schema.html %}
 
-<div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ page.category }}" data-last-places="{% if last_places %}true{% else %}false{% endif %}">
+<div class="container" data-product-id="{{ workshop_id }}" data-product-kind="workshop" data-category="{{ page.category }}" data-last-places="{% if last_places %}true{% else %}false{% endif %}" data-hide-last-places="{% if page.hide_last_places %}true{% else %}false{% endif %}">
 
   <div class="page-head">
     <h1 class="page-title">{{ page.title }}</h1>

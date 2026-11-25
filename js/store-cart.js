@@ -611,6 +611,8 @@
             workshopLimited =
               lastPlacesAttr === 'true' || Boolean(p.limitedStock) || isLowStock(p.stock);
           }
+          /* Per-page opt-out: `hide_last_places: true` never shows the badge. */
+          if (root.getAttribute('data-hide-last-places') === 'true') workshopLimited = false;
         }
         var badgeLimited = workshop ? workshopLimited : showLimitedBadge;
         var overlayLabel = soldOut

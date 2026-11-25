@@ -13,6 +13,7 @@ cart_price: 110
 spots: 3
 order: 5
 last_places: false
+hide_last_places: true
 filter_months:
   - "01"
   - "02"

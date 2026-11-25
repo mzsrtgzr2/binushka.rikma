@@ -819,6 +819,18 @@
           "/images/store/bookmark-kits/chickens-dmc.jpg",
           "/images/store/bookmark-kits/chickens-dmc-close.jpg"
         ]
+      },
+      "canevas-fatal-outdoor-chilling": {
+        "name": "ערכת גובלן – Outdoor Chilling מבית Canevas Fatal",
+        "price": 330,
+        "image": "/images/store/canevas-fatal/outdoor-chilling-box.jpg",
+        "description": "ערכת רקמת גובלן צרפתית – איור של Mameko Maeda, מבית Canevas Fatal.\nכל החומרים בפנים: בד קנבס כותנה, 6 גווני חוט DMC מותאמים, מחט גובלן של Bohin וחוברת הוראות מאוירת.\nהתוצר הסופי בגודל 15×20 ס\"מ.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/canevas-fatal/outdoor-chilling-back.jpg",
+          "/images/store/canevas-fatal/outdoor-chilling-contents.jpg",
+          "/images/store/canevas-fatal/outdoor-chilling-detail.jpg"
+        ]
       }
     },
     "variant_order": [
@@ -828,6 +840,7 @@
       "atelier-59-dove",
       "bookmark-eiffel",
       "bookmark-chickens",
+      "canevas-fatal-outdoor-chilling",
       "tablecloth-autumn"
     ],
     "category": "kits",

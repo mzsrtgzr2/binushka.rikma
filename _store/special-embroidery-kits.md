@@ -1,7 +1,7 @@
 ---
 title: ערכות רקמה מיוחדות
 date: 2026-10-08 05:00:00 +0000
-subtitle: מבית DMC, VOG ו-Djeco
+subtitle: מבית DMC, VOG, Djeco ו-Canevas Fatal
 image: /images/store/special-embroidery-kits/screenshot-2026-09-23-at-15-24-40-mvtkze7p.jpg
 price: ₪100 – ₪360
 out_of_stock: false
@@ -85,8 +85,18 @@ variants:
       - /images/store/bookmark-kits/chickens-dmc.jpg
       - /images/store/bookmark-kits/chickens-dmc-close.jpg
     description: "ערכת רקמת סימניה צרפתית עם שלוש תרנגולות מצחיקות – מבית Le Bonheur des Dames, הבאתי מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס"מ."
+  canevas-fatal-outdoor-chilling:
+    name: ערכת גובלן – Outdoor Chilling מבית Canevas Fatal
+    price: 330
+    stock: 1
+    image: /images/store/canevas-fatal/outdoor-chilling-box.jpg
+    gallery:
+      - /images/store/canevas-fatal/outdoor-chilling-back.jpg
+      - /images/store/canevas-fatal/outdoor-chilling-contents.jpg
+      - /images/store/canevas-fatal/outdoor-chilling-detail.jpg
+    description: "ערכת רקמת גובלן צרפתית – איור של Mameko Maeda, מבית Canevas Fatal.\nכל החומרים בפנים: בד קנבס כותנה, 6 גווני חוט DMC מותאמים, מחט גובלן של Bohin וחוברת הוראות מאוירת.\nהתוצר הסופי בגודל 15×20 ס"מ."
 ---
 
-ערכות רקמה מוכנות ומפנקות מבית DMC, VOG ו-Djeco – כל אחת עם אופי משלה.
+ערכות רקמה מוכנות ומפנקות מבית DMC, VOG, Djeco ו-Canevas Fatal – כל אחת עם אופי משלה.
 
 בחרי את הערכה שמתאימה לך, והשאר כבר בפנים.

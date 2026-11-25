@@ -65,6 +65,26 @@ variants:
       - /images/store/atelier-59-dove/atelier-59-dove-box-back.jpg
       - /images/store/atelier-59-dove/atelier-59-dove-box-side.jpg
     description: "ערכת רקמה, חרוזים ופאייטים של יונה, היישר מפריז – מבית Atelier 59 של Djeco.\nהערכה כוללת בד כותנה עם דוגמת יונה מודפסת, חישוק במבוק אובלי, חוטים, חרוזים ופאייטים, מחט, מספריים מוזהבות והוראות מאוירות שלב אחר שלב."
+  bookmark-eiffel:
+    name: ערכת רקמת סימניה – אייפל וקרואסון
+    price: 170
+    stock: 1
+    image: /images/store/bookmark-kits/eiffel-front.jpg
+    gallery:
+      - /images/store/bookmark-kits/eiffel-angle.jpg
+      - /images/store/bookmark-kits/eiffel-threads.jpg
+      - /images/store/bookmark-kits/eiffel-label.jpg
+    description: "ערכת רקמת סימניה צרפתית – מגדל אייפל, קרואסון וספל קפה, מבית Le Bonheur des Dames, הבאתי מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס"מ."
+  bookmark-chickens:
+    name: ערכת רקמת סימניה – תרנגולות
+    price: 170
+    stock: 1
+    image: /images/store/bookmark-kits/chickens-front.jpg
+    gallery:
+      - /images/store/bookmark-kits/chickens-detail.jpg
+      - /images/store/bookmark-kits/chickens-dmc.jpg
+      - /images/store/bookmark-kits/chickens-dmc-close.jpg
+    description: "ערכת רקמת סימניה צרפתית עם שלוש תרנגולות מצחיקות – מבית Le Bonheur des Dames, הבאתי מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס"מ."
 ---
 
 ערכות רקמה מוכנות ומפנקות מבית DMC, VOG ו-Djeco – כל אחת עם אופי משלה.

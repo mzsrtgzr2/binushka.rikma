@@ -795,6 +795,30 @@
           "/images/store/atelier-59-dove/atelier-59-dove-box-back.jpg",
           "/images/store/atelier-59-dove/atelier-59-dove-box-side.jpg"
         ]
+      },
+      "bookmark-eiffel": {
+        "name": "ערכת רקמת סימניה – אייפל וקרואסון",
+        "price": 170,
+        "image": "/images/store/bookmark-kits/eiffel-front.jpg",
+        "description": "ערכת רקמת סימניה צרפתית – מגדל אייפל, קרואסון וספל קפה, מבית Le Bonheur des Dames, הבאתי מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס\"מ.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/bookmark-kits/eiffel-angle.jpg",
+          "/images/store/bookmark-kits/eiffel-threads.jpg",
+          "/images/store/bookmark-kits/eiffel-label.jpg"
+        ]
+      },
+      "bookmark-chickens": {
+        "name": "ערכת רקמת סימניה – תרנגולות",
+        "price": 170,
+        "image": "/images/store/bookmark-kits/chickens-front.jpg",
+        "description": "ערכת רקמת סימניה צרפתית עם שלוש תרנגולות מצחיקות – מבית Le Bonheur des Dames, הבאתי מהתערוכה בפריז.\nהערכה כוללת בד פשתן מודפס, חוטי DMC, מחט, גדילים לקישוט והוראות. גדלים: כ-5×20 ס\"מ.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/bookmark-kits/chickens-detail.jpg",
+          "/images/store/bookmark-kits/chickens-dmc.jpg",
+          "/images/store/bookmark-kits/chickens-dmc-close.jpg"
+        ]
       }
     },
     "variant_order": [
@@ -802,6 +826,8 @@
       "trimits-butterfly",
       "kit-all-inclusive",
       "atelier-59-dove",
+      "bookmark-eiffel",
+      "bookmark-chickens",
       "tablecloth-autumn"
     ],
     "category": "kits",

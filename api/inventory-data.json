@@ -236,6 +236,12 @@
         "9": {
           "stock": null
         },
+        "bohin-leopard-classic": {
+          "stock": 2
+        },
+        "bohin-leopard-purple": {
+          "stock": 1
+        },
         "9-2": {
           "stock": 2
         },
@@ -254,12 +260,6 @@
         "prym-pinking": {
           "stock": 1,
           "preorder": true
-        },
-        "bohin-leopard-classic": {
-          "stock": 2
-        },
-        "bohin-leopard-purple": {
-          "stock": 1
         }
       }
     },

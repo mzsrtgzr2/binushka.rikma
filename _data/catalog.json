@@ -495,6 +495,29 @@
           "/images/store/scissors/screenshot-2026-09-23-at-21-50-57-mueib4k5.jpg"
         ]
       },
+      "bohin-leopard-classic": {
+        "name": "מספרי רקמה Bohin מנומרות קלאסיות 9 ס\"מ",
+        "price": 75,
+        "image": "/images/store/scissors/bohin-leopard-classic-card.jpg",
+        "description": "מספרי רקמה מנומרות קלאסיות של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833.",
+        "stock": 2,
+        "gallery": [
+          "/images/store/scissors/bohin-leopard-classic-card-back.jpg",
+          "/images/store/scissors/bohin-leopard-classic-angle.jpg"
+        ]
+      },
+      "bohin-leopard-purple": {
+        "name": "מספרי רקמה Bohin מנומרות סגול־אדום־שחור 9 ס\"מ",
+        "price": 75,
+        "image": "/images/store/scissors/bohin-leopard-purple.jpg",
+        "description": "מספרי רקמה מנומרות בגווני סגול, אדום ושחור של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833.",
+        "stock": 1,
+        "gallery": [
+          "/images/store/scissors/bohin-leopard-purple-hand.jpg",
+          "/images/store/scissors/bohin-leopard-purple-angle.jpg",
+          "/images/store/scissors/bohin-leopard-purple-close.jpg"
+        ]
+      },
       "9-2": {
         "name": "מספרי ציפור 9 ס״מ",
         "price": 70,
@@ -553,40 +576,17 @@
           "/images/store/scissors/prym-pinking-open.jpg",
           "/images/store/scissors/prym-pinking-pack.jpg"
         ]
-      },
-      "bohin-leopard-classic": {
-        "name": "מספרי רקמה Bohin מנומרות קלאסיות 9 ס\"מ",
-        "price": 75,
-        "image": "/images/store/scissors/bohin-leopard-classic-card.jpg",
-        "description": "מספרי רקמה מנומרות קלאסיות של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833.",
-        "stock": 2,
-        "gallery": [
-          "/images/store/scissors/bohin-leopard-classic-card-back.jpg",
-          "/images/store/scissors/bohin-leopard-classic-angle.jpg"
-        ]
-      },
-      "bohin-leopard-purple": {
-        "name": "מספרי רקמה Bohin מנומרות סגול־אדום־שחור 9 ס\"מ",
-        "price": 75,
-        "image": "/images/store/scissors/bohin-leopard-purple.jpg",
-        "description": "מספרי רקמה מנומרות בגווני סגול, אדום ושחור של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833.",
-        "stock": 1,
-        "gallery": [
-          "/images/store/scissors/bohin-leopard-purple-hand.jpg",
-          "/images/store/scissors/bohin-leopard-purple-angle.jpg",
-          "/images/store/scissors/bohin-leopard-purple-close.jpg"
-        ]
       }
     },
     "variant_order": [
+      "bohin-leopard-classic",
+      "bohin-leopard-purple",
       "9",
       "9-2",
       "type-3",
       "victorinox",
       "singer-pro-95",
       "prym-pinking",
-      "bohin-leopard-classic",
-      "bohin-leopard-purple",
       "singer"
     ],
     "category": "tools"

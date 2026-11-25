@@ -14,6 +14,25 @@ gallery:
   - /images/store/scissors/screenshot-2026-10-01-at-12-01-07-mupb31eu.jpg
 category: tools
 variants:
+  bohin-leopard-classic:
+    name: מספרי רקמה Bohin מנומרות קלאסיות 9 ס"מ
+    price: 75
+    stock: 2
+    image: /images/store/scissors/bohin-leopard-classic-card.jpg
+    gallery:
+      - /images/store/scissors/bohin-leopard-classic-card-back.jpg
+      - /images/store/scissors/bohin-leopard-classic-angle.jpg
+    description: "מספרי רקמה מנומרות קלאסיות של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833."
+  bohin-leopard-purple:
+    name: מספרי רקמה Bohin מנומרות סגול־אדום־שחור 9 ס"מ
+    price: 75
+    stock: 1
+    image: /images/store/scissors/bohin-leopard-purple.jpg
+    gallery:
+      - /images/store/scissors/bohin-leopard-purple-hand.jpg
+      - /images/store/scissors/bohin-leopard-purple-angle.jpg
+      - /images/store/scissors/bohin-leopard-purple-close.jpg
+    description: "מספרי רקמה מנומרות בגווני סגול, אדום ושחור של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833."
   9:
     name: עגולות גודל 9 ס״מ
     price: 70
@@ -72,25 +91,6 @@ variants:
       - /images/store/scissors/prym-pinking-open.jpg
       - /images/store/scissors/prym-pinking-pack.jpg
     description: "מספרי זיג זג כלליות של Prym, באורך 22 ס״מ.\nהלהבים המשוננים חותכים בד בגימור דקורטיבי ומונעים התפרמות של קצוות הבד — מושלמות לגימור בדים, לבד, נייר ועור דק.\nלהבי Stainless Steel וידיות אפורות נוחות לאחיזה."
-  bohin-leopard-classic:
-    name: מספרי רקמה Bohin מנומרות קלאסיות 9 ס"מ
-    price: 75
-    stock: 2
-    image: /images/store/scissors/bohin-leopard-classic-card.jpg
-    gallery:
-      - /images/store/scissors/bohin-leopard-classic-card-back.jpg
-      - /images/store/scissors/bohin-leopard-classic-angle.jpg
-    description: "מספרי רקמה מנומרות קלאסיות של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833."
-  bohin-leopard-purple:
-    name: מספרי רקמה Bohin מנומרות סגול־אדום־שחור 9 ס"מ
-    price: 75
-    stock: 1
-    image: /images/store/scissors/bohin-leopard-purple.jpg
-    gallery:
-      - /images/store/scissors/bohin-leopard-purple-hand.jpg
-      - /images/store/scissors/bohin-leopard-purple-angle.jpg
-      - /images/store/scissors/bohin-leopard-purple-close.jpg
-    description: "מספרי רקמה מנומרות בגווני סגול, אדום ושחור של Bohin, גודל 9 ס״מ.\nפלדה איכותית עם חוד מדויק לעבודות רקמה, מיוצרות בצרפת מאז 1833."
 ---
 
 מספרי רקמה של DMC, Singer, Bohin, Victorinox ו-Prym — עגולות 9 ס״מ, מספרי ציפור, הזוג המלכותי ומספרי זיג זג 22 ס״מ.

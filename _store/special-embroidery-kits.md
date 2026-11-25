@@ -56,9 +56,9 @@ variants:
     name: ערכת רקמה, חרוזים ופאייטים של יונה – מפריז
     price: 360
     stock: 1
-    image: /images/store/atelier-59-dove/atelier-59-dove-stitched.png
+    image: /images/store/atelier-59-dove/atelier-59-dove-stitched.jpg
     gallery:
-      - /images/store/atelier-59-dove/atelier-59-dove-kit-flat.png
+      - /images/store/atelier-59-dove/atelier-59-dove-kit-flat.jpg
       - /images/store/atelier-59-dove/atelier-59-dove-hero.jpg
       - /images/store/atelier-59-dove/atelier-59-dove-contents.jpg
       - /images/store/atelier-59-dove/atelier-59-dove-box.jpg

@@ -1,9 +1,9 @@
 ---
 title: ערכות רקמה מיוחדות
 date: 2026-10-08 05:00:00 +0000
-subtitle: מבית DMC ומבית VOG
+subtitle: מבית DMC, VOG ו-Djeco
 image: /images/store/special-embroidery-kits/screenshot-2026-09-23-at-15-24-40-mvtkze7p.jpg
-price: ₪100 – ₪210
+price: ₪100 – ₪440
 out_of_stock: false
 limited_stock: true
 hide: false
@@ -52,8 +52,18 @@ variants:
       - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-07-mui93a0u.jpg
       - /images/store/embroidery-tablecloth/screenshot-2026-09-26-at-13-30-13-mui93a0v.jpg
     description: "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת."
+  atelier-59-dove:
+    name: ערכת רקמה, חרוזים ופאייטים של יונה – מפריז
+    price: 440
+    image: /images/store/atelier-59-dove/atelier-59-dove-hero.jpg
+    gallery:
+      - /images/store/atelier-59-dove/atelier-59-dove-box.jpg
+      - /images/store/atelier-59-dove/atelier-59-dove-contents.jpg
+      - /images/store/atelier-59-dove/atelier-59-dove-box-back.jpg
+      - /images/store/atelier-59-dove/atelier-59-dove-box-side.jpg
+    description: "ערכת רקמה, חרוזים ופאייטים של יונה, היישר מפריז – מבית Atelier 59 של Djeco.\nהערכה כוללת בד כותנה עם דוגמת יונה מודפסת, חישוק במבוק אובלי, חוטים, חרוזים ופאייטים, מחט, מספריים מוזהבות והוראות מאוירות שלב אחר שלב."
 ---
 
-ערכות רקמה מוכנות ומפנקות מבית DMC ומבית VOG – כל אחת עם אופי משלה.
+ערכות רקמה מוכנות ומפנקות מבית DMC, VOG ו-Djeco – כל אחת עם אופי משלה.
 
 בחרי את הערכה שמתאימה לך, והשאר כבר בפנים.

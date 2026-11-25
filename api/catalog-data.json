@@ -783,9 +783,10 @@
       },
       "atelier-59-dove": {
         "name": "ערכת רקמה, חרוזים ופאייטים של יונה – מפריז",
-        "price": 440,
+        "price": 360,
         "image": "/images/store/atelier-59-dove/atelier-59-dove-hero.jpg",
         "description": "ערכת רקמה, חרוזים ופאייטים של יונה, היישר מפריז – מבית Atelier 59 של Djeco.\nהערכה כוללת בד כותנה עם דוגמת יונה מודפסת, חישוק במבוק אובלי, חוטים, חרוזים ופאייטים, מחט, מספריים מוזהבות והוראות מאוירות שלב אחר שלב.",
+        "stock": 1,
         "gallery": [
           "/images/store/atelier-59-dove/atelier-59-dove-box.jpg",
           "/images/store/atelier-59-dove/atelier-59-dove-contents.jpg",

@@ -3,7 +3,7 @@ title: ערכות רקמה מיוחדות
 date: 2026-10-08 05:00:00 +0000
 subtitle: מבית DMC, VOG ו-Djeco
 image: /images/store/special-embroidery-kits/screenshot-2026-09-23-at-15-24-40-mvtkze7p.jpg
-price: ₪100 – ₪440
+price: ₪100 – ₪360
 out_of_stock: false
 limited_stock: true
 hide: false
@@ -54,7 +54,8 @@ variants:
     description: "ערכת רקמה פרחונית בצבע כתום, ירוק, צהוב וגווניהם – מפה רקומה 60×80 ס״מ מבית VOG.\nמגיע עם חישוק קוטר 16 במתנה, למי שנוח לה יותר לרקום על בד מתוח.\nבד: 100% כותנה עם דוגמה מודפסת."
   atelier-59-dove:
     name: ערכת רקמה, חרוזים ופאייטים של יונה – מפריז
-    price: 440
+    price: 360
+    stock: 1
     image: /images/store/atelier-59-dove/atelier-59-dove-hero.jpg
     gallery:
       - /images/store/atelier-59-dove/atelier-59-dove-box.jpg
